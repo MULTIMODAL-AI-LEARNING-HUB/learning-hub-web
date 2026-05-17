@@ -1,0 +1,12 @@
+services:
+  web:
+    build: .
+    ports:
+      - "5173:80"
+    networks:
+      - hub-network
+
+networks:
+  hub-network:
+    external: true
+    name: hub-network
