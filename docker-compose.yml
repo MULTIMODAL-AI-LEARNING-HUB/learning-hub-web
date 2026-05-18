@@ -1,10 +1,21 @@
 services:
   web:
     build: .
+    init: true
+    restart: unless-stopped
     ports:
       - "5173:80"
     networks:
       - hub-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 128M
 
 networks:
   hub-network:
