@@ -3,9 +3,28 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { EssayGrading } from '../study/EssayGrading'
 
+vi.mock('../../services/api', () => ({
+  studyApi: {
+    submitEssay: vi.fn(),
+  },
+}))
+
 vi.mock('../../stores/appStore', () => ({
   useAppStore: (selector: (state: Record<string, unknown>) => unknown) => {
     const state = {
+      documents: {
+        items: [
+          { id: 'd1', name: 'AI_Basics.pdf', type: 'pdf', status: 'ready', size: '1MB' },
+        ],
+        selectedId: null,
+        select: vi.fn(),
+        add: vi.fn(),
+        remove: vi.fn(),
+        retry: vi.fn(),
+        updateProgress: vi.fn(),
+        loadDocuments: vi.fn(),
+        uploadDocument: vi.fn(),
+      },
       toasts: {
         add: vi.fn(),
         remove: vi.fn(),
@@ -27,9 +46,10 @@ describe('EssayGrading', () => {
     expect(screen.getByText('Grade Essay')).toBeInTheDocument()
   })
 
-  it('renders textarea with default text', () => {
+  it('renders textarea', () => {
     render(<EssayGrading />, { wrapper })
-    expect(screen.getByText(/Machine learning has become/)).toBeInTheDocument()
+    const textarea = screen.getByRole('textbox')
+    expect(textarea).toBeInTheDocument()
   })
 
   it('shows word count', () => {

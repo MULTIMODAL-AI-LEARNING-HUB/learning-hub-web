@@ -35,6 +35,7 @@ function AuthShell({ variant }: { variant: Variant }) {
   const content = copy[variant]
   const navigate = useNavigate()
   const login = useAppStore((s) => s.auth.login)
+  const register = useAppStore((s) => s.auth.register)
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -56,17 +57,24 @@ function AuthShell({ variant }: { variant: Variant }) {
     return errs
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const errs = validate()
     setErrors(errs)
     if (Object.keys(errs).length > 0) return
 
     setLoading(true)
-    setTimeout(() => {
-      login()
-      setLoading(false)
+    try {
+      if (variant === 'login') {
+        await login(email, password)
+      } else {
+        await register(email, password, name)
+      }
       navigate('/app/documents')
-    }, 600)
+    } catch {
+      setErrors({ email: 'Invalid credentials' })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

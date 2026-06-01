@@ -3,6 +3,7 @@ import { useAppStore } from '../../stores/appStore'
 import { Modal } from '../../components/ui/Modal'
 import { Button } from '../../components/ui/Button'
 import { Progress } from '../../components/ui/Progress'
+import { documentsApi } from '../../services/api'
 
 interface UploadItem {
   id: string
@@ -18,39 +19,37 @@ export function UploadModal({ open, onClose }: { open: boolean; onClose: () => v
   const [files, setFiles] = useState<UploadItem[]>([])
   const [dragging, setDragging] = useState(false)
 
-  const simulateUpload = useCallback(
-    (file: UploadItem) => {
-      let progress = 0
-      const interval = setInterval(() => {
-        progress += Math.random() * 25
-        if (progress >= 100) {
-          progress = 100
-          clearInterval(interval)
-          setFiles((prev) =>
-            prev.map((f) => (f.id === file.id ? { ...f, progress: 100, status: 'done' } : f))
-          )
-          addDoc({
-            id: `doc-${Date.now()}-${file.id}`,
-            name: file.name,
-            type: file.name.endsWith('.pdf') ? 'pdf' : file.name.endsWith('.mp4') ? 'video' : 'audio',
-            status: 'processing',
-            size: file.size,
-            pageCount: Math.floor(Math.random() * 50) + 1
-          })
-          toasts({ type: 'success', title: 'Upload complete', message: file.name })
-        } else {
-          setFiles((prev) =>
-            prev.map((f) => (f.id === file.id ? { ...f, progress: Math.round(progress) } : f))
-          )
-        }
-      }, 300)
+  const doUpload = useCallback(
+    async (file: UploadItem, rawFile: File) => {
+      try {
+        const res = await documentsApi.upload(rawFile)
+        const data = res.data as Record<string, unknown>
+        setFiles((prev) =>
+          prev.map((f) => (f.id === file.id ? { ...f, progress: 100, status: 'done' } : f))
+        )
+        addDoc({
+          id: data.id as string,
+          name: data.file_name as string,
+          type: (data.file_type as 'pdf' | 'video' | 'audio') || 'pdf',
+          status: 'processing',
+          size: file.size,
+          progress: 0,
+        })
+        toasts({ type: 'success', title: 'Upload complete', message: file.name })
+      } catch {
+        setFiles((prev) =>
+          prev.map((f) => (f.id === file.id ? { ...f, status: 'error' } : f))
+        )
+        toasts({ type: 'error', title: 'Upload failed', message: file.name })
+      }
     },
     [addDoc, toasts]
   )
 
   const addFiles = (fileList: FileList | null) => {
     if (!fileList) return
-    const newFiles: UploadItem[] = Array.from(fileList).map((f) => ({
+    const rawFiles = Array.from(fileList)
+    const newFiles: UploadItem[] = rawFiles.map((f) => ({
       id: `${Date.now()}-${f.name}`,
       name: f.name,
       size: `${(f.size / 1024 / 1024).toFixed(1)}MB`,
@@ -58,7 +57,7 @@ export function UploadModal({ open, onClose }: { open: boolean; onClose: () => v
       status: 'uploading' as const
     }))
     setFiles((prev) => [...prev, ...newFiles])
-    newFiles.forEach(simulateUpload)
+    newFiles.forEach((f, i) => doUpload(f, rawFiles[i]))
   }
 
   const handleDrop = (e: React.DragEvent) => {
