@@ -70,8 +70,9 @@ function AuthShell({ variant }: { variant: Variant }) {
         await register(email, password, name)
       }
       navigate('/app/documents')
-    } catch {
-      setErrors({ email: 'Invalid credentials' })
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Something went wrong'
+      setErrors({ email: msg })
     } finally {
       setLoading(false)
     }
