@@ -1,11 +1,52 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { useAppStore } from '../appStore'
+
+vi.mock('../../services/api', () => ({
+  authApi: {
+    login: vi.fn().mockResolvedValue({
+      data: {
+        user: { id: '1', email: 'test@test.com', full_name: 'Test User', role: 'user', avatar_url: null, created_at: null },
+        token: { access_token: 'mock-token', token_type: 'bearer', refresh_token: 'mock-refresh' }
+      }
+    }),
+    register: vi.fn().mockResolvedValue({
+      data: {
+        user: { id: '1', email: 'test@test.com', full_name: 'Test User', role: 'user', avatar_url: null, created_at: null },
+        token: { access_token: 'mock-token', token_type: 'bearer', refresh_token: 'mock-refresh' }
+      }
+    }),
+    me: vi.fn().mockResolvedValue({ data: { id: '1', email: 'test@test.com', full_name: 'Test', role: 'user' } }),
+  },
+  documentsApi: {
+    list: vi.fn().mockResolvedValue({ data: { items: [], total: 0 } }),
+    upload: vi.fn(),
+  },
+  chatApi: {
+    createSession: vi.fn().mockResolvedValue({ data: { id: 'new-session', title: 'New chat', document_id: null, created_at: '', updated_at: '' } }),
+    listSessions: vi.fn().mockResolvedValue({ data: { items: [], total: 0 } }),
+    deleteSession: vi.fn().mockResolvedValue({}),
+    ask: vi.fn().mockResolvedValue({ data: { answer: 'Mock answer', citations: [], token_usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 } } }),
+    listMessages: vi.fn(),
+  },
+  studyApi: {
+    generateQuiz: vi.fn(),
+    submitQuiz: vi.fn(),
+    generateFlashcards: vi.fn(),
+    getFlashcard: vi.fn(),
+    submitEssay: vi.fn(),
+  },
+  adminApi: {
+    listUsers: vi.fn(),
+    analytics: vi.fn(),
+    health: vi.fn(),
+  },
+}))
 
 describe('appStore', () => {
   beforeEach(() => {
     useAppStore.setState({
-      auth: { isAuthenticated: true, user: { name: 'Test', role: 'Student', initials: 'T' }, login: useAppStore.getState().auth.login, logout: useAppStore.getState().auth.logout },
-      documents: { items: [], selectedId: null, select: useAppStore.getState().documents.select, add: useAppStore.getState().documents.add, remove: useAppStore.getState().documents.remove, retry: useAppStore.getState().documents.retry, updateProgress: useAppStore.getState().documents.updateProgress },
+      auth: { isAuthenticated: true, user: { name: 'Test', role: 'Student', initials: 'T' }, token: 'mock', login: useAppStore.getState().auth.login, register: useAppStore.getState().auth.register, logout: useAppStore.getState().auth.logout, loadUser: useAppStore.getState().auth.loadUser },
+      documents: { items: [], selectedId: null, select: useAppStore.getState().documents.select, add: useAppStore.getState().documents.add, remove: useAppStore.getState().documents.remove, retry: useAppStore.getState().documents.retry, updateProgress: useAppStore.getState().documents.updateProgress, loadDocuments: useAppStore.getState().documents.loadDocuments, uploadDocument: useAppStore.getState().documents.uploadDocument },
       chat: { sessions: [], activeSessionId: null, selectSession: useAppStore.getState().chat.selectSession, sendMessage: useAppStore.getState().chat.sendMessage, addSession: useAppStore.getState().chat.addSession, deleteSession: useAppStore.getState().chat.deleteSession },
       notifications: { items: [], dismiss: useAppStore.getState().notifications.dismiss, clear: useAppStore.getState().notifications.clear },
       toasts: { items: [], add: useAppStore.getState().toasts.add, remove: useAppStore.getState().toasts.remove }
@@ -22,9 +63,9 @@ describe('appStore', () => {
       expect(useAppStore.getState().auth.isAuthenticated).toBe(false)
     })
 
-    it('logs in', () => {
+    it('logs in', async () => {
       useAppStore.getState().auth.logout()
-      useAppStore.getState().auth.login()
+      await useAppStore.getState().auth.login('test@test.com', 'password')
       expect(useAppStore.getState().auth.isAuthenticated).toBe(true)
     })
   })
@@ -79,8 +120,8 @@ describe('appStore', () => {
       expect(messages[0].role).toBe('user')
     })
 
-    it('adds a new session', () => {
-      useAppStore.getState().chat.addSession()
+    it('adds a new session', async () => {
+      await useAppStore.getState().chat.addSession()
       expect(useAppStore.getState().chat.sessions).toHaveLength(1)
     })
 

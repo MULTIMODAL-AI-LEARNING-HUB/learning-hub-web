@@ -1,7 +1,14 @@
 import { useState } from 'react'
 import { useAppStore } from '../../stores/appStore'
 import { Button } from '../../components/ui/Button'
-import { mockQuizQuestions } from '../../data/mockData'
+import { studyApi } from '../../services/api'
+
+interface QuizQ {
+  id: string
+  question: string
+  options: string[]
+  correctIndex: number
+}
 
 export function QuizGenerator() {
   const docs = useAppStore((s) => s.documents.items)
@@ -10,18 +17,46 @@ export function QuizGenerator() {
   const [selectedDoc, setSelectedDoc] = useState('')
   const [numQuestions, setNumQuestions] = useState(5)
   const [quizStarted, setQuizStarted] = useState(false)
-  const [questions, setQuestions] = useState(mockQuizQuestions.slice(0, numQuestions))
+  const [questions, setQuestions] = useState<QuizQ[]>([])
   const [currentQ, setCurrentQ] = useState(0)
   const [answers, setAnswers] = useState<Record<string, number>>({})
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  const handleGenerate = () => {
-    setQuestions(mockQuizQuestions.slice(0, numQuestions))
-    setQuizStarted(true)
-    setCurrentQ(0)
-    setAnswers({})
-    setSubmitted(false)
-    toasts({ type: 'success', title: 'Quiz generated', message: `${numQuestions} questions ready` })
+  const handleGenerate = async () => {
+    if (!selectedDoc) {
+      toasts({ type: 'warning', title: 'Please select a document first' })
+      return
+    }
+    setLoading(true)
+    try {
+      const res = await studyApi.generateQuiz({
+        document_id: selectedDoc,
+        question_count: numQuestions,
+      })
+      const qs = (res.data as Record<string, unknown>).questions as Array<{
+        id: string
+        question: string
+        options: string[]
+        correct_answer: string
+      }> || []
+      const mapped: QuizQ[] = qs.map((q) => ({
+        id: q.id,
+        question: q.question,
+        options: q.options,
+        correctIndex: 'ABCD'.indexOf(q.correct_answer),
+      }))
+      setQuestions(mapped)
+      setQuizStarted(true)
+      setCurrentQ(0)
+      setAnswers({})
+      setSubmitted(false)
+      toasts({ type: 'success', title: 'Quiz generated', message: `${mapped.length} questions ready` })
+    } catch {
+      toasts({ type: 'error', title: 'Failed to generate quiz' })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleSubmit = () => {
@@ -82,17 +117,14 @@ export function QuizGenerator() {
             </div>
           </div>
 
-          <Button onClick={handleGenerate} className="mt-6 w-full" size="lg">
+          <Button onClick={handleGenerate} loading={loading} className="mt-6 w-full" size="lg">
             Generate Quiz
           </Button>
         </div>
       ) : (
         <div className="mt-6 rounded-2xl border border-border bg-panel p-6 shadow-soft">
-          {/* Progress */}
           <div className="flex items-center justify-between text-sm text-inkMute">
-            <span>
-              Question {currentQ + 1} of {questions.length}
-            </span>
+            <span>Question {currentQ + 1} of {questions.length}</span>
             <span>{Math.round(((currentQ + 1) / questions.length) * 100)}%</span>
           </div>
           <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surfaceDeep">
@@ -102,16 +134,13 @@ export function QuizGenerator() {
             />
           </div>
 
-          {/* Question */}
           <div className="mt-6">
             <p className="text-base font-medium text-ink">{q.question}</p>
-
             <div className="mt-4 grid gap-2">
               {q.options.map((opt, i) => {
                 const selected = answers[q.id] === i
                 const isCorrect = submitted && i === q.correctIndex
                 const isWrong = submitted && selected && i !== q.correctIndex
-
                 return (
                   <button
                     key={i}
@@ -127,9 +156,7 @@ export function QuizGenerator() {
                         : 'border-border bg-white hover:border-accent/40 text-ink'
                     }`}
                   >
-                    <span className="mr-2 font-medium">
-                      {String.fromCharCode(65 + i)}.
-                    </span>
+                    <span className="mr-2 font-medium">{String.fromCharCode(65 + i)}.</span>
                     {opt}
                   </button>
                 )
@@ -137,37 +164,22 @@ export function QuizGenerator() {
             </div>
           </div>
 
-          {/* Navigation */}
           <div className="mt-6 flex items-center justify-between">
-            <Button
-              variant="ghost"
-              onClick={() => setCurrentQ((p) => Math.max(0, p - 1))}
-              disabled={currentQ === 0}
-            >
+            <Button variant="ghost" onClick={() => setCurrentQ((p) => Math.max(0, p - 1))} disabled={currentQ === 0}>
               Previous
             </Button>
-
             {submitted && (
               <div className="text-center">
-                <p className="text-lg font-semibold text-ink">
-                  {correctCount}/{questions.length}
-                </p>
-                <p className="text-xs text-inkMute">
-                  {Math.round((correctCount / questions.length) * 100)}% correct
-                </p>
+                <p className="text-lg font-semibold text-ink">{correctCount}/{questions.length}</p>
+                <p className="text-xs text-inkMute">{Math.round((correctCount / questions.length) * 100)}% correct</p>
               </div>
             )}
-
             {currentQ < questions.length - 1 ? (
               <Button onClick={() => setCurrentQ((p) => p + 1)}>Next</Button>
             ) : !submitted ? (
-              <Button onClick={handleSubmit} variant="primary">
-                Submit Quiz
-              </Button>
+              <Button onClick={handleSubmit} variant="primary">Submit Quiz</Button>
             ) : (
-              <Button onClick={handleReset} variant="outline">
-                Try Again
-              </Button>
+              <Button onClick={handleReset} variant="outline">Try Again</Button>
             )}
           </div>
         </div>

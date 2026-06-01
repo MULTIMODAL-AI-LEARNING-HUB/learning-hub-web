@@ -21,7 +21,9 @@ describe('DocumentHub', () => {
         add: useAppStore.getState().documents.add,
         remove: useAppStore.getState().documents.remove,
         retry: useAppStore.getState().documents.retry,
-        updateProgress: useAppStore.getState().documents.updateProgress
+        updateProgress: useAppStore.getState().documents.updateProgress,
+        loadDocuments: useAppStore.getState().documents.loadDocuments,
+        uploadDocument: useAppStore.getState().documents.uploadDocument,
       }
     })
   })
