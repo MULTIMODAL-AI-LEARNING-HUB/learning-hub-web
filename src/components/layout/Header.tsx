@@ -1,18 +1,27 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '../../stores/appStore'
 import { Progress } from '../ui/Progress'
 
 export function Header() {
-  const navigate = useNavigate()
+  const user = useAppStore((s) => s.auth.user)
+  const toggleSidebar = useAppStore((s) => s.ui.toggleSidebar)
   const notifications = useAppStore((s) => s.notifications.items)
   const dismissNotif = useAppStore((s) => s.notifications.dismiss)
   const [search, setSearch] = useState('')
   const [notifOpen, setNotifOpen] = useState(false)
   const notifRef = useRef<HTMLDivElement>(null)
 
-  const storagePct = Math.round((2 / 5) * 100)
-  const tokenPct = Math.round((10000 / 50000) * 100)
+  const storageUsed = user?.quota?.storageUsed ?? 0
+  const storageTotal = user?.quota?.storageTotal ?? 1024
+  const storagePct = Math.min(100, Math.round((storageUsed / storageTotal) * 100))
+  const storageUsedLabel = storageUsed >= 1024 ? `${(storageUsed / 1024).toFixed(1)}GB` : `${storageUsed.toFixed(0)}MB`
+  const storageTotalLabel = storageTotal >= 1024 ? `${(storageTotal / 1024).toFixed(0)}GB` : `${storageTotal}MB`
+
+  const tokensUsed = user?.quota?.tokensUsed ?? 0
+  const tokensTotal = user?.quota?.tokensTotal ?? 50000
+  const tokenPct = Math.min(100, Math.round((tokensUsed / tokensTotal) * 100))
+  const tokensUsedLabel = tokensUsed >= 1000 ? `${(tokensUsed / 1000).toFixed(0)}k` : tokensUsed
+  const tokensTotalLabel = tokensTotal >= 1000 ? `${(tokensTotal / 1000).toFixed(0)}k` : tokensTotal
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -30,7 +39,7 @@ export function Header() {
       <div className="flex items-center gap-3">
         <button
           className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-inkMute transition hover:bg-surface lg:hidden"
-          onClick={() => navigate('/app')}
+          onClick={toggleSidebar}
         >
           ☰
         </button>
@@ -61,11 +70,11 @@ export function Header() {
           <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-inkMute">Quota</p>
           <div className="mt-1.5 flex items-center gap-2">
             <Progress value={storagePct} variant="accent" />
-            <span className="whitespace-nowrap text-xs">2/5GB</span>
+            <span className="whitespace-nowrap text-xs">{storageUsedLabel}/{storageTotalLabel}</span>
           </div>
           <div className="mt-1 flex items-center gap-2">
             <Progress value={tokenPct} />
-            <span className="whitespace-nowrap text-xs">10k/50k</span>
+            <span className="whitespace-nowrap text-xs">{tokensUsedLabel}/{tokensTotalLabel}</span>
           </div>
         </div>
 

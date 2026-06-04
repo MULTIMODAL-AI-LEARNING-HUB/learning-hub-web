@@ -23,6 +23,8 @@ export function QuizGenerator() {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  const [jobId, setJobId] = useState('')
+
   const handleGenerate = async () => {
     if (!selectedDoc) {
       toasts({ type: 'warning', title: 'Please select a document first' })
@@ -30,31 +32,56 @@ export function QuizGenerator() {
     }
     setLoading(true)
     try {
-      const res = await studyApi.generateQuiz({
+      const startRes = await studyApi.generateQuiz({
         document_id: selectedDoc,
         question_count: numQuestions,
       })
-      const qs = (res.data as Record<string, unknown>).questions as Array<{
-        id: string
-        question: string
-        options: string[]
-        correct_answer: string
-      }> || []
-      const mapped: QuizQ[] = qs.map((q) => ({
-        id: q.id,
-        question: q.question,
-        options: q.options,
-        correctIndex: 'ABCD'.indexOf(q.correct_answer),
-      }))
-      setQuestions(mapped)
-      setQuizStarted(true)
-      setCurrentQ(0)
-      setAnswers({})
-      setSubmitted(false)
-      toasts({ type: 'success', title: 'Quiz generated', message: `${mapped.length} questions ready` })
+      const { job_id } = startRes.data as { job_id: string }
+      setJobId(job_id)
+
+      let attempts = 0
+      const maxAttempts = 60 // 2 minutes (60 * 2s)
+
+      const pollInterval = setInterval(async () => {
+        attempts++
+        if (attempts >= maxAttempts) {
+          clearInterval(pollInterval)
+          setLoading(false)
+          toasts({ type: 'error', title: 'Generation timed out', message: 'Quiz generation timed out.' })
+          return
+        }
+
+        try {
+          const checkRes = await studyApi.getQuizJob(job_id)
+          const data = checkRes.data as { status: string; questions?: any[] }
+
+          if (data.status === 'ready') {
+            clearInterval(pollInterval)
+            const qs = data.questions || []
+            const mapped: QuizQ[] = qs.map((q: any) => ({
+              id: q.id,
+              question: q.question,
+              options: q.options,
+              correctIndex: 'ABCD'.indexOf(q.correct_answer),
+            }))
+            setQuestions(mapped)
+            setQuizStarted(true)
+            setCurrentQ(0)
+            setAnswers({})
+            setSubmitted(false)
+            setLoading(false)
+            toasts({ type: 'success', title: 'Quiz generated', message: `${mapped.length} questions ready` })
+          } else if (data.status === 'failed') {
+            clearInterval(pollInterval)
+            setLoading(false)
+            toasts({ type: 'error', title: 'Failed to generate quiz', message: 'The AI model failed to parse the document.' })
+          }
+        } catch {
+          // Ignore network glitch and try again
+        }
+      }, 2000)
     } catch {
-      toasts({ type: 'error', title: 'Failed to generate quiz' })
-    } finally {
+      toasts({ type: 'error', title: 'Failed to start quiz generation' })
       setLoading(false)
     }
   }

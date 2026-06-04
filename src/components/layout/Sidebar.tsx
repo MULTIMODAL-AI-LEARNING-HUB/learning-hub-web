@@ -5,12 +5,7 @@ import { Button } from '../ui/Button'
 import { Progress } from '../ui/Progress'
 import type { DocumentItem } from '../../types'
 
-const fileIcon = (type: string) => {
-  if (type === 'pdf') return '📄'
-  if (type === 'video') return '🎬'
-  if (type === 'audio') return '🎧'
-  return '🔗'
-}
+import { fileIcon } from '../../utils/fileIcon'
 
 const navItems = [
   { id: 'documents', label: 'Documents', icon: '📚', path: '/app/documents' },

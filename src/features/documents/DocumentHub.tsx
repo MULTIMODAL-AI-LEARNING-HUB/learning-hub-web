@@ -1,15 +1,11 @@
+import { useEffect } from 'react'
 import { useAppStore } from '../../stores/appStore'
 import { DocumentViewer } from './DocumentViewer'
 import { Button } from '../../components/ui/Button'
 import { Progress } from '../../components/ui/Progress'
 import type { DocumentItem } from '../../types'
-
-const fileIcon = (type: string) => {
-  if (type === 'pdf') return '📄'
-  if (type === 'video') return '🎬'
-  if (type === 'audio') return '🎧'
-  return '🔗'
-}
+import { fileIcon } from '../../utils/fileIcon'
+import { useDocumentStatus } from '../../hooks/useDocumentStatus'
 
 function DocumentCard({ doc }: { doc: DocumentItem }) {
   const select = useAppStore((s) => s.documents.select)
@@ -82,6 +78,16 @@ export function DocumentHub() {
   const docs = useAppStore((s) => s.documents.items)
   const selectedId = useAppStore((s) => s.documents.selectedId)
   const openUpload = useAppStore((s) => s.ui.openUploadModal)
+  const loadDocuments = useAppStore((s) => s.documents.loadDocuments)
+
+  // Start polling processing document statuses
+  useDocumentStatus()
+
+  // Fetch document list from API gateway on component mount
+  useEffect(() => {
+    loadDocuments()
+  }, [loadDocuments])
+
   const selectedDoc = docs.find((d) => d.id === selectedId)
 
   return (

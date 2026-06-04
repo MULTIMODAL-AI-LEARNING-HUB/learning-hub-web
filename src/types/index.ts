@@ -49,6 +49,7 @@ export interface UserProfile {
   name: string
   role: string
   initials: string
+  quota?: QuotaInfo
 }
 
 export interface QuizQuestion {

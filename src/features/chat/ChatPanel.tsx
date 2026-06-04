@@ -22,7 +22,7 @@ export function ChatPanel() {
 
   const handleSend = () => {
     if (!input.trim()) return
-    sendMessage(input)
+    sendMessage(input, selectedDoc ? [selectedDoc] : [])
     setInput('')
   }
 

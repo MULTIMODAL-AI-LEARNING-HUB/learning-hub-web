@@ -33,9 +33,17 @@ api.interceptors.response.use(
         } catch {
           localStorage.removeItem('access_token')
           localStorage.removeItem('refresh_token')
-          window.location.href = '/login'
+          const { router } = await import('../routes')
+          router.navigate('/login')
         }
       }
+    }
+    if (error.response?.status === 429) {
+      const msg = error.response.data?.message || 'Too many requests. Please try again later.'
+      try {
+        const { useAppStore } = await import('../stores/appStore')
+        useAppStore.getState().toasts.add({ type: 'error', title: 'Rate Limited', message: msg })
+      } catch {}
     }
     return Promise.reject(error)
   }
@@ -48,6 +56,14 @@ export interface AuthUser {
   avatar_url: string | null
   role: string
   created_at: string | null
+  quota?: {
+    storage_limit_mb: number
+    storage_used_mb: number
+    video_limit: number
+    video_used: number
+    token_limit: number
+    token_used: number
+  }
 }
 
 export interface AuthResponse {
@@ -142,6 +158,7 @@ export const chatApi = {
 export const studyApi = {
   generateQuiz: (data: { document_id: string; quiz_type?: string; question_count?: number }) =>
     api.post('/study/quiz/generate', data),
+  getQuizJob: (jobId: string) => api.get(`/study/quiz/job/${jobId}`),
   submitQuiz: (quizId: string, answers: Array<{ question_id: string; answer: string }>) =>
     api.post(`/study/quiz/${quizId}/submit`, { answers }),
   generateFlashcards: (data: { document_id: string; set_name: string; count?: number }) =>

@@ -14,36 +14,24 @@ interface UploadItem {
 }
 
 export function UploadModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const addDoc = useAppStore((s) => s.documents.add)
-  const toasts = useAppStore((s) => s.toasts.add)
+  const uploadDoc = useAppStore((s) => s.documents.uploadDocument)
   const [files, setFiles] = useState<UploadItem[]>([])
   const [dragging, setDragging] = useState(false)
 
   const doUpload = useCallback(
     async (file: UploadItem, rawFile: File) => {
       try {
-        const res = await documentsApi.upload(rawFile)
-        const data = res.data as Record<string, unknown>
+        await uploadDoc(rawFile)
         setFiles((prev) =>
           prev.map((f) => (f.id === file.id ? { ...f, progress: 100, status: 'done' } : f))
         )
-        addDoc({
-          id: data.id as string,
-          name: data.file_name as string,
-          type: (data.file_type as 'pdf' | 'video' | 'audio') || 'pdf',
-          status: 'processing',
-          size: file.size,
-          progress: 0,
-        })
-        toasts({ type: 'success', title: 'Upload complete', message: file.name })
       } catch {
         setFiles((prev) =>
           prev.map((f) => (f.id === file.id ? { ...f, status: 'error' } : f))
         )
-        toasts({ type: 'error', title: 'Upload failed', message: file.name })
       }
     },
-    [addDoc, toasts]
+    [uploadDoc]
   )
 
   const addFiles = (fileList: FileList | null) => {
