@@ -30,7 +30,7 @@ describe('DocumentHub', () => {
 
   it('renders document list heading', () => {
     render(<DocumentHub />, { wrapper })
-    expect(screen.getByText('Documents')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Documents' })).toBeInTheDocument()
   })
 
   it('renders upload button', () => {
@@ -56,10 +56,8 @@ describe('DocumentHub', () => {
 
   it('selects a document on click', () => {
     render(<DocumentHub />, { wrapper })
-    const cards = document.querySelectorAll('.cursor-pointer')
-    if (cards.length > 1) {
-      fireEvent.click(cards[1])
-      expect(useAppStore.getState().documents.selectedId).toBe('d2')
-    }
+    const card = screen.getByText('ML_Overview.mp4')
+    fireEvent.click(card)
+    expect(useAppStore.getState().documents.selectedId).toBe('d2')
   })
 })

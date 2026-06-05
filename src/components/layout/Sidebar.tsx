@@ -1,64 +1,34 @@
 import { useNavigate, useLocation } from 'react-router-dom'
+import {
+  FileText,
+  MessageSquare,
+  BookOpen,
+  Layers,
+  PenLine,
+  Settings,
+  Upload,
+  Plus,
+  LogOut,
+  Sparkles,
+  PanelLeftClose,
+  PanelLeft
+} from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { Avatar } from '../ui/Avatar'
 import { Button } from '../ui/Button'
-import { Progress } from '../ui/Progress'
-import type { DocumentItem } from '../../types'
-
-import { fileIcon } from '../../utils/fileIcon'
+import { Tabs } from '../ui/Tabs'
+import { DocumentCard } from '../../features/documents/DocumentCard'
+import { useToast } from '../ui/useToast'
+import { Tooltip } from '../ui/Tooltip'
+import { cn } from '../../utils/cn'
 
 const navItems = [
-  { id: 'documents', label: 'Documents', icon: '📚', path: '/app/documents' },
-  { id: 'chat', label: 'AI Chat', icon: '💬', path: '/app/chat' },
-  { id: 'quiz', label: 'Quiz Generator', icon: '📝', path: '/app/quiz' },
-  { id: 'flashcards', label: 'Flashcards', icon: '🃏', path: '/app/flashcards' },
-  { id: 'essay', label: 'Essay Grading', icon: '✍️', path: '/app/essay' }
+  { id: 'documents', label: 'Documents', icon: FileText, path: '/app/documents' },
+  { id: 'chat', label: 'AI Chat', icon: MessageSquare, path: '/app/chat' },
+  { id: 'quiz', label: 'Quiz', icon: BookOpen, path: '/app/quiz' },
+  { id: 'flashcards', label: 'Flashcards', icon: Layers, path: '/app/flashcards' },
+  { id: 'essay', label: 'Essay', icon: PenLine, path: '/app/essay' }
 ]
-
-function DocumentCard({ doc, isSelected, onSelect }: { doc: DocumentItem; isSelected: boolean; onSelect: () => void }) {
-  const retry = useAppStore((s) => s.documents.retry)
-  const toast = useAppStore((s) => s.toasts.add)
-
-  return (
-    <div
-      onClick={onSelect}
-      className={`rounded-xl border px-3 py-2.5 text-sm transition cursor-pointer ${
-        isSelected
-          ? 'border-accent bg-accentSoft shadow-soft'
-          : 'border-border bg-white hover:border-accent/40'
-      }`}
-    >
-      <div className="flex items-center gap-2 text-ink">
-        <span className="text-base">{fileIcon(doc.type)}</span>
-        <p className="truncate flex-1">{doc.name}</p>
-      </div>
-      <div className="mt-1.5 text-xs text-inkMute">
-        {doc.status === 'processing' && (
-          <div className="space-y-1.5">
-            <Progress value={doc.progress ?? 0} variant="accent" />
-            <p>Processing • {doc.progress}%</p>
-          </div>
-        )}
-        {doc.status === 'ready' && <p className="text-success">✓ Ready • {doc.pageCount} pages</p>}
-        {doc.status === 'failed' && (
-          <div className="flex items-center justify-between">
-            <p className="text-danger">✕ Failed</p>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                retry(doc.id)
-                toast({ type: 'info', title: 'Retrying...', message: `${doc.name}` })
-              }}
-              className="text-accent underline transition hover:text-accent/80"
-            >
-              Retry
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
 
 export function Sidebar() {
   const navigate = useNavigate()
@@ -73,110 +43,181 @@ export function Sidebar() {
   const selectSession = useAppStore((s) => s.chat.selectSession)
   const addSession = useAppStore((s) => s.chat.addSession)
   const openUpload = useAppStore((s) => s.ui.openUploadModal)
-  const toasts = useAppStore((s) => s.toasts.add)
+  const toast = useToast()
+
+  const showAdmin = user?.role === 'admin'
+  const activePath = location.pathname
+  const isDocumentsRoute = activePath.startsWith('/app/documents')
+  const isChatRoute = activePath.startsWith('/app/chat')
+
+  const tabValue = isDocumentsRoute ? 'docs' : isChatRoute ? 'sessions' : null
 
   return (
-    <div className="flex h-full flex-col gap-1 overflow-y-auto">
-      {/* Profile */}
-      <div className="flex items-center gap-3 rounded-xl bg-surface px-3 py-3">
-        <Avatar fallback={user.initials} size="md" />
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-ink truncate">{user.name}</p>
-          <p className="text-xs text-inkMute">{user.role}</p>
+    <div className="flex h-full flex-col gap-3 overflow-y-auto scrollbar-thin">
+      {/* Brand + Collapse */}
+      <div className="flex items-center justify-between gap-2 px-1">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-soft">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-display font-semibold text-foreground truncate">
+              Learning Hub
+            </p>
+            <p className="text-2xs text-muted-foreground truncate">AI Study Workspace</p>
+          </div>
         </div>
-        <button
-          onClick={() => {
-            logout()
-            navigate('/login')
-          }}
-          className="text-xs text-inkMute transition hover:text-danger"
-          title="Logout"
-        >
-          ⏻
-        </button>
+        <Tooltip content="Collapse sidebar" side="bottom">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => useAppStore.getState().ui.toggleSidebar()}
+            className="hidden lg:flex h-7 w-7"
+            aria-label="Collapse sidebar"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </Button>
+        </Tooltip>
+      </div>
+
+      {/* Profile Card */}
+      <div className="flex items-center gap-2.5 rounded-xl border border-border bg-muted/30 p-2.5">
+        <Avatar fallback={user.initials} size="md" status="online" />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
+          <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
+        </div>
       </div>
 
       {/* Upload Button */}
-      <Button onClick={openUpload} variant="outline" size="sm" className="w-full" icon="＋">
+      <Button
+        onClick={openUpload}
+        variant="primary"
+        size="md"
+        icon={<Upload className="h-4 w-4" />}
+        className="w-full"
+        fullWidth
+      >
         Upload Document
       </Button>
 
-      {/* Navigation */}
-      <nav className="mt-2 grid gap-0.5">
+      {/* Main Navigation */}
+      <nav className="grid gap-0.5">
         {navItems.map((item) => {
-          const active = location.pathname.startsWith(item.path)
+          const active = activePath.startsWith(item.path)
+          const Icon = item.icon
           return (
             <button
               key={item.id}
               onClick={() => navigate(item.path)}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition ${
+              className={cn(
+                'group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium transition',
                 active
-                  ? 'bg-accent text-white shadow-soft'
-                  : 'text-inkSoft hover:bg-surface hover:text-ink'
-              }`}
+                  ? 'bg-primary text-primary-foreground shadow-soft'
+                  : 'text-foreground/80 hover:bg-muted hover:text-foreground'
+              )}
             >
-              <span className="text-base">{item.icon}</span>
-              <span className="font-medium">{item.label}</span>
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="flex-1 truncate">{item.label}</span>
+              {active && <span className="h-1.5 w-1.5 rounded-full bg-primary-foreground" />}
             </button>
           )
         })}
+        {showAdmin && (
+          <button
+            onClick={() => navigate('/app/admin')}
+            className={cn(
+              'group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium transition',
+              activePath.startsWith('/app/admin')
+                ? 'bg-primary text-primary-foreground shadow-soft'
+                : 'text-foreground/80 hover:bg-muted hover:text-foreground'
+            )}
+          >
+            <Settings className="h-4 w-4 shrink-0" />
+            <span className="flex-1 truncate">Admin Panel</span>
+          </button>
+        )}
       </nav>
 
-      {/* Documents (only show on documents route) */}
-      {location.pathname.startsWith('/app/documents') && (
-        <section className="mt-4">
-          <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-inkMute">
-            <span>My Documents</span>
-            <span>{docs.length}</span>
-          </div>
-          <div className="mt-2 grid gap-2">
-            {docs.map((doc) => (
-              <DocumentCard
-                key={doc.id}
-                doc={doc}
-                isSelected={selectedDocId === doc.id}
-                onSelect={() => selectDoc(doc.id)}
-              />
-            ))}
-          </div>
-        </section>
+      {/* Contextual Tabs: Documents / Sessions */}
+      {tabValue && (
+        <div className="mt-2">
+          <Tabs defaultValue={tabValue} className="w-full">
+            <Tabs.List className="w-full">
+              {isDocumentsRoute && (
+                <Tabs.Trigger value="docs" icon={<FileText className="h-3.5 w-3.5" />} count={docs.length} className="flex-1 justify-center">
+                  Documents
+                </Tabs.Trigger>
+              )}
+              {isChatRoute && (
+                <Tabs.Trigger value="sessions" icon={<MessageSquare className="h-3.5 w-3.5" />} count={sessions.length} className="flex-1 justify-center">
+                  Sessions
+                </Tabs.Trigger>
+              )}
+            </Tabs.List>
+            {isDocumentsRoute && (
+              <Tabs.Content value="docs" className="space-y-1.5 max-h-72 overflow-y-auto scrollbar-thin pr-1">
+                {docs.length === 0 ? (
+                  <p className="text-xs text-muted-foreground text-center py-6">
+                    No documents yet
+                  </p>
+                ) : (
+                  docs.map((doc) => (
+                    <DocumentCard
+                      key={doc.id}
+                      doc={doc}
+                      isSelected={selectedDocId === doc.id}
+                      onSelect={() => selectDoc(doc.id)}
+                      variant="compact"
+                    />
+                  ))
+                )}
+              </Tabs.Content>
+            )}
+            {isChatRoute && (
+              <Tabs.Content value="sessions" className="space-y-1 max-h-72 overflow-y-auto scrollbar-thin pr-1">
+                {sessions.length === 0 ? (
+                  <p className="text-xs text-muted-foreground text-center py-6">
+                    No sessions yet
+                  </p>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => {
+                        addSession()
+                        toast({ type: 'success', title: 'New session created' })
+                      }}
+                      className="w-full flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 transition"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      New session
+                    </button>
+                    {sessions.map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => selectSession(s.id)}
+                        className={cn(
+                          'w-full rounded-lg px-2.5 py-2 text-left text-xs transition',
+                          activeSessionId === s.id
+                            ? 'bg-primary/10 border border-primary/30 text-foreground'
+                            : 'text-foreground/80 hover:bg-muted'
+                        )}
+                      >
+                        <p className="font-medium truncate">{s.title}</p>
+                        <p className="mt-0.5 text-2xs text-muted-foreground truncate">
+                          {s.preview || 'No messages yet'}
+                        </p>
+                      </button>
+                    ))}
+                  </>
+                )}
+              </Tabs.Content>
+            )}
+          </Tabs>
+        </div>
       )}
 
-      {/* Chat Sessions (only show on chat route) */}
-      {location.pathname.startsWith('/app/chat') && (
-        <section className="mt-4">
-          <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-inkMute">
-            <span>Sessions</span>
-            <button
-              onClick={() => {
-                addSession()
-                toasts({ type: 'success', title: 'New session created' })
-              }}
-              className="text-accent transition hover:text-accent/80"
-            >
-              + New
-            </button>
-          </div>
-          <div className="mt-2 grid gap-2">
-            {sessions.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => selectSession(s.id)}
-                className={`rounded-xl px-3 py-2.5 text-left text-sm transition ${
-                  activeSessionId === s.id
-                    ? 'bg-accentSoft border border-accent/30 text-ink'
-                    : 'bg-surface text-inkSoft hover:bg-surfaceDeep'
-                }`}
-              >
-                <p className="font-medium truncate">{s.title}</p>
-                <p className="mt-0.5 text-xs text-inkMute truncate">{s.preview || 'No messages yet'}</p>
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <div className="flex-1" />
+      <div className="flex-1 min-h-2" />
 
       {/* Logout */}
       <button
@@ -184,10 +225,27 @@ export function Sidebar() {
           logout()
           navigate('/login')
         }}
-        className="mt-4 flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-inkMute transition hover:bg-surface hover:text-danger"
+        className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-muted-foreground transition hover:bg-muted hover:text-destructive"
       >
-        <span>⏻</span> Log out
+        <LogOut className="h-4 w-4" />
+        <span>Log out</span>
       </button>
     </div>
+  )
+}
+
+export function SidebarCollapseButton() {
+  return (
+    <Tooltip content="Open sidebar" side="right">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => useAppStore.getState().ui.toggleSidebar()}
+        className="h-7 w-7"
+        aria-label="Open sidebar"
+      >
+        <PanelLeft className="h-4 w-4" />
+      </Button>
+    </Tooltip>
   )
 }

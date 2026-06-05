@@ -5,16 +5,25 @@ import { QuizGenerator } from '../study/QuizGenerator'
 
 vi.mock('../../services/api', () => ({
   studyApi: {
-    generateQuiz: vi.fn().mockResolvedValue({
-      data: {
-        questions: [
-          { id: 'q1', question: 'What is ML?', options: ['Option A', 'Option B', 'Option C', 'Option D'], correct_answer: 'A' },
-          { id: 'q2', question: 'What is DL?', options: ['Option A', 'Option B', 'Option C', 'Option D'], correct_answer: 'B' },
-          { id: 'q3', question: 'What is AI?', options: ['Option A', 'Option B', 'Option C', 'Option D'], correct_answer: 'C' },
-        ]
-      }
-    }),
+    generateQuiz: vi.fn().mockResolvedValue({ data: { job_id: 'job-1' } }),
+    getQuizJob: vi.fn().mockResolvedValue({ data: { status: 'pending' } }),
   },
+}))
+
+vi.mock('../../components/ui/Toast', () => ({
+  useToast: () => vi.fn(),
+}))
+
+vi.mock('../../hooks/useJobPolling', () => ({
+  useJobPolling: () => ({
+    loading: false,
+    progress: 0,
+    start: vi.fn(),
+    stop: vi.fn(),
+    setProgress: vi.fn(),
+    status: 'pending',
+    data: null
+  })
 }))
 
 vi.mock('../../stores/appStore', () => ({

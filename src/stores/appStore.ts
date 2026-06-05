@@ -1,4 +1,5 @@
-import { create, StateCreator } from 'zustand'
+import { create } from 'zustand'
+import type { StateCreator } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import type {
   ChatSession,
@@ -458,7 +459,7 @@ const createStudySlice: StateCreator<AppState, [['zustand/devtools', never]], []
   }
 })
 
-const createToastsSlice: StateCreator<AppState, [['zustand/devtools', never]], [], ToastsSlice> = (set, get) => ({
+const createToastsSlice: StateCreator<AppState, [['zustand/devtools', never]], [], ToastsSlice> = (set) => ({
   toasts: {
     items: [],
     add: (toast) => {

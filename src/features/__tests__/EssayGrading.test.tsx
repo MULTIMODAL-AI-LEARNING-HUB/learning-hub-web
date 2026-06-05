@@ -9,6 +9,10 @@ vi.mock('../../services/api', () => ({
   },
 }))
 
+vi.mock('../../components/ui/Toast', () => ({
+  useToast: () => vi.fn(),
+}))
+
 vi.mock('../../stores/appStore', () => ({
   useAppStore: (selector: (state: Record<string, unknown>) => unknown) => {
     const state = {
@@ -59,7 +63,7 @@ describe('EssayGrading', () => {
 
   it('shows empty state before grading', () => {
     render(<EssayGrading />, { wrapper })
-    expect(screen.getByText(/Write an essay and click/)).toBeInTheDocument()
+    expect(screen.getByText(/Ready when you are/)).toBeInTheDocument()
   })
 
   it('clears essay content', () => {

@@ -32,7 +32,7 @@ describe('ToastContainer', () => {
   it('removes toast on close click', () => {
     useAppStore.getState().toasts.add({ type: 'success', title: 'Test' })
     render(<ToastContainer />)
-    const closeButtons = screen.getAllByText('✕')
+    const closeButtons = screen.getAllByRole('button', { name: /dismiss/i })
     fireEvent.click(closeButtons[closeButtons.length - 1])
     expect(screen.queryByText('Test')).not.toBeInTheDocument()
   })

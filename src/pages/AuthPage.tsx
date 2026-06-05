@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Sparkles, ArrowRight, BookOpen, Zap, MessageSquare, FileText, ShieldCheck } from 'lucide-react'
 import { useAppStore } from '../stores/appStore'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
 
 type Variant = 'login' | 'register'
 
@@ -26,9 +28,15 @@ const copy = {
 } as const
 
 const stats = [
-  { label: 'Documents', value: '240+' },
-  { label: 'Study Tools', value: '3 modules' },
-  { label: 'Avg. Response', value: '1.4s' }
+  { label: 'Documents', value: '240+', icon: FileText },
+  { label: 'Study Tools', value: '3 modules', icon: BookOpen },
+  { label: 'Avg. Response', value: '1.4s', icon: Zap }
+]
+
+const features = [
+  { icon: FileText, text: 'Upload PDFs, videos, audio, and URLs' },
+  { icon: ShieldCheck, text: 'Track processing status in real time' },
+  { icon: MessageSquare, text: 'Chat with contextual citations' }
 ]
 
 function AuthShell({ variant }: { variant: Variant }) {
@@ -79,20 +87,32 @@ function AuthShell({ variant }: { variant: Variant }) {
   }
 
   return (
-    <div className="min-h-screen bg-surface text-ink">
+    <div className="min-h-screen gradient-mesh">
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 py-10 lg:flex-row lg:items-center lg:justify-between">
         <section className="flex w-full flex-col gap-8 lg:w-5/12">
-          <div className="space-y-3">
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-accent">Learning Hub</p>
-            <h1 className="font-display text-4xl font-semibold text-ink lg:text-5xl">{content.title}</h1>
-            <p className="text-base text-inkMute">{content.subtitle}</p>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-glow">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-display font-semibold text-foreground">Learning Hub</p>
+                <p className="text-2xs text-muted-foreground">AI Study Workspace</p>
+              </div>
+            </div>
+            <h1 className="font-display text-4xl font-bold tracking-tight text-foreground text-balance lg:text-5xl">
+              {content.title}
+            </h1>
+            <p className="text-base text-muted-foreground max-w-md">{content.subtitle}</p>
           </div>
 
-          <div className="rounded-2xl border border-border bg-panel p-6 shadow-soft">
+          <Card className="p-6">
             <div className="grid gap-4">
               {variant === 'register' && (
                 <div className="grid gap-1.5">
-                  <label className="text-sm text-inkSoft">Full name</label>
+                  <label className="text-sm font-medium text-foreground/80">
+                    Full name
+                  </label>
                   <Input
                     placeholder="Nguyen Minh"
                     value={name}
@@ -103,7 +123,7 @@ function AuthShell({ variant }: { variant: Variant }) {
               )}
 
               <div className="grid gap-1.5">
-                <label className="text-sm text-inkSoft">Email</label>
+                <label className="text-sm font-medium text-foreground/80">Email</label>
                 <Input
                   type="email"
                   placeholder="you@example.com"
@@ -114,7 +134,7 @@ function AuthShell({ variant }: { variant: Variant }) {
               </div>
 
               <div className="grid gap-1.5">
-                <label className="text-sm text-inkSoft">Password</label>
+                <label className="text-sm font-medium text-foreground/80">Password</label>
                 <Input
                   type="password"
                   placeholder="Minimum 8 characters"
@@ -126,7 +146,9 @@ function AuthShell({ variant }: { variant: Variant }) {
 
               {variant === 'register' && (
                 <div className="grid gap-1.5">
-                  <label className="text-sm text-inkSoft">Confirm password</label>
+                  <label className="text-sm font-medium text-foreground/80">
+                    Confirm password
+                  </label>
                   <Input
                     type="password"
                     placeholder="Re-enter password"
@@ -142,47 +164,71 @@ function AuthShell({ variant }: { variant: Variant }) {
               onClick={handleSubmit}
               loading={loading}
               className="mt-6 w-full"
+              size="lg"
+              iconRight={!loading ? <ArrowRight className="h-4 w-4" /> : undefined}
             >
               {content.cta}
             </Button>
 
-            <div className="mt-4 flex items-center justify-center gap-2 text-sm text-inkMute">
+            <div className="mt-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
               <span>{content.alt}</span>
-              <Link className="font-medium text-ink transition hover:text-accent" to={content.linkTo}>
+              <Link
+                className="font-semibold text-primary transition hover:underline"
+                to={content.linkTo}
+              >
                 {content.linkText}
               </Link>
             </div>
-          </div>
+          </Card>
         </section>
 
-        <aside className="w-full rounded-2xl border border-border bg-panel p-8 shadow-lift lg:w-6/12">
-          <div className="space-y-4">
-            <div className="rounded-xl border border-border bg-surface px-4 py-3 text-sm text-inkSoft italic">
-              "Search documents, ask questions, and capture citations in one workspace."
-            </div>
+        <aside className="w-full lg:w-6/12">
+          <Card className="p-8" variant="elevated">
+            <div className="space-y-6">
+              <div className="rounded-xl border border-border bg-muted/30 p-4">
+                <p className="text-sm text-foreground/90 italic leading-relaxed">
+                  "Search documents, ask questions, and capture citations in one workspace."
+                </p>
+              </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
-              {stats.map((item) => (
-                <div key={item.label} className="rounded-xl bg-surface px-4 py-3 text-center">
-                  <p className="font-display text-xl font-semibold text-ink">{item.value}</p>
-                  <p className="text-xs uppercase tracking-[0.18em] text-inkMute">{item.label}</p>
-                </div>
-              ))}
-            </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {stats.map((item) => {
+                  const Icon = item.icon
+                  return (
+                    <div
+                      key={item.label}
+                      className="rounded-xl border border-border bg-surface-elevated p-4 text-center"
+                    >
+                      <Icon className="h-4 w-4 mx-auto mb-1.5 text-muted-foreground" />
+                      <p className="font-display text-lg font-bold text-foreground tabular-nums">
+                        {item.value}
+                      </p>
+                      <p className="text-2xs font-medium uppercase tracking-wider text-muted-foreground mt-0.5">
+                        {item.label}
+                      </p>
+                    </div>
+                  )
+                })}
+              </div>
 
-            <div className="grid gap-3">
-              {[
-                'Upload PDFs, videos, audio, and URLs',
-                'Track processing status in real time',
-                'Chat with contextual citations'
-              ].map((item) => (
-                <div key={item} className="flex items-start gap-3 rounded-xl bg-surface px-4 py-3 text-sm text-inkSoft">
-                  <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-accent" />
-                  <p>{item}</p>
-                </div>
-              ))}
+              <div className="grid gap-2.5">
+                {features.map((item) => {
+                  const Icon = item.icon
+                  return (
+                    <div
+                      key={item.text}
+                      className="flex items-start gap-3 rounded-xl border border-border bg-surface-elevated p-3"
+                    >
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <p className="text-sm text-foreground/80 pt-1">{item.text}</p>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
-          </div>
+          </Card>
         </aside>
       </div>
     </div>

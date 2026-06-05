@@ -37,17 +37,17 @@ describe('Button', () => {
 
   it('applies variant classes', () => {
     const { rerender } = render(<Button variant="primary">Test</Button>)
-    expect(screen.getByText('Test').className).toContain('bg-accent')
+    expect(screen.getByRole('button').className).toContain('bg-primary')
 
     rerender(<Button variant="danger">Test</Button>)
-    expect(screen.getByText('Test').className).toContain('bg-danger')
+    expect(screen.getByRole('button').className).toContain('bg-destructive')
   })
 
   it('applies size classes', () => {
     const { rerender } = render(<Button size="sm">Test</Button>)
-    expect(screen.getByText('Test').className).toContain('text-xs')
+    expect(screen.getByRole('button').className).toContain('text-xs')
 
     rerender(<Button size="lg">Test</Button>)
-    expect(screen.getByText('Test').className).toContain('text-sm')
+    expect(screen.getByRole('button').className).toContain('h-11')
   })
 })

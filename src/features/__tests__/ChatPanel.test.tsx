@@ -10,14 +10,16 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('ChatPanel', () => {
   beforeEach(() => {
-    // Mock scrollIntoView for jsdom
     Element.prototype.scrollIntoView = vi.fn()
     useAppStore.setState({
       chat: {
         sessions: [
-          { id: 'c1', title: 'Test Chat', preview: 'Hello', messages: [
-            { id: 'm1', role: 'user', content: 'Hello', timestamp: '10:00' }
-          ] }
+          {
+            id: 'c1',
+            title: 'Test Chat',
+            preview: 'Hello',
+            messages: [{ id: 'm1', role: 'user', content: 'Hello', timestamp: '10:00' }]
+          }
         ],
         activeSessionId: 'c1',
         selectSession: useAppStore.getState().chat.selectSession,
@@ -41,20 +43,20 @@ describe('ChatPanel', () => {
 
   it('renders input field', () => {
     render(<ChatPanel />, { wrapper })
-    expect(screen.getByPlaceholderText('Type your message...')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/ask anything/i)).toBeInTheDocument()
   })
 
   it('sends a message', () => {
     render(<ChatPanel />, { wrapper })
-    const input = screen.getByPlaceholderText('Type your message...')
+    const input = screen.getByPlaceholderText(/ask anything/i)
     fireEvent.change(input, { target: { value: 'What is ML?' } })
-    fireEvent.click(screen.getByText('Send'))
+    fireEvent.click(screen.getByRole('button', { name: /send message/i }))
     expect(useAppStore.getState().chat.sessions[0].messages.length).toBeGreaterThan(1)
   })
 
   it('sends message on Enter', () => {
     render(<ChatPanel />, { wrapper })
-    const input = screen.getByPlaceholderText('Type your message...')
+    const input = screen.getByPlaceholderText(/ask anything/i)
     fireEvent.change(input, { target: { value: 'Hello AI' } })
     fireEvent.keyDown(input, { key: 'Enter' })
     expect(useAppStore.getState().chat.sessions[0].messages.length).toBeGreaterThan(1)
@@ -62,7 +64,7 @@ describe('ChatPanel', () => {
 
   it('does not send empty message', () => {
     render(<ChatPanel />, { wrapper })
-    fireEvent.click(screen.getByText('Send'))
-    expect(useAppStore.getState().chat.sessions[0].messages).toHaveLength(1)
+    const sendBtn = screen.getByRole('button', { name: /send message/i })
+    expect(sendBtn).toBeDisabled()
   })
 })

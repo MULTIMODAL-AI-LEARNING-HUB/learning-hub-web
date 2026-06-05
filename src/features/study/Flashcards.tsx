@@ -1,6 +1,16 @@
 import { useState } from 'react'
+import { Layers, Sparkles, Shuffle, Check, X, RotateCcw, Plus, FileQuestion } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { Button } from '../../components/ui/Button'
+import { Card } from '../../components/ui/Card'
+import { Select, FormField } from '../../components/ui/Select'
+import { Input } from '../../components/ui/Input'
+import { PageHeader } from '../../components/ui/PageHeader'
+import { Progress } from '../../components/ui/Progress'
+import { Badge } from '../../components/ui/Badge'
+import { EmptyState } from '../../components/ui/EmptyState'
+import { useToast } from '../../components/ui/useToast'
+import { useJobPolling } from '../../hooks/useJobPolling'
 import { studyApi } from '../../services/api'
 
 interface CardItem {
@@ -11,11 +21,13 @@ interface CardItem {
 
 export function Flashcards() {
   const docs = useAppStore((s) => s.documents.items)
-  const toasts = useAppStore((s) => s.toasts.add)
+  const toast = useToast()
+  const readyDocs = docs.filter((d) => d.status === 'ready')
 
   const [selectedDoc, setSelectedDoc] = useState('')
   const [setName, setSetName] = useState('New Card Set')
   const [count, setCount] = useState(20)
+  const [setId, setSetId] = useState<string | null>(null)
 
   const [cards, setCards] = useState<CardItem[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -23,76 +35,66 @@ export function Flashcards() {
   const [known, setKnown] = useState<string[]>([])
   const [unknown, setUnknown] = useState<string[]>([])
   const [quizStarted, setQuizStarted] = useState(false)
-  const [loading, setLoading] = useState(false)
+
+  const { loading, progress, start, setProgress } = useJobPolling<CardItem[]>({
+    poll: async () => {
+      if (!setId) return { status: 'pending' }
+      try {
+        const res = await studyApi.getFlashcard(setId)
+        const data = res.data as { items?: Array<{ id: string; front: string; back: string }> }
+        if (data.items && data.items.length > 0) {
+          return { status: 'ready', data: data.items }
+        }
+        return { status: 'processing' }
+      } catch {
+        return { status: 'processing' }
+      }
+    },
+    onReady: (items) => {
+      setCards(items)
+      setQuizStarted(true)
+      setCurrentIndex(0)
+      setFlipped(false)
+      setKnown([])
+      setUnknown([])
+      toast({ type: 'success', title: 'Flashcards ready!', message: `Loaded ${items.length} cards` })
+    },
+    errorTitle: 'Failed to start flashcards generation',
+    timeoutTitle: 'Flashcards generation timed out'
+  })
 
   const handleGenerate = async () => {
     if (!selectedDoc) {
-      toasts({ type: 'warning', title: 'Please select a document first' })
+      toast({ type: 'warning', title: 'Please select a document first' })
       return
     }
-    setLoading(true)
     try {
-      // 1. Trigger background generation
       const startRes = await studyApi.generateFlashcards({
         document_id: selectedDoc,
         set_name: setName,
         count: count,
       })
-      const flashcardSetId = startRes.data.id
-
-      // 2. Poll flashcard set until items are populated by worker
-      let attempts = 0
-      const maxAttempts = 60 // 2 minutes
-
-      const pollInterval = setInterval(async () => {
-        attempts++
-        if (attempts >= maxAttempts) {
-          clearInterval(pollInterval)
-          setLoading(false)
-          toasts({ type: 'error', title: 'Generation timed out', message: 'Flashcards generation timed out.' })
-          return
-        }
-
-        try {
-          const checkRes = await studyApi.getFlashcard(flashcardSetId)
-          const data = checkRes.data
-
-          if (data.items && data.items.length > 0) {
-            clearInterval(pollInterval)
-            const mapped = data.items.map((item) => ({
-              id: item.id,
-              front: item.front,
-              back: item.back,
-            }))
-            setCards(mapped)
-            setQuizStarted(true)
-            setCurrentIndex(0)
-            setFlipped(false)
-            setKnown([])
-            setUnknown([])
-            setLoading(false)
-            toasts({ type: 'success', title: 'Flashcards ready!', message: `Loaded ${mapped.length} cards` })
-          }
-        } catch {
-          // Ignore network glitch and retry
-        }
-      }, 2500)
+      const id = (startRes.data as { id: string }).id
+      setSetId(id)
+      setProgress(0)
+      start()
     } catch {
-      toasts({ type: 'error', title: 'Failed to start flashcards generation' })
-      setLoading(false)
+      toast({ type: 'error', title: 'Failed to start flashcards generation' })
     }
   }
 
   const card = cards[currentIndex]
   const total = cards.length
-  const progress = total > 0 ? Math.round(((currentIndex + 1) / total) * 100) : 0
+  const progressPct = total > 0 ? Math.round(((currentIndex + 1) / total) * 100) : 0
 
   const handleKnow = () => {
+    if (!card) return
     setKnown((prev) => [...prev, card.id])
     goNext()
   }
 
   const handleDontKnow = () => {
+    if (!card) return
     setUnknown((prev) => [...prev, card.id])
     goNext()
   }
@@ -102,7 +104,7 @@ export function Flashcards() {
       setFlipped(false)
       setTimeout(() => setCurrentIndex((p) => p + 1), 150)
     } else {
-      toasts({
+      toast({
         type: 'info',
         title: 'Session complete!',
         message: `${known.length + 1}/${total} cards reviewed`
@@ -115,7 +117,7 @@ export function Flashcards() {
     setCards(shuffled)
     setCurrentIndex(0)
     setFlipped(false)
-    toasts({ type: 'success', title: 'Cards shuffled' })
+    toast({ type: 'success', title: 'Cards shuffled' })
   }
 
   const handleReset = () => {
@@ -124,145 +126,199 @@ export function Flashcards() {
     setFlipped(false)
     setKnown([])
     setUnknown([])
+    setSetId(null)
+  }
+
+  if (!quizStarted && !loading) {
+    return (
+      <div className="mx-auto max-w-2xl">
+        <PageHeader
+          subtitle="Study Tools"
+          title="Flashcards"
+          description="Spaced repetition learning with AI-generated cards from your documents."
+          icon={<Layers />}
+        />
+
+        {readyDocs.length === 0 ? (
+          <EmptyState
+            icon={<FileQuestion />}
+            title="No documents ready"
+            description="Upload and process a document first to generate flashcards from it."
+          />
+        ) : (
+          <Card className="p-6">
+            <div className="grid gap-4">
+              <FormField label="Select document" required>
+                <Select
+                  value={selectedDoc}
+                  onChange={setSelectedDoc}
+                  placeholder="Choose a document..."
+                  options={readyDocs.map((d) => ({ value: d.id, label: d.name }))}
+                />
+              </FormField>
+
+              <FormField label="Card Set Name" required>
+                <Input
+                  value={setName}
+                  onChange={setSetName}
+                  placeholder="Set Name"
+                />
+              </FormField>
+
+              <FormField label="Number of cards" required>
+                <Select
+                  value={String(count)}
+                  onChange={(v) => setCount(Number(v))}
+                  options={[
+                    { value: '10', label: '10 flashcards' },
+                    { value: '15', label: '15 flashcards' },
+                    { value: '20', label: '20 flashcards' },
+                    { value: '30', label: '30 flashcards' }
+                  ]}
+                />
+              </FormField>
+            </div>
+
+            <Button
+              onClick={handleGenerate}
+              loading={loading}
+              className="mt-6 w-full"
+              size="lg"
+              icon={<Sparkles className="h-4 w-4" />}
+            >
+              Generate Flashcards
+            </Button>
+          </Card>
+        )}
+      </div>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-2xl">
+        <PageHeader
+          subtitle="Study Tools"
+          title="Generating Flashcards"
+          description="Our AI is creating spaced repetition cards for you."
+          icon={<Sparkles />}
+        />
+        <Card className="p-6">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium text-foreground">Creating cards</span>
+              <span className="text-muted-foreground">{Math.round(progress)}%</span>
+            </div>
+            <Progress value={progress} indeterminate={progress < 5} />
+            <p className="text-xs text-muted-foreground text-center pt-2">
+              Usually takes 30-90 seconds
+            </p>
+          </div>
+        </Card>
+      </div>
+    )
   }
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h2 className="font-display text-2xl font-semibold text-ink">🃏 Flashcards</h2>
-      <p className="mt-1 text-sm text-inkMute">Study with interactive AI-generated flashcards</p>
+      <PageHeader
+        subtitle="Study Tools"
+        title="Flashcards"
+        description={setName}
+        icon={<Layers />}
+        actions={
+          <Badge variant="primary" label={`${currentIndex + 1} / ${total}`} />
+        }
+      />
 
-      {!quizStarted ? (
-        <div className="mt-6 rounded-2xl border border-border bg-panel p-6 shadow-soft">
-          <div className="grid gap-4">
-            <div className="grid gap-1.5">
-              <label className="text-sm font-medium text-inkSoft">Select document</label>
-              <select
-                value={selectedDoc}
-                onChange={(e) => setSelectedDoc(e.target.value)}
-                className="rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-ink outline-none focus:border-accent"
-              >
-                <option value="">Choose document...</option>
-                {docs
-                  .filter((d) => d.status === 'ready')
-                  .map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
-
-            <div className="grid gap-1.5">
-              <label className="text-sm font-medium text-inkSoft">Card Set Name</label>
-              <input
-                type="text"
-                value={setName}
-                onChange={(e) => setSetName(e.target.value)}
-                className="rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-ink outline-none focus:border-accent"
-                placeholder="Set Name"
-              />
-            </div>
-
-            <div className="grid gap-1.5">
-              <label className="text-sm font-medium text-inkSoft">Number of cards</label>
-              <select
-                value={count}
-                onChange={(e) => setCount(Number(e.target.value))}
-                className="rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-ink outline-none focus:border-accent"
-              >
-                {[10, 15, 20, 30].map((n) => (
-                  <option key={n} value={n}>
-                    {n} flashcards
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <Button onClick={handleGenerate} loading={loading} className="mt-6 w-full" size="lg">
-            Generate Flashcards
-          </Button>
+      <div className="mb-3 flex items-center gap-4 text-sm">
+        <div className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-success" />
+          <span className="font-medium text-foreground tabular-nums">{known.length}</span>
+          <span className="text-muted-foreground">known</span>
         </div>
-      ) : (
-        <div className="mt-6">
-          {/* Stats */}
-          <div className="flex items-center gap-4 text-sm">
-            <span className="text-success">✓ Known: {known.length}</span>
-            <span className="text-danger">✕ Unknown: {unknown.length}</span>
-            <span className="text-inkMute">Card {currentIndex + 1}/{total}</span>
-          </div>
+        <div className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-destructive" />
+          <span className="font-medium text-foreground tabular-nums">{unknown.length}</span>
+          <span className="text-muted-foreground">review</span>
+        </div>
+      </div>
 
-          {/* Progress */}
-          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surfaceDeep">
-            <div
-              className="h-full rounded-full bg-accent transition-all"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+      <Progress value={progressPct} className="mb-6" />
 
-          {/* Card */}
+      <div
+        className="cursor-pointer"
+        onClick={() => setFlipped((p) => !p)}
+        style={{ perspective: '1200px' }}
+      >
+        <div
+          className="relative h-72 w-full transition-transform duration-500"
+          style={{
+            transformStyle: 'preserve-3d',
+            transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+          }}
+        >
           <div
-            className="mt-6 cursor-pointer"
-            onClick={() => setFlipped((p) => !p)}
-            style={{ perspective: '1000px' }}
+            className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-border bg-surface-elevated p-8 text-center shadow-lift"
+            style={{ backfaceVisibility: 'hidden' }}
           >
-            <div
-              className="relative h-64 w-full transition-transform duration-300"
-              style={{
-                transformStyle: 'preserve-3d',
-                transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
-              }}
-            >
-              {/* Front */}
-              <div
-                className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-border bg-panel p-8 text-center shadow-lift"
-                style={{ backfaceVisibility: 'hidden' }}
-              >
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-inkMute">Question</p>
-                  <p className="mt-3 text-lg font-medium text-ink">{card?.front}</p>
-                  <p className="mt-6 text-xs text-inkMute/70">Click to reveal answer</p>
-                </div>
-              </div>
-
-              {/* Back */}
-              <div
-                className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-accent/30 bg-accentSoft p-8 text-center shadow-lift"
-                style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
-              >
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-accent">Answer</p>
-                  <p className="mt-3 text-base text-ink">{card?.back}</p>
-                </div>
-              </div>
-            </div>
+            <Badge variant="default" label="Question" className="mb-4" />
+            <p className="text-lg font-semibold text-foreground leading-relaxed max-w-md text-balance">
+              {card?.front}
+            </p>
+            <p className="mt-6 text-xs text-muted-foreground">Click to reveal answer</p>
           </div>
 
-          {/* Actions */}
-          <div className="mt-6 flex items-center justify-center gap-3">
-            <Button onClick={handleDontKnow} variant="danger" size="lg">
-              ✕ Don't know
-            </Button>
-            <Button onClick={handleShuffle} variant="outline" size="lg">
-              🔀 Shuffle
-            </Button>
-            <Button onClick={handleKnow} variant="primary" size="lg">
-              ✓ Know it
-            </Button>
-          </div>
-
-          <div className="mt-6 flex justify-center gap-2">
-            <Button onClick={handleReset} variant="ghost">
-              Change Document
-            </Button>
-            {currentIndex === total - 1 && (
-              <Button onClick={handleReset} variant="outline">
-                Start over
-              </Button>
-            )}
+          <div
+            className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border-2 border-primary/30 bg-primary/5 p-8 text-center shadow-lift"
+            style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+          >
+            <Badge variant="primary" label="Answer" className="mb-4" />
+            <p className="text-base text-foreground leading-relaxed max-w-md text-balance">
+              {card?.back}
+            </p>
+            <p className="mt-6 text-xs text-muted-foreground">Click to flip back</p>
           </div>
         </div>
-      )}
+      </div>
+
+      <div className="mt-6 grid grid-cols-3 gap-3">
+        <Button
+          onClick={handleDontKnow}
+          variant="danger"
+          size="lg"
+          icon={<X className="h-4 w-4" />}
+        >
+          Review
+        </Button>
+        <Button
+          onClick={handleShuffle}
+          variant="outline"
+          size="lg"
+          icon={<Shuffle className="h-4 w-4" />}
+        >
+          Shuffle
+        </Button>
+        <Button
+          onClick={handleKnow}
+          variant="primary"
+          size="lg"
+          icon={<Check className="h-4 w-4" />}
+        >
+          Know it
+        </Button>
+      </div>
+
+      <div className="mt-6 flex justify-center gap-2">
+        <Button onClick={handleReset} variant="ghost" icon={<Plus className="h-3.5 w-3.5" />}>
+          Change Document
+        </Button>
+        {currentIndex === total - 1 && (
+          <Button onClick={handleReset} variant="outline" icon={<RotateCcw className="h-3.5 w-3.5" />}>
+            Start Over
+          </Button>
+        )}
+      </div>
     </div>
   )
 }

@@ -1,59 +1,101 @@
-import { type ReactNode, useState, useRef, useEffect } from 'react'
+import { type ReactNode, useState, useRef, useEffect, useCallback } from 'react'
+import { cn } from '../../utils/cn'
 
 interface DropdownItem {
   id: string
   label: string
   icon?: ReactNode
   danger?: boolean
+  disabled?: boolean
+  shortcut?: string
 }
 
 interface DropdownProps {
   trigger: ReactNode
   items: DropdownItem[]
   onSelect: (id: string) => void
-  align?: 'left' | 'right'
+  align?: 'left' | 'right' | 'center'
+  className?: string
+  menuClassName?: string
 }
 
-export function Dropdown({ trigger, items, onSelect, align = 'right' }: DropdownProps) {
+const alignClasses = {
+  left: 'left-0',
+  right: 'right-0',
+  center: 'left-1/2 -translate-x-1/2'
+}
+
+export function Dropdown({
+  trigger,
+  items,
+  onSelect,
+  align = 'right',
+  className,
+  menuClassName
+}: DropdownProps) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
+  const handleClickOutside = useCallback((e: MouseEvent) => {
+    if (ref.current && !ref.current.contains(e.target as Node)) {
+      setOpen(false)
     }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
   }, [])
 
+  useEffect(() => {
+    if (!open) return
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [open, handleClickOutside])
+
   return (
-    <div ref={ref} className="relative">
-      <div onClick={() => setOpen((p) => !p)} className="cursor-pointer">
+    <div ref={ref} className={cn('relative', className)}>
+      <div
+        onClick={() => setOpen((p) => !p)}
+        className="cursor-pointer"
+        role="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+      >
         {trigger}
       </div>
       {open && (
         <div
-          className={`absolute top-full z-50 mt-2 min-w-[160px] rounded-xl border border-border bg-panel py-1.5 shadow-lift ${
-            align === 'right' ? 'right-0' : 'left-0'
-          }`}
+          role="menu"
+          className={cn(
+            'absolute top-full z-50 mt-2 min-w-[180px] rounded-xl border border-border bg-surface-elevated py-1 shadow-lift',
+            'animate-slide-in-from-top',
+            alignClasses[align],
+            menuClassName
+          )}
         >
           {items.map((item) => (
             <button
               key={item.id}
+              role="menuitem"
+              disabled={item.disabled}
               onClick={() => {
+                if (item.disabled) return
                 onSelect(item.id)
                 setOpen(false)
               }}
-              className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition ${
-                item.danger
-                  ? 'text-danger hover:bg-danger/5'
-                  : 'text-inkSoft hover:bg-surface hover:text-ink'
-              }`}
+              className={cn(
+                'flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition',
+                'focus-visible:outline-none',
+                item.disabled
+                  ? 'opacity-50 cursor-not-allowed'
+                  : item.danger
+                    ? 'text-destructive hover:bg-destructive/10'
+                    : 'text-foreground hover:bg-muted'
+              )}
             >
-              {item.icon && <span className="shrink-0 text-base">{item.icon}</span>}
-              {item.label}
+              {item.icon && <span className="shrink-0 [&>svg]:h-4 [&>svg]:w-4">{item.icon}</span>}
+              <span className="flex-1">{item.label}</span>
+              {item.shortcut && (
+                <kbd className="hidden sm:inline-flex items-center rounded border border-border bg-muted px-1.5 py-0.5 text-2xs font-mono text-muted-foreground">
+                  {item.shortcut}
+                </kbd>
+              )}
             </button>
           ))}
         </div>

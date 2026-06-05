@@ -23,7 +23,7 @@ describe('Input', () => {
   it('applies error border class', () => {
     render(<Input error="Error" />)
     const input = screen.getByRole('textbox')
-    expect(input.className).toContain('border-danger')
+    expect(input.className).toContain('border-destructive')
   })
 
   it('can be disabled', () => {

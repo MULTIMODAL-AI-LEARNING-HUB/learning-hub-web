@@ -61,7 +61,6 @@ export function useDocumentStatus() {
             })
           } else {
             // Document is still processing, simulate intermediate progress in UI
-            const metadata = latest.metadata as Record<string, any>
             const simulatedProgress = Math.min(95, 20 + pollCount * 8)
             updateProgress(doc.id, simulatedProgress, 'processing')
           }

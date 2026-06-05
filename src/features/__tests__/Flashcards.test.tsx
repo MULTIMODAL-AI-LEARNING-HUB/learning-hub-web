@@ -1,7 +1,30 @@
-import { describe, it, expect } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { Flashcards } from '../study/Flashcards'
+
+vi.mock('../../services/api', () => ({
+  studyApi: {
+    generateFlashcards: vi.fn(),
+    getFlashcard: vi.fn(),
+  },
+}))
+
+vi.mock('../../components/ui/Toast', () => ({
+  useToast: () => vi.fn(),
+}))
+
+vi.mock('../../hooks/useJobPolling', () => ({
+  useJobPolling: () => ({
+    loading: false,
+    progress: 0,
+    start: vi.fn(),
+    stop: vi.fn(),
+    setProgress: vi.fn(),
+    status: 'pending',
+    data: null
+  })
+}))
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <BrowserRouter>{children}</BrowserRouter>
@@ -10,38 +33,19 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 describe('Flashcards', () => {
   it('renders flashcards page', () => {
     render(<Flashcards />, { wrapper })
-    expect(screen.getByText(/Flashcards/)).toBeInTheDocument()
-    expect(screen.getByText('Study with interactive flashcards')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Flashcards' })).toBeInTheDocument()
+    expect(screen.getByText(/spaced repetition learning/i)).toBeInTheDocument()
   })
 
-  it('shows first card', () => {
+  it('renders configuration form', () => {
     render(<Flashcards />, { wrapper })
-    expect(screen.getByText('What is Machine Learning?')).toBeInTheDocument()
-    expect(screen.getByText('Question')).toBeInTheDocument()
+    expect(screen.getByText('Select document')).toBeInTheDocument()
+    expect(screen.getByText('Card Set Name')).toBeInTheDocument()
+    expect(screen.getByText('Number of cards')).toBeInTheDocument()
   })
 
-  it('flips card on click', () => {
+  it('shows generate button', () => {
     render(<Flashcards />, { wrapper })
-    fireEvent.click(screen.getByText('What is Machine Learning?'))
-    expect(screen.getByText('Answer')).toBeInTheDocument()
-    expect(screen.getByText(/A subset of AI/)).toBeInTheDocument()
-  })
-
-  it('marks card as known', () => {
-    render(<Flashcards />, { wrapper })
-    fireEvent.click(screen.getByText(/Know it/))
-    expect(screen.getByText(/Known: 1/)).toBeInTheDocument()
-  })
-
-  it('marks card as unknown', () => {
-    render(<Flashcards />, { wrapper })
-    fireEvent.click(screen.getByText(/Don't know/))
-    expect(screen.getByText(/Unknown: 1/)).toBeInTheDocument()
-  })
-
-  it('shuffles cards', () => {
-    render(<Flashcards />, { wrapper })
-    fireEvent.click(screen.getByText(/Shuffle/))
-    expect(screen.getByText(/Card 1\/8/)).toBeInTheDocument()
+    expect(screen.getByText('Generate Flashcards')).toBeInTheDocument()
   })
 })

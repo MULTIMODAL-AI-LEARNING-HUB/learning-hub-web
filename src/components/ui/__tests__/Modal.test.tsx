@@ -29,9 +29,9 @@ describe('Modal', () => {
         <p>Content</p>
       </Modal>
     )
-    const closeBtn = screen.getAllByRole('button').find((b) => b.textContent?.trim() === '✕')
+    const closeBtn = screen.getByRole('button', { name: /close/i })
     expect(closeBtn).toBeTruthy()
-    fireEvent.click(closeBtn!)
+    fireEvent.click(closeBtn)
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 

@@ -20,6 +20,7 @@ vi.mock('../../services/api', () => ({
   documentsApi: {
     list: vi.fn().mockResolvedValue({ data: { items: [], total: 0 } }),
     upload: vi.fn(),
+    delete: vi.fn().mockResolvedValue({}),
   },
   chatApi: {
     createSession: vi.fn().mockResolvedValue({ data: { id: 'new-session', title: 'New chat', document_id: null, created_at: '', updated_at: '' } }),
