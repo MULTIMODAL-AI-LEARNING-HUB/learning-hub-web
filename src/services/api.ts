@@ -43,7 +43,9 @@ api.interceptors.response.use(
       try {
         const { useAppStore } = await import('../stores/appStore')
         useAppStore.getState().toasts.add({ type: 'error', title: 'Rate Limited', message: msg })
-      } catch {}
+      } catch (err) {
+        console.warn('Failed to display rate limit toast:', err)
+      }
     }
     return Promise.reject(error)
   }

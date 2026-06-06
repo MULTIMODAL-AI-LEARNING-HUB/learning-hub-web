@@ -19,6 +19,16 @@ import {
 } from '../data/mockData'
 import { authApi, documentsApi, chatApi } from '../services/api'
 
+interface AxiosErrorLike {
+  response?: {
+    data?: {
+      message?: string
+      detail?: string
+    }
+  }
+  message?: string
+}
+
 // Define Store Interfaces
 interface AuthSlice {
   auth: {
@@ -133,9 +143,10 @@ const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never]], [],
             }
           }
         }), false, 'auth/login')
-      } catch (err: any) {
-        const msg = err.response?.data?.message || err.message || 'Login failed'
-        throw new Error(msg)
+      } catch (err) {
+        const apiErr = err as AxiosErrorLike
+        const msg = apiErr.response?.data?.message || apiErr.message || 'Login failed'
+        throw new Error(msg, { cause: err })
       }
     },
     register: async (email, password, fullName) => {
@@ -163,9 +174,10 @@ const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never]], [],
             }
           }
         }), false, 'auth/register')
-      } catch (err: any) {
-        const msg = err.response?.data?.message || err.message || 'Registration failed'
-        throw new Error(msg)
+      } catch (err) {
+        const apiErr = err as AxiosErrorLike
+        const msg = apiErr.response?.data?.message || apiErr.message || 'Registration failed'
+        throw new Error(msg, { cause: err })
       }
     },
     logout: () => {
@@ -260,7 +272,7 @@ const createDocumentsSlice: StateCreator<AppState, [['zustand/devtools', never]]
     uploadDocument: async (file: File) => {
       try {
         const res = await documentsApi.upload(file)
-        const data = res.data as Record<string, any>
+        const data = res.data as { id: string; file_name: string; file_type?: string }
         const newDoc: DocumentItem = {
           id: data.id,
           name: data.file_name,
@@ -271,8 +283,9 @@ const createDocumentsSlice: StateCreator<AppState, [['zustand/devtools', never]]
         }
         get().documents.add(newDoc)
         get().toasts.add({ type: 'success', title: 'Upload started', message: file.name })
-      } catch (err: any) {
-        const msg = err.response?.data?.detail || err.message || file.name
+      } catch (err) {
+        const apiErr = err as AxiosErrorLike
+        const msg = apiErr.response?.data?.detail || apiErr.message || file.name
         get().toasts.add({ type: 'error', title: 'Upload failed', message: msg })
         throw err
       }

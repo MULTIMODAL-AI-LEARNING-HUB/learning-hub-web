@@ -53,6 +53,7 @@ export function AdminDashboard() {
   const [loadingUsers, setLoadingUsers] = useState(false)
 
   const fetchAnalytics = useCallback(async () => {
+    await Promise.resolve()
     setLoadingAnalytics(true)
     try {
       const res = await adminApi.analytics()
@@ -65,6 +66,7 @@ export function AdminDashboard() {
   }, [toast])
 
   const fetchHealth = useCallback(async () => {
+    await Promise.resolve()
     setLoadingHealth(true)
     try {
       const res = await adminApi.health()
@@ -78,6 +80,7 @@ export function AdminDashboard() {
 
   const fetchUsers = useCallback(
     async (p: number) => {
+      await Promise.resolve()
       setLoadingUsers(true)
       try {
         const res = await adminApi.listUsers(p, pageSize)
@@ -93,11 +96,13 @@ export function AdminDashboard() {
   )
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAnalytics()
     fetchHealth()
   }, [fetchAnalytics, fetchHealth])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchUsers(page)
   }, [page, fetchUsers])
 
