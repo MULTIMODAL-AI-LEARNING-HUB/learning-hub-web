@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Sparkles, ArrowLeft, Mail, Send, CheckCircle2 } from 'lucide-react'
 import { useAppStore } from '../stores/appStore'
 import { Button } from '../components/ui/Button'
@@ -7,7 +7,6 @@ import { Card } from '../components/ui/Card'
 import { AuthInput } from '../components/auth/AuthInput'
 
 export function ForgotPasswordPage() {
-  const navigate = useNavigate()
   const forgotPassword = useAppStore((s) => s.auth.forgotPassword)
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
