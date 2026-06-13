@@ -39,6 +39,8 @@ interface AuthSlice {
     register: (email: string, password: string, fullName?: string) => Promise<void>
     logout: () => void
     loadUser: () => Promise<void>
+    forgotPassword: (email: string) => Promise<void>
+    resetPassword: (token: string, password: string) => Promise<void>
   }
 }
 
@@ -209,6 +211,24 @@ const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never]], [],
         }), false, 'auth/loadUser')
       } catch {
         get().auth.logout()
+      }
+    },
+    forgotPassword: async (email) => {
+      try {
+        await authApi.forgotPassword(email)
+      } catch (err) {
+        const apiErr = err as AxiosErrorLike
+        const msg = apiErr.response?.data?.message || apiErr.message || 'Failed to send reset email'
+        throw new Error(msg, { cause: err })
+      }
+    },
+    resetPassword: async (token, password) => {
+      try {
+        await authApi.resetPassword(token, password)
+      } catch (err) {
+        const apiErr = err as AxiosErrorLike
+        const msg = apiErr.response?.data?.message || apiErr.message || 'Failed to reset password'
+        throw new Error(msg, { cause: err })
       }
     }
   }

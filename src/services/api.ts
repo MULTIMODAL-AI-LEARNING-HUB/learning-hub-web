@@ -122,6 +122,10 @@ export const authApi = {
   refresh: (refresh_token: string) =>
     api.post<{ access_token: string; refresh_token: string }>('/auth/refresh', { refresh_token }),
   me: () => api.get<AuthUser>('/auth/me'),
+  forgotPassword: (email: string) =>
+    api.post<{ message: string }>('/auth/forgot-password', { email }),
+  resetPassword: (token: string, password: string) =>
+    api.post<{ message: string }>('/auth/reset-password', { token, password }),
 }
 
 export const documentsApi = {

@@ -60,6 +60,7 @@ function AuthShell({ variant }: { variant: Variant }) {
   const login = useAppStore((s) => s.auth.login)
   const register = useAppStore((s) => s.auth.register)
 
+
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -192,6 +193,7 @@ function AuthShell({ variant }: { variant: Variant }) {
                   </label>
                   <button
                     type="button"
+                    onClick={() => navigate('/forgot-password')}
                     className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
                   >
                     Forgot password?
