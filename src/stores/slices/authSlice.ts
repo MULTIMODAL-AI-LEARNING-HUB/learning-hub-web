@@ -1,10 +1,10 @@
 import type { StateCreator } from 'zustand'
 import type { AppState, AuthSlice, AxiosErrorLike } from '../types'
-import { authApi } from '../../services/api'
+import { authApi, type AuthUser } from '../../services/api'
 import { userProfile } from '../../data/mockData'
 
 // Helper to map API User structure to frontend UserProfile structure
-export const mapApiUser = (user: any) => ({
+export const mapApiUser = (user: AuthUser) => ({
   name: user.full_name || user.email,
   role: user.role,
   initials: (user.full_name || user.email)

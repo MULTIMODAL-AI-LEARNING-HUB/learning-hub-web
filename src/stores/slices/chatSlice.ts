@@ -2,7 +2,7 @@ import type { StateCreator } from 'zustand'
 import type { AppState, ChatSlice } from '../types'
 import type { ChatSession, Message } from '../../types'
 import { chatSessions as initSessions } from '../../data/mockData'
-import { chatApi } from '../../services/api'
+import { chatApi, type Citation as ApiCitation } from '../../services/api'
 
 export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never]], [], ChatSlice> = (set, get) => ({
   chat: {
@@ -48,7 +48,7 @@ export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never
           role: 'assistant',
           content: data.answer,
           timestamp: ts,
-          citations: data.citations?.map((c: any, i: number) => ({
+          citations: data.citations?.map((c: ApiCitation, i: number) => ({
             id: `cite-${i}`,
             label: `[${i + 1}] Page ${c.page_number || '?'}`
           })) || []
