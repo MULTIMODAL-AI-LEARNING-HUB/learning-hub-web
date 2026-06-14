@@ -9,9 +9,10 @@ import { QuizGenerator } from '../features/study/QuizGenerator'
 import { Flashcards } from '../features/study/Flashcards'
 import { EssayGrading } from '../features/study/EssayGrading'
 import { AdminDashboard } from '../features/admin/AdminDashboard'
+import { HomePage } from '../features/dashboard/HomePage'
 
 export const router = createBrowserRouter([
-  { path: '/', element: <Navigate to="/app/documents" replace /> },
+  { path: '/', element: <Navigate to="/app/home" replace /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
@@ -20,7 +21,8 @@ export const router = createBrowserRouter([
     path: '/app',
     element: <AppShell />,
     children: [
-      { index: true, element: <Navigate to="/app/documents" replace /> },
+      { index: true, element: <Navigate to="/app/home" replace /> },
+      { path: 'home', element: <HomePage /> },
       { path: 'documents', element: <DocumentHub /> },
       { path: 'chat', element: <ChatPanel /> },
       { path: 'quiz', element: <QuizGenerator /> },

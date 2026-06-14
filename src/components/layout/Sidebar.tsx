@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
+  Home,
   FileText,
   MessageSquare,
   BookOpen,
@@ -23,6 +24,7 @@ import { Tooltip } from '../ui/Tooltip'
 import { cn } from '../../utils/cn'
 
 const navItems = [
+  { id: 'home', label: 'Home', icon: Home, path: '/app/home' },
   { id: 'documents', label: 'Documents', icon: FileText, path: '/app/documents' },
   { id: 'chat', label: 'AI Chat', icon: MessageSquare, path: '/app/chat' },
   { id: 'quiz', label: 'Quiz', icon: BookOpen, path: '/app/quiz' },
@@ -43,6 +45,7 @@ export function Sidebar() {
   const selectSession = useAppStore((s) => s.chat.selectSession)
   const addSession = useAppStore((s) => s.chat.addSession)
   const openUpload = useAppStore((s) => s.ui.openUploadModal)
+  const toggleSidebar = useAppStore((s) => s.ui.toggleSidebar)
   const toast = useToast()
 
   const showAdmin = user?.role === 'admin'
@@ -71,7 +74,7 @@ export function Sidebar() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => useAppStore.getState().ui.toggleSidebar()}
+            onClick={toggleSidebar}
             className="hidden lg:flex h-7 w-7"
             aria-label="Collapse sidebar"
           >
@@ -235,12 +238,13 @@ export function Sidebar() {
 }
 
 export function SidebarCollapseButton() {
+  const toggleSidebar = useAppStore((s) => s.ui.toggleSidebar)
   return (
     <Tooltip content="Open sidebar" side="right">
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => useAppStore.getState().ui.toggleSidebar()}
+        onClick={toggleSidebar}
         className="h-7 w-7"
         aria-label="Open sidebar"
       >

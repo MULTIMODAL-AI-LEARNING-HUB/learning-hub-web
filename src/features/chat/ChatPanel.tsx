@@ -14,6 +14,7 @@ export function ChatPanel() {
   const activeSessionId = useAppStore((s) => s.chat.activeSessionId)
   const sendMessage = useAppStore((s) => s.chat.sendMessage)
   const docs = useAppStore((s) => s.documents.items)
+  const userInitials = useAppStore((s) => s.auth.user.initials)
 
   const [input, setInput] = useState('')
   const [selectedDoc, setSelectedDoc] = useState<string>('')
@@ -135,7 +136,7 @@ export function ChatPanel() {
                 </div>
                 {msg.role === 'user' && (
                   <Avatar
-                    fallback={useAppStore.getState().auth.user.initials}
+                    fallback={userInitials}
                     size="sm"
                     className="h-7 w-7"
                   />

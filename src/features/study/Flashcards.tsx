@@ -12,6 +12,7 @@ import { EmptyState } from '../../components/ui/EmptyState'
 import { useToast } from '../../components/ui/useToast'
 import { useJobPolling } from '../../hooks/useJobPolling'
 import { studyApi } from '../../services/api'
+import { StudyLoadingState } from './StudyLoadingState'
 
 interface CardItem {
   id: string
@@ -196,26 +197,13 @@ export function Flashcards() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-2xl">
-        <PageHeader
-          subtitle="Study Tools"
-          title="Generating Flashcards"
-          description="Our AI is creating spaced repetition cards for you."
-          icon={<Sparkles />}
-        />
-        <Card className="p-6">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium text-foreground">Creating cards</span>
-              <span className="text-muted-foreground">{Math.round(progress)}%</span>
-            </div>
-            <Progress value={progress} indeterminate={progress < 5} />
-            <p className="text-xs text-muted-foreground text-center pt-2">
-              Usually takes 30-90 seconds
-            </p>
-          </div>
-        </Card>
-      </div>
+      <StudyLoadingState
+        title="Generating Flashcards"
+        description="Our AI is creating spaced repetition cards for you."
+        progress={progress}
+        statusText="Creating cards"
+        durationText="Usually takes 30-90 seconds"
+      />
     )
   }
 

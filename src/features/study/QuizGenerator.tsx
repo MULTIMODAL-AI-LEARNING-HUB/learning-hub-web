@@ -12,6 +12,7 @@ import { useToast } from '../../components/ui/useToast'
 import { useJobPolling } from '../../hooks/useJobPolling'
 import { studyApi } from '../../services/api'
 import { cn } from '../../utils/cn'
+import { StudyLoadingState } from './StudyLoadingState'
 
 interface QuizQ {
   id: string
@@ -168,26 +169,13 @@ export function QuizGenerator() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-2xl">
-        <PageHeader
-          subtitle="Study Tools"
-          title="Generating Quiz"
-          description="Our AI is crafting personalized questions from your document."
-          icon={<Sparkles />}
-        />
-        <Card className="p-6">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium text-foreground">Generating questions</span>
-              <span className="text-muted-foreground">{Math.round(progress)}%</span>
-            </div>
-            <Progress value={progress} indeterminate={progress < 5} />
-            <p className="text-xs text-muted-foreground text-center pt-2">
-              This usually takes 20-60 seconds
-            </p>
-          </div>
-        </Card>
-      </div>
+      <StudyLoadingState
+        title="Generating Quiz"
+        description="Our AI is crafting personalized questions from your document."
+        progress={progress}
+        statusText="Generating questions"
+        durationText="This usually takes 20-60 seconds"
+      />
     )
   }
 
