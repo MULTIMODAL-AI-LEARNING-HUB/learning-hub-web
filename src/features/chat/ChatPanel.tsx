@@ -115,7 +115,7 @@ export function ChatPanel() {
                 )}
                 <div
                   className={cn(
-                    'max-w-[80%] rounded-2xl px-4 py-2.5 text-sm',
+                    'max-w-[90%] rounded-2xl px-3 py-2 text-sm sm:max-w-[80%] sm:px-4 sm:py-2.5',
                     msg.role === 'user'
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-muted text-foreground border border-border'
@@ -148,8 +148,8 @@ export function ChatPanel() {
         )}
       </div>
 
-      <div className="border-t border-border p-3 bg-muted/20">
-        <div className="flex items-end gap-2 rounded-xl border border-input bg-surface-elevated p-2 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition">
+      <div className="border-t border-border p-2 bg-muted/20 sm:p-3">
+        <div className="flex items-end gap-1.5 rounded-xl border border-input bg-surface-elevated p-1.5 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition sm:gap-2 sm:p-2">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -170,7 +170,7 @@ export function ChatPanel() {
         </div>
         <div className="mt-1.5 flex items-center justify-between px-1 text-2xs text-muted-foreground">
           <span className="tabular-nums">{input.length} / 500</span>
-          <span>Enter to send · Shift+Enter for newline</span>
+          <span className="hidden sm:inline">Enter to send · Shift+Enter for newline</span>
         </div>
       </div>
     </Card>

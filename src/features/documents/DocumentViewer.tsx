@@ -23,33 +23,33 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
 
   return (
     <Card className="flex h-full flex-col overflow-hidden">
-      <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-lg">
+      <div className="flex items-start justify-between gap-2 border-b border-border px-3 py-2 sm:items-center sm:gap-3 sm:px-4 sm:py-3">
+        <div className="flex items-center gap-2 min-w-0 sm:gap-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-base sm:h-9 sm:w-9 sm:text-lg">
             {fileIconEmoji(doc.type)}
           </div>
           <div className="min-w-0">
             <p className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
               {doc.type.toUpperCase()} Viewer
             </p>
-            <p className="text-sm font-semibold text-foreground truncate">{doc.name}</p>
+            <p className="text-xs font-semibold text-foreground truncate sm:text-sm">{doc.name}</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1 shrink-0 sm:gap-2">
           {doc.type === 'pdf' && totalPages > 1 && (
-            <div className="flex items-center gap-1 rounded-lg border border-input bg-surface-elevated p-0.5">
+            <div className="flex items-center gap-0.5 rounded-lg border border-input bg-surface-elevated p-0.5">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage <= 1}
-                className="h-7 w-7"
+                className="h-6 w-6 sm:h-7 sm:w-7"
                 aria-label="Previous page"
               >
-                <ChevronLeft className="h-3.5 w-3.5" />
+                <ChevronLeft className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               </Button>
-              <div className="px-2 text-xs font-medium text-foreground tabular-nums min-w-12 text-center">
+              <div className="px-1 text-2xs font-medium text-foreground tabular-nums min-w-8 text-center sm:px-2 sm:text-xs sm:min-w-12">
                 {currentPage} / {totalPages}
               </div>
               <Button
@@ -57,40 +57,40 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
                 size="icon"
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage >= totalPages}
-                className="h-7 w-7"
+                className="h-6 w-6 sm:h-7 sm:w-7"
                 aria-label="Next page"
               >
-                <ChevronRight className="h-3.5 w-3.5" />
+                <ChevronRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               </Button>
             </div>
           )}
 
-          <div className="flex items-center gap-1 rounded-lg border border-input bg-surface-elevated p-0.5">
+          <div className="flex items-center gap-0.5 rounded-lg border border-input bg-surface-elevated p-0.5">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setZoom((z) => Math.max(50, z - 10))}
-              className="h-7 w-7"
+              className="h-6 w-6 sm:h-7 sm:w-7"
               aria-label="Zoom out"
             >
-              <ZoomOut className="h-3.5 w-3.5" />
+              <ZoomOut className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
             </Button>
-            <div className="px-2 text-xs font-medium text-foreground tabular-nums min-w-12 text-center">
+            <div className="px-1 text-2xs font-medium text-foreground tabular-nums min-w-8 text-center sm:px-2 sm:text-xs sm:min-w-12">
               {zoom}%
             </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setZoom((z) => Math.min(200, z + 10))}
-              className="h-7 w-7"
+              className="h-6 w-6 sm:h-7 sm:w-7"
               aria-label="Zoom in"
             >
-              <ZoomIn className="h-3.5 w-3.5" />
+              <ZoomIn className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
             </Button>
           </div>
 
-          <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Fullscreen">
-            <Maximize2 className="h-4 w-4" />
+          <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" aria-label="Fullscreen">
+            <Maximize2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </Button>
         </div>
       </div>
@@ -115,9 +115,9 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
         )}
 
         {doc.status === 'ready' && (
-          <div className="p-6">
+          <div className="p-3 sm:p-6">
             <div
-              className="mx-auto max-w-3xl rounded-xl border border-border bg-surface-elevated p-10 shadow-soft transition-transform origin-top"
+              className="mx-auto max-w-3xl rounded-xl border border-border bg-surface-elevated p-4 shadow-soft transition-transform origin-top sm:p-10"
               style={{ transform: `scale(${zoom / 100})` }}
             >
               <div className="space-y-4">

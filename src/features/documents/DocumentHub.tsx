@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Upload, FileText, LayoutGrid, List, ArrowUpDown, Search } from 'lucide-react'
+import { Upload, FileText, LayoutGrid, List, ArrowUpDown, Search, ArrowLeft } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { DocumentViewer } from './DocumentViewer'
 import { DocumentCard } from './DocumentCard'
@@ -21,6 +21,14 @@ export function DocumentHub() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [sortBy, setSortBy] = useState<'name' | 'size' | 'status'>('name')
   const [searchQuery, setSearchQuery] = useState('')
+  const [showMobileViewer, setShowMobileViewer] = useState(false)
+
+  const handleSelectDoc = (id: string) => {
+    selectDoc(id)
+    if (window.innerWidth < 1024) {
+      setShowMobileViewer(true)
+    }
+  }
 
   useDocumentStatus()
 
@@ -105,7 +113,7 @@ export function DocumentHub() {
                     <span>Sort by:</span>
                     <select
                       value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as any)}
+                      onChange={(e) => setSortBy(e.target.value as 'name' | 'size' | 'status')}
                       className="bg-transparent font-semibold text-foreground outline-none cursor-pointer hover:text-primary transition"
                     >
                       <option value="name">Name</option>
@@ -155,7 +163,7 @@ export function DocumentHub() {
                       key={doc.id}
                       doc={doc}
                       isSelected={selectedId === doc.id}
-                      onSelect={() => selectDoc(doc.id)}
+                      onSelect={() => handleSelectDoc(doc.id)}
                       onRemove={removeDoc}
                       onRetry={retryDoc}
                     />
@@ -168,7 +176,7 @@ export function DocumentHub() {
                       key={doc.id}
                       doc={doc}
                       isSelected={selectedId === doc.id}
-                      onSelect={() => selectDoc(doc.id)}
+                      onSelect={() => handleSelectDoc(doc.id)}
                       onRemove={removeDoc}
                       onRetry={retryDoc}
                       variant="compact"
@@ -194,6 +202,31 @@ export function DocumentHub() {
           )}
         </div>
       </div>
+
+      {showMobileViewer && selectedDoc && (
+        <div className="fixed inset-0 z-50 animate-fade-in lg:hidden">
+          <div className="flex h-full flex-col bg-background">
+            <div className="flex items-center gap-3 border-b border-border px-3 py-3 sm:px-4">
+              <button
+                onClick={() => setShowMobileViewer(false)}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg hover:bg-muted transition-colors"
+                aria-label="Go back"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+              <div className="min-w-0 flex-1">
+                <p className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  DOCUMENT VIEWER
+                </p>
+                <p className="text-sm font-semibold text-foreground truncate">{selectedDoc.name}</p>
+              </div>
+            </div>
+            <div className="flex-1 min-h-0">
+              <DocumentViewer doc={selectedDoc} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

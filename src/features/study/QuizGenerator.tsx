@@ -127,7 +127,7 @@ export function QuizGenerator() {
             description="Upload and process a document first to generate a quiz from it."
           />
         ) : (
-          <Card className="p-6">
+          <Card className="p-4 sm:p-6">
             <div className="grid gap-4">
               <FormField label="Select document" required>
                 <Select
@@ -194,7 +194,7 @@ export function QuizGenerator() {
         }
       />
 
-      <Card className="p-6">
+      <Card className="p-4 sm:p-6">
         <div className="flex items-center justify-between text-sm">
           <span className="font-medium text-muted-foreground">Progress</span>
           <span className="font-semibold text-foreground tabular-nums">
@@ -204,7 +204,7 @@ export function QuizGenerator() {
         <Progress value={((currentQ + 1) / questions.length) * 100} className="mt-2" />
 
         <div className="mt-6">
-          <h3 className="font-display text-lg font-semibold text-foreground leading-relaxed">
+          <h3 className="font-display text-base font-semibold text-foreground leading-relaxed sm:text-lg break-words">
             {q.question}
           </h3>
           <div className="mt-4 grid gap-2">
@@ -248,7 +248,7 @@ export function QuizGenerator() {
                       String.fromCharCode(65 + i)
                     )}
                   </span>
-                  <span className="flex-1">{opt}</span>
+                  <span className="flex-1 break-words">{opt}</span>
                 </button>
               )
             })}

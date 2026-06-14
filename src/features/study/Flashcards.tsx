@@ -240,7 +240,7 @@ export function Flashcards() {
         style={{ perspective: '1200px' }}
       >
         <div
-          className="relative h-72 w-full transition-transform duration-500"
+          className="relative h-56 w-full transition-transform duration-500 sm:h-72"
           style={{
             transformStyle: 'preserve-3d',
             transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
@@ -270,7 +270,7 @@ export function Flashcards() {
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-3 gap-3">
+      <div className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
         <Button
           onClick={handleDontKnow}
           variant="danger"
