@@ -1,6 +1,11 @@
 import axios from 'axios'
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
+let API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
+
+// Auto-append /api/v1 if the VITE_API_URL is an absolute domain but misses the prefix
+if (API_BASE.startsWith('http') && !API_BASE.includes('/api/v1')) {
+  API_BASE = API_BASE.replace(/\/+$/, '') + '/api/v1'
+}
 
 const api = axios.create({
   baseURL: API_BASE,
