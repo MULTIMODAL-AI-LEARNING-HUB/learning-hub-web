@@ -43,7 +43,7 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
         }), false, 'auth/login')
       } catch (err) {
         const apiErr = err as AxiosErrorLike
-        const msg = apiErr.response?.data?.message || apiErr.message || 'Login failed'
+        const msg = apiErr.response?.data?.detail || apiErr.response?.data?.message || apiErr.message || 'Login failed'
         throw new Error(msg, { cause: err })
       }
     },
@@ -64,7 +64,7 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
         }), false, 'auth/register')
       } catch (err) {
         const apiErr = err as AxiosErrorLike
-        const msg = apiErr.response?.data?.message || apiErr.message || 'Registration failed'
+        const msg = apiErr.response?.data?.detail || apiErr.response?.data?.message || apiErr.message || 'Registration failed'
         throw new Error(msg, { cause: err })
       }
     },
@@ -94,7 +94,7 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
         await authApi.forgotPassword(email)
       } catch (err) {
         const apiErr = err as AxiosErrorLike
-        const msg = apiErr.response?.data?.message || apiErr.message || 'Failed to send reset email'
+        const msg = apiErr.response?.data?.detail || apiErr.response?.data?.message || apiErr.message || 'Failed to send reset email'
         throw new Error(msg, { cause: err })
       }
     },
@@ -103,7 +103,7 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
         await authApi.resetPassword(token, password)
       } catch (err) {
         const apiErr = err as AxiosErrorLike
-        const msg = apiErr.response?.data?.message || apiErr.message || 'Failed to reset password'
+        const msg = apiErr.response?.data?.detail || apiErr.response?.data?.message || apiErr.message || 'Failed to reset password'
         throw new Error(msg, { cause: err })
       }
     }

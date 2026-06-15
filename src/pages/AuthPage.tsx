@@ -98,7 +98,10 @@ function AuthShell({ variant }: { variant: Variant }) {
       navigate('/app/documents')
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Something went wrong'
-      setErrors({ email: msg })
+      const isNetwork = !navigator.onLine || msg.toLowerCase().includes('network')
+      setErrors(isNetwork
+        ? { form: 'Không thể kết nối đến server. Vui lòng thử lại sau.' }
+        : { email: msg })
     } finally {
       setLoading(false)
     }
@@ -134,8 +137,13 @@ function AuthShell({ variant }: { variant: Variant }) {
           </div>
 
           {/* Form Card */}
-          <Card className="border-border/50 bg-surface-elevated/80 p-6 backdrop-blur-xl sm:p-8">
+            <Card className="border-border/50 bg-surface-elevated/80 p-6 backdrop-blur-xl sm:p-8">
             <form onSubmit={handleSubmit} className="grid gap-5">
+              {errors.form && (
+                <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive animate-shake-in" role="alert">
+                  {errors.form}
+                </div>
+              )}
               {variant === 'register' && (
                 <AuthInput
                   label="Full name"
