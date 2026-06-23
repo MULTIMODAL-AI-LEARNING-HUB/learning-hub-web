@@ -73,3 +73,13 @@ export default defineConfig([
   },
 ])
 ```
+
+## Token Refresh Queue & CI Lint Fix
+
+In [src/services/api.ts](file:///d:/Laptrinh/Project_Practice/MULTIMODAL%20AI%20LEARNING%20HUB/learning-hub-web/src/services/api.ts), a token refresh race condition mechanism queue is implemented using `failedQueue` and `processQueue`. 
+
+To prevent `@typescript-eslint/no-explicit-any` validation errors in the GitHub CI pipeline, the error arguments inside `failedQueue` and `processQueue` are strictly typed as `unknown` instead of `any`:
+
+- `failedQueue` reject handler: `reject: (error: unknown) => void`
+- `processQueue` handler: `const processQueue = (error: unknown, token: string | null = null)`
+
