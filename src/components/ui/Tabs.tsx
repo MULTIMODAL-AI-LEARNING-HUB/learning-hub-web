@@ -4,23 +4,37 @@ import { TabsContext, useTabs } from './tabs-context'
 
 interface TabsProps {
   value?: string
+  activeTab?: string
   defaultValue?: string
   onChange?: (value: string) => void
-  children: ReactNode
+  children?: ReactNode
   className?: string
+  tabs?: { id: string; label: string }[]
 }
 
-function TabsRoot({ value, defaultValue, onChange, children, className }: TabsProps) {
+function TabsRoot({ value, activeTab, defaultValue, onChange, children, className, tabs }: TabsProps) {
   const [internalValue, setInternalValue] = useState(defaultValue ?? '')
-  const currentValue = value ?? internalValue
+  const currentValue = value ?? activeTab ?? internalValue
   const handleChange = (v: string) => {
-    if (value === undefined) setInternalValue(v)
+    if (value === undefined && activeTab === undefined) setInternalValue(v)
     onChange?.(v)
   }
 
   return (
     <TabsContext.Provider value={{ value: currentValue, onChange: handleChange }}>
-      <div className={className}>{children}</div>
+      <div className={className}>
+        {tabs ? (
+          <>
+            <TabsListImpl>
+              {tabs.map(tab => (
+                <TabsTriggerImpl key={tab.id} value={tab.id}>
+                  {tab.label}
+                </TabsTriggerImpl>
+              ))}
+            </TabsListImpl>
+          </>
+        ) : children}
+      </div>
     </TabsContext.Provider>
   )
 }

@@ -202,7 +202,7 @@ export function CourseLearning() {
               <h2 className="text-xl font-semibold">{currentMaterial.title}</h2>
               <div className="flex items-center gap-2">
                 {progress.get(currentMaterial.id)?.completed ? (
-                  <Badge variant="success">Đã hoàn thành</Badge>
+                  <Badge variant="success" label="Đã hoàn thành" />
                 ) : (
                   <Button onClick={markComplete} disabled={updating}>
                     {updating ? 'Đang lưu...' : 'Đánh dấu hoàn thành'}
@@ -286,12 +286,12 @@ export function CourseLearning() {
                 Hỏi đáp, tóm tắt, hoặc tạo quiz từ nội dung bài học
               </p>
               <div className="flex gap-2">
-                <Button as={Link} to={`/app/chat?course_id=${id}&material_id=${currentMaterialId}`}>
-                  Mở Chat AI
-                </Button>
-                <Button as={Link} to={`/app/courses/${id}/quiz`} variant="outline">
-                  Làm Quiz
-                </Button>
+                <Link to={`/app/chat?course_id=${id}&material_id=${currentMaterialId}`}>
+                  <Button>Mở Chat AI</Button>
+                </Link>
+                <Link to={`/app/courses/${id}/quiz`}>
+                  <Button variant="outline">Làm Quiz</Button>
+                </Link>
               </div>
             </Card>
           </div>

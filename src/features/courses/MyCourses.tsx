@@ -57,7 +57,7 @@ export function MyCourses() {
             <Link to={`/app/courses/${enrollment.course_id}`} className="font-semibold hover:text-indigo-600 line-clamp-1">
               {enrollment.course?.title || 'Khóa học'}
             </Link>
-            {enrollment.status === 'completed' && <Badge variant="success">Hoàn thành</Badge>}
+            {enrollment.status === 'completed' && <Badge variant="success" label="Hoàn thành" />}
           </div>
           <p className="text-sm text-gray-600 mb-2 line-clamp-1">
             {enrollment.course?.description}
@@ -77,22 +77,15 @@ export function MyCourses() {
         </div>
       </div>
       <div className="flex gap-2 mt-3 justify-end">
-        <Button
-          variant="outline"
-          size="sm"
-          as={Link}
-          to={`/app/courses/${enrollment.course_id}`}
-        >
-          Xem khóa học
-        </Button>
+        <Link to={`/app/courses/${enrollment.course_id}`}>
+          <Button variant="outline" size="sm">Xem khóa học</Button>
+        </Link>
         {(enrollment.status === 'active' || enrollment.progress_percent === 0) && (
-          <Button
-            size="sm"
-            as={Link}
-            to={`/app/courses/${enrollment.course_id}/learn`}
-          >
-            {enrollment.progress_percent === 0 ? 'Bắt đầu học' : 'Tiếp tục'}
-          </Button>
+          <Link to={`/app/courses/${enrollment.course_id}/learn`}>
+            <Button size="sm">
+              {enrollment.progress_percent === 0 ? 'Bắt đầu học' : 'Tiếp tục'}
+            </Button>
+          </Link>
         )}
       </div>
     </Card>
@@ -137,7 +130,9 @@ export function MyCourses() {
                 <span className="text-4xl mb-4 block">📚</span>
                 <h3 className="text-lg font-medium mb-2">Chưa có khóa học nào</h3>
                 <p className="text-gray-600 mb-4">Đăng ký khóa học để bắt đầu học tập</p>
-                <Button as={Link} to="/app/courses">Khám phá khóa học</Button>
+                <Link to="/app/courses">
+                  <Button>Khám phá khóa học</Button>
+                </Link>
               </div>
             ) : (
               activeEnrollments.map((enrollment) => (

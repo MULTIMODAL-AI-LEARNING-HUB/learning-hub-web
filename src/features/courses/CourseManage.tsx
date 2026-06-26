@@ -124,9 +124,7 @@ export function CourseManage() {
               <div className="space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="font-semibold line-clamp-1">{course.title}</h3>
-                  <Badge variant={course.status === 'published' ? 'success' : 'warning'}>
-                    {course.status === 'published' ? 'Đã xuất bản' : course.status}
-                  </Badge>
+                  <Badge variant={course.status === 'published' ? 'success' : 'warning'} label={course.status === 'published' ? 'Đã xuất bản' : course.status} />
                 </div>
                 <p className="text-sm text-gray-600 line-clamp-2">{course.description}</p>
                 <div className="flex items-center justify-between text-sm pt-2 border-t">
@@ -138,24 +136,12 @@ export function CourseManage() {
                   </span>
                 </div>
                 <div className="flex gap-2 pt-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1"
-                    as={Link}
-                    to={`/app/courses/${course.id}`}
-                  >
-                    Xem
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1"
-                    as={Link}
-                    to={`/app/courses/${course.id}/edit`}
-                  >
-                    Sửa
-                  </Button>
+                  <Link to={`/app/courses/${course.id}`} className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full">Xem</Button>
+                  </Link>
+                  <Link to={`/app/courses/${course.id}/edit`} className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full">Sửa</Button>
+                  </Link>
                 </div>
               </div>
             </Card>
@@ -173,7 +159,7 @@ export function CourseManage() {
             <label className="block text-sm font-medium mb-1">Tiêu đề khóa học</label>
             <Input
               value={newCourse.title}
-              onChange={(e) => setNewCourse(prev => ({ ...prev, title: e.target.value }))}
+              onChange={(value) => setNewCourse(prev => ({ ...prev, title: value }))}
               placeholder="Nhập tiêu đề khóa học"
             />
           </div>
@@ -191,7 +177,7 @@ export function CourseManage() {
             <Input
               type="number"
               value={newCourse.price}
-              onChange={(e) => setNewCourse(prev => ({ ...prev, price: Number(e.target.value) }))}
+              onChange={(value) => setNewCourse(prev => ({ ...prev, price: Number(value) }))}
               min={0}
             />
           </div>

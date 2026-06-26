@@ -123,11 +123,9 @@ export function CourseDetail() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               {course.category && (
-                <Badge variant="secondary">{course.category.name}</Badge>
+                <Badge variant="primary" label={course.category.name} />
               )}
-              <Badge variant={course.status === 'published' ? 'success' : 'warning'}>
-                {course.status === 'published' ? 'Đang mở' : course.status}
-              </Badge>
+              <Badge variant={course.status === 'published' ? 'success' : 'warning'} label={course.status === 'published' ? 'Đang mở' : course.status} />
             </div>
             <h1 className="text-2xl md:text-3xl font-bold mb-4">{course.title}</h1>
             <div className="flex items-center gap-4 mb-6">
@@ -160,16 +158,16 @@ export function CourseDetail() {
                     <div className="flex items-center gap-2">
                       <span className="text-lg">{getMaterialIcon(material.material_type)}</span>
                       <span className="font-medium">{material.title}</span>
-                      {material.is_preview && <Badge variant="secondary">Xem trước</Badge>}
+                      {material.is_preview && <Badge variant="warning" label="Xem trước" />}
                     </div>
                     <p className="text-sm text-gray-500">
                       {getMaterialDuration(material) || material.material_type.toUpperCase()}
                     </p>
                   </div>
                   {enrollment && (
-                    <Button variant="ghost" size="sm" as={Link} to={`/app/courses/${course.id}/learn?material=${material.id}`}>
-                      Học ngay
-                    </Button>
+                    <Link to={`/app/courses/${course.id}/learn?material=${material.id}`}>
+                      <Button variant="ghost" size="sm">Học ngay</Button>
+                    </Link>
                   )}
                 </Card>
               ))}
@@ -208,13 +206,9 @@ export function CourseDetail() {
                     />
                   </div>
                 </div>
-                <Button
-                  className="w-full"
-                  as={Link}
-                  to={`/app/courses/${course.id}/learn`}
-                >
-                  Tiếp tục học
-                </Button>
+                <Link to={`/app/courses/${course.id}/learn`} className="w-full">
+                  <Button className="w-full">Tiếp tục học</Button>
+                </Link>
               </div>
             ) : (
               <div className="space-y-3">

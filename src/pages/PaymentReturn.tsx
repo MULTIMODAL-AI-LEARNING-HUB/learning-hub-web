@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { paymentsApi } from '../../services/api'
-import { Spinner } from '../../components/ui/Spinner'
-import { Card } from '../../components/ui/Card'
-import { Button } from '../../components/ui/Button'
+import { paymentsApi } from '../services/api'
+import { Spinner } from '../components/ui/Spinner'
+import { Card } from '../components/ui/Card'
+import { Button } from '../components/ui/Button'
 
 export function PaymentReturn() {
   const [searchParams] = useSearchParams()

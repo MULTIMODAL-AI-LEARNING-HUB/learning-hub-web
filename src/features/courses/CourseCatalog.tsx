@@ -69,14 +69,14 @@ export function CourseCatalog() {
           )}
         </div>
         <div className="p-4">
-          <div className="flex items-center gap-2 mb-2">
-            {course.category && (
-              <Badge variant="secondary">{course.category.name}</Badge>
-            )}
-            {course.price === 0 && (
-              <Badge variant="success">Miễn phí</Badge>
-            )}
-          </div>
+<div className="flex items-center gap-2 mb-2">
+              {course.category && (
+                <Badge variant="primary" label={course.category.name} />
+              )}
+              {course.price === 0 && (
+                <Badge variant="success" label="Miễn phí" />
+              )}
+            </div>
           <h3 className="font-semibold text-lg mb-1 line-clamp-2">{course.title}</h3>
           <p className="text-sm text-gray-600 mb-3 line-clamp-2">{course.description}</p>
           <div className="flex items-center justify-between">
@@ -109,7 +109,7 @@ export function CourseCatalog() {
           <Input
             placeholder="Tìm kiếm khóa học..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(value) => setSearch(value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             className="w-full md:w-64"
           />

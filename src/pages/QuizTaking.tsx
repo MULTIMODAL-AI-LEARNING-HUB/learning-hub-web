@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { BookOpen, CheckCircle2, XCircle, Trophy, ArrowLeft, ArrowRight } from 'lucide-react'
-import { coursesApi, enrollmentsApi, type Course, type Enrollment } from '../../services/api'
-import { Card } from '../../components/ui/Card'
-import { Button } from '../../components/ui/Button'
-import { useAppStore } from '../../stores/appStore'
-import { cn } from '../../utils/cn'
+import { coursesApi, enrollmentsApi, type Course, type Enrollment } from '../services/api'
+import { Card } from '../components/ui/Card'
+import { Button } from '../components/ui/Button'
+import { useAppStore } from '../stores/appStore'
+import { cn } from '../utils/cn'
+import { Badge } from '../components/ui/Badge'
+import { Skeleton } from '../components/ui/Skeleton'
+import { Progress } from '../components/ui/Progress'
 
 interface QuizQuestion {
   id: string
@@ -181,7 +184,9 @@ export function QuizTaking() {
     return (
       <div className="text-center py-12">
         <h2 className="text-xl font-semibold mb-2">Bạn chưa đăng ký khóa học này</h2>
-        <Button as={Link} to={`/app/courses/${id}`}> Quay lại khóa học</Button>
+        <Link to={`/app/courses/${id}`}>
+          <Button> Quay lại khóa học</Button>
+        </Link>
       </div>
     )
   }
@@ -256,7 +261,7 @@ export function QuizTaking() {
           </Link>
           <h1 className="text-xl font-bold">Quiz: {course.title}</h1>
         </div>
-        <Badge variant="primary">{currentQ + 1} / {questions.length}</Badge>
+        <Badge variant="primary" label={`${currentQ + 1} / ${questions.length}`} />
       </div>
 
       <Card className="p-6">
