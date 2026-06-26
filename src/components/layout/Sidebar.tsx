@@ -12,7 +12,10 @@ import {
   LogOut,
   Sparkles,
   PanelLeftClose,
-  PanelLeft
+  PanelLeft,
+  BookMarked,
+  GraduationCap,
+  Users
 } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { Avatar } from '../ui/Avatar'
@@ -25,11 +28,14 @@ import { cn } from '../../utils/cn'
 
 const navItems = [
   { id: 'home', label: 'Home', icon: Home, path: '/app/home' },
+  { id: 'courses', label: 'Courses', icon: BookMarked, path: '/app/courses' },
+  { id: 'my-courses', label: 'My Learning', icon: GraduationCap, path: '/app/courses/my', roles: ['student', 'admin'] },
   { id: 'documents', label: 'Documents', icon: FileText, path: '/app/documents' },
   { id: 'chat', label: 'AI Chat', icon: MessageSquare, path: '/app/chat' },
   { id: 'quiz', label: 'Quiz', icon: BookOpen, path: '/app/quiz' },
   { id: 'flashcards', label: 'Flashcards', icon: Layers, path: '/app/flashcards' },
-  { id: 'essay', label: 'Essay', icon: PenLine, path: '/app/essay' }
+  { id: 'essay', label: 'Essay', icon: PenLine, path: '/app/essay' },
+  { id: 'manage', label: 'Manage Courses', icon: Users, path: '/app/courses/manage', roles: ['lecturer', 'admin'] }
 ]
 
 export function Sidebar() {
@@ -54,6 +60,11 @@ export function Sidebar() {
   const isChatRoute = activePath.startsWith('/app/chat')
 
   const tabValue = isDocumentsRoute ? 'docs' : isChatRoute ? 'sessions' : null
+
+  const filteredNavItems = navItems.filter(item => {
+    if (!item.roles) return true
+    return item.roles.includes(user?.role?.toLowerCase() || '')
+  })
 
   return (
     <div className="flex h-full flex-col gap-3 overflow-y-auto scrollbar-thin">
@@ -106,7 +117,7 @@ export function Sidebar() {
 
       {/* Main Navigation */}
       <nav className="grid gap-0.5">
-        {navItems.map((item) => {
+        {filteredNavItems.map((item) => {
           const active = activePath.startsWith(item.path)
           const Icon = item.icon
           return (
@@ -126,20 +137,6 @@ export function Sidebar() {
             </button>
           )
         })}
-        {showAdmin && (
-          <button
-            onClick={() => navigate('/app/admin')}
-            className={cn(
-              'group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium transition',
-              activePath.startsWith('/app/admin')
-                ? 'bg-primary text-primary-foreground shadow-soft'
-                : 'text-foreground/80 hover:bg-muted hover:text-foreground'
-            )}
-          >
-            <Settings className="h-4 w-4 shrink-0" />
-            <span className="flex-1 truncate">Admin Panel</span>
-          </button>
-        )}
       </nav>
 
       {/* Contextual Tabs: Documents / Sessions */}

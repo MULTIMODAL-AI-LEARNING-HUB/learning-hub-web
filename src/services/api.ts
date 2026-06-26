@@ -156,6 +156,124 @@ export interface ChatAskResponse {
   token_usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number }
 }
 
+export interface Category {
+  id: string
+  name: string
+  description: string | null
+  icon: string | null
+  course_count: number
+}
+
+export interface CourseMaterial {
+  id: string
+  title: string
+  material_type: 'pdf' | 'docx' | 'image' | 'video' | 'url'
+  file_url: string | null
+  external_url: string | null
+  file_size: number | null
+  duration_seconds: number | null
+  page_count: number | null
+  is_preview: boolean
+  order_index: number
+}
+
+export interface Course {
+  id: string
+  title: string
+  description: string
+  thumbnail_url: string | null
+  price: number
+  category_id: string
+  category?: Category
+  lecturer_id: string
+  lecturer?: { id: string; full_name: string | null; avatar_url: string | null }
+  status: 'draft' | 'published' | 'archived'
+  enrollment_count: number
+  materials: CourseMaterial[]
+  created_at: string
+  updated_at: string
+}
+
+export interface Enrollment {
+  id: string
+  user_id: string
+  course_id: string
+  course?: Course
+  enrolled_at: string
+  completed_at: string | null
+  progress_percent: number
+  status: 'active' | 'completed' | 'cancelled'
+  payment_id: string | null
+  payment_status: 'pending' | 'paid' | 'failed' | 'refunded'
+}
+
+export interface MaterialProgress {
+  id: string
+  enrollment_id: string
+  material_id: string
+  material?: CourseMaterial
+  completed: boolean
+  progress_percent: number
+  completed_at: string | null
+  last_position_seconds: number | null
+  last_position_percent: number | null
+}
+
+export const categoriesApi = {
+  list: () => api.get<Category[]>('/categories'),
+  get: (id: string) => api.get<Category>(`/categories/${id}`),
+}
+
+export const coursesApi = {
+  list: (params?: { category_id?: string; status?: string; page?: number; page_size?: number }) =>
+    api.get<{ items: Course[]; total: number; page: number; page_size: number }>('/courses', { params }),
+  get: (id: string) => api.get<Course>(`/courses/${id}`),
+  create: (data: { title: string; description: string; price: number; category_id: string; thumbnail_url?: string }) =>
+    api.post<Course>('/courses', data),
+  update: (id: string, data: Partial<Course>) => api.put<Course>(`/courses/${id}`, data),
+  delete: (id: string) => api.delete(`/courses/${id}`),
+  publish: (id: string) => api.post<Course>(`/courses/${id}/publish`, {}),
+  archive: (id: string) => api.post<Course>(`/courses/${id}/archive`, {}),
+  getMaterials: (id: string) => api.get<CourseMaterial[]>(`/courses/${id}/materials`),
+  addMaterial: (id: string, data: FormData) =>
+    api.post<CourseMaterial>(`/courses/${id}/materials`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  updateMaterial: (courseId: string, materialId: string, data: Partial<CourseMaterial>) =>
+    api.put<CourseMaterial>(`/courses/${courseId}/materials/${materialId}`, data),
+  deleteMaterial: (courseId: string, materialId: string) =>
+    api.delete(`/courses/${courseId}/materials/${materialId}`),
+  reorderMaterials: (id: string, materialIds: string[]) =>
+    api.put<CourseMaterial[]>(`/courses/${id}/materials/reorder`, { material_ids: materialIds }),
+}
+
+export const enrollmentsApi = {
+  list: (params?: { status?: string; page?: number; page_size?: number }) =>
+    api.get<{ items: Enrollment[]; total: number }>('/enrollments', { params }),
+  get: (id: string) => api.get<Enrollment>(`/enrollments/${id}`),
+  enroll: (courseId: string, paymentMethod?: 'vnpay' | 'momo') =>
+    api.post<{ enrollment: Enrollment; payment_url?: string }>('/enrollments', {
+      course_id: courseId,
+      payment_method: paymentMethod,
+    }),
+  cancel: (id: string) => api.delete(`/enrollments/${id}`),
+  getProgress: (id: string) => api.get<{ progress_percent: number; completed_materials: string[] }>(`/enrollments/${id}/progress`),
+  updateProgress: (enrollmentId: string, materialId: string, data: {
+    completed?: boolean
+    progress_percent?: number
+    last_position_seconds?: number
+    last_position_percent?: number
+  }) => api.put<MaterialProgress>(`/enrollments/${enrollmentId}/progress/${materialId}`, data),
+}
+
+export const paymentsApi = {
+  getStatus: (paymentId: string) => api.get<{ status: string; enrollment_id?: string }>(`/payments/${paymentId}/status`),
+  createVNPayUrl: (enrollmentId: string, amount: number) =>
+    api.post<{ payment_url: string }>('/payments/vnpay/create', { enrollment_id: enrollmentId, amount }),
+  createMoMoUrl: (enrollmentId: string, amount: number) =>
+    api.post<{ payment_url: string }>('/payments/momo/create', { enrollment_id: enrollmentId, amount }),
+}
+
 export const authApi = {
   register: (data: { email: string; password: string; full_name?: string }) =>
     api.post<AuthResponse>('/auth/register', data),

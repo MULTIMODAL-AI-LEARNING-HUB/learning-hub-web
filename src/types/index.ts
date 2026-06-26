@@ -80,3 +80,74 @@ export interface ToastItem {
   title: string
   message?: string
 }
+
+export type MaterialType = 'pdf' | 'docx' | 'image' | 'video' | 'url'
+
+export interface Category {
+  id: string
+  name: string
+  description: string | null
+  icon: string | null
+  course_count: number
+}
+
+export interface CourseMaterial {
+  id: string
+  title: string
+  material_type: MaterialType
+  file_url: string | null
+  external_url: string | null
+  file_size: number | null
+  duration_seconds: number | null
+  page_count: number | null
+  is_preview: boolean
+  order_index: number
+}
+
+export interface Course {
+  id: string
+  title: string
+  description: string
+  thumbnail_url: string | null
+  price: number
+  category_id: string
+  category?: Category
+  lecturer_id: string
+  lecturer?: { id: string; full_name: string | null; avatar_url: string | null }
+  status: 'draft' | 'published' | 'archived'
+  enrollment_count: number
+  materials: CourseMaterial[]
+  created_at: string
+  updated_at: string
+}
+
+export interface Enrollment {
+  id: string
+  user_id: string
+  course_id: string
+  course?: Course
+  enrolled_at: string
+  completed_at: string | null
+  progress_percent: number
+  status: 'active' | 'completed' | 'cancelled'
+  payment_id: string | null
+  payment_status: 'pending' | 'paid' | 'failed' | 'refunded'
+}
+
+export interface MaterialProgress {
+  id: string
+  enrollment_id: string
+  material_id: string
+  material?: CourseMaterial
+  completed: boolean
+  progress_percent: number
+  completed_at: string | null
+  last_position_seconds: number | null
+  last_position_percent: number | null
+}
+
+export interface PaymentRequest {
+  payment_method: 'vnpay' | 'momo'
+  amount: number
+  course_id: string
+}

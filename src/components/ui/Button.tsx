@@ -1,4 +1,4 @@
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode, type ElementType } from 'react'
 import { cn } from '../../utils/cn'
 
 type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'gradient'
@@ -12,6 +12,7 @@ interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'typ
   iconRight?: ReactNode
   type?: 'button' | 'submit' | 'reset'
   fullWidth?: boolean
+  as?: ElementType
 }
 
 const variants: Record<Variant, string> = {
@@ -49,14 +50,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       type = 'button',
       fullWidth = false,
       className = '',
+      as: Component = 'button',
       ...rest
     },
     ref
   ) => {
     return (
-      <button
+      <Component
         ref={ref}
-        type={type}
+        type={Component === 'button' ? type : undefined}
         disabled={disabled || loading}
         className={cn(
           'inline-flex items-center justify-center font-medium transition-all duration-150',
@@ -78,7 +80,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {iconRight && !loading && (
           <span className="shrink-0 [&>svg]:h-4 [&>svg]:w-4">{iconRight}</span>
         )}
-      </button>
+      </Component>
     )
   }
 )
