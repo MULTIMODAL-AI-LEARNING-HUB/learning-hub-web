@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { enrollmentsApi, type Enrollment } from '../../services/api'
 import { Card } from '../../components/ui/Card'
@@ -13,7 +13,9 @@ export function MyCourses() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active')
 
-  const loadEnrollments = async () => {
+  const mountedRef = useRef(false)
+
+  const loadEnrollments = useCallback(async () => {
     setLoading(true)
     try {
       const res = await enrollmentsApi.list({ page_size: 100 })
@@ -23,11 +25,14 @@ export function MyCourses() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    loadEnrollments()
-  }, [])
+    if (!mountedRef.current) {
+      mountedRef.current = true
+      loadEnrollments()
+    }
+  }, [loadEnrollments])
 
   const activeEnrollments = enrollments.filter(e => e.status === 'active')
   const completedEnrollments = enrollments.filter(e => e.status === 'completed')

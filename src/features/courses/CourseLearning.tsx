@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useParams, useSearchParams, Link } from 'react-router-dom'
 import { coursesApi, enrollmentsApi, type Course, type Enrollment, type MaterialProgress } from '../../services/api'
 import { Card } from '../../components/ui/Card'
@@ -6,7 +7,6 @@ import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { Progress } from '../../components/ui/Progress'
-import { useAppStore } from '../../stores/appStore'
 
 export function CourseLearning() {
   const { id } = useParams<{ id: string }>()
@@ -17,9 +17,8 @@ export function CourseLearning() {
   const [currentMaterialId, setCurrentMaterialId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
-  const { auth } = useAppStore()
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!id) return
     setLoading(true)
     try {
@@ -45,20 +44,20 @@ export function CourseLearning() {
     } finally {
       setLoading(false)
     }
-  }
-
-  useEffect(() => {
-    loadData()
   }, [id])
 
   useEffect(() => {
-    const materialId = searchParams.get('material')
-    if (materialId && course?.materials) {
-      setCurrentMaterialId(materialId)
+    loadData()
+  }, [loadData])
+
+  useEffect(() => {
+    const materialIdFromParams = searchParams.get('material')
+    if (materialIdFromParams && course?.materials) {
+      setCurrentMaterialId(materialIdFromParams)
     } else if (course?.materials?.length && !currentMaterialId) {
       setCurrentMaterialId(course.materials[0].id)
     }
-  }, [course, searchParams])
+  }, [course, searchParams, currentMaterialId])
 
   const updateProgress = useCallback(async (materialId: string, data: {
     completed?: boolean

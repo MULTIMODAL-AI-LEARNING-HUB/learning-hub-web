@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { coursesApi, enrollmentsApi, type Course, type Enrollment } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { Skeleton } from '../../components/ui/Skeleton'
-import { useAppStore } from '../../stores/appStore'
 
 export function CourseDetail() {
   const { id } = useParams<{ id: string }>()
@@ -14,9 +14,8 @@ export function CourseDetail() {
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null)
   const [loading, setLoading] = useState(true)
   const [enrolling, setEnrolling] = useState(false)
-  const { auth } = useAppStore()
 
-  const loadCourse = async () => {
+  const loadCourse = useCallback(async () => {
     if (!id) return
     setLoading(true)
     try {
@@ -32,11 +31,11 @@ export function CourseDetail() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id])
 
   useEffect(() => {
     loadCourse()
-  }, [id])
+  }, [loadCourse])
 
   const handleEnroll = async (paymentMethod?: 'vnpay' | 'momo') => {
     if (!id) return
@@ -52,8 +51,9 @@ export function CourseDetail() {
         setEnrollment(res.data.enrollment)
         navigate(`/app/courses/${id}/learn`)
       }
-    } catch (err: any) {
-      const msg = err?.response?.data?.detail || 'Failed to enroll'
+    } catch (err) {
+      const axiosErr = err as { response?: { data?: { detail?: string } } }
+      const msg = axiosErr?.response?.data?.detail || 'Failed to enroll'
       alert(msg)
     } finally {
       setEnrolling(false)

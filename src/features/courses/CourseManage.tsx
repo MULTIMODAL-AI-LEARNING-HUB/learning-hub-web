@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { coursesApi, enrollmentsApi, type Course, type Enrollment } from '../../services/api'
 import { Card } from '../../components/ui/Card'
@@ -21,7 +21,9 @@ export function CourseManage() {
 
   const isLecturer = auth.user?.role === 'lecturer' || auth.user?.role === 'admin'
 
-  const loadData = async () => {
+  const mountedRef = useRef(false)
+
+  const loadData = useCallback(async () => {
     if (!isLecturer) return
     setLoading(true)
     try {
@@ -36,11 +38,14 @@ export function CourseManage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [isLecturer])
 
   useEffect(() => {
-    loadData()
-  }, [])
+    if (!mountedRef.current) {
+      mountedRef.current = true
+      loadData()
+    }
+  }, [loadData])
 
   const handleCreateCourse = async () => {
     if (!newCourse.title) return
@@ -48,8 +53,9 @@ export function CourseManage() {
     try {
       const res = await coursesApi.create(newCourse)
       navigate(`/app/courses/${res.data.id}/edit`)
-    } catch (err: any) {
-      alert(err?.response?.data?.detail || 'Failed to create course')
+    } catch (err) {
+      const axiosErr = err as { response?: { data?: { detail?: string } } }
+      alert(axiosErr?.response?.data?.detail || 'Failed to create course')
     } finally {
       setCreating(false)
     }

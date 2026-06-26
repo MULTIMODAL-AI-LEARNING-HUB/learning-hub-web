@@ -1,12 +1,9 @@
-import { useState, useEffect } from 'react'
-import { useParams, useSearchParams, Link } from 'react-router-dom'
-import { BookOpen, CheckCircle2, XCircle, Trophy, Clock, ArrowLeft, ArrowRight } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { useParams, Link } from 'react-router-dom'
+import { BookOpen, CheckCircle2, XCircle, Trophy, ArrowLeft, ArrowRight } from 'lucide-react'
 import { coursesApi, enrollmentsApi, type Course, type Enrollment } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
-import { Badge } from '../../components/ui/Badge'
-import { Skeleton } from '../../components/ui/Skeleton'
-import { Progress } from '../../components/ui/Progress'
 import { useAppStore } from '../../stores/appStore'
 import { cn } from '../../utils/cn'
 
@@ -26,8 +23,6 @@ interface QuizResult {
 
 export function QuizTaking() {
   const { id } = useParams<{ id: string }>()
-  const [searchParams] = useSearchParams()
-  const materialId = searchParams.get('material')
   const { auth } = useAppStore()
 
   const [course, setCourse] = useState<Course | null>(null)
@@ -41,7 +36,9 @@ export function QuizTaking() {
   const [results, setResults] = useState<QuizResult[] | null>(null)
   const [score, setScore] = useState({ correct: 0, total: 0, percentage: 0 })
 
-  const loadData = async () => {
+  const mountedRef = useRef(false)
+
+  const loadData = useCallback(async () => {
     if (!id) return
     setLoading(true)
     try {
@@ -59,17 +56,20 @@ export function QuizTaking() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id])
 
   useEffect(() => {
-    loadData()
-  }, [id])
+    if (!mountedRef.current) {
+      mountedRef.current = true
+      loadData()
+    }
+  }, [loadData])
 
   const handleGenerateQuiz = async (fromMaterialId?: string) => {
     if (!id) return
     setGenerating(true)
     try {
-      const payload: any = {
+      const payload: { course_id: string; question_count: number; material_ids?: string[] } = {
         course_id: id,
         question_count: 5,
       }
@@ -368,7 +368,7 @@ export function QuizTaking() {
         <Card className="p-6 mt-4">
           <h3 className="font-semibold mb-4">Chi tiết đáp án</h3>
           <div className="space-y-4">
-            {results?.map((result, idx) => {
+            {results?.map((result) => {
               const question = questions.find(q => q.id === result.question_id)
               return (
                 <div key={result.question_id} className="border-b pb-4 last:border-0">

@@ -36,13 +36,14 @@ export function PaymentReturn() {
           setStatus('failed')
           setMessage(`Thanh toán thất bại. Mã lỗi: ${statusCode || paymentStatus}`)
         }
-      } catch (err: any) {
+      } catch (err) {
+        const axiosErr = err as { response?: { data?: { detail?: string } } }
         if (statusCode === '00' || statusCode === '0') {
           setStatus('success')
           setMessage('Thanh toán thành công! Bạn có thể bắt đầu học ngay.')
         } else {
           setStatus('failed')
-          setMessage(err?.response?.data?.detail || 'Không thể xác minh thanh toán')
+          setMessage(axiosErr?.response?.data?.detail || 'Không thể xác minh thanh toán')
         }
       }
     }

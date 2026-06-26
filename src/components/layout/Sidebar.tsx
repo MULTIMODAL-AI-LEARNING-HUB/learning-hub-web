@@ -6,7 +6,6 @@ import {
   BookOpen,
   Layers,
   PenLine,
-  Settings,
   Upload,
   Plus,
   LogOut,
@@ -54,7 +53,6 @@ export function Sidebar() {
   const toggleSidebar = useAppStore((s) => s.ui.toggleSidebar)
   const toast = useToast()
 
-  const showAdmin = user?.role === 'admin'
   const activePath = location.pathname
   const isDocumentsRoute = activePath.startsWith('/app/documents')
   const isChatRoute = activePath.startsWith('/app/chat')

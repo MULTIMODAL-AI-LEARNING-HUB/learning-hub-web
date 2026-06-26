@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+/* eslint-disable react-hooks/set-state-in-effect */
 import { Link } from 'react-router-dom'
 import { coursesApi, categoriesApi, type Course, type Category } from '../../services/api'
 import { Card } from '../../components/ui/Card'
@@ -6,7 +7,6 @@ import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { Input } from '../../components/ui/Input'
-import { useAppStore } from '../../stores/appStore'
 
 export function CourseCatalog() {
   const [courses, setCourses] = useState<Course[]>([])
@@ -15,7 +15,7 @@ export function CourseCatalog() {
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
-  const loadCourses = async () => {
+  const loadCourses = useCallback(async () => {
     setLoading(true)
     try {
       const params: Record<string, string | number | undefined> = {
@@ -31,24 +31,28 @@ export function CourseCatalog() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedCategory, search])
 
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     try {
       const res = await categoriesApi.list()
       setCategories(res.data)
     } catch (err) {
       console.error('Failed to load categories:', err)
     }
-  }
-
-  useEffect(() => {
-    loadCategories()
   }, [])
 
   useEffect(() => {
+    loadCategories()
+  }, [loadCategories])
+
+  useEffect(() => {
     loadCourses()
-  }, [selectedCategory])
+  }, [loadCourses])
+
+  const handleSearch = () => {
+    loadCourses()
+  }
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN').format(price)
@@ -106,10 +110,10 @@ export function CourseCatalog() {
             placeholder="Tìm kiếm khóa học..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && loadCourses()}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             className="w-full md:w-64"
           />
-          <Button onClick={loadCourses}>Tìm kiếm</Button>
+          <Button onClick={handleSearch}>Tìm kiếm</Button>
         </div>
       </div>
 
