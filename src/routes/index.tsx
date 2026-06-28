@@ -16,35 +16,21 @@ import { QuizGenerator } from '../features/study/QuizGenerator'
 import { Flashcards } from '../features/study/Flashcards'
 import { EssayGrading } from '../features/study/EssayGrading'
 import { AdminDashboard } from '../features/admin/AdminDashboard'
-
-// Placeholder pages for missing features
-function PlaceholderPage({ title }: { title: string }) {
-  return (
-    <div className="flex h-[60vh] items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-foreground">{title}</h1>
-        <p className="text-muted-foreground mt-2">This feature is coming soon.</p>
-      </div>
-    </div>
-  )
-}
-
-// Student Placeholder Pages
-function StudentCourses() { return <PlaceholderPage title="My Courses" /> }
-function StudentCourseDetail() { return <PlaceholderPage title="Course Detail" /> }
-function StudentProfile() { return <PlaceholderPage title="Profile" /> }
-
-// Lecturer Placeholder Pages
-function LecturerCourses() { return <PlaceholderPage title="Manage Courses" /> }
-function LecturerCourseDetail() { return <PlaceholderPage title="Course Management" /> }
-function LecturerStudents() { return <PlaceholderPage title="Students" /> }
-function LecturerAnalytics() { return <PlaceholderPage title="Analytics" /> }
-function LecturerDocuments() { return <PlaceholderPage title="Content Library" /> }
-function LecturerSettings() { return <PlaceholderPage title="Settings" /> }
-function LecturerProfile() { return <PlaceholderPage title="Profile" /> }
+import {
+  PlaceholderPage,
+  StudentCourses,
+  StudentCourseDetail,
+  StudentProfile,
+  LecturerCourses,
+  LecturerCourseDetail,
+  LecturerStudents,
+  LecturerAnalytics,
+  LecturerDocuments,
+  LecturerSettings,
+  LecturerProfile,
+} from '../pages/PlaceholderPage'
 
 export const router = createBrowserRouter([
-  // Public Routes
   { path: '/', element: <Navigate to="/welcome" replace /> },
   { path: '/welcome', element: <WelcomePage /> },
   { path: '/login', element: <LoginPage /> },
@@ -53,9 +39,8 @@ export const router = createBrowserRouter([
   { path: '/reset-password/:token', element: <ResetPasswordPage /> },
   { path: '/payment/return', element: <PaymentReturn /> },
   { path: '/quiz/:id', element: <QuizTaking /> },
-  { path: '/unauthorized', element: <div className="flex h-screen items-center justify-center"><h1>Unauthorized</h1></div> },
+  { path: '/unauthorized', element: <PlaceholderPage title="Unauthorized" /> },
 
-  // Student Routes
   {
     path: '/app/student',
     element: (
@@ -77,7 +62,6 @@ export const router = createBrowserRouter([
     ]
   },
 
-  // Lecturer Routes
   {
     path: '/app/lecturer',
     element: (
@@ -98,7 +82,6 @@ export const router = createBrowserRouter([
     ]
   },
 
-  // Admin Route (keep existing for now)
   {
     path: '/app/admin',
     element: (
@@ -108,6 +91,5 @@ export const router = createBrowserRouter([
     )
   },
 
-  // Catch all - redirect to welcome
   { path: '*', element: <Navigate to="/welcome" replace /> }
 ])
