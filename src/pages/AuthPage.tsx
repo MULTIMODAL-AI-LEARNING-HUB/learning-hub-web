@@ -1,73 +1,51 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import {
-  Sparkles, ArrowRight, Mail, Lock, User,
-  FileText, BookOpen, Zap, MessageSquare, ShieldCheck,
-  Quote
-} from 'lucide-react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Sparkles, ArrowRight, Mail, Lock, User, GraduationCap, BookOpen } from 'lucide-react'
 import { useAppStore } from '../stores/appStore'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { AuthInput } from '../components/auth/AuthInput'
-import { SocialLoginButton } from '../components/auth/SocialLoginButton'
 
 type Variant = 'login' | 'register'
 
 const copy = {
   login: {
     title: 'Welcome back',
-    subtitle: 'Continue your study sessions with a single sign in.',
+    subtitle: 'Sign in to continue your learning journey.',
     cta: 'Sign in',
     alt: "Don't have an account?",
     linkText: 'Create one',
     linkTo: '/register',
-    heading: 'Sign in to',
   },
   register: {
-    title: 'Create your workspace',
-    subtitle: 'Upload knowledge sources and chat with your AI tutor.',
+    title: 'Create your account',
+    subtitle: 'Join our AI-powered learning platform.',
     cta: 'Create account',
     alt: 'Already have an account?',
     linkText: 'Sign in',
     linkTo: '/login',
-    heading: 'Join',
   }
-} as const
-
-const stats = [
-  { label: 'Documents', value: '240+', icon: FileText },
-  { label: 'Study Tools', value: '3 modules', icon: BookOpen },
-  { label: 'Avg. Response', value: '1.4s', icon: Zap }
-]
-
-const features = [
-  { icon: FileText, text: 'Upload PDFs, videos, audio, and URLs' },
-  { icon: ShieldCheck, text: 'Track processing status in real time' },
-  { icon: MessageSquare, text: 'Chat with contextual citations' }
-]
-
-function AnimatedNumber({ value }: { value: string }) {
-  return (
-    <span className="font-display text-lg font-bold text-foreground tabular-nums">
-      {value}
-    </span>
-  )
 }
 
 function AuthShell({ variant }: { variant: Variant }) {
   const content = copy[variant]
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const login = useAppStore((s) => s.auth.login)
   const register = useAppStore((s) => s.auth.register)
 
+  const roleFromUrl = searchParams.get('role') || 'student'
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [rememberMe, setRememberMe] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
+
+  const isStudent = roleFromUrl === 'student'
+  const roleLabel = isStudent ? 'Student' : 'Lecturer'
+  const roleIcon = isStudent ? <GraduationCap className="h-5 w-5" /> : <BookOpen className="h-5 w-5" />
 
   const validate = () => {
     const errs: Record<string, string> = {}
@@ -92,16 +70,18 @@ function AuthShell({ variant }: { variant: Variant }) {
     try {
       if (variant === 'login') {
         await login(email, password)
+        const user = useAppStore.getState().auth.user
+        const redirectPath = user?.role === 'lecturer' ? '/app/lecturer/dashboard' : '/app/student/dashboard'
+        navigate(redirectPath)
       } else {
         await register(email, password, name)
+        const user = useAppStore.getState().auth.user
+        const redirectPath = user?.role === 'lecturer' ? '/app/lecturer/dashboard' : '/app/student/dashboard'
+        navigate(redirectPath)
       }
-      navigate('/app/documents')
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Something went wrong'
-      const isNetwork = !navigator.onLine || msg.toLowerCase().includes('network')
-      setErrors(isNetwork
-        ? { form: 'Không thể kết nối đến server. Vui lòng thử lại sau.' }
-        : { email: msg })
+      setErrors({ form: msg })
     } finally {
       setLoading(false)
     }
@@ -109,12 +89,9 @@ function AuthShell({ variant }: { variant: Variant }) {
 
   return (
     <div className="relative min-h-screen gradient-mesh-auth animate-fade-in">
-      <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 py-8 lg:flex-row lg:items-center lg:justify-between lg:gap-20">
-        {/* ─── Left: Brand + Form ─── */}
-        <section
-          key={variant}
-          className="flex w-full flex-col gap-8 lg:w-5/12 animate-zoom-in-95"
-        >
+      <div className="mx-auto flex min-h-screen max-w-5xl flex-col gap-10 px-6 py-8 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
+        {/* Left: Brand + Form */}
+        <section className="flex w-full flex-col gap-8 lg:w-[480px] animate-zoom-in-95">
           {/* Brand */}
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-glow">
@@ -128,22 +105,33 @@ function AuthShell({ variant }: { variant: Variant }) {
 
           {/* Header */}
           <div className="space-y-2">
-            <h1 className="font-display text-4xl font-bold tracking-tight text-foreground text-balance lg:text-5xl">
+            <h1 className="font-display text-3xl font-bold tracking-tight text-foreground text-balance lg:text-4xl">
               {content.title}
             </h1>
-            <p className="text-base text-muted-foreground max-w-md">
+            <p className="text-base text-muted-foreground">
               {content.subtitle}
             </p>
           </div>
 
+          {/* Role Badge (for register) */}
+          {variant === 'register' && (
+            <div className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium ${
+              isStudent ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'
+            }`}>
+              {roleIcon}
+              <span>Registering as {roleLabel}</span>
+            </div>
+          )}
+
           {/* Form Card */}
-            <Card className="border-border/50 bg-surface-elevated/80 p-6 backdrop-blur-xl sm:p-8">
+          <Card className="border-border/50 bg-surface-elevated/80 p-6 backdrop-blur-xl sm:p-8">
             <form onSubmit={handleSubmit} className="grid gap-5">
               {errors.form && (
                 <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive animate-shake-in" role="alert">
                   {errors.form}
                 </div>
               )}
+
               {variant === 'register' && (
                 <AuthInput
                   label="Full name"
@@ -187,14 +175,12 @@ function AuthShell({ variant }: { variant: Variant }) {
                 />
               )}
 
-              {/* Login extras: Remember me + Forgot password */}
+              {/* Login extras */}
               {variant === 'login' && (
                 <div className="flex items-center justify-between">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
                       className="h-4 w-4 rounded border-border bg-surface-elevated text-primary focus:ring-primary/30 cursor-pointer"
                     />
                     <span className="text-sm text-muted-foreground select-none">Remember me</span>
@@ -209,18 +195,13 @@ function AuthShell({ variant }: { variant: Variant }) {
                 </div>
               )}
 
-              {/* Register extras: Terms */}
+              {/* Register extras */}
               {variant === 'register' && (
                 <p className="text-xs text-muted-foreground">
                   By signing up, you agree to our{' '}
-                  <button type="button" className="font-medium text-primary hover:underline">
-                    Terms of Service
-                  </button>{' '}
-                  and{' '}
-                  <button type="button" className="font-medium text-primary hover:underline">
-                    Privacy Policy
-                  </button>
-                  .
+                  <button type="button" className="font-medium text-primary hover:underline">Terms</button>
+                  {' '}and{' '}
+                  <button type="button" className="font-medium text-primary hover:underline">Privacy Policy</button>.
                 </p>
               )}
 
@@ -229,37 +210,19 @@ function AuthShell({ variant }: { variant: Variant }) {
                 loading={loading}
                 className="w-full"
                 size="lg"
-                variant="gradient"
+                variant={variant === 'register' ? (isStudent ? 'primary' : 'gradient') : 'gradient'}
                 iconRight={!loading ? <ArrowRight className="h-4 w-4" /> : undefined}
               >
                 {loading ? 'Please wait...' : content.cta}
               </Button>
             </form>
 
-            {/* Divider */}
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-surface-elevated px-3 text-muted-foreground">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
-            {/* Social Login */}
-            <div className="grid gap-3">
-              <SocialLoginButton provider="google" />
-              <SocialLoginButton provider="github" />
-            </div>
-
             {/* Toggle */}
             <div className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
               <span>{content.alt}</span>
               <Link
                 className="font-semibold text-primary transition hover:underline"
-                to={content.linkTo}
+                to={content.linkTo + (variant === 'register' ? `?role=${roleFromUrl}` : '')}
               >
                 {content.linkText}
               </Link>
@@ -267,66 +230,44 @@ function AuthShell({ variant }: { variant: Variant }) {
           </Card>
         </section>
 
-        {/* ─── Right: Sidebar ─── */}
-        <aside className="hidden w-full animate-slide-in-from-right lg:block lg:w-6/12">
+        {/* Right: Decorative Panel */}
+        <aside className="hidden w-full animate-slide-in-from-right lg:block lg:w-[400px]">
           <div className="space-y-6">
-            {/* Quote */}
-            <Card variant="elevated" className="relative overflow-hidden p-6 border-border/50 bg-gradient-to-br from-primary/5 via-surface-elevated to-accent/5">
-              <Quote className="absolute top-3 right-3 h-8 w-8 text-primary/10" />
-              <div className="flex gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                  <MessageSquare className="h-5 w-5 text-primary" />
+            {/* Role Info Card */}
+            <Card className="p-6 border-border/50 bg-gradient-to-br from-primary/5 via-surface-elevated to-accent/5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${isStudent ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'}`}>
+                  {roleIcon}
                 </div>
                 <div>
-                  <p className="text-sm text-foreground/85 italic leading-relaxed">
-                    "Search documents, ask questions, and capture citations in one workspace."
-                  </p>
-                  <p className="mt-2 text-xs font-medium text-muted-foreground">
-                    — AI Learning Hub
-                  </p>
+                  <p className="font-semibold text-foreground">{roleLabel} Account</p>
+                  <p className="text-xs text-muted-foreground">AI-powered learning tools</p>
                 </div>
               </div>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                {isStudent ? (
+                  <>
+                    <li className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Access to all courses</li>
+                    <li className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> AI-powered study tools</li>
+                    <li className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Track your progress</li>
+                  </>
+                ) : (
+                  <>
+                    <li className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-accent" /> Create & manage courses</li>
+                    <li className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-accent" /> Monitor student progress</li>
+                    <li className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-accent" /> AI-assisted grading</li>
+                  </>
+                )}
+              </ul>
             </Card>
 
-            {/* Stats */}
-            <div className="grid gap-3 sm:grid-cols-3">
-              {stats.map((item, i) => {
-                const Icon = item.icon
-                return (
-                  <Card
-                    key={item.label}
-                    className="group border-border/50 p-4 text-center transition-all duration-300 hover:shadow-lift hover:-translate-y-0.5"
-                    style={{ animationDelay: `${i * 100}ms` }}
-                  >
-                    <div className="mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <AnimatedNumber value={item.value} />
-                    <p className="text-2xs font-medium uppercase tracking-wider text-muted-foreground mt-0.5">
-                      {item.label}
-                    </p>
-                  </Card>
-                )
-              })}
-            </div>
-
-            {/* Features */}
-            <div className="grid gap-2.5">
-              {features.map((item) => {
-                const Icon = item.icon
-                return (
-                  <div
-                    key={item.text}
-                    className="flex items-start gap-3 rounded-xl border border-border bg-surface-elevated p-3 transition-all duration-200 hover:border-primary/30 hover:bg-surface-elevated"
-                  >
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <p className="text-sm text-foreground/80 pt-1">{item.text}</p>
-                  </div>
-                )
-              })}
-            </div>
+            {/* Quote Card */}
+            <Card className="p-6 border-border/50 bg-surface-elevated/60">
+              <p className="text-sm italic text-foreground/80 leading-relaxed">
+                "Education is the most powerful weapon which you can use to change the world."
+              </p>
+              <p className="mt-3 text-xs font-medium text-muted-foreground">— Nelson Mandela</p>
+            </Card>
           </div>
         </aside>
       </div>

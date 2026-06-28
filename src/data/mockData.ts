@@ -2,7 +2,7 @@ import type { ChatSession, DocumentItem, Flashcard, Notification, QuizQuestion, 
 
 export const userProfile: UserProfile = {
   name: 'Minh Nguyen',
-  role: 'Student',
+  role: 'student',
   initials: 'MN'
 }
 

@@ -47,9 +47,9 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
         throw new Error(msg, { cause: err })
       }
     },
-    register: async (email, password, fullName) => {
+    register: async (email, password, fullName, role = 'student') => {
       try {
-        const res = await authApi.register({ email, password, full_name: fullName })
+        const res = await authApi.register({ email, password, full_name: fullName, role })
         const { user, token } = res.data
         localStorage.setItem('access_token', token.access_token)
         if (token.refresh_token) localStorage.setItem('refresh_token', token.refresh_token)

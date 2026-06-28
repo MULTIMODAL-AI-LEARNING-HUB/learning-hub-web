@@ -14,7 +14,7 @@ export interface AuthSlice {
     user: UserProfile
     token: string | null
     login: (email: string, password: string) => Promise<void>
-    register: (email: string, password: string, fullName?: string) => Promise<void>
+    register: (email: string, password: string, fullName?: string, role?: string) => Promise<void>
     logout: () => void
     loadUser: () => Promise<void>
     forgotPassword: (email: string) => Promise<void>

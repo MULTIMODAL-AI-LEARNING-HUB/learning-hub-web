@@ -275,7 +275,7 @@ export const paymentsApi = {
 }
 
 export const authApi = {
-  register: (data: { email: string; password: string; full_name?: string }) =>
+  register: (data: { email: string; password: string; full_name?: string; role?: string }) =>
     api.post<AuthResponse>('/auth/register', data),
   login: (data: { email: string; password: string }) =>
     api.post<AuthResponse>('/auth/login', data),
