@@ -1,49 +1,95 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
-import AppShell from '../pages/AppShell'
+import { RoleRoute } from '../components/auth/ProtectedRoute'
+import WelcomePage from '../pages/WelcomePage'
 import { LoginPage, RegisterPage } from '../pages/AuthPage'
 import { ForgotPasswordPage } from '../pages/ForgotPasswordPage'
 import { ResetPasswordPage } from '../pages/ResetPasswordPage'
 import { PaymentReturn } from '../pages/PaymentReturn'
 import { QuizTaking } from '../pages/QuizTaking'
+import { StudentLayout } from '../layouts/StudentLayout'
+import { LecturerLayout } from '../layouts/LecturerLayout'
+import { StudentDashboard } from '../features/student/StudentDashboard'
+import { LecturerDashboard } from '../features/lecturer/LecturerDashboard'
 import { DocumentHub } from '../features/documents/DocumentHub'
 import { ChatPanel } from '../features/chat/ChatPanel'
 import { QuizGenerator } from '../features/study/QuizGenerator'
 import { Flashcards } from '../features/study/Flashcards'
 import { EssayGrading } from '../features/study/EssayGrading'
 import { AdminDashboard } from '../features/admin/AdminDashboard'
-import { HomePage } from '../features/dashboard/HomePage'
-import { CourseCatalog } from '../features/courses/CourseCatalog'
-import { CourseDetail } from '../features/courses/CourseDetail'
-import { CourseLearning } from '../features/courses/CourseLearning'
-import { CourseManage } from '../features/courses/CourseManage'
-import { MyCourses } from '../features/courses/MyCourses'
+import {
+  PlaceholderPage,
+  StudentCourses,
+  StudentCourseDetail,
+  StudentProfile,
+  LecturerCourses,
+  LecturerCourseDetail,
+  LecturerStudents,
+  LecturerAnalytics,
+  LecturerDocuments,
+  LecturerSettings,
+  LecturerProfile,
+} from '../pages/PlaceholderPage'
 
 export const router = createBrowserRouter([
-  { path: '/', element: <Navigate to="/app/home" replace /> },
+  { path: '/', element: <Navigate to="/welcome" replace /> },
+  { path: '/welcome', element: <WelcomePage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/reset-password/:token', element: <ResetPasswordPage /> },
   { path: '/payment/return', element: <PaymentReturn /> },
   { path: '/quiz/:id', element: <QuizTaking /> },
+  { path: '/unauthorized', element: <PlaceholderPage title="Unauthorized" /> },
+
   {
-    path: '/app',
-    element: <AppShell />,
+    path: '/app/student',
+    element: (
+      <RoleRoute allowedRoles={['student']}>
+        <StudentLayout />
+      </RoleRoute>
+    ),
     children: [
-      { index: true, element: <Navigate to="/app/home" replace /> },
-      { path: 'home', element: <HomePage /> },
-      { path: 'courses', element: <CourseCatalog /> },
-      { path: 'courses/my', element: <MyCourses /> },
-      { path: 'courses/manage', element: <CourseManage /> },
-      { path: 'courses/:id', element: <CourseDetail /> },
-      { path: 'courses/:id/learn', element: <CourseLearning /> },
-      { path: 'courses/:id/quiz', element: <QuizTaking /> },
+      { index: true, element: <Navigate to="/app/student/dashboard" replace /> },
+      { path: 'dashboard', element: <StudentDashboard /> },
+      { path: 'courses', element: <StudentCourses /> },
+      { path: 'courses/:id', element: <StudentCourseDetail /> },
       { path: 'documents', element: <DocumentHub /> },
       { path: 'chat', element: <ChatPanel /> },
       { path: 'quiz', element: <QuizGenerator /> },
       { path: 'flashcards', element: <Flashcards /> },
       { path: 'essay', element: <EssayGrading /> },
-      { path: 'admin', element: <AdminDashboard /> }
+      { path: 'profile', element: <StudentProfile /> },
     ]
-  }
+  },
+
+  {
+    path: '/app/lecturer',
+    element: (
+      <RoleRoute allowedRoles={['lecturer']}>
+        <LecturerLayout />
+      </RoleRoute>
+    ),
+    children: [
+      { index: true, element: <Navigate to="/app/lecturer/dashboard" replace /> },
+      { path: 'dashboard', element: <LecturerDashboard /> },
+      { path: 'courses', element: <LecturerCourses /> },
+      { path: 'courses/:id', element: <LecturerCourseDetail /> },
+      { path: 'students', element: <LecturerStudents /> },
+      { path: 'analytics', element: <LecturerAnalytics /> },
+      { path: 'documents', element: <LecturerDocuments /> },
+      { path: 'settings', element: <LecturerSettings /> },
+      { path: 'profile', element: <LecturerProfile /> },
+    ]
+  },
+
+  {
+    path: '/app/admin',
+    element: (
+      <RoleRoute allowedRoles={['admin']}>
+        <AdminDashboard />
+      </RoleRoute>
+    )
+  },
+
+  { path: '*', element: <Navigate to="/welcome" replace /> }
 ])
