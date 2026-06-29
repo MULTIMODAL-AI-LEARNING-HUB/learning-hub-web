@@ -8,6 +8,7 @@ import { PaymentReturn } from '../pages/PaymentReturn'
 import { QuizTaking } from '../pages/QuizTaking'
 import { StudentLayout } from '../layouts/StudentLayout'
 import { LecturerLayout } from '../layouts/LecturerLayout'
+import { AdminLayout } from '../layouts/AdminLayout'
 import { StudentDashboard } from '../features/student/StudentDashboard'
 import { LecturerDashboard } from '../features/lecturer/LecturerDashboard'
 import { DocumentHub } from '../features/documents/DocumentHub'
@@ -86,9 +87,12 @@ export const router = createBrowserRouter([
     path: '/app/admin',
     element: (
       <RoleRoute allowedRoles={['admin']}>
-        <AdminDashboard />
+        <AdminLayout />
       </RoleRoute>
-    )
+    ),
+    children: [
+      { index: true, element: <AdminDashboard /> }
+    ]
   },
 
   { path: '*', element: <Navigate to="/welcome" replace /> }
