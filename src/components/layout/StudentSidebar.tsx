@@ -37,7 +37,7 @@ export function StudentSidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 grid gap-1">
+      <nav className="flex-1 flex flex-col gap-1">
         {studentNavItems.map((item) => {
           const active = location.pathname === item.path
           const Icon = item.icon
@@ -61,7 +61,7 @@ export function StudentSidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="grid gap-1 pt-2 border-t border-border">
+      <div className="flex flex-col gap-1 pt-2 border-t border-border">
         <button
           onClick={() => navigate('/app/student/profile')}
           className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition"
