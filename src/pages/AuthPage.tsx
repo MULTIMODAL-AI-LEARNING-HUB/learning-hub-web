@@ -79,7 +79,7 @@ function AuthShell({ variant }: { variant: Variant }) {
             : '/app/student/dashboard'
         navigate(redirectPath)
       } else {
-        await register(email, password, name)
+        await register(email, password, name, roleFromUrl)
         const user = useAppStore.getState().auth.user
         const redirectPath =
           user?.role === 'admin'
