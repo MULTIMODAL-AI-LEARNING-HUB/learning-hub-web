@@ -71,12 +71,22 @@ function AuthShell({ variant }: { variant: Variant }) {
       if (variant === 'login') {
         await login(email, password)
         const user = useAppStore.getState().auth.user
-        const redirectPath = user?.role === 'lecturer' ? '/app/lecturer/dashboard' : '/app/student/dashboard'
+        const redirectPath =
+          user?.role === 'admin'
+            ? '/app/admin'
+            : user?.role === 'lecturer'
+            ? '/app/lecturer/dashboard'
+            : '/app/student/dashboard'
         navigate(redirectPath)
       } else {
         await register(email, password, name)
         const user = useAppStore.getState().auth.user
-        const redirectPath = user?.role === 'lecturer' ? '/app/lecturer/dashboard' : '/app/student/dashboard'
+        const redirectPath =
+          user?.role === 'admin'
+            ? '/app/admin'
+            : user?.role === 'lecturer'
+            ? '/app/lecturer/dashboard'
+            : '/app/student/dashboard'
         navigate(redirectPath)
       }
     } catch (err: unknown) {

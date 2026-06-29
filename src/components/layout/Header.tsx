@@ -153,7 +153,7 @@ export function Header() {
             }
             items={[
               { id: 'profile', label: 'Profile', icon: <UserIcon /> },
-              { id: 'admin', label: 'Admin Panel', icon: <SettingsIcon /> },
+              ...(user?.role === 'admin' ? [{ id: 'admin', label: 'Admin Panel', icon: <SettingsIcon /> }] : []),
               { id: 'logout', label: 'Log out', icon: <LogOut />, danger: true }
             ]}
             onSelect={(id) => {

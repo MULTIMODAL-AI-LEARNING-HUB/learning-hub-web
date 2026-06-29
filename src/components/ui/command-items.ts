@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { FileText, MessageSquare, Layers, PenLine, Settings, BookOpen, type LucideIcon } from 'lucide-react'
+import { useAppStore } from '../../stores/appStore'
 
 export interface CommandItem {
   id: string
@@ -13,7 +14,9 @@ export interface CommandItem {
 
 export function useDefaultCommandItems(): CommandItem[] {
   const navigate = useNavigate()
-  return [
+  const user = useAppStore((s) => s.auth.user)
+  
+  const items: CommandItem[] = [
     {
       id: 'nav-documents',
       label: 'Documents',
@@ -55,14 +58,19 @@ export function useDefaultCommandItems(): CommandItem[] {
       icon: PenLine,
       group: 'Study Tools',
       action: () => navigate('/app/essay')
-    },
-    {
+    }
+  ]
+
+  if (user?.role === 'admin') {
+    items.push({
       id: 'nav-admin',
       label: 'Admin Panel',
       description: 'Manage users and system health',
       icon: Settings,
       group: 'Navigation',
       action: () => navigate('/app/admin')
-    }
-  ]
+    })
+  }
+
+  return items
 }
