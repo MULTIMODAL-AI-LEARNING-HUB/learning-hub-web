@@ -36,29 +36,32 @@ function RoleToggle({
 }) {
   const isStudent = role === 'student'
   return (
-    <div className="inline-flex rounded-full bg-surface-elevated/90 p-1 border border-border/50 shadow-sm">
+    <div className="relative flex rounded-xl bg-surface-elevated/60 border border-border/30 p-1 shadow-sm">
+      <div
+        className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg transition-all duration-300 ease-out ${
+          isStudent
+            ? 'left-1 bg-primary shadow-md'
+            : 'left-[calc(50%+3px)] bg-accent shadow-md'
+        }`}
+      />
       <button
         type="button"
         onClick={() => onChange('student')}
-        className={`relative inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
-          isStudent
-            ? 'bg-primary text-primary-foreground shadow-sm'
-            : 'text-muted-foreground hover:text-foreground'
+        className={`relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200 ${
+          isStudent ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
         }`}
       >
-        <GraduationCap className={`h-4 w-4 ${isStudent ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+        <GraduationCap className="h-4 w-4" />
         <span>Student</span>
       </button>
       <button
         type="button"
         onClick={() => onChange('lecturer')}
-        className={`relative inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
-          !isStudent
-            ? 'bg-accent text-accent-foreground shadow-sm'
-            : 'text-muted-foreground hover:text-foreground'
+        className={`relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200 ${
+          !isStudent ? 'text-accent-foreground' : 'text-muted-foreground hover:text-foreground'
         }`}
       >
-        <BookOpen className={`h-4 w-4 ${!isStudent ? 'text-accent-foreground' : 'text-muted-foreground'}`} />
+        <BookOpen className="h-4 w-4" />
         <span>Lecturer</span>
       </button>
     </div>
