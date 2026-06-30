@@ -23,7 +23,7 @@ import { cn } from '../../utils/cn'
 
 export function Header() {
   const navigate = useNavigate()
-  const user = useAppStore((s) => s.auth.user)
+  const user = useAppStore((s) => s.auth.user)!
   const toggleSidebar = useAppStore((s) => s.ui.toggleSidebar)
   const notifications = useAppStore((s) => s.notifications.items)
   const dismissNotif = useAppStore((s) => s.notifications.dismiss)

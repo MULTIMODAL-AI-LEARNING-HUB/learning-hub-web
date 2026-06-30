@@ -11,7 +11,7 @@ import type {
 export interface AuthSlice {
   auth: {
     isAuthenticated: boolean
-    user: UserProfile
+    user: UserProfile | null
     token: string | null
     login: (email: string, password: string) => Promise<void>
     register: (email: string, password: string, fullName?: string, role?: string) => Promise<void>

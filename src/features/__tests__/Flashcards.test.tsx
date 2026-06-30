@@ -1,7 +1,8 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { Flashcards } from '../study/Flashcards'
+import { useAppStore } from '../../stores/appStore'
 
 vi.mock('../../services/api', () => ({
   studyApi: {
@@ -31,6 +32,24 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 )
 
 describe('Flashcards', () => {
+  beforeEach(() => {
+    useAppStore.setState({
+      documents: {
+        items: [
+          { id: 'd1', name: 'AI_Basics.pdf', type: 'pdf', status: 'ready', size: '2.5MB', pageCount: 42 },
+        ],
+        selectedId: null,
+        select: useAppStore.getState().documents.select,
+        add: useAppStore.getState().documents.add,
+        remove: useAppStore.getState().documents.remove,
+        retry: useAppStore.getState().documents.retry,
+        updateProgress: useAppStore.getState().documents.updateProgress,
+        loadDocuments: useAppStore.getState().documents.loadDocuments,
+        uploadDocument: useAppStore.getState().documents.uploadDocument,
+      }
+    })
+  })
+
   it('renders flashcards page', () => {
     render(<Flashcards />, { wrapper })
     expect(screen.getByRole('heading', { name: 'Flashcards' })).toBeInTheDocument()

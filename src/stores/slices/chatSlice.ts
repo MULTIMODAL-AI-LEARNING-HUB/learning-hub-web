@@ -1,13 +1,12 @@
 import type { StateCreator } from 'zustand'
 import type { AppState, ChatSlice } from '../types'
 import type { ChatSession, Message } from '../../types'
-import { chatSessions as initSessions } from '../../data/mockData'
 import { chatApi, type Citation as ApiCitation } from '../../services/api'
 
 export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never]], [], ChatSlice> = (set, get) => ({
   chat: {
-    sessions: initSessions.map((s) => ({ ...s, messages: [] } as ChatSession)),
-    activeSessionId: 'c1',
+    sessions: [] as ChatSession[],
+    activeSessionId: null,
     selectSession: (id) => set((state) => ({
       chat: { ...state.chat, activeSessionId: id }
     }), false, 'chat/selectSession'),

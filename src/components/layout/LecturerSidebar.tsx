@@ -16,7 +16,7 @@ const lecturerNavItems = [
 export function LecturerSidebar() {
   const navigate = useNavigate()
   const location = useLocation()
-  const user = useAppStore((s) => s.auth.user)
+  const user = useAppStore((s) => s.auth.user)!
   const logout = useAppStore((s) => s.auth.logout)
 
   return (

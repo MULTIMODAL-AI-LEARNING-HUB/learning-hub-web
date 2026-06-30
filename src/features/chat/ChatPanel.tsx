@@ -14,7 +14,7 @@ export function ChatPanel() {
   const activeSessionId = useAppStore((s) => s.chat.activeSessionId)
   const sendMessage = useAppStore((s) => s.chat.sendMessage)
   const docs = useAppStore((s) => s.documents.items)
-  const userInitials = useAppStore((s) => s.auth.user.initials)
+  const userInitials = useAppStore((s) => s.auth.user?.initials ?? '?')
 
   const [input, setInput] = useState('')
   const [selectedDoc, setSelectedDoc] = useState<string>('')

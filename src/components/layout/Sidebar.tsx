@@ -40,7 +40,7 @@ const navItems = [
 export function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
-  const user = useAppStore((s) => s.auth.user)
+  const user = useAppStore((s) => s.auth.user)!
   const logout = useAppStore((s) => s.auth.logout)
   const docs = useAppStore((s) => s.documents.items)
   const selectedDocId = useAppStore((s) => s.documents.selectedId)

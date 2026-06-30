@@ -1,13 +1,12 @@
 import type { StateCreator } from 'zustand'
 import type { AppState, DocumentsSlice, AxiosErrorLike } from '../types'
 import type { DocumentItem } from '../../types'
-import { documents as initDocs } from '../../data/mockData'
 import { documentsApi } from '../../services/api'
 
 export const createDocumentsSlice: StateCreator<AppState, [['zustand/devtools', never]], [], DocumentsSlice> = (set, get) => ({
   documents: {
-    items: [...initDocs] as unknown as DocumentItem[],
-    selectedId: 'd1',
+    items: [] as DocumentItem[],
+    selectedId: null,
     select: (id) => set((state) => ({
       documents: { ...state.documents, selectedId: id }
     }), false, 'documents/select'),

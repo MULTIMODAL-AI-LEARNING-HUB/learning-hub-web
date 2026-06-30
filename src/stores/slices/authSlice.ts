@@ -1,7 +1,6 @@
 import type { StateCreator } from 'zustand'
 import type { AppState, AuthSlice, AxiosErrorLike } from '../types'
 import { authApi, type AuthUser } from '../../services/api'
-import { userProfile } from '../../data/mockData'
 
 // Helper to map API User structure to frontend UserProfile structure
 export const mapApiUser = (user: AuthUser) => ({
@@ -24,7 +23,7 @@ export const mapApiUser = (user: AuthUser) => ({
 export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never]], [], AuthSlice> = (set, get) => ({
   auth: {
     isAuthenticated: !!localStorage.getItem('access_token'),
-    user: userProfile,
+    user: null,
     token: localStorage.getItem('access_token'),
     login: async (email, password) => {
       try {
