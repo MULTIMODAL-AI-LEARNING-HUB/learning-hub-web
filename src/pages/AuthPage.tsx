@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Sparkles, ArrowRight, Mail, Lock, User, GraduationCap, BookOpen } from 'lucide-react'
 import { useAppStore } from '../stores/appStore'
@@ -27,10 +27,48 @@ const copy = {
   }
 }
 
+function RoleToggle({
+  role,
+  onChange,
+}: {
+  role: string
+  onChange: (role: string) => void
+}) {
+  const isStudent = role === 'student'
+  return (
+    <div className="inline-flex rounded-full bg-surface-elevated/90 p-1 border border-border/50 shadow-sm">
+      <button
+        type="button"
+        onClick={() => onChange('student')}
+        className={`relative inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+          isStudent
+            ? 'bg-primary text-primary-foreground shadow-sm'
+            : 'text-muted-foreground hover:text-foreground'
+        }`}
+      >
+        <GraduationCap className={`h-4 w-4 ${isStudent ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+        <span>Student</span>
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange('lecturer')}
+        className={`relative inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+          !isStudent
+            ? 'bg-accent text-accent-foreground shadow-sm'
+            : 'text-muted-foreground hover:text-foreground'
+        }`}
+      >
+        <BookOpenKarly className={`h-4 w-4 ${!isStudent ? 'text-accent-foreground' : 'text-muted-foreground'}`} />
+        <span>Lecturer</span>
+      </button>
+    </div>
+  )
+}
+
 function AuthShell({ variant }: { variant: Variant }) {
   const content = copy[variant]
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const login = useAppStore((s) => s.auth.login)
   const register = useAppStore((s) => s.auth.register)
 
@@ -42,8 +80,18 @@ function AuthShell({ variant }: { variant: Variant }) {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
+  const [currentRole, setCurrentRole] = useState(roleFromUrl)
 
-  const isStudent = roleFromUrl === 'student'
+  useEffect(() => {
+    setSearchParams({ role: currentRole })
+  }, [currentRole, setSearchParams])
+
+  const handleRoleChange = (role: string) => {
+    setCurrentRole(role)
+    setErrors({})
+  }
+
+  const isStudent = currentRole === 'student'
   const roleLabel = isStudent ? 'Student' : 'Lecturer'
   const roleIcon = isStudent ? <GraduationCap className="h-5 w-5" /> : <BookOpen className="h-5 w-5" />
 
@@ -123,13 +171,10 @@ function AuthShell({ variant }: { variant: Variant }) {
             </p>
           </div>
 
-          {/* Role Badge (for register) */}
+          {/* Role Toggle (for register) */}
           {variant === 'register' && (
-            <div className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium ${
-              isStudent ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'
-            }`}>
-              {roleIcon}
-              <span>Registering as {roleLabel}</span>
+            <div className="flex flex-col gap-3">
+              <RoleToggle role={currentRole} onChange={handleRoleChange} />
             </div>
           )}
 
