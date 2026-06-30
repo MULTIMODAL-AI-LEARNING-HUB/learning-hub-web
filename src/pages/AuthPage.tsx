@@ -58,7 +58,7 @@ function RoleToggle({
             : 'text-muted-foreground hover:text-foreground'
         }`}
       >
-        <BookOpenKarly className={`h-4 w-4 ${!isStudent ? 'text-accent-foreground' : 'text-muted-foreground'}`} />
+        <BookOpen className={`h-4 w-4 ${!isStudent ? 'text-accent-foreground' : 'text-muted-foreground'}`} />
         <span>Lecturer</span>
       </button>
     </div>
