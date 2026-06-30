@@ -188,10 +188,170 @@ export interface Course {
   lecturer_id: string
   lecturer?: { id: string; full_name: string | null; avatar_url: string | null }
   status: 'draft' | 'published' | 'archived'
+  level?: string
+  language?: string
+  requirements?: string
+  learning_outcomes?: string
+  tags?: string
+  view_count?: number
+  rating_avg?: number
+  rating_count?: number
   enrollment_count: number
   materials: CourseMaterial[]
   created_at: string
   updated_at: string
+}
+
+// ============ NEW LMS TYPES ============
+
+export interface Section {
+  id: string
+  course_id: string
+  title: string
+  description: string | null
+  order_index: number
+  created_at: string
+  updated_at: string
+  lesson_count?: number
+  lessons?: Lesson[]
+}
+
+export interface Lesson {
+  id: string
+  section_id: string
+  title: string
+  description: string | null
+  type: 'VIDEO' | 'ARTICLE' | 'QUIZ' | 'ASSIGNMENT'
+  video_url: string | null
+  video_duration: number | null
+  content: string | null
+  order_index: number
+  is_preview: boolean
+  is_active: boolean
+  has_quiz: boolean
+  has_assignment: boolean
+  attachment_count: number
+  created_at: string
+  updated_at: string
+  quiz?: Quiz
+  assignment?: Assignment
+  attachments?: Attachment[]
+}
+
+export interface Attachment {
+  id: string
+  lesson_id: string
+  file_name: string
+  file_url: string
+  file_type: string | null
+  file_size: number | null
+  uploaded_at: string
+}
+
+export interface Quiz {
+  id: string
+  lesson_id: string
+  title: string
+  description: string | null
+  passing_score: number
+  duration_mins: number | null
+  max_attempts: number
+  is_active: boolean
+  question_count?: number
+  created_at: string
+  updated_at: string
+  questions?: Question[]
+}
+
+export interface Question {
+  id: string
+  quiz_id: string
+  question_text: string
+  type: 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_BLANK'
+  points: number
+  explanation: string | null
+  order_index: number
+  created_at: string
+  answers?: Answer[]
+}
+
+export interface Answer {
+  id: string
+  question_id: string
+  answer_text: string
+  is_correct: boolean
+  order_index: number
+  created_at: string
+}
+
+export interface QuizAttempt {
+  id: string
+  enrollment_id: string
+  quiz_id: string
+  attempt_number: number
+  score: number | null
+  max_score: number | null
+  passed: boolean | null
+  started_at: string
+  completed_at: string | null
+}
+
+export interface Assignment {
+  id: string
+  lesson_id: string
+  title: string
+  description: string | null
+  instructions: string | null
+  deadline: string | null
+  max_score: number
+  allow_resubmit: boolean
+  max_resubmits: number
+  submission_count?: number
+  created_at: string
+  updated_at: string
+}
+
+export interface AssignmentSubmission {
+  id: string
+  assignment_id: string
+  student_id: string
+  student_name: string | null
+  submission_text: string | null
+  attachments: { file_name: string; file_url: string }[] | null
+  score: number | null
+  feedback: string | null
+  submitted_at: string
+  graded_at: string | null
+  is_late: boolean
+}
+
+export interface Discussion {
+  id: string
+  lesson_id: string
+  user_id: string
+  user_name: string | null
+  user_avatar: string | null
+  parent_id: string | null
+  content: string
+  is_pinned: boolean
+  is_answer: boolean
+  upvotes: number
+  reply_count: number
+  created_at: string
+  updated_at: string
+  replies: Discussion[]
+}
+
+export interface Review {
+  id: string
+  enrollment_id: string
+  rating: number
+  comment: string | null
+  lecturer_reply: string | null
+  replied_at: string | null
+  created_at: string
+  student_name: string | null
+  course_title: string | null
 }
 
 export interface Enrollment {
@@ -245,6 +405,155 @@ export const coursesApi = {
     api.delete(`/courses/${courseId}/materials/${materialId}`),
   reorderMaterials: (id: string, materialIds: string[]) =>
     api.put<CourseMaterial[]>(`/courses/${id}/materials/reorder`, { material_ids: materialIds }),
+  // Lecturer dashboard
+  getStats: () => api.get<{
+    total_courses: number
+    total_students: number
+    total_revenue: number
+    avg_rating: number
+    recent_enrollments: { date: string; count: number }[]
+    course_stats: { course_id: string; title: string; enrollment_count: number; revenue: number; rating_avg: number }[]
+  }>('/courses/stats'),
+  getReviews: (courseId: string, page = 1, pageSize = 20) =>
+    api.get<{ items: Review[]; total: number }>(`/courses/${courseId}/reviews`, { params: { page, page_size: pageSize } }),
+  replyReview: (courseId: string, reviewId: string, reply: string) =>
+    api.post<Review>(`/courses/${courseId}/reviews/${reviewId}/reply`, { reply }),
+  getDiscussionStats: (courseId: string) =>
+    api.get<{ total_discussions: number; unanswered: number }>(`/courses/${courseId}/discussions/stats`),
+}
+
+// ============ NEW LECTURER API ENDPOINTS ============
+
+export const sectionsApi = {
+  list: (courseId: string) => api.get<Section[]>(`/courses/${courseId}/sections`),
+  get: (courseId: string, sectionId: string) => api.get<Section>(`/courses/${courseId}/sections/${sectionId}`),
+  create: (courseId: string, data: { title: string; description?: string; order_index?: number }) =>
+    api.post<Section>(`/courses/${courseId}/sections`, data),
+  update: (courseId: string, sectionId: string, data: { title?: string; description?: string }) =>
+    api.put<Section>(`/courses/${courseId}/sections/${sectionId}`, data),
+  delete: (courseId: string, sectionId: string) => api.delete(`/courses/${courseId}/sections/${sectionId}`),
+  reorder: (courseId: string, sectionIds: string[]) =>
+    api.put<Section[]>(`/courses/${courseId}/sections/reorder`, { section_ids: sectionIds }),
+}
+
+export const lessonsApi = {
+  list: (sectionId: string) => api.get<Lesson[]>(`/sections/${sectionId}/lessons`),
+  get: (sectionId: string, lessonId: string) => api.get<Lesson>(`/sections/${sectionId}/lessons/${lessonId}`),
+  create: (sectionId: string, data: {
+    title: string
+    description?: string
+    type: 'VIDEO' | 'ARTICLE' | 'QUIZ' | 'ASSIGNMENT'
+    video_url?: string
+    video_duration?: number
+    content?: string
+    order_index?: number
+    is_preview?: boolean
+  }) => api.post<Lesson>(`/sections/${sectionId}/lessons`, data),
+  update: (sectionId: string, lessonId: string, data: {
+    title?: string
+    description?: string
+    video_url?: string
+    video_duration?: number
+    content?: string
+    is_preview?: boolean
+    is_active?: boolean
+  }) => api.put<Lesson>(`/sections/${sectionId}/lessons/${lessonId}`, data),
+  delete: (sectionId: string, lessonId: string) => api.delete(`/sections/${sectionId}/lessons/${lessonId}`),
+  reorder: (sectionId: string, lessonIds: string[]) =>
+    api.put<Lesson[]>(`/sections/${sectionId}/lessons/reorder`, { lesson_ids: lessonIds }),
+  getAttachments: (sectionId: string, lessonId: string) => api.get<Attachment[]>(`/sections/${sectionId}/lessons/${lessonId}/attachments`),
+  addAttachment: (sectionId: string, lessonId: string, data: FormData) =>
+    api.post<Attachment>(`/sections/${sectionId}/lessons/${lessonId}/attachments`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  deleteAttachment: (sectionId: string, lessonId: string, attachmentId: string) =>
+    api.delete(`/sections/${sectionId}/lessons/${lessonId}/attachments/${attachmentId}`),
+}
+
+export const quizzesApi = {
+  get: (lessonId: string) => api.get<Quiz>(`/lessons/${lessonId}/quiz`),
+  create: (lessonId: string, data: {
+    title: string
+    description?: string
+    passing_score?: number
+    duration_mins?: number
+    max_attempts?: number
+  }) => api.post<Quiz>(`/lessons/${lessonId}/quiz`, data),
+  update: (lessonId: string, data: {
+    title?: string
+    description?: string
+    passing_score?: number
+    duration_mins?: number
+    max_attempts?: number
+    is_active?: boolean
+  }) => api.put<Quiz>(`/lessons/${lessonId}/quiz`, data),
+  delete: (quizId: string) => api.delete(`/lessons/${quizId}/quiz`),
+  getQuestions: (quizId: string) => api.get<Question[]>(`/quizzes/${quizId}/questions`),
+  addQuestion: (quizId: string, data: {
+    question_text: string
+    type: 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_BLANK'
+    points?: number
+    explanation?: string
+    order_index?: number
+    answers: { answer_text: string; is_correct: boolean }[]
+  }) => api.post<Question>(`/quizzes/${quizId}/questions`, data),
+  updateQuestion: (questionId: string, data: {
+    question_text?: string
+    type?: 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_BLANK'
+    points?: number
+    explanation?: string
+  }) => api.put<Question>(`/quizzes/questions/${questionId}`, data),
+  deleteQuestion: (questionId: string) => api.delete(`/quizzes/questions/${questionId}`),
+  reorderQuestions: (quizId: string, questionIds: string[]) =>
+    api.put<Question[]>(`/quizzes/${quizId}/questions/reorder`, { question_ids: questionIds }),
+  updateAnswers: (questionId: string, answers: { id?: string; answer_text: string; is_correct: boolean }[]) =>
+    api.put<Answer[]>(`/quizzes/questions/${questionId}/answers`, { answers }),
+  getAttempts: (quizId: string) => api.get<QuizAttempt[]>(`/quizzes/${quizId}/attempts`),
+}
+
+export const assignmentsApi = {
+  get: (lessonId: string) => api.get<Assignment>(`/lessons/${lessonId}/assignment`),
+  create: (lessonId: string, data: {
+    title: string
+    description?: string
+    instructions?: string
+    deadline?: string
+    max_score?: number
+    allow_resubmit?: boolean
+    max_resubmits?: number
+  }) => api.post<Assignment>(`/lessons/${lessonId}/assignment`, data),
+  update: (lessonId: string, data: {
+    title?: string
+    description?: string
+    instructions?: string
+    deadline?: string
+    max_score?: number
+    allow_resubmit?: boolean
+    max_resubmits?: number
+    is_active?: boolean
+  }) => api.put<Assignment>(`/lessons/${lessonId}/assignment`, data),
+  delete: (assignmentId: string) => api.delete(`/lessons/${assignmentId}/assignment`),
+  getSubmissions: (assignmentId: string, page = 1, pageSize = 20) =>
+    api.get<{ items: AssignmentSubmission[]; total: number }>(`/assignments/${assignmentId}/submissions`, {
+      params: { page, page_size: pageSize },
+    }),
+  gradeSubmission: (submissionId: string, data: { score: number; feedback?: string }) =>
+    api.put<AssignmentSubmission>(`/assignments/submissions/${submissionId}/grade`, data),
+}
+
+export const discussionsApi = {
+  list: (lessonId: string, page = 1, pageSize = 20) =>
+    api.get<{ items: Discussion[]; total: number }>(`/lessons/${lessonId}/discussions`, {
+      params: { page, page_size: pageSize },
+    }),
+  create: (lessonId: string, data: { content: string; parent_id?: string }) =>
+    api.post<Discussion>(`/lessons/${lessonId}/discussions`, data),
+  update: (discussionId: string, data: { content: string }) =>
+    api.put<Discussion>(`/discussions/${discussionId}`, data),
+  delete: (discussionId: string) => api.delete(`/discussions/${discussionId}`),
+  upvote: (discussionId: string) => api.post<{ upvotes: number }>(`/discussions/${discussionId}/upvote`),
+  pin: (discussionId: string) => api.post<Discussion>(`/discussions/${discussionId}/pin`, {}),
+  markAsAnswer: (discussionId: string) => api.post<Discussion>(`/discussions/${discussionId}/mark-answer`, {}),
 }
 
 export const enrollmentsApi = {

@@ -17,7 +17,6 @@ export function StudentCourses() { return <PlaceholderPage title="My Courses" />
 export function StudentCourseDetail() { return <PlaceholderPage title="Course Detail" /> }
 export function StudentProfile() { return <PlaceholderPage title="Profile" /> }
 
-export function LecturerCourses() { return <PlaceholderPage title="Manage Courses" /> }
 export function LecturerCourseDetail() { return <PlaceholderPage title="Course Management" /> }
 export function LecturerStudents() { return <PlaceholderPage title="Students" /> }
 export function LecturerAnalytics() { return <PlaceholderPage title="Analytics" /> }

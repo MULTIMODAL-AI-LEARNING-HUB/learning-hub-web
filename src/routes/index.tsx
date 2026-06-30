@@ -11,6 +11,8 @@ import { LecturerLayout } from '../layouts/LecturerLayout'
 import { AdminLayout } from '../layouts/AdminLayout'
 import { StudentDashboard } from '../features/student/StudentDashboard'
 import { LecturerDashboard } from '../features/lecturer/LecturerDashboard'
+import { LecturerCourses } from '../features/lecturer/LecturerCourses'
+import { LecturerCourseDetail } from '../features/lecturer/LecturerCourseDetail'
 import { DocumentHub } from '../features/documents/DocumentHub'
 import { ChatPanel } from '../features/chat/ChatPanel'
 import { QuizGenerator } from '../features/study/QuizGenerator'
@@ -22,8 +24,6 @@ import {
   StudentCourses,
   StudentCourseDetail,
   StudentProfile,
-  LecturerCourses,
-  LecturerCourseDetail,
   LecturerStudents,
   LecturerAnalytics,
   LecturerDocuments,
