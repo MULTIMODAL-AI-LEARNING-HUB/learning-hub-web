@@ -384,7 +384,7 @@ export const categoriesApi = {
   list: () => api.get<Category[]>('/categories'),
   get: (id: string) => api.get<Category>(`/categories/${id}`),
   getTree: () => api.get<Category[]>(`/categories/tree`),
-  create: (data: { name: string; slug: string; description?: string; icon?: string; parent_id?: string }) =>
+  create: (data: { name: string; slug: string; description?: string; icon?: string; parent_id?: string | null }) =>
     api.post<Category>('/categories', data),
   update: (id: string, data: { name?: string; description?: string; icon?: string }) =>
     api.put<Category>(`/categories/${id}`, data),
