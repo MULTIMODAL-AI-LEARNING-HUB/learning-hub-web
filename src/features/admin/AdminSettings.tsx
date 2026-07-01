@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Database, Bot, Zap, Shield } from 'lucide-react'
+import { Database, Bot, Zap, Shield, HardDrive, Activity } from 'lucide-react'
 import { adminApi } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -12,6 +12,9 @@ interface HealthData {
     database: string
     ai_service: string
     redis: string
+    s3_storage: string
+    qdrant: string
+    celery: string
   }
 }
 
@@ -40,7 +43,10 @@ export function AdminSettings() {
   const services = [
     { name: 'PostgreSQL Database', description: 'Relational data storage', icon: Database, key: 'database' as const },
     { name: 'AI LangGraph Service', description: 'LLM workflow engine', icon: Bot, key: 'ai_service' as const },
-    { name: 'Redis Cache', description: 'Session & query caching', icon: Zap, key: 'redis' as const },
+    { name: 'Redis (Upstash)', description: 'Session & query caching', icon: Zap, key: 'redis' as const },
+    { name: 'Cloudflare R2 Storage', description: 'S3-compatible object storage', icon: HardDrive, key: 's3_storage' as const },
+    { name: 'Qdrant Vector DB', description: 'Vector embeddings database', icon: Database, key: 'qdrant' as const },
+    { name: 'Celery Worker', description: 'Background task processing', icon: Activity, key: 'celery' as const },
   ]
 
   const overall = health?.status === 'healthy' ? 'All systems operational' : 'Some services degraded'
