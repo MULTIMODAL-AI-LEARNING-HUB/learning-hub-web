@@ -165,6 +165,10 @@
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground) / 0.5);
   }
+
+  @media (max-width: 639px) {
+    html { font-size: 15px; }
+  }
 }
 
 @layer utilities {
