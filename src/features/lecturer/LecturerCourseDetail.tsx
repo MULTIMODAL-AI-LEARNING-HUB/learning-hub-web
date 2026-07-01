@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Edit, Users, BarChart3 } from 'lucide-react'
+import { ArrowLeft, Edit, Users, BarChart3, BookOpen, Star, DollarSign, TrendingUp } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { Card } from '../../components/ui/Card'
@@ -11,17 +11,40 @@ import { ReviewsManager } from './ReviewsManager'
 
 type Tab = 'content' | 'reviews' | 'students' | 'analytics'
 
+interface CourseAnalytics {
+  total_students: number
+  enrollment_count: number
+  revenue: number
+  rating_avg: number
+  rating_count: number
+}
+
 export function LecturerCourseDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [course, setCourse] = useState<Course | null>(null)
+  const [analytics, setAnalytics] = useState<CourseAnalytics | null>(null)
   const [loading, setLoading] = useState(true)
+
   const [activeTab, setActiveTab] = useState<Tab>('content')
 
   useEffect(() => {
     if (id) {
-      coursesApi.get(id).then(res => {
-        setCourse(res.data)
+      Promise.all([
+        coursesApi.get(id),
+        coursesApi.getStats().catch(() => null),
+      ]).then(([courseRes, statsRes]) => {
+        setCourse(courseRes.data)
+        const stats = statsRes?.data?.course_stats?.find((c: { course_id: string }) => c.course_id === id)
+        if (stats) {
+          setAnalytics({
+            total_students: stats.enrollment_count,
+            enrollment_count: stats.enrollment_count,
+            revenue: stats.revenue,
+            rating_avg: stats.rating_avg,
+            rating_count: 0,
+          })
+        }
         setLoading(false)
       }).catch(() => {
         navigate('/app/lecturer/courses')
@@ -47,10 +70,10 @@ export function LecturerCourseDetail() {
   }
 
   const tabs = [
-    { id: 'content' as Tab, label: 'Content', icon: null },
-    { id: 'reviews' as Tab, label: 'Reviews', icon: null },
-    { id: 'students' as Tab, label: 'Students', icon: null },
-    { id: 'analytics' as Tab, label: 'Analytics', icon: null },
+    { id: 'content' as Tab, label: 'Content' },
+    { id: 'reviews' as Tab, label: 'Reviews' },
+    { id: 'students' as Tab, label: 'Students' },
+    { id: 'analytics' as Tab, label: 'Analytics' },
   ]
 
   return (
@@ -66,7 +89,7 @@ export function LecturerCourseDetail() {
           </div>
           <p className="text-muted-foreground mt-1">{course.description}</p>
         </div>
-        <Button variant="outline" icon={<Edit className="h-4 w-4" />} fullWidthMobile>
+        <Button variant="outline" icon={<Edit className="h-4 w-4" />} onClick={() => navigate('/app/lecturer/courses')} fullWidthMobile>
           Edit Details
         </Button>
       </div>
@@ -93,18 +116,108 @@ export function LecturerCourseDetail() {
         {activeTab === 'content' && <CourseContentManager course={course} />}
         {activeTab === 'reviews' && <ReviewsManager courseId={course.id} />}
         {activeTab === 'students' && (
-          <Card className="p-8 text-center">
-            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">Student Management</h3>
-            <p className="text-muted-foreground">View and manage enrolled students</p>
-          </Card>
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <Users className="h-5 w-5 text-accent" />
+              Enrolled Students
+            </h2>
+            {analytics ? (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card padding="responsive">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Students</span>
+                    <Users className="h-4 w-4 text-primary" />
+                  </div>
+                  <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">{analytics.total_students}</p>
+                </Card>
+                <Card padding="responsive">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Rating</span>
+                    <Star className="h-4 w-4 text-warning" />
+                  </div>
+                  <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">
+                    {analytics.rating_avg > 0 ? `${analytics.rating_avg.toFixed(1)} / 5` : '—'}
+                  </p>
+                </Card>
+                <Card padding="responsive">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Revenue</span>
+                    <DollarSign className="h-4 w-4 text-success" />
+                  </div>
+                  <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">${analytics.revenue.toLocaleString()}</p>
+                </Card>
+                <Card padding="responsive">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Course Status</span>
+                    <TrendingUp className="h-4 w-4 text-accent" />
+                  </div>
+                  <p className="text-2xl font-bold text-foreground mt-2 capitalize">{course.status}</p>
+                </Card>
+              </div>
+            ) : (
+              <Card className="p-8 text-center">
+                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">No student data yet</h3>
+                <p className="text-muted-foreground">Student enrollments will appear here once your course is published and students enroll.</p>
+              </Card>
+            )}
+          </div>
         )}
         {activeTab === 'analytics' && (
-          <Card className="p-8 text-center">
-            <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">Course Analytics</h3>
-            <p className="text-muted-foreground">Track performance and engagement</p>
-          </Card>
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-accent" />
+              Course Analytics
+            </h2>
+            {analytics ? (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <Card padding="responsive" className="text-center">
+                  <BookOpen className="h-8 w-8 text-primary mx-auto mb-3" />
+                  <p className="text-3xl font-bold text-foreground tabular-nums">{analytics.enrollment_count}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Total Enrollments</p>
+                </Card>
+                <Card padding="responsive" className="text-center">
+                  <Star className="h-8 w-8 text-warning mx-auto mb-3" />
+                  <p className="text-3xl font-bold text-foreground tabular-nums">
+                    {analytics.rating_avg > 0 ? analytics.rating_avg.toFixed(1) : '—'}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Average Rating</p>
+                </Card>
+                <Card padding="responsive" className="text-center">
+                  <DollarSign className="h-8 w-8 text-success mx-auto mb-3" />
+                  <p className="text-3xl font-bold text-foreground tabular-nums">${analytics.revenue.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Total Revenue</p>
+                </Card>
+                <Card padding="responsive">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Course Info</p>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Price</span>
+                      <span className="font-medium text-foreground">${course.price}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Category</span>
+                      <span className="font-medium text-foreground">{course.category_id || '—'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Level</span>
+                      <span className="font-medium text-foreground capitalize">{course.level || '—'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Language</span>
+                      <span className="font-medium text-foreground">{course.language || '—'}</span>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            ) : (
+              <Card className="p-8 text-center">
+                <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">Analytics not available</h3>
+                <p className="text-muted-foreground">Course analytics will be available once your course has enrollments.</p>
+              </Card>
+            )}
+          </div>
         )}
       </div>
     </div>

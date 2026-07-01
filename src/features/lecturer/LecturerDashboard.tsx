@@ -1,14 +1,20 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BookOpen, Users, BarChart3, TrendingUp, Award, Clock, ArrowRight, Plus } from 'lucide-react'
+import { BookOpen, Users, BarChart3, TrendingUp, Star, Clock, ArrowRight, Plus } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
-import { Badge } from '../../components/ui/Badge'
-import { cn } from '../../utils/cn'
+import { useLecturerCourses } from '../../hooks/useLecturerCourses'
 
 export function LecturerDashboard() {
   const navigate = useNavigate()
   const user = useAppStore((s) => s.auth.user)
+  const { courses, stats, fetchCourses, fetchStats } = useLecturerCourses()
+
+  useEffect(() => {
+    fetchCourses()
+    fetchStats()
+  }, [fetchCourses, fetchStats])
 
   const getGreeting = () => {
     const hr = new Date().getHours()
@@ -17,44 +23,29 @@ export function LecturerDashboard() {
     return 'Good evening'
   }
 
-  const stats = [
-    { label: 'Total Courses', value: 5, icon: BookOpen, variant: 'primary' as const },
-    { label: 'Total Students', value: 128, icon: Users, variant: 'accent' as const },
-    { label: 'Avg Completion', value: '72%', icon: TrendingUp, variant: 'success' as const },
-    { label: 'Pending Reviews', value: 12, icon: Award, variant: 'warning' as const },
-  ]
-
-  const courses = [
-    { id: 1, title: 'Introduction to Machine Learning', students: 45, completion: 68, pending: 3 },
-    { id: 2, title: 'Data Structures & Algorithms', students: 38, completion: 45, pending: 5 },
-    { id: 3, title: 'Web Development Fundamentals', students: 52, completion: 82, pending: 1 },
-    { id: 4, title: 'Database Systems', students: 33, completion: 55, pending: 4 },
-  ]
-
-  const recentSubmissions = [
-    { student: 'Alice Johnson', course: 'ML Basics', type: 'Essay', score: 85, time: '2 hours ago' },
-    { student: 'Bob Smith', course: 'DSA', type: 'Quiz', score: 92, time: '4 hours ago' },
-    { student: 'Carol White', course: 'Web Dev', type: 'Assignment', score: 78, time: 'Yesterday' },
+  const statCards = [
+    { label: 'Total Courses', value: stats?.total_courses ?? 0, icon: BookOpen, variant: 'primary' as const },
+    { label: 'Total Students', value: stats?.total_students ?? 0, icon: Users, variant: 'accent' as const },
+    { label: 'Avg Rating', value: stats?.avg_rating ? stats.avg_rating.toFixed(1) : '—', icon: Star, variant: 'warning' as const },
+    { label: 'Revenue', value: stats?.total_revenue ? `$${stats.total_revenue.toLocaleString()}` : '$0', icon: TrendingUp, variant: 'success' as const },
   ]
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-fluid-2xl font-bold text-foreground">
-            {getGreeting()}, {user?.name?.split(' ')[0]}! 👨‍🏫
+            {getGreeting()}, {user?.name?.split(' ')[0]}!
           </h1>
           <p className="text-muted-foreground mt-1">Here's an overview of your teaching activity.</p>
         </div>
-        <Button onClick={() => navigate('/app/lecturer/courses/create')} icon={<Plus className="h-4 w-4" />} variant="gradient">
+        <Button onClick={() => navigate('/app/lecturer/courses')} icon={<Plus className="h-4 w-4" />} variant="gradient">
           Create Course
         </Button>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => {
+        {statCards.map((stat) => {
           const Icon = stat.icon
           const iconColors: Record<string, string> = {
             primary: 'bg-primary/10 text-primary',
@@ -66,19 +57,17 @@ export function LecturerDashboard() {
             <Card key={stat.label} padding="responsive">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider min-w-0 truncate">{stat.label}</span>
-                <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', iconColors[stat.variant] || 'bg-muted text-foreground')}>
+                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${iconColors[stat.variant] || 'bg-muted text-foreground'}`}>
                   <Icon className="h-4 w-4" />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-foreground mt-2">{stat.value}</p>
+              <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">{stat.value}</p>
             </Card>
           )
         })}
       </div>
 
-      {/* Main Content Grid */}
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Courses Table */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
@@ -97,66 +86,82 @@ export function LecturerDashboard() {
                   <tr>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Course</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Students</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Completion</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pending</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Revenue</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Rating</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {courses.map((course) => (
-                    <tr key={course.id} className="hover:bg-muted/30 cursor-pointer transition" onClick={() => navigate(`/app/lecturer/courses/${course.id}`)}>
-                      <td className="px-4 py-3">
-                        <p className="font-medium text-foreground text-sm">{course.title}</p>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">{course.students}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <div className="h-1.5 w-16 rounded-full bg-muted">
-                            <div className="h-full rounded-full bg-success" style={{ width: `${course.completion}%` }} />
-                          </div>
-                          <span className="text-xs text-muted-foreground">{course.completion}%</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        {course.pending > 0 ? (
-                          <Badge variant="warning" label={`${course.pending}`} />
-                        ) : (
-                          <Badge variant="success" label="0" />
-                        )}
+                  {(stats?.course_stats ?? []).length > 0 ? (
+                    (stats?.course_stats ?? []).map((c) => (
+                      <tr key={c.course_id} className="hover:bg-muted/30 cursor-pointer transition" onClick={() => navigate(`/app/lecturer/courses/${c.course_id}`)}>
+                        <td className="px-4 py-3">
+                          <p className="font-medium text-foreground text-sm">{c.title}</p>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-muted-foreground tabular-nums">{c.enrollment_count}</td>
+                        <td className="px-4 py-3 text-sm tabular-nums">${c.revenue.toLocaleString()}</td>
+                        <td className="px-4 py-3">
+                          {c.rating_avg ? (
+                            <div className="flex items-center gap-1">
+                              <Star className="h-4 w-4 text-warning fill-warning" />
+                              <span className="text-sm tabular-nums">{c.rating_avg.toFixed(1)}</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">No ratings</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                        {courses.length > 0
+                          ? 'Stat data not yet available'
+                          : 'No courses yet. Create your first course to get started.'}
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
           </Card>
         </div>
 
-        {/* Recent Submissions */}
         <div className="space-y-4">
           <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />
-            Pending Reviews
+            Quick Stats
           </h2>
 
           <Card className="divide-y divide-border">
-            {recentSubmissions.map((submission, i) => (
-              <div key={i} className="p-4 flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent text-sm font-semibold">
-                  {submission.student.split(' ').map(n => n[0]).join('')}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">{submission.student}</p>
-                  <p className="text-xs text-muted-foreground">{submission.course} • {submission.type}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Badge variant={submission.score >= 80 ? 'success' : submission.score >= 60 ? 'warning' : 'default'} label={`${submission.score}%`} />
-                    <span className="text-2xs text-muted-foreground">{submission.time}</span>
-                  </div>
-                </div>
+            <div className="p-4 flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <BookOpen className="h-4 w-4" />
               </div>
-            ))}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground">Total Courses</p>
+                <p className="text-xs text-muted-foreground tabular-nums">{stats?.total_courses ?? 0} courses</p>
+              </div>
+            </div>
+            <div className="p-4 flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-success/10 text-success">
+                <Users className="h-4 w-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground">Total Students</p>
+                <p className="text-xs text-muted-foreground tabular-nums">{stats?.total_students ?? 0} enrolled</p>
+              </div>
+            </div>
+            <div className="p-4 flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-warning/10 text-warning">
+                <Star className="h-4 w-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground">Avg Rating</p>
+                <p className="text-xs text-muted-foreground tabular-nums">{stats?.avg_rating ? `${stats.avg_rating.toFixed(1)} / 5` : 'No ratings yet'}</p>
+              </div>
+            </div>
           </Card>
 
-          {/* Quick Actions */}
           <div className="grid grid-cols-2 gap-3">
             <Button variant="outline" size="sm" onClick={() => navigate('/app/lecturer/students')} className="h-auto py-3 flex-col gap-1.5">
               <Users className="h-5 w-5" />

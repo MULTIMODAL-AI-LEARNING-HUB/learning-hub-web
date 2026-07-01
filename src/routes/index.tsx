@@ -21,15 +21,15 @@ import { EssayGrading } from '../features/study/EssayGrading'
 import { AdminDashboard } from '../features/admin/AdminDashboard'
 import {
   PlaceholderPage,
-  StudentCourses,
-  StudentCourseDetail,
   StudentProfile,
-  LecturerStudents,
-  LecturerAnalytics,
-  LecturerDocuments,
-  LecturerSettings,
-  LecturerProfile,
 } from '../pages/PlaceholderPage'
+import { MyCourses as StudentCourses } from '../features/courses/MyCourses'
+import { CourseDetail as StudentCourseDetail } from '../features/courses/CourseDetail'
+import { LecturerStudents } from '../features/lecturer/LecturerStudents'
+import { LecturerAnalytics } from '../features/lecturer/LecturerAnalytics'
+import { LecturerDocuments } from '../features/lecturer/LecturerDocuments'
+import { LecturerSettings } from '../features/lecturer/LecturerSettings'
+import { LecturerProfile } from '../features/lecturer/LecturerProfile'
 
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/welcome" replace /> },
