@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useParams, useNavigate, Link } from 'react-router-dom'
+import { BookOpen } from 'lucide-react'
 import { coursesApi, enrollmentsApi, type Course, type Enrollment } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -100,8 +101,8 @@ export function CourseDetail() {
   if (!course) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-xl font-semibold">Không tìm thấy khóa học</h2>
-        <Link to="/app/courses" className="text-indigo-600 hover:underline mt-2 block">
+        <h2 className="text-xl font-semibold text-foreground">Không tìm thấy khóa học</h2>
+        <Link to="/app/courses" className="text-primary hover:underline mt-2 block">
           Quay lại danh sách khóa học
         </Link>
       </div>
@@ -112,7 +113,7 @@ export function CourseDetail() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <div className="aspect-video bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center overflow-hidden">
+          <div className="aspect-video bg-gradient-to-br from-primary/5 to-accent/5 rounded-xl flex items-center justify-center overflow-hidden">
             {course.thumbnail_url ? (
               <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover" />
             ) : (
@@ -121,46 +122,46 @@ export function CourseDetail() {
           </div>
 
           <div>
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
               {course.category && (
                 <Badge variant="primary" label={course.category.name} />
               )}
               <Badge variant={course.status === 'published' ? 'success' : 'warning'} label={course.status === 'published' ? 'Đang mở' : course.status} />
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-4">{course.title}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold mb-4 text-foreground">{course.title}</h1>
             <div className="flex items-center gap-4 mb-6">
               <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-lg font-medium">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-lg font-medium text-primary">
                   {course.lecturer?.full_name?.[0] || 'L'}
                 </div>
                 <div>
-                  <p className="font-medium">{course.lecturer?.full_name || 'Giảng viên'}</p>
-                  <p className="text-sm text-gray-500">{course.enrollment_count} học viên</p>
+                  <p className="font-medium text-foreground">{course.lecturer?.full_name || 'Giảng viên'}</p>
+                  <p className="text-sm text-muted-foreground">{course.enrollment_count} học viên</p>
                 </div>
               </div>
             </div>
 
-            <div className="prose max-w-none">
-              <h2 className="text-xl font-semibold mb-3">Mô tả khóa học</h2>
-              <p className="text-gray-700 whitespace-pre-wrap">{course.description}</p>
+            <div className="max-w-none">
+              <h2 className="text-xl font-semibold mb-3 text-foreground">Mô tả khóa học</h2>
+              <p className="text-muted-foreground whitespace-pre-wrap">{course.description}</p>
             </div>
           </div>
 
           <div>
-            <h2 className="text-xl font-semibold mb-4">Nội dung khóa học ({course.materials?.length || 0} bài)</h2>
+            <h2 className="text-xl font-semibold mb-4 text-foreground">Nội dung khóa học ({course.materials?.length || 0} bài)</h2>
             <div className="space-y-2">
               {course.materials?.map((material, index) => (
-                <Card key={material.id} className="flex items-center gap-4 p-4">
-                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium">
+                <Card key={material.id} padding="responsive" className="flex items-center gap-4">
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground shrink-0">
                     {index + 1}
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-lg">{getMaterialIcon(material.material_type)}</span>
-                      <span className="font-medium">{material.title}</span>
+                      <span className="font-medium text-foreground truncate">{material.title}</span>
                       {material.is_preview && <Badge variant="warning" label="Xem trước" />}
                     </div>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       {getMaterialDuration(material) || material.material_type.toUpperCase()}
                     </p>
                   </div>
@@ -176,37 +177,35 @@ export function CourseDetail() {
         </div>
 
         <div className="space-y-4">
-          <Card className="p-6 sticky top-4">
+          <Card padding="responsive" className="lg:sticky lg:top-4">
             <div className="text-center mb-6">
               {course.price === 0 ? (
-                <span className="text-3xl font-bold text-green-600">Miễn phí</span>
+                <span className="text-3xl font-bold text-success">Miễn phí</span>
               ) : (
-                <>
-                  <span className="text-3xl font-bold text-indigo-600">
-                    {new Intl.NumberFormat('vi-VN').format(course.price)}đ
-                  </span>
-                </>
+                <span className="text-3xl font-bold text-primary">
+                  {new Intl.NumberFormat('vi-VN').format(course.price)}đ
+                </span>
               )}
             </div>
 
             {enrollment ? (
               <div className="space-y-3">
-                <div className="text-center text-green-600 font-medium mb-2">
+                <div className="text-center text-success font-medium mb-2">
                   ✓ Bạn đã đăng ký khóa học này
                 </div>
                 <div className="mb-4">
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Tiến độ</span>
-                    <span>{enrollment.progress_percent || 0}%</span>
+                    <span className="text-muted-foreground">Tiến độ</span>
+                    <span className="text-foreground font-medium">{enrollment.progress_percent || 0}%</span>
                   </div>
-                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-indigo-600 transition-all"
+                      className="h-full bg-primary transition-all"
                       style={{ width: `${enrollment.progress_percent || 0}%` }}
                     />
                   </div>
                 </div>
-                <Link to={`/app/courses/${course.id}/learn`} className="w-full">
+                <Link to={`/app/courses/${course.id}/learn`} className="block">
                   <Button className="w-full">Tiếp tục học</Button>
                 </Link>
               </div>
@@ -240,7 +239,7 @@ export function CourseDetail() {
                     >
                       Thanh toán qua MoMo
                     </Button>
-                    <p className="text-xs text-center text-gray-500 mt-2">
+                    <p className="text-xs text-center text-muted-foreground mt-2">
                       Đăng ký = Thanh toán → Học ngay. Không hoàn tiền.
                     </p>
                   </>
@@ -248,21 +247,21 @@ export function CourseDetail() {
               </div>
             )}
 
-            <div className="mt-6 pt-6 border-t space-y-3 text-sm">
-              <div className="flex items-center gap-2 text-gray-600">
-                <span>📚</span>
+            <div className="mt-6 pt-6 border-t border-border space-y-3 text-sm">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <BookOpen className="h-4 w-4 shrink-0" />
                 <span>{course.materials?.length || 0} bài học</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <span>👥</span>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <span role="img" aria-label="students">👥</span>
                 <span>{course.enrollment_count} học viên</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <span>⏱️</span>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <span role="img" aria-label="time">⏱️</span>
                 <span>Học mọi lúc, mọi nơi</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <span>🔄</span>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <span role="img" aria-label="unlimited">🔄</span>
                 <span>Học lại không giới hạn</span>
               </div>
             </div>

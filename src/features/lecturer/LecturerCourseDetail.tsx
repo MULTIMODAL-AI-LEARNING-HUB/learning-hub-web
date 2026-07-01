@@ -55,29 +55,29 @@ export function LecturerCourseDetail() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <button onClick={() => navigate('/app/lecturer/courses')} className="text-sm text-muted-foreground hover:text-foreground mb-2 flex items-center gap-1">
             <ArrowLeft className="h-4 w-4" /> Back to Courses
           </button>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">{course.title}</h1>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-fluid-2xl font-bold text-foreground">{course.title}</h1>
             {getStatusBadge(course.status)}
           </div>
           <p className="text-muted-foreground mt-1">{course.description}</p>
         </div>
-        <Button variant="outline" icon={<Edit className="h-4 w-4" />}>
+        <Button variant="outline" icon={<Edit className="h-4 w-4" />} fullWidthMobile>
           Edit Details
         </Button>
       </div>
 
-      <div className="border-b border-border">
-        <nav className="flex gap-4">
+      <div className="border-b border-border overflow-x-auto">
+        <nav className="flex gap-4 min-w-0">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-1 py-3 text-sm font-medium border-b-2 transition ${
+              className={`shrink-0 px-1 py-3 text-sm font-medium border-b-2 transition ${
                 activeTab === tab.id
                   ? 'border-primary text-foreground'
                   : 'border-transparent text-muted-foreground hover:text-foreground'

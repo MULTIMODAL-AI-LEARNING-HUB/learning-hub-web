@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { Button } from '../../components/ui/Button'
+import { Card } from '../../components/ui/Card'
 import { Badge } from '../../components/ui/Badge'
 import { fileIconEmoji } from '../../utils/fileIcon'
 
@@ -129,77 +130,71 @@ export function HomePage() {
 
       {/* Stats Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Total Documents */}
-        <div className="rounded-2xl border border-border/50 bg-surface-elevated/50 p-5 backdrop-blur-sm shadow-soft hover:border-primary/20 transition-all">
+        <Card padding="responsive" className="backdrop-blur-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Documents</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-500">
-              <FileText className="h-4.5 w-4.5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <FileText className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-foreground">{totalDocs}</span>
+            <span className="text-3xl font-bold tracking-tight text-foreground tabular-nums">{totalDocs}</span>
             <span className="text-xs text-muted-foreground">{readyDocs} ready</span>
           </div>
           <p className="mt-2 text-2xs text-muted-foreground">PDFs, videos, and website URLs</p>
-        </div>
+        </Card>
 
-        {/* AI Quota */}
-        <div className="rounded-2xl border border-border/50 bg-surface-elevated/50 p-5 backdrop-blur-sm shadow-soft hover:border-primary/20 transition-all">
+        <Card padding="responsive" className="backdrop-blur-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">AI Quota Limit</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/10 text-purple-500">
-              <Cpu className="h-4.5 w-4.5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10 text-accent">
+              <Cpu className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-foreground">{tokensPercent}%</span>
+            <span className="text-3xl font-bold tracking-tight text-foreground tabular-nums">{tokensPercent}%</span>
             <span className="text-xs text-muted-foreground">{tokensUsed.toLocaleString()} / {tokensTotal.toLocaleString()} tokens</span>
           </div>
-          {/* Progress bar */}
           <div className="mt-3.5 h-1.5 w-full rounded-full bg-muted overflow-hidden">
             <div
               className="h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all duration-500"
               style={{ width: `${tokensPercent}%` }}
             />
           </div>
-        </div>
+        </Card>
 
-        {/* Storage Quota */}
-        <div className="rounded-2xl border border-border/50 bg-surface-elevated/50 p-5 backdrop-blur-sm shadow-soft hover:border-primary/20 transition-all">
+        <Card padding="responsive" className="backdrop-blur-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cloud Storage</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-pink-500/10 text-pink-500">
-              <HardDrive className="h-4.5 w-4.5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/10 text-success">
+              <HardDrive className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-foreground">{storagePercent}%</span>
+            <span className="text-3xl font-bold tracking-tight text-foreground tabular-nums">{storagePercent}%</span>
             <span className="text-xs text-muted-foreground">{storageUsed.toFixed(1)} / {storageTotal} MB</span>
           </div>
-          {/* Progress bar */}
           <div className="mt-3.5 h-1.5 w-full rounded-full bg-muted overflow-hidden">
             <div
-              className="h-full rounded-full bg-pink-500 transition-all duration-500"
+              className="h-full rounded-full bg-success transition-all duration-500"
               style={{ width: `${storagePercent}%` }}
             />
           </div>
-        </div>
+        </Card>
 
-        {/* Chat Sessions */}
-        <div className="rounded-2xl border border-border/50 bg-surface-elevated/50 p-5 backdrop-blur-sm shadow-soft hover:border-primary/20 transition-all">
+        <Card padding="responsive" className="backdrop-blur-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">AI Sessions</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500">
-              <MessageSquare className="h-4.5 w-4.5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-warning/10 text-warning">
+              <MessageSquare className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-foreground">{activeSessions}</span>
+            <span className="text-3xl font-bold tracking-tight text-foreground tabular-nums">{activeSessions}</span>
             <span className="text-xs text-muted-foreground">active chats</span>
           </div>
           <p className="mt-2 text-2xs text-muted-foreground">Interactive text and citation maps</p>
-        </div>
+        </Card>
       </div>
 
       {/* Quick Actions (Large Cards) */}

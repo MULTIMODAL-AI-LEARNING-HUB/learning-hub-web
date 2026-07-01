@@ -88,15 +88,15 @@ export function LecturerCourses() {
   if (viewMode === 'content' && selectedCourse) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <button onClick={() => setViewMode('list')} className="text-sm text-muted-foreground hover:text-foreground mb-2">
+            <button onClick={() => setViewMode('list')} className="text-sm text-muted-foreground hover:text-foreground mb-2 flex items-center gap-1">
               ← Back to Courses
             </button>
-            <h1 className="text-2xl font-bold">{selectedCourse.title}</h1>
-            {getStatusBadge(selectedCourse.status)}
+            <h1 className="text-2xl font-bold text-foreground">{selectedCourse.title}</h1>
+            <div className="mt-1">{getStatusBadge(selectedCourse.status)}</div>
           </div>
-          <Button variant="outline" onClick={() => openEditModal(selectedCourse)} icon={<Edit className="h-4 w-4" />}>
+          <Button variant="outline" onClick={() => openEditModal(selectedCourse)} icon={<Edit className="h-4 w-4" />} fullWidthMobile>
             Edit Details
           </Button>
         </div>
@@ -109,7 +109,7 @@ export function LecturerCourses() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">My Courses</h1>
+          <h1 className="text-fluid-2xl font-bold text-foreground">My Courses</h1>
           <p className="text-muted-foreground">Manage your courses and content</p>
         </div>
         <Button onClick={() => setShowCreateModal(true)} icon={<Plus className="h-4 w-4" />} variant="gradient">
@@ -119,33 +119,33 @@ export function LecturerCourses() {
 
       {stats && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="p-4">
+          <Card padding="responsive">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-muted-foreground uppercase">Total Courses</span>
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Courses</span>
               <BookOpen className="h-4 w-4 text-primary" />
             </div>
-            <p className="text-2xl font-bold mt-2">{stats.total_courses}</p>
+            <p className="text-2xl font-bold mt-2 text-foreground tabular-nums">{stats.total_courses}</p>
           </Card>
-          <Card className="p-4">
+          <Card padding="responsive">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-muted-foreground uppercase">Total Students</span>
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Students</span>
               <Users className="h-4 w-4 text-accent" />
             </div>
-            <p className="text-2xl font-bold mt-2">{stats.total_students}</p>
+            <p className="text-2xl font-bold mt-2 text-foreground tabular-nums">{stats.total_students}</p>
           </Card>
-          <Card className="p-4">
+          <Card padding="responsive">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-muted-foreground uppercase">Avg Rating</span>
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Avg Rating</span>
               <Star className="h-4 w-4 text-warning" />
             </div>
-            <p className="text-2xl font-bold mt-2">{stats.avg_rating.toFixed(1)}</p>
+            <p className="text-2xl font-bold mt-2 text-foreground tabular-nums">{stats.avg_rating.toFixed(1)}</p>
           </Card>
-          <Card className="p-4">
+          <Card padding="responsive">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-muted-foreground uppercase">Revenue</span>
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Revenue</span>
               <BarChart3 className="h-4 w-4 text-success" />
             </div>
-            <p className="text-2xl font-bold mt-2">${stats.total_revenue.toLocaleString()}</p>
+            <p className="text-2xl font-bold mt-2 text-foreground tabular-nums">${stats.total_revenue.toLocaleString()}</p>
           </Card>
         </div>
       )}

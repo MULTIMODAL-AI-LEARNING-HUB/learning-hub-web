@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Plus } from 'lucide-react'
 import { coursesApi, enrollmentsApi, type Course, type Enrollment } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -75,28 +76,28 @@ export function CourseManage() {
   if (!isLecturer) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-xl font-semibold mb-2">Không có quyền truy cập</h2>
-        <p className="text-gray-600">Chỉ giảng viên mới có thể quản lý khóa học</p>
+        <h2 className="text-xl font-semibold mb-2 text-foreground">Không có quyền truy cập</h2>
+        <p className="text-muted-foreground">Chỉ giảng viên mới có thể quản lý khóa học</p>
       </div>
     )
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Quản lý khóa học</h1>
-          <p className="text-gray-600">Tạo và quản lý các khóa học của bạn</p>
+          <h1 className="text-fluid-2xl font-bold text-foreground">Quản lý khóa học</h1>
+          <p className="text-muted-foreground">Tạo và quản lý các khóa học của bạn</p>
         </div>
-        <Button onClick={() => setShowCreateModal(true)}>
-          + Tạo khóa học mới
+        <Button onClick={() => setShowCreateModal(true)} icon={<Plus className="h-4 w-4" />} fullWidthMobile>
+          Tạo khóa học mới
         </Button>
       </div>
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, i) => (
-            <Card key={i} className="p-4">
+            <Card key={i} padding="responsive">
               <Skeleton className="h-32 mb-4" />
               <Skeleton className="h-4 w-full mb-2" />
               <Skeleton className="h-4 w-3/4" />
@@ -104,17 +105,17 @@ export function CourseManage() {
           ))}
         </div>
       ) : courses.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
+        <Card padding="responsive" className="text-center py-12">
           <span className="text-4xl mb-4 block">📚</span>
-          <h3 className="text-lg font-medium mb-2">Chưa có khóa học nào</h3>
-          <p className="text-gray-600 mb-4">Tạo khóa học đầu tiên của bạn</p>
+          <h3 className="text-lg font-medium mb-2 text-foreground">Chưa có khóa học nào</h3>
+          <p className="text-muted-foreground mb-4">Tạo khóa học đầu tiên của bạn</p>
           <Button onClick={() => setShowCreateModal(true)}>Tạo khóa học</Button>
-        </div>
+        </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {courses.map((course) => (
-            <Card key={course.id} className="p-4">
-              <div className="aspect-video bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+            <Card key={course.id} padding="responsive">
+              <div className="aspect-video bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
                 {course.thumbnail_url ? (
                   <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover" />
                 ) : (
@@ -123,24 +124,24 @@ export function CourseManage() {
               </div>
               <div className="space-y-2">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-semibold line-clamp-1">{course.title}</h3>
-                  <Badge variant={course.status === 'published' ? 'success' : 'warning'} label={course.status === 'published' ? 'Đã xuất bản' : course.status} />
+                  <h3 className="font-semibold line-clamp-1 text-foreground">{course.title}</h3>
+                  <Badge variant={course.status === 'published' ? 'success' : 'warning'} label={course.status === 'published' ? 'Đã xuất bản' : course.status} className="shrink-0" />
                 </div>
-                <p className="text-sm text-gray-600 line-clamp-2">{course.description}</p>
-                <div className="flex items-center justify-between text-sm pt-2 border-t">
-                  <span className="text-gray-500">
+                <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
+                <div className="flex items-center justify-between text-sm pt-2 border-t border-border">
+                  <span className="text-muted-foreground">
                     {getEnrollmentCount(course.id)} học viên
                   </span>
-                  <span className="font-medium text-indigo-600">
+                  <span className="font-medium text-primary">
                     {new Intl.NumberFormat('vi-VN').format(getTotalRevenue(course.id))}đ
                   </span>
                 </div>
                 <div className="flex gap-2 pt-2">
                   <Link to={`/app/courses/${course.id}`} className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full">Xem</Button>
+                    <Button variant="outline" size="sm" fullWidth>Xem</Button>
                   </Link>
                   <Link to={`/app/courses/${course.id}/edit`} className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full">Sửa</Button>
+                    <Button variant="outline" size="sm" fullWidth>Sửa</Button>
                   </Link>
                 </div>
               </div>

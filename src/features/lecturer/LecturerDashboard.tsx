@@ -4,6 +4,7 @@ import { useAppStore } from '../../stores/appStore'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { Badge } from '../../components/ui/Badge'
+import { cn } from '../../utils/cn'
 
 export function LecturerDashboard() {
   const navigate = useNavigate()
@@ -17,10 +18,10 @@ export function LecturerDashboard() {
   }
 
   const stats = [
-    { label: 'Total Courses', value: 5, icon: BookOpen, color: 'primary' },
-    { label: 'Total Students', value: 128, icon: Users, color: 'accent' },
-    { label: 'Avg Completion', value: '72%', icon: TrendingUp, color: 'success' },
-    { label: 'Pending Reviews', value: 12, icon: Award, color: 'warning' },
+    { label: 'Total Courses', value: 5, icon: BookOpen, variant: 'primary' as const },
+    { label: 'Total Students', value: 128, icon: Users, variant: 'accent' as const },
+    { label: 'Avg Completion', value: '72%', icon: TrendingUp, variant: 'success' as const },
+    { label: 'Pending Reviews', value: 12, icon: Award, variant: 'warning' as const },
   ]
 
   const courses = [
@@ -41,7 +42,7 @@ export function LecturerDashboard() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">
+          <h1 className="text-fluid-2xl font-bold text-foreground">
             {getGreeting()}, {user?.name?.split(' ')[0]}! 👨‍🏫
           </h1>
           <p className="text-muted-foreground mt-1">Here's an overview of your teaching activity.</p>
@@ -55,11 +56,17 @@ export function LecturerDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => {
           const Icon = stat.icon
+          const iconColors: Record<string, string> = {
+            primary: 'bg-primary/10 text-primary',
+            accent: 'bg-accent/10 text-accent',
+            success: 'bg-success/10 text-success',
+            warning: 'bg-warning/10 text-warning',
+          }
           return (
-            <Card key={stat.label} className="p-4">
+            <Card key={stat.label} padding="responsive">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{stat.label}</span>
-                <div className={`flex h-8 w-8 items-center justify-center rounded-lg bg-${stat.color}/10 text-${stat.color}`}>
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider min-w-0 truncate">{stat.label}</span>
+                <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', iconColors[stat.variant] || 'bg-muted text-foreground')}>
                   <Icon className="h-4 w-4" />
                 </div>
               </div>

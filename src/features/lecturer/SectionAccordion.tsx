@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { ChevronDown, ChevronRight, Plus, Pencil, Trash2, GripVertical, Video, FileText, HelpCircle, ClipboardList } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
+import { Badge } from '../../components/ui/Badge'
 import { Modal } from '../../components/ui/Modal'
 import { useLessons } from '../../hooks/useLessons'
 import type { Section, Lesson } from '../../services/api'
-
 interface SectionAccordionProps {
   section: Section
   onSectionUpdate: (sectionId: string, data: { title?: string; description?: string }) => void
@@ -41,11 +41,11 @@ export function SectionAccordion({
 
   const getLessonIcon = (type: string) => {
     switch (type) {
-      case 'VIDEO': return <Video className="h-4 w-4 text-blue-500" />
-      case 'ARTICLE': return <FileText className="h-4 w-4 text-green-500" />
-      case 'QUIZ': return <HelpCircle className="h-4 w-4 text-purple-500" />
-      case 'ASSIGNMENT': return <ClipboardList className="h-4 w-4 text-orange-500" />
-      default: return <FileText className="h-4 w-4" />
+      case 'VIDEO': return <Video className="h-4 w-4 text-primary" />
+      case 'ARTICLE': return <FileText className="h-4 w-4 text-success" />
+      case 'QUIZ': return <HelpCircle className="h-4 w-4 text-accent" />
+      case 'ASSIGNMENT': return <ClipboardList className="h-4 w-4 text-warning" />
+      default: return <FileText className="h-4 w-4 text-muted-foreground" />
     }
   }
 
@@ -95,34 +95,42 @@ export function SectionAccordion({
                   variant="ghost"
                   icon={<Plus className="h-4 w-4" />}
                   onClick={() => setShowAddMenu(!showAddMenu)}
+                  className="hidden sm:inline-flex"
                 >
                   Add Lesson
                 </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  icon={<Plus className="h-4 w-4" />}
+                  onClick={() => setShowAddMenu(!showAddMenu)}
+                  className="sm:hidden"
+                />
                 {showAddMenu && (
-                  <div className="absolute right-0 top-full mt-1 w-48 bg-popover border border-border rounded-lg shadow-lg z-10 py-1">
+                  <div className="absolute right-0 top-full mt-1 min-w-44 bg-surface-elevated border border-border rounded-lg shadow-lift z-10 py-1 animate-zoom-in-95">
                     <button
                       onClick={() => { onAddLesson(section.id, 'VIDEO'); setShowAddMenu(false) }}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-muted flex items-center gap-2"
+                      className="w-full px-3 py-2.5 text-left text-sm hover:bg-muted flex items-center gap-2 text-foreground"
                     >
-                      <Video className="h-4 w-4 text-blue-500" /> Video
+                      <Video className="h-4 w-4 text-primary" /> Video
                     </button>
                     <button
                       onClick={() => { onAddLesson(section.id, 'ARTICLE'); setShowAddMenu(false) }}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-muted flex items-center gap-2"
+                      className="w-full px-3 py-2.5 text-left text-sm hover:bg-muted flex items-center gap-2 text-foreground"
                     >
-                      <FileText className="h-4 w-4 text-green-500" /> Article
+                      <FileText className="h-4 w-4 text-success" /> Article
                     </button>
                     <button
                       onClick={() => { onAddLesson(section.id, 'QUIZ'); setShowAddMenu(false) }}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-muted flex items-center gap-2"
+                      className="w-full px-3 py-2.5 text-left text-sm hover:bg-muted flex items-center gap-2 text-foreground"
                     >
-                      <HelpCircle className="h-4 w-4 text-purple-500" /> Quiz
+                      <HelpCircle className="h-4 w-4 text-accent" /> Quiz
                     </button>
                     <button
                       onClick={() => { onAddLesson(section.id, 'ASSIGNMENT'); setShowAddMenu(false) }}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-muted flex items-center gap-2"
+                      className="w-full px-3 py-2.5 text-left text-sm hover:bg-muted flex items-center gap-2 text-foreground"
                     >
-                      <ClipboardList className="h-4 w-4 text-orange-500" /> Assignment
+                      <ClipboardList className="h-4 w-4 text-warning" /> Assignment
                     </button>
                   </div>
                 )}
@@ -162,9 +170,9 @@ export function SectionAccordion({
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {lesson.has_quiz && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">Quiz</span>}
-                {lesson.has_assignment && <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded">Assignment</span>}
-                {lesson.is_preview && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Preview</span>}
+                {lesson.has_quiz && <Badge variant="primary" label="Quiz" />}
+                {lesson.has_assignment && <Badge variant="warning" label="Assignment" />}
+                {lesson.is_preview && <Badge variant="info" label="Preview" />}
               </div>
             </div>
           ))}

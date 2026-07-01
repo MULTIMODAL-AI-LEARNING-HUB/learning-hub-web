@@ -4,6 +4,7 @@ import { cn } from '../../utils/cn'
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: 'default' | 'elevated' | 'outlined' | 'ghost'
   interactive?: boolean
+  padding?: 'none' | 'sm' | 'md' | 'lg' | 'responsive'
 }
 
 const variants = {
@@ -17,9 +18,18 @@ const variants = {
     'bg-surface border border-transparent'
 }
 
+const paddings = {
+  none: '',
+  sm: 'p-3',
+  md: 'p-4',
+  lg: 'p-5',
+  responsive: 'p-3 sm:p-4 lg:p-5'
+}
+
 export function Card({
   variant = 'default',
   interactive = false,
+  padding,
   className,
   children,
   ...rest
@@ -29,6 +39,7 @@ export function Card({
       className={cn(
         'rounded-2xl transition-all duration-200',
         variants[variant],
+        padding && paddings[padding],
         interactive && 'cursor-pointer hover:shadow-lift hover:-translate-y-0.5 hover:border-primary/30',
         className
       )}
@@ -42,7 +53,7 @@ export function Card({
 function CardHeader({ className, children, ...rest }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('px-5 py-4 border-b border-border', className)}
+      className={cn('px-4 sm:px-5 py-3 sm:py-4 border-b border-border', className)}
       {...rest}
     >
       {children}
@@ -52,7 +63,7 @@ function CardHeader({ className, children, ...rest }: HTMLAttributes<HTMLDivElem
 
 function CardBody({ className, children, ...rest }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('p-5', className)} {...rest}>
+    <div className={cn('p-4 sm:p-5', className)} {...rest}>
       {children}
     </div>
   )
@@ -61,7 +72,7 @@ function CardBody({ className, children, ...rest }: HTMLAttributes<HTMLDivElemen
 function CardFooter({ className, children, ...rest }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('px-5 py-3 border-t border-border bg-muted/30 rounded-b-2xl', className)}
+      className={cn('px-4 sm:px-5 py-3 border-t border-border bg-muted/30 rounded-b-2xl', className)}
       {...rest}
     >
       {children}

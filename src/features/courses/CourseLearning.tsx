@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useParams, useSearchParams, Link } from 'react-router-dom'
+import { Menu, X } from 'lucide-react'
 import { coursesApi, enrollmentsApi, type Course, type Enrollment, type MaterialProgress } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { Progress } from '../../components/ui/Progress'
+import { cn } from '../../utils/cn'
 
 export function CourseLearning() {
   const { id } = useParams<{ id: string }>()
@@ -17,6 +19,7 @@ export function CourseLearning() {
   const [currentMaterialId, setCurrentMaterialId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const loadData = useCallback(async () => {
     if (!id) return
@@ -143,10 +146,30 @@ export function CourseLearning() {
   }
 
   return (
-    <div className="flex gap-6 h-full">
-      <div className="w-72 border-r pr-4 flex-shrink-0">
+    <div className="flex flex-col lg:flex-row gap-6 h-full">
+      {/* Mobile sidebar toggle */}
+      <div className="flex items-center gap-2 lg:hidden mb-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label="Toggle lessons"
+        >
+          {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+        </Button>
+        <Link to={`/app/courses/${id}`} className="text-sm text-primary hover:underline">
+          ← Quay lại
+        </Link>
+      </div>
+
+      {/* Sidebar - desktop fixed, mobile drawer */}
+      <div className={cn(
+        'w-full lg:w-72 lg:border-r lg:pr-4 lg:flex-shrink-0',
+        'lg:block',
+        sidebarOpen ? 'block' : 'hidden lg:block'
+      )}>
         <div className="mb-4">
-          <Link to={`/app/courses/${id}`} className="text-sm text-indigo-600 hover:underline flex items-center gap-1 mb-2">
+          <Link to={`/app/courses/${id}`} className="text-sm text-primary hover:underline hidden lg:flex items-center gap-1 mb-2">
             ← Quay lại khóa học
           </Link>
           <h2 className="font-semibold line-clamp-2">{course.title}</h2>
@@ -157,7 +180,7 @@ export function CourseLearning() {
             </div>
             <Progress value={enrollment.progress_percent || 0} />
           </div>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             {completedCount}/{totalCount} bài đã hoàn thành
           </p>
         </div>
@@ -168,22 +191,24 @@ export function CourseLearning() {
             return (
               <button
                 key={material.id}
-                onClick={() => goToMaterial(material.id)}
-                className={`w-full text-left p-3 rounded-lg transition-colors ${
-                  isActive ? 'bg-indigo-50 border border-indigo-200' : 'hover:bg-gray-50'
-                }`}
+                onClick={() => { goToMaterial(material.id); setSidebarOpen(false) }}
+                className={cn(
+                  'w-full text-left p-3 rounded-lg transition-colors text-foreground',
+                  isActive ? 'bg-primary/10 border border-primary/30' : 'hover:bg-muted'
+                )}
               >
                 <div className="flex items-start gap-3">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5 ${
-                    isCompleted ? 'bg-green-100 text-green-600' : 'bg-gray-100'
-                  }`}>
+                  <div className={cn(
+                    'w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5',
+                    isCompleted ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'
+                  )}>
                     {isCompleted ? '✓' : index + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium line-clamp-2 ${isCompleted ? 'text-green-600' : ''}`}>
+                    <p className={cn('text-sm font-medium line-clamp-2', isCompleted && 'text-success')}>
                       {material.title}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {getMaterialIcon(material.material_type)} {material.material_type.toUpperCase()}
                       {material.is_preview && ' • Xem trước'}
                     </p>
@@ -195,23 +220,24 @@ export function CourseLearning() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      {/* Main content */}
+      <div className="flex-1 min-w-0">
         {currentMaterial ? (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">{currentMaterial.title}</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <h2 className="text-lg sm:text-xl font-semibold">{currentMaterial.title}</h2>
               <div className="flex items-center gap-2">
                 {progress.get(currentMaterial.id)?.completed ? (
                   <Badge variant="success" label="Đã hoàn thành" />
                 ) : (
-                  <Button onClick={markComplete} disabled={updating}>
+                  <Button onClick={markComplete} disabled={updating} size="sm">
                     {updating ? 'Đang lưu...' : 'Đánh dấu hoàn thành'}
                   </Button>
                 )}
               </div>
             </div>
 
-            <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+            <div className="aspect-video bg-muted rounded-lg flex items-center justify-center overflow-hidden">
               {currentMaterial.material_type === 'video' && currentMaterial.file_url ? (
                 <video
                   src={currentMaterial.file_url}
@@ -236,13 +262,13 @@ export function CourseLearning() {
               ) : (
                 <div className="text-center p-8">
                   <span className="text-4xl mb-4 block">{getMaterialIcon(currentMaterial.material_type)}</span>
-                  <p>Không thể xem trước tài liệu này</p>
+                  <p className="text-muted-foreground">Không thể xem trước tài liệu này</p>
                   {currentMaterial.external_url && (
                     <a
                       href={currentMaterial.external_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-indigo-600 hover:underline mt-2 block"
+                      className="text-primary hover:underline mt-2 block"
                     >
                       Mở trong tab mới
                     </a>
@@ -251,10 +277,11 @@ export function CourseLearning() {
               )}
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {currentMaterialId !== course.materials?.[0]?.id && (
                 <Button
                   variant="outline"
+                  size="sm"
                   onClick={() => {
                     const idx = course.materials?.findIndex(m => m.id === currentMaterialId) ?? -1
                     if (idx > 0 && course.materials) {
@@ -268,6 +295,7 @@ export function CourseLearning() {
               {currentMaterialId !== course.materials?.[course.materials?.length - 1]?.id && (
                 <Button
                   variant="outline"
+                  size="sm"
                   onClick={() => {
                     const idx = course.materials?.findIndex(m => m.id === currentMaterialId) ?? -1
                     if (course.materials && idx < course.materials.length - 1) {
@@ -280,24 +308,24 @@ export function CourseLearning() {
               )}
             </div>
 
-            <Card className="p-4 mt-6">
+            <Card padding="responsive" className="mt-6">
               <h3 className="font-semibold mb-2">Chat với AI về bài học này</h3>
-              <p className="text-sm text-gray-600 mb-3">
+              <p className="text-sm text-muted-foreground mb-3">
                 Hỏi đáp, tóm tắt, hoặc tạo quiz từ nội dung bài học
               </p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Link to={`/app/chat?course_id=${id}&material_id=${currentMaterialId}`}>
-                  <Button>Mở Chat AI</Button>
+                  <Button size="sm">Mở Chat AI</Button>
                 </Link>
                 <Link to={`/app/courses/${id}/quiz`}>
-                  <Button variant="outline">Làm Quiz</Button>
+                  <Button variant="outline" size="sm">Làm Quiz</Button>
                 </Link>
               </div>
             </Card>
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-500">Chọn một bài học để bắt đầu</p>
+            <p className="text-muted-foreground">Chọn một bài học để bắt đầu</p>
           </div>
         )}
       </div>

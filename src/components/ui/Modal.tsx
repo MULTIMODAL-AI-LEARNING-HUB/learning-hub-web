@@ -9,15 +9,17 @@ interface ModalProps {
   children: ReactNode
   footer?: ReactNode
   onClose?: () => void
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
   hideClose?: boolean
+  fullScreenOnMobile?: boolean
 }
 
 const sizes = {
   sm: 'max-w-sm',
   md: 'max-w-md',
   lg: 'max-w-lg',
-  xl: 'max-w-2xl'
+  xl: 'max-w-2xl',
+  full: 'max-w-full'
 }
 
 export function Modal({
@@ -28,7 +30,8 @@ export function Modal({
   footer,
   onClose,
   size = 'md',
-  hideClose = false
+  hideClose = false,
+  fullScreenOnMobile = true
 }: ModalProps) {
   useEffect(() => {
     if (open) {
@@ -61,7 +64,10 @@ export function Modal({
         aria-modal="true"
         aria-label={title}
         className={cn(
-          'relative w-full rounded-2xl border border-border bg-surface-elevated shadow-lift',
+          'relative w-full border border-border bg-surface-elevated shadow-lift',
+          fullScreenOnMobile
+            ? 'h-full max-h-screen rounded-none sm:rounded-2xl sm:h-auto sm:max-h-[85vh]'
+            : 'rounded-2xl',
           'animate-slide-in-from-bottom',
           sizes[size]
         )}

@@ -7,11 +7,13 @@ type Size = 'sm' | 'md' | 'lg' | 'icon'
 interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'type'> {
   variant?: Variant
   size?: Size
+  responsiveSize?: boolean
   loading?: boolean
   icon?: ReactNode
   iconRight?: ReactNode
   type?: 'button' | 'submit' | 'reset'
   fullWidth?: boolean
+  fullWidthMobile?: boolean
   as?: ElementType
 }
 
@@ -42,6 +44,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     {
       variant = 'primary',
       size = 'md',
+      responsiveSize = false,
       disabled = false,
       loading = false,
       icon,
@@ -49,12 +52,17 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       type = 'button',
       fullWidth = false,
+      fullWidthMobile = false,
       className = '',
       as: Component = 'button',
       ...rest
     },
     ref
   ) => {
+    const sizeClasses = responsiveSize
+      ? 'h-8 px-3 text-xs rounded-lg gap-1.5 sm:h-9 sm:px-4 sm:text-sm sm:rounded-lg sm:gap-2'
+      : sizes[size]
+
     return (
       <Component
         ref={ref}
@@ -65,8 +73,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           'active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background',
           variants[variant],
-          sizes[size],
+          sizeClasses,
           fullWidth && 'w-full',
+          fullWidthMobile && 'w-full sm:w-auto',
           className
         )}
         {...rest}

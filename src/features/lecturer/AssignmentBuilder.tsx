@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { X, ClipboardList, FileText } from 'lucide-react'
+import { X, ClipboardList, FileText, Plus } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
@@ -13,15 +13,6 @@ interface AssignmentBuilderProps {
   lessonId: string
   isOpen: boolean
   onClose: () => void
-}
-
-function Plus({ className }: { className?: string }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <line x1="12" y1="5" x2="12" y2="19" />
-      <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-  )
 }
 
 export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuilderProps) {
@@ -122,10 +113,12 @@ export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuild
       <div className="bg-card rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <ClipboardList className="h-5 w-5 text-orange-500" />
-            <h2 className="text-lg font-semibold">Assignment Builder</h2>
+            <ClipboardList className="h-5 w-5 text-warning" />
+            <h2 className="text-lg font-semibold text-foreground">Assignment Builder</h2>
           </div>
-          <Button variant="ghost" size="sm" icon={<X className="h-5 w-5" />} onClick={onClose} />
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">
+            <X className="h-5 w-5" />
+          </Button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -155,7 +148,7 @@ export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuild
                 <label className="text-sm font-medium">Instructions</label>
                 <Textarea value={instructions} onChange={(e) => setInstructions(e.target.value)} className="mt-1" rows={4} placeholder="Detailed instructions for students..." />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">Deadline</label>
                   <Input type="datetime-local" value={deadline} onChange={setDeadline} className="mt-1" />
@@ -175,7 +168,7 @@ export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuild
           {assignment && (
             <>
               <Card className="p-4 space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <Input
                       value={title}

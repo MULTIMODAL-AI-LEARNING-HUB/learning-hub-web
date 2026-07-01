@@ -33,7 +33,7 @@ export function StudentDashboard() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">
+          <h1 className="text-fluid-2xl font-bold text-foreground">
             {getGreeting()}, {user?.name?.split(' ')[0]}! 👋
           </h1>
           <p className="text-muted-foreground mt-1">Ready to continue learning today?</p>
@@ -45,47 +45,47 @@ export function StudentDashboard() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4">
+        <Card padding="responsive">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Enrolled</span>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <BookOpen className="h-4 w-4" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-foreground mt-2">{courses.length}</p>
+          <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">{courses.length}</p>
           <p className="text-xs text-muted-foreground">Active courses</p>
         </Card>
 
-        <Card className="p-4">
+        <Card padding="responsive">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Documents</span>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10 text-accent">
               <FileText className="h-4 w-4" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-foreground mt-2">12</p>
+          <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">12</p>
           <p className="text-xs text-muted-foreground">Uploaded files</p>
         </Card>
 
-        <Card className="p-4">
+        <Card padding="responsive">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">AI Sessions</span>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/10 text-success">
               <MessageSquare className="h-4 w-4" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-foreground mt-2">8</p>
+          <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">8</p>
           <p className="text-xs text-muted-foreground">Chat sessions</p>
         </Card>
 
-        <Card className="p-4">
+        <Card padding="responsive">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Avg Score</span>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-warning/10 text-warning">
               <Award className="h-4 w-4" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-foreground mt-2">78%</p>
+          <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">78%</p>
           <p className="text-xs text-muted-foreground">Quiz average</p>
         </Card>
       </div>
@@ -106,7 +106,7 @@ export function StudentDashboard() {
 
           <div className="grid md:grid-cols-2 gap-4">
             {courses.map((course) => (
-              <Card key={course.id} className="p-4 cursor-pointer hover:shadow-lift transition-all" onClick={() => navigate(`/app/student/courses/${course.id}`)}>
+              <Card key={course.id} padding="responsive" className="cursor-pointer hover:shadow-lift transition-all" onClick={() => navigate(`/app/student/courses/${course.id}`)}>
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <BookOpen className="h-5 w-5" />

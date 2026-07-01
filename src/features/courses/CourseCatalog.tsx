@@ -102,7 +102,7 @@ export function CourseCatalog() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Khóa học</h1>
+          <h1 className="text-fluid-2xl font-bold text-foreground">Khóa học</h1>
           <p className="text-gray-600">Khám phá các khóa học chất lượng từ giảng viên</p>
         </div>
         <div className="flex gap-2 w-full md:w-auto">

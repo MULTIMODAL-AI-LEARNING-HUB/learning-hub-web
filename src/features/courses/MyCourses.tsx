@@ -43,9 +43,9 @@ export function MyCourses() {
   }
 
   const EnrollmentCard = ({ enrollment }: { enrollment: Enrollment }) => (
-    <Card className="p-4">
-      <div className="flex gap-4">
-        <div className="w-32 h-20 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+    <Card padding="responsive">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="w-full sm:w-32 h-24 sm:h-20 bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
           {enrollment.course?.thumbnail_url ? (
             <img src={enrollment.course.thumbnail_url} alt={enrollment.course?.title} className="w-full h-full object-cover" />
           ) : (
@@ -54,24 +54,24 @@ export function MyCourses() {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-1">
-            <Link to={`/app/courses/${enrollment.course_id}`} className="font-semibold hover:text-indigo-600 line-clamp-1">
+            <Link to={`/app/courses/${enrollment.course_id}`} className="font-semibold text-foreground hover:text-primary line-clamp-1">
               {enrollment.course?.title || 'Khóa học'}
             </Link>
-            {enrollment.status === 'completed' && <Badge variant="success" label="Hoàn thành" />}
+            {enrollment.status === 'completed' && <Badge variant="success" label="Hoàn thành" className="shrink-0" />}
           </div>
-          <p className="text-sm text-gray-600 mb-2 line-clamp-1">
+          <p className="text-sm text-muted-foreground mb-2 line-clamp-1">
             {enrollment.course?.description}
           </p>
           <div className="flex items-center gap-4">
             <div className="flex-1">
               <div className="flex justify-between text-xs mb-1">
-                <span>Tiến độ</span>
-                <span>{enrollment.progress_percent || 0}%</span>
+                <span className="text-muted-foreground">Tiến độ</span>
+                <span className="text-foreground font-medium">{enrollment.progress_percent || 0}%</span>
               </div>
               <Progress value={enrollment.progress_percent || 0} className="h-1.5" />
             </div>
-            <span className="text-xs text-gray-500">
-              Đăng ký: {formatDate(enrollment.enrolled_at)}
+            <span className="text-xs text-muted-foreground shrink-0">
+              {formatDate(enrollment.enrolled_at)}
             </span>
           </div>
         </div>
@@ -94,7 +94,7 @@ export function MyCourses() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Khóa học của tôi</h1>
+        <h1 className="text-fluid-2xl font-bold text-foreground">Khóa học của tôi</h1>
         <p className="text-gray-600">Theo dõi tiến độ học tập của bạn</p>
       </div>
 

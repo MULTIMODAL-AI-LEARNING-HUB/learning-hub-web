@@ -141,9 +141,11 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-card rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <h2 className="text-lg font-semibold">Quiz Builder</h2>
-          <Button variant="ghost" size="sm" icon={<X className="h-5 w-5" />} onClick={onClose} />
+        <div className="flex items-center justify-between px-4 py-3 sm:p-4 border-b border-border">
+          <h2 className="text-lg font-semibold text-foreground">Quiz Builder</h2>
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">
+            <X className="h-5 w-5" />
+          </Button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -169,7 +171,7 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
                 <label className="text-sm font-medium">Description</label>
                 <Textarea value={quizDescription} onChange={(e) => setQuizDescription(e.target.value)} className="mt-1" rows={2} />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="text-sm font-medium">Passing Score (%)</label>
                   <Input type="number" value={passingScore} onChange={(v) => setPassingScore(parseInt(v))} className="mt-1" min={0} max={100} />
@@ -205,7 +207,7 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
                   </div>
                   <Button variant="danger" size="sm" onClick={handleDeleteQuiz}>Delete Quiz</Button>
                 </div>
-                <div className="grid grid-cols-4 gap-4 text-sm">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
                   <div>
                     <span className="text-muted-foreground">Passing Score: </span>
                     <span className="font-medium">{quiz.passing_score}%</span>
