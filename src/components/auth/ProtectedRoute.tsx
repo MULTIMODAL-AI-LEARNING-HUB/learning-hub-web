@@ -35,7 +35,12 @@ export function RoleRoute({ children, allowedRoles }: ProtectedRouteProps) {
     return <Navigate to="/welcome" replace />
   }
 
-  if (!user?.role || (allowedRoles && !allowedRoles.includes(user.role))) {
+  if (!user) {
+    return null
+  }
+
+  const userRole = user.role?.toLowerCase()
+  if (!userRole || (allowedRoles && !allowedRoles.map(r => r.toLowerCase()).includes(userRole))) {
     return <Navigate to="/unauthorized" replace />
   }
 
