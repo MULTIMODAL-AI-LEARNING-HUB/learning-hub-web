@@ -383,6 +383,12 @@ export interface MaterialProgress {
 export const categoriesApi = {
   list: () => api.get<Category[]>('/categories'),
   get: (id: string) => api.get<Category>(`/categories/${id}`),
+  getTree: () => api.get<Category[]>(`/categories/tree`),
+  create: (data: { name: string; slug: string; description?: string; icon?: string; parent_id?: string }) =>
+    api.post<Category>('/categories', data),
+  update: (id: string, data: { name?: string; description?: string; icon?: string }) =>
+    api.put<Category>(`/categories/${id}`, data),
+  delete: (id: string) => api.delete(`/categories/${id}`),
 }
 
 export const coursesApi = {
@@ -647,6 +653,16 @@ export const studyApi = {
 export const adminApi = {
   listUsers: (page = 1, pageSize = 20) =>
     api.get('/admin/users', { params: { page, page_size: pageSize } }),
+  createUser: (data: { email: string; password: string; full_name?: string; role: string }) =>
+    api.post('/admin/users', data),
+  updateUser: (userId: string, data: { full_name?: string; role?: string; is_active?: boolean }) =>
+    api.put(`/admin/users/${userId}`, data),
+  deleteUser: (userId: string) =>
+    api.delete(`/admin/users/${userId}`),
+  listAllCourses: (params?: { page?: number; page_size?: number; search?: string; status?: string }) =>
+    api.get('/admin/courses', { params }),
+  deleteCourse: (courseId: string) =>
+    api.delete(`/admin/courses/${courseId}`),
   analytics: () => api.get('/admin/analytics'),
   health: () => api.get('/admin/health'),
 }

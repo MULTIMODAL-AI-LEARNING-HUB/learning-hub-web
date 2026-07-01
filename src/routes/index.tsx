@@ -19,6 +19,10 @@ import { QuizGenerator } from '../features/study/QuizGenerator'
 import { Flashcards } from '../features/study/Flashcards'
 import { EssayGrading } from '../features/study/EssayGrading'
 import { AdminDashboard } from '../features/admin/AdminDashboard'
+import { AdminUsers } from '../features/admin/AdminUsers'
+import { AdminCourses } from '../features/admin/AdminCourses'
+import { AdminCategories } from '../features/admin/AdminCategories'
+import { AdminSettings } from '../features/admin/AdminSettings'
 import {
   PlaceholderPage,
   StudentProfile,
@@ -91,7 +95,11 @@ export const router = createBrowserRouter([
       </RoleRoute>
     ),
     children: [
-      { index: true, element: <AdminDashboard /> }
+      { index: true, element: <AdminDashboard /> },
+      { path: 'users', element: <AdminUsers /> },
+      { path: 'courses', element: <AdminCourses /> },
+      { path: 'categories', element: <AdminCategories /> },
+      { path: 'settings', element: <AdminSettings /> },
     ]
   },
 
