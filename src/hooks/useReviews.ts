@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback } from 'react'
-import { coursesApi, Review } from '../../services/api'
-import { useAppStore } from '../../stores/appStore'
+import { coursesApi } from '../services/api'
+import type { Review } from '../services/api'
+import { useAppStore } from '../stores/appStore'
 
 export function useReviews(courseId: string) {
   const [reviews, setReviews] = useState<Review[]>([])

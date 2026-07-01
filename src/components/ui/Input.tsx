@@ -78,18 +78,16 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
 Input.displayName = 'Input'
 
-interface TextareaProps {
+export const Textarea = forwardRef<HTMLTextAreaElement, {
   placeholder?: string
   value?: string
-  onChange?: (value: string) => void
+  onChange?: React.ChangeEventHandler<HTMLTextAreaElement>
   error?: string
   disabled?: boolean
   rows?: number
   className?: string
   onKeyDown?: (e: React.KeyboardEvent) => void
-}
-
-export function Textarea({
+}>(function Textarea({
   placeholder,
   value,
   onChange,
@@ -97,14 +95,23 @@ export function Textarea({
   disabled,
   rows = 4,
   className = '',
-  onKeyDown
-}: TextareaProps) {
+  onKeyDown,
+}: {
+  placeholder?: string
+  value?: string
+  onChange?: React.ChangeEventHandler<HTMLTextAreaElement>
+  error?: string
+  disabled?: boolean
+  rows?: number
+  className?: string
+  onKeyDown?: (e: React.KeyboardEvent) => void
+}) {
   return (
     <div className="grid gap-1.5 w-full">
       <textarea
         placeholder={placeholder}
         value={value}
-        onChange={(e) => onChange?.(e.target.value)}
+        onChange={onChange}
         onKeyDown={onKeyDown}
         disabled={disabled}
         rows={rows}
@@ -120,4 +127,6 @@ export function Textarea({
       {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   )
-}
+})
+
+Textarea.displayName = 'Textarea'

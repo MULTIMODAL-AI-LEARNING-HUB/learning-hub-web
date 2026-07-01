@@ -3,8 +3,8 @@ import { ChevronDown, ChevronRight, Plus, Pencil, Trash2, GripVertical, Video, F
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Modal } from '../../components/ui/Modal'
-import { Section, Lesson } from '../../services/api'
 import { useLessons } from '../../hooks/useLessons'
+import type { Section, Lesson } from '../../services/api'
 
 interface SectionAccordionProps {
   section: Section
@@ -65,7 +65,7 @@ export function SectionAccordion({
           {isEditing ? (
             <Input
               value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
+              onChange={setEditTitle}
               className="h-8 max-w-xs"
               onClick={(e) => e.stopPropagation()}
             />
@@ -176,14 +176,14 @@ export function SectionAccordion({
         </div>
       )}
 
-      <Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Delete Section">
+      <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Delete Section">
         <div className="space-y-4">
           <p className="text-muted-foreground">
             Are you sure you want to delete "{section.title}"? This will also delete all lessons in this section.
           </p>
           <div className="flex justify-end gap-2">
             <Button variant="ghost" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+            <Button variant="danger" onClick={handleDelete}>Delete</Button>
           </div>
         </div>
       </Modal>

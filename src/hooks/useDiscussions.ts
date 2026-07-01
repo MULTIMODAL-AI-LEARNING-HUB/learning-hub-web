@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback } from 'react'
-import { discussionsApi, Discussion } from '../../services/api'
-import { useAppStore } from '../../stores/appStore'
+import { discussionsApi } from '../services/api'
+import type { Discussion } from '../services/api'
+import { useAppStore } from '../stores/appStore'
 
 export function useDiscussions(lessonId: string) {
   const [discussions, setDiscussions] = useState<Discussion[]>([])

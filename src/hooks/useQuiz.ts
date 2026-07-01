@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback } from 'react'
-import { quizzesApi, Quiz, Question, QuizAttempt } from '../../services/api'
-import { useAppStore } from '../../stores/appStore'
+import { quizzesApi } from '../services/api'
+import type { Quiz, Question, QuizAttempt } from '../services/api'
+import { useAppStore } from '../stores/appStore'
 
 export function useQuiz(lessonId: string) {
   const [quiz, setQuiz] = useState<Quiz | null>(null)

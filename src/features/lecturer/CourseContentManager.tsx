@@ -4,8 +4,8 @@ import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
 import { Modal } from '../../components/ui/Modal'
-import { Course, Lesson } from '../../services/api'
 import { lessonsApi } from '../../services/api'
+import type { Course, Lesson } from '../../services/api'
 import { useSections } from '../../hooks/useLecturerCourses'
 import { SectionAccordion } from './SectionAccordion'
 import { LessonEditor } from './LessonEditor'
@@ -100,13 +100,13 @@ export function CourseContentManager({ course }: CourseContentManagerProps) {
         )}
       </div>
 
-      <Modal isOpen={showAddSection} onClose={() => setShowAddSection(false)} title="Add Section">
+      <Modal open={showAddSection} onClose={() => setShowAddSection(false)} title="Add Section">
         <div className="space-y-4">
           <div>
             <label className="text-sm font-medium">Section Title</label>
             <Input
               value={newSectionTitle}
-              onChange={(e) => setNewSectionTitle(e.target.value)}
+              onChange={setNewSectionTitle}
               className="mt-1"
               placeholder="e.g., Introduction, Getting Started, etc."
             />

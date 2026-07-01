@@ -90,7 +90,7 @@ export function EssayGrading() {
               <FormField label="Your Essay" required>
                 <Textarea
                   value={essay}
-                  onChange={setEssay}
+                  onChange={(e) => setEssay(e.target.value)}
                   placeholder="Write or paste your essay here..."
                   rows={14}
                 />

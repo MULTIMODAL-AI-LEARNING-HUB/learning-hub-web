@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback } from 'react'
-import { assignmentsApi, Assignment, AssignmentSubmission } from '../../services/api'
-import { useAppStore } from '../../stores/appStore'
+import { assignmentsApi } from '../services/api'
+import type { Assignment, AssignmentSubmission } from '../services/api'
+import { useAppStore } from '../stores/appStore'
 
 export function useAssignment(lessonId: string) {
   const [assignment, setAssignment] = useState<Assignment | null>(null)

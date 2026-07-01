@@ -306,6 +306,7 @@ export interface Assignment {
   max_score: number
   allow_resubmit: boolean
   max_resubmits: number
+  is_active: boolean
   submission_count?: number
   created_at: string
   updated_at: string

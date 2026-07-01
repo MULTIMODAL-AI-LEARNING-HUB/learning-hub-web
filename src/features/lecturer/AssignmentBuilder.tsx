@@ -6,7 +6,7 @@ import { Textarea } from '../../components/ui/Textarea'
 import { Badge } from '../../components/ui/Badge'
 import { Card } from '../../components/ui/Card'
 import { Modal } from '../../components/ui/Modal'
-import { AssignmentSubmission } from '../../services/api'
+import type { AssignmentSubmission } from '../../services/api'
 import { useAssignment, useAssignmentSubmissions } from '../../hooks/useAssignment'
 
 interface AssignmentBuilderProps {
@@ -145,7 +145,7 @@ export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuild
               <h3 className="font-medium">Create Assignment</h3>
               <div>
                 <label className="text-sm font-medium">Title</label>
-                <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" placeholder="Assignment title" />
+                <Input value={title} onChange={setTitle} className="mt-1" placeholder="Assignment title" />
               </div>
               <div>
                 <label className="text-sm font-medium">Description</label>
@@ -158,11 +158,11 @@ export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuild
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">Deadline</label>
-                  <Input type="datetime-local" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="mt-1" />
+                  <Input type="datetime-local" value={deadline} onChange={setDeadline} className="mt-1" />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Max Score</label>
-                  <Input type="number" value={maxScore} onChange={(e) => setMaxScore(parseInt(e.target.value))} className="mt-1" min={1} />
+                  <Input type="number" value={maxScore} onChange={(v) => setMaxScore(parseInt(v))} className="mt-1" min={1} />
                 </div>
               </div>
               <div className="flex justify-end gap-2">
@@ -179,13 +179,13 @@ export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuild
                   <div className="flex items-center gap-2">
                     <Input
                       value={title}
-                      onChange={(e) => setTitle(e.target.value)}
+                      onChange={setTitle}
                       className="text-lg font-semibold max-w-md"
                       onBlur={handleUpdate}
                     />
-                    <Badge variant={assignment.is_active ? 'success' : 'default'}>{assignment.is_active ? 'Active' : 'Inactive'}</Badge>
+                    <Badge variant={assignment.is_active ? 'success' : 'default'} label={assignment.is_active ? 'Active' : 'Inactive'} />
                   </div>
-                  <Button variant="destructive" size="sm" onClick={handleDelete}>Delete</Button>
+                  <Button variant="danger" size="sm" onClick={handleDelete}>Delete</Button>
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
@@ -237,11 +237,9 @@ export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuild
                           </div>
                           <div className="flex items-center gap-2">
                             {sub.score !== null ? (
-                              <Badge variant={sub.score >= 70 ? 'success' : sub.score >= 50 ? 'warning' : 'destructive'}>
-                                {sub.score}/{assignment.max_score}
-                              </Badge>
+                              <Badge variant={sub.score >= 70 ? 'success' : sub.score >= 50 ? 'warning' : 'error'} label={`${sub.score}/${assignment.max_score}`} />
                             ) : (
-                              <Badge variant="default">Not graded</Badge>
+                              <Badge variant="default" label="Not graded" />
                             )}
                             <Button size="sm" variant="outline" onClick={() => openGradingModal(sub)}>
                               {sub.score !== null ? 'Re-grade' : 'Grade'}
@@ -274,11 +272,11 @@ export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuild
             </>
           )}
 
-          <Modal isOpen={!!gradingSubmission} onClose={() => setGradingSubmission(null)} title="Grade Submission">
+          <Modal open={!!gradingSubmission} onClose={() => setGradingSubmission(null)} title="Grade Submission">
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium">Score (out of {assignment?.max_score})</label>
-                <Input type="number" value={gradeScore} onChange={(e) => setGradeScore(parseInt(e.target.value))} className="mt-1" min={0} max={assignment?.max_score} />
+                <Input type="number" value={gradeScore} onChange={(v) => setGradeScore(parseInt(v))} className="mt-1" min={0} max={assignment?.max_score} />
               </div>
               <div>
                 <label className="text-sm font-medium">Feedback</label>

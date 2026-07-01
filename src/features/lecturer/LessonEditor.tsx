@@ -6,8 +6,8 @@ import { Textarea } from '../../components/ui/Textarea'
 import { Switch } from '../../components/ui/Switch'
 import { Modal } from '../../components/ui/Modal'
 import { Badge } from '../../components/ui/Badge'
-import { Lesson } from '../../services/api'
 import { useLessons, useLessonAttachments } from '../../hooks/useLessons'
+import type { Lesson } from '../../services/api'
 
 interface LessonEditorProps {
   courseId: string
@@ -81,13 +81,6 @@ export function LessonEditor({
     onClose()
   }
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      await addAttachment(file)
-    }
-  }
-
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'VIDEO': return <Video className="h-5 w-5 text-blue-500" />
@@ -105,7 +98,7 @@ export function LessonEditor({
           <div className="flex items-center gap-3">
             {getTypeIcon(lesson.type)}
             <h2 className="text-lg font-semibold">Edit Lesson</h2>
-            <Badge variant="outline">{lesson.type}</Badge>
+            <Badge variant="outline" label={lesson.type} />
           </div>
           <Button variant="ghost" size="sm" icon={<X className="h-5 w-5" />} onClick={onClose} />
         </div>
@@ -113,7 +106,7 @@ export function LessonEditor({
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           <div>
             <label className="text-sm font-medium text-foreground">Title</label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" />
+            <Input value={title} onChange={setTitle} className="mt-1" />
           </div>
 
           <div>
@@ -127,7 +120,7 @@ export function LessonEditor({
                 <label className="text-sm font-medium text-foreground">Video URL</label>
                 <Input
                   value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
+                  onChange={setVideoUrl}
                   placeholder="https://youtube.com/..."
                   className="mt-1"
                 />
@@ -137,7 +130,7 @@ export function LessonEditor({
                 <Input
                   type="number"
                   value={videoDuration || ''}
-                  onChange={(e) => setVideoDuration(parseInt(e.target.value) || undefined)}
+                  onChange={(v) => setVideoDuration(parseInt(v) || undefined)}
                   className="mt-1 w-32"
                 />
               </div>
@@ -220,7 +213,7 @@ export function LessonEditor({
                 </div>
               ))}
               <label className="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/50">
-                <Input type="file" className="hidden" onChange={handleFileUpload} />
+                <input type="file" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) addAttachment(file); }} />
                 <span className="text-sm text-muted-foreground">Click to upload file</span>
               </label>
             </div>
@@ -228,7 +221,7 @@ export function LessonEditor({
         </div>
 
         <div className="flex items-center justify-between p-4 border-t border-border bg-muted/30">
-          <Button variant="destructive" onClick={() => setShowDeleteModal(true)}>
+          <Button variant="danger" onClick={() => setShowDeleteModal(true)}>
             Delete Lesson
           </Button>
           <div className="flex gap-2">
@@ -238,14 +231,14 @@ export function LessonEditor({
         </div>
       </div>
 
-      <Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Delete Lesson">
+      <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Delete Lesson">
         <div className="space-y-4">
           <p className="text-muted-foreground">
             Are you sure you want to delete "{lesson.title}"? This action cannot be undone.
           </p>
           <div className="flex justify-end gap-2">
             <Button variant="ghost" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+            <Button variant="danger" onClick={handleDelete}>Delete</Button>
           </div>
         </div>
       </Modal>

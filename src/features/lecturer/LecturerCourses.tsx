@@ -8,9 +8,9 @@ import { Select } from '../../components/ui/Select'
 import { Badge } from '../../components/ui/Badge'
 import { Card } from '../../components/ui/Card'
 import { Modal } from '../../components/ui/Modal'
-import { Course, Category } from '../../services/api'
 import { useLecturerCourses } from '../../hooks/useLecturerCourses'
 import { categoriesApi } from '../../services/api'
+import type { Course, Category } from '../../services/api'
 import { CourseContentManager } from './CourseContentManager'
 
 export function LecturerCourses() {
@@ -73,10 +73,10 @@ export function LecturerCourses() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'published': return <Badge variant="success">Published</Badge>
-      case 'draft': return <Badge variant="warning">Draft</Badge>
-      case 'archived': return <Badge variant="default">Archived</Badge>
-      default: return <Badge variant="default">{status}</Badge>
+      case 'published': return <Badge variant="success" label="Published" />
+      case 'draft': return <Badge variant="warning" label="Draft" />
+      case 'archived': return <Badge variant="default" label="Archived" />
+      default: return <Badge variant="default" label={status} />
     }
   }
 
@@ -224,11 +224,11 @@ export function LecturerCourses() {
         )}
       </Card>
 
-      <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title="Create Course">
+      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Create Course">
         <div className="space-y-4">
           <div>
             <label className="text-sm font-medium">Course Title</label>
-            <Input value={newCourse.title} onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })} className="mt-1" placeholder="Enter course title" />
+            <Input value={newCourse.title} onChange={(v) => setNewCourse({ ...newCourse, title: v })} className="mt-1" placeholder="Enter course title" />
           </div>
           <div>
             <label className="text-sm font-medium">Description</label>
@@ -237,16 +237,17 @@ export function LecturerCourses() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium">Category</label>
-              <Select value={newCourse.category_id} onChange={(e) => setNewCourse({ ...newCourse, category_id: e.target.value })} className="mt-1">
-                <option value="">Select category</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </Select>
+              <Select
+                value={newCourse.category_id}
+                onChange={(v) => setNewCourse({ ...newCourse, category_id: v })}
+                options={categories.map((cat) => ({ value: cat.id, label: cat.name }))}
+                placeholder="Select category"
+                className="mt-1"
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Price ($)</label>
-              <Input type="number" value={newCourse.price} onChange={(e) => setNewCourse({ ...newCourse, price: parseFloat(e.target.value) })} className="mt-1" min={0} step={0.01} />
+              <Input type="number" value={newCourse.price} onChange={(v) => setNewCourse({ ...newCourse, price: parseFloat(v) })} className="mt-1" min={0} step={0.01} />
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-4">
@@ -256,11 +257,11 @@ export function LecturerCourses() {
         </div>
       </Modal>
 
-      <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Edit Course">
+      <Modal open={showEditModal} onClose={() => setShowEditModal(false)} title="Edit Course">
         <div className="space-y-4">
           <div>
             <label className="text-sm font-medium">Course Title</label>
-            <Input value={editCourse.title} onChange={(e) => setEditCourse({ ...editCourse, title: e.target.value })} className="mt-1" />
+            <Input value={editCourse.title} onChange={(v) => setEditCourse({ ...editCourse, title: v })} className="mt-1" />
           </div>
           <div>
             <label className="text-sm font-medium">Description</label>
@@ -269,30 +270,36 @@ export function LecturerCourses() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium">Category</label>
-              <Select value={editCourse.category_id} onChange={(e) => setEditCourse({ ...editCourse, category_id: e.target.value })} className="mt-1">
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </Select>
+              <Select
+                value={editCourse.category_id}
+                onChange={(v) => setEditCourse({ ...editCourse, category_id: v })}
+                options={categories.map((cat) => ({ value: cat.id, label: cat.name }))}
+                className="mt-1"
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Price ($)</label>
-              <Input type="number" value={editCourse.price} onChange={(e) => setEditCourse({ ...editCourse, price: parseFloat(e.target.value) })} className="mt-1" min={0} step={0.01} />
+              <Input type="number" value={editCourse.price} onChange={(v) => setEditCourse({ ...editCourse, price: parseFloat(v) })} className="mt-1" min={0} step={0.01} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium">Level</label>
-              <Select value={editCourse.level} onChange={(e) => setEditCourse({ ...editCourse, level: e.target.value })} className="mt-1">
-                <option value="">Select level</option>
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
-              </Select>
+              <Select
+                value={editCourse.level || ''}
+                onChange={(v) => setEditCourse({ ...editCourse, level: v })}
+                options={[
+                  { value: 'beginner', label: 'Beginner' },
+                  { value: 'intermediate', label: 'Intermediate' },
+                  { value: 'advanced', label: 'Advanced' },
+                ]}
+                placeholder="Select level"
+                className="mt-1"
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Language</label>
-              <Input value={editCourse.language} onChange={(e) => setEditCourse({ ...editCourse, language: e.target.value })} className="mt-1" placeholder="e.g., English, Vietnamese" />
+              <Input value={editCourse.language} onChange={(v) => setEditCourse({ ...editCourse, language: v })} className="mt-1" placeholder="e.g., English, Vietnamese" />
             </div>
           </div>
           <div>
@@ -305,7 +312,7 @@ export function LecturerCourses() {
           </div>
           <div>
             <label className="text-sm font-medium">Tags</label>
-            <Input value={editCourse.tags} onChange={(e) => setEditCourse({ ...editCourse, tags: e.target.value })} className="mt-1" placeholder="Comma-separated tags" />
+            <Input value={editCourse.tags} onChange={(v) => setEditCourse({ ...editCourse, tags: v })} className="mt-1" placeholder="Comma-separated tags" />
           </div>
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="ghost" onClick={() => setShowEditModal(false)}>Cancel</Button>

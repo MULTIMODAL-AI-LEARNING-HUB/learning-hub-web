@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback } from 'react'
-import { coursesApi, sectionsApi, Section, Course } from '../../services/api'
-import { useAppStore } from '../../stores/appStore'
+import { coursesApi, sectionsApi } from '../services/api'
+import type { Section, Course } from '../services/api'
+import { useAppStore } from '../stores/appStore'
 
 export function useLecturerCourses() {
   const [courses, setCourses] = useState<Course[]>([])

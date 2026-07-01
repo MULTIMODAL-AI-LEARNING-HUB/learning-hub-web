@@ -4,7 +4,8 @@ import { ArrowLeft, Edit, Users, BarChart3 } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { Card } from '../../components/ui/Card'
-import { Course, coursesApi } from '../../services/api'
+import { coursesApi } from '../../services/api'
+import type { Course } from '../../services/api'
 import { CourseContentManager } from './CourseContentManager'
 import { ReviewsManager } from './ReviewsManager'
 
@@ -38,10 +39,10 @@ export function LecturerCourseDetail() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'published': return <Badge variant="success">Published</Badge>
-      case 'draft': return <Badge variant="warning">Draft</Badge>
-      case 'archived': return <Badge variant="default">Archived</Badge>
-      default: return <Badge variant="default">{status}</Badge>
+      case 'published': return <Badge variant="success" label="Published" />
+      case 'draft': return <Badge variant="warning" label="Draft" />
+      case 'archived': return <Badge variant="default" label="Archived" />
+      default: return <Badge variant="default" label={status} />
     }
   }
 

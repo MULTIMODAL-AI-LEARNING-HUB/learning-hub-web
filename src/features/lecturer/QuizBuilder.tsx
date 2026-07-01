@@ -163,7 +163,7 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
               <h3 className="font-medium">Create Quiz</h3>
               <div>
                 <label className="text-sm font-medium">Title</label>
-                <Input value={quizTitle} onChange={(e) => setQuizTitle(e.target.value)} className="mt-1" placeholder="Quiz title" />
+                <Input value={quizTitle} onChange={setQuizTitle} className="mt-1" placeholder="Quiz title" />
               </div>
               <div>
                 <label className="text-sm font-medium">Description</label>
@@ -172,15 +172,15 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="text-sm font-medium">Passing Score (%)</label>
-                  <Input type="number" value={passingScore} onChange={(e) => setPassingScore(parseInt(e.target.value))} className="mt-1" min={0} max={100} />
+                  <Input type="number" value={passingScore} onChange={(v) => setPassingScore(parseInt(v))} className="mt-1" min={0} max={100} />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Duration (mins)</label>
-                  <Input type="number" value={durationMins || ''} onChange={(e) => setDurationMins(parseInt(e.target.value) || undefined)} className="mt-1" />
+                  <Input type="number" value={durationMins || ''} onChange={(v) => setDurationMins(parseInt(v) || undefined)} className="mt-1" />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Max Attempts</label>
-                  <Input type="number" value={maxAttempts} onChange={(e) => setMaxAttempts(parseInt(e.target.value))} className="mt-1" min={1} />
+                  <Input type="number" value={maxAttempts} onChange={(v) => setMaxAttempts(parseInt(v))} className="mt-1" min={1} />
                 </div>
               </div>
               <div className="flex justify-end gap-2">
@@ -197,13 +197,13 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
                   <div className="flex items-center gap-2">
                     <Input
                       value={quizTitle}
-                      onChange={(e) => setQuizTitle(e.target.value)}
+                      onChange={setQuizTitle}
                       className="text-lg font-semibold max-w-md"
                       onBlur={handleUpdateQuiz}
                     />
-                    <Badge variant={quiz.is_active ? 'success' : 'default'}>{quiz.is_active ? 'Active' : 'Inactive'}</Badge>
+                    <Badge variant={quiz.is_active ? 'success' : 'default'} label={quiz.is_active ? 'Active' : 'Inactive'} />
                   </div>
-                  <Button variant="destructive" size="sm" onClick={handleDeleteQuiz}>Delete Quiz</Button>
+                  <Button variant="danger" size="sm" onClick={handleDeleteQuiz}>Delete Quiz</Button>
                 </div>
                 <div className="grid grid-cols-4 gap-4 text-sm">
                   <div>
@@ -240,7 +240,7 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-sm font-medium">Q{idx + 1}</span>
-                          <Badge variant="outline">{q.type.replace('_', ' ')}</Badge>
+                          <Badge variant="outline" label={q.type.replace('_', ' ')} />
                           <span className="text-xs text-muted-foreground">{q.points} points</span>
                         </div>
                         <p className="text-foreground">{q.question_text}</p>
@@ -276,7 +276,7 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
           )}
 
           {showQuestionForm && (
-            <Modal isOpen={showQuestionForm} onClose={() => setShowQuestionForm(false)} title="Add Question">
+            <Modal open={showQuestionForm} onClose={() => setShowQuestionForm(false)} title="Add Question">
               <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium">Question</label>
@@ -285,20 +285,21 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium">Type</label>
-                    <Select value={newQuestionType} onChange={(e) => setNewQuestionType(e.target.value as 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_BLANK')} className="mt-1">
-                      {QUESTION_TYPES.map((t) => (
-                        <option key={t.value} value={t.value}>{t.label}</option>
-                      ))}
-                    </Select>
+                    <Select
+                      value={newQuestionType}
+                      onChange={(v) => setNewQuestionType(v as 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_BLANK')}
+                      options={QUESTION_TYPES}
+                      className="mt-1"
+                    />
                   </div>
                   <div>
                     <label className="text-sm font-medium">Points</label>
-                    <Input type="number" value={newQuestionPoints} onChange={(e) => setNewQuestionPoints(parseInt(e.target.value))} className="mt-1" min={1} />
+                    <Input type="number" value={newQuestionPoints} onChange={(v) => setNewQuestionPoints(parseInt(v))} className="mt-1" min={1} />
                   </div>
                 </div>
                 <div>
                   <label className="text-sm font-medium">Explanation (optional)</label>
-                  <Input value={newQuestionExplanation} onChange={(e) => setNewQuestionExplanation(e.target.value)} className="mt-1" />
+                  <Input value={newQuestionExplanation} onChange={setNewQuestionExplanation} className="mt-1" />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Answer Options</label>
@@ -313,9 +314,9 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
                         </button>
                         <Input
                           value={ans.answer_text}
-                          onChange={(e) => {
+                          onChange={(v) => {
                             const updated = [...newAnswers]
-                            updated[idx].answer_text = e.target.value
+                            updated[idx].answer_text = v
                             setNewAnswers(updated)
                           }}
                           placeholder={`Option ${idx + 1}`}
