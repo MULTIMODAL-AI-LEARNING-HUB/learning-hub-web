@@ -397,6 +397,8 @@ export const coursesApi = {
   get: (id: string) => api.get<Course>(`/courses/${id}`),
   create: (data: { title: string; description: string; price: number; category_id: string; thumbnail_url?: string }) =>
     api.post<Course>('/courses', data),
+  listMyCourses: (params?: { page?: number; page_size?: number }) =>
+    api.get<{ items: Course[]; total: number; page: number; page_size: number }>('/courses/lecturer', { params }),
   update: (id: string, data: Partial<Course>) => api.put<Course>(`/courses/${id}`, data),
   delete: (id: string) => api.delete(`/courses/${id}`),
   publish: (id: string) => api.post<Course>(`/courses/${id}/publish`, {}),

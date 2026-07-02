@@ -22,7 +22,7 @@ export function useLecturerCourses() {
     setLoading(true)
     setError(null)
     try {
-      const res = await coursesApi.list({ status: 'all', page_size: 100 })
+      const res = await coursesApi.listMyCourses({ page_size: 100 })
       setCourses(res.data.items)
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to fetch courses')
