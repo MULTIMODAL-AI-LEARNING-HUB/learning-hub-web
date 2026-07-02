@@ -49,7 +49,6 @@ export function CourseDetail() {
       if (res.data.payment_url) {
         window.location.href = res.data.payment_url
       } else {
-        setEnrollment(res.data.enrollment)
         navigate(`/app/courses/${id}/learn`)
       }
     } catch (err) {
@@ -78,8 +77,9 @@ export function CourseDetail() {
   }
 
   const getMaterialDuration = (material: Course['materials'][0]) => {
-    if (material.duration_seconds) return formatDuration(material.duration_seconds)
-    if (material.page_count) return `${material.page_count} trang`
+    const meta = material.file_metadata || {}
+    if (meta.duration_seconds) return formatDuration(meta.duration_seconds as number)
+    if (meta.page_count) return `${meta.page_count as number} trang`
     if (material.file_size) return `${Math.round(material.file_size / 1024)} KB`
     return null
   }
@@ -159,7 +159,6 @@ export function CourseDetail() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-lg">{getMaterialIcon(material.material_type)}</span>
                       <span className="font-medium text-foreground truncate">{material.title}</span>
-                      {material.is_preview && <Badge variant="warning" label="Xem trước" />}
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {getMaterialDuration(material) || material.material_type.toUpperCase()}

@@ -34,11 +34,10 @@ export function CourseLearning() {
       if (userEnrollment) {
         setEnrollment(userEnrollment)
         const progressRes = await enrollmentsApi.getProgress(userEnrollment.id)
-        setEnrollment(prev => prev ? { ...prev, progress_percent: progressRes.data.progress_percent } : null)
-        const materialIds = progressRes.data.completed_materials || []
+        setEnrollment(prev => prev ? { ...prev, progress_percent: progressRes.data.completion_percent } : null)
         const progressMap = new Map<string, MaterialProgress>()
-        materialIds.forEach(mid => {
-          progressMap.set(mid, { id: mid, enrollment_id: userEnrollment.id, material_id: mid, completed: true, progress_percent: 100 } as MaterialProgress)
+        progressRes.data.materials.forEach(mp => {
+          progressMap.set(mp.material_id, { ...mp } as MaterialProgress)
         })
         setProgress(progressMap)
       }
@@ -64,16 +63,15 @@ export function CourseLearning() {
 
   const updateProgress = useCallback(async (materialId: string, data: {
     completed?: boolean
-    progress_percent?: number
-    last_position_seconds?: number
-    last_position_percent?: number
+    completion_percent?: number
+    last_position?: Record<string, unknown>
   }) => {
     if (!enrollment) return
     setUpdating(true)
     try {
-      await enrollmentsApi.updateProgress(enrollment.id, materialId, data)
+      await enrollmentsApi.updateProgress(enrollment.id, materialId, { completion_percent: data.completion_percent, last_position: data.last_position })
       const progressRes = await enrollmentsApi.getProgress(enrollment.id)
-      setEnrollment(prev => prev ? { ...prev, progress_percent: progressRes.data.progress_percent } : prev)
+      setEnrollment(prev => prev ? { ...prev, progress_percent: progressRes.data.completion_percent } : prev)
       if (data.completed) {
         setProgress(prev => {
           const newMap = new Map(prev)
@@ -82,7 +80,8 @@ export function CourseLearning() {
             enrollment_id: enrollment.id,
             material_id: materialId,
             completed: true,
-            progress_percent: 100,
+            completion_percent: 100,
+            last_position: null,
             completed_at: new Date().toISOString()
           } as MaterialProgress)
           return newMap
@@ -99,7 +98,7 @@ export function CourseLearning() {
 
   const markComplete = async () => {
     if (!currentMaterialId) return
-    await updateProgress(currentMaterialId, { completed: true, progress_percent: 100 })
+    await updateProgress(currentMaterialId, { completed: true, completion_percent: 100 })
   }
 
   const goToMaterial = (materialId: string) => {
@@ -210,7 +209,6 @@ export function CourseLearning() {
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {getMaterialIcon(material.material_type)} {material.material_type.toUpperCase()}
-                      {material.is_preview && ' • Xem trước'}
                     </p>
                   </div>
                 </div>
@@ -246,18 +244,18 @@ export function CourseLearning() {
                   onEnded={() => markComplete()}
                 />
               ) : currentMaterial.material_type === 'image' && currentMaterial.file_url ? (
-                <img src={currentMaterial.file_url} alt={currentMaterial.title} className="max-w-full max-h-full object-contain" />
+                <img src={currentMaterial.file_url} alt={currentMaterial.title ?? undefined} className="max-w-full max-h-full object-contain" />
               ) : currentMaterial.material_type === 'url' && currentMaterial.external_url ? (
                 <iframe
                   src={currentMaterial.external_url}
                   className="w-full h-full"
-                  title={currentMaterial.title}
+                  title={currentMaterial.title ?? undefined}
                 />
               ) : currentMaterial.file_url ? (
                 <iframe
                   src={currentMaterial.file_url}
                   className="w-full h-full"
-                  title={currentMaterial.title}
+                  title={currentMaterial.title ?? undefined}
                 />
               ) : (
                 <div className="text-center p-8">

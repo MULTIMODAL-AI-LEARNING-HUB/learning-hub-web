@@ -379,6 +379,16 @@ export interface Enrollment {
   payment_status: 'pending' | 'paid' | 'failed' | 'refunded'
 }
 
+export interface MaterialProgressResponse {
+  id: string
+  enrollment_id: string
+  material_id: string
+  completion_percent: number
+  completed: boolean
+  last_position: Record<string, unknown> | null
+  completed_at: string | null
+}
+
 export interface MaterialProgress {
   id: string
   enrollment_id: string
@@ -583,7 +593,7 @@ export const enrollmentsApi = {
       payment_method: paymentMethod,
     }),
   cancel: (id: string) => api.delete(`/enrollments/${id}`),
-  getProgress: (id: string) => api.get<{ progress_percent: number; completed_materials: string[] }>(`/enrollments/${id}/progress`),
+  getProgress: (id: string) => api.get<{ enrollment_id: string; course_id: string; total_materials: number; completed_materials: number; completion_percent: number; materials: MaterialProgressResponse[] }>(`/enrollments/${id}/progress`),
   updateProgress: (enrollmentId: string, materialId: string, data: {
     completion_percent?: number
     last_position?: Record<string, unknown>
