@@ -312,7 +312,7 @@ export function CourseLearning() {
                 Hỏi đáp, tóm tắt, hoặc tạo quiz từ nội dung bài học
               </p>
               <div className="flex flex-wrap gap-2">
-                <Link to={`/app/chat?course_id=${id}&material_id=${currentMaterialId}`}>
+                <Link to={`/app/student/chat?course_id=${id}&material_id=${currentMaterialId}`}>
                   <Button size="sm">Mở Chat AI</Button>
                 </Link>
                 <Link to={`/app/courses/${id}/quiz`}>

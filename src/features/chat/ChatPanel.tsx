@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Send, Sparkles, MessageSquare, FileText, X, Paperclip } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { Card } from '../../components/ui/Card'
@@ -10,8 +11,10 @@ import { fileIconEmoji } from '../../utils/fileIcon'
 import { cn } from '../../utils/cn'
 
 export function ChatPanel() {
+  const [searchParams] = useSearchParams()
   const sessions = useAppStore((s) => s.chat.sessions)
   const activeSessionId = useAppStore((s) => s.chat.activeSessionId)
+  const addSession = useAppStore((s) => s.chat.addSession)
   const sendMessage = useAppStore((s) => s.chat.sendMessage)
   const docs = useAppStore((s) => s.documents.items)
   const userInitials = useAppStore((s) => s.auth.user?.initials ?? '?')
@@ -20,8 +23,15 @@ export function ChatPanel() {
   const [selectedDoc, setSelectedDoc] = useState<string>('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  const courseId = searchParams.get('course_id') || undefined
   const activeSession = sessions.find((s) => s.id === activeSessionId)
   const messages = activeSession?.messages ?? []
+
+  useEffect(() => {
+    if (courseId && !activeSessionId) {
+      addSession(courseId)
+    }
+  }, [courseId, activeSessionId, addSession])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })

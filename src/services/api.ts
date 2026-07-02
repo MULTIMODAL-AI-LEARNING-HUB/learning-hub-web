@@ -130,7 +130,8 @@ export interface DocumentItem {
 export interface ChatSession {
   id: string
   title: string | null
-  document_id: string | null
+  course_id: string | null
+  context_type: string
   created_at: string
   updated_at: string
 }

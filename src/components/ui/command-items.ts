@@ -33,7 +33,7 @@ export function useDefaultCommandItems(): CommandItem[] {
       icon: MessageSquare,
       group: 'Navigation',
       shortcut: 'G C',
-      action: () => navigate('/app/chat')
+      action: () => navigate('/app/student/chat')
     },
     {
       id: 'nav-quiz',

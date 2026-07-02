@@ -78,13 +78,15 @@ export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never
         }), false, 'chat/receiveAIMessageError')
       }
     },
-    addSession: async () => {
+    addSession: async (courseId?: string) => {
       try {
-        const res = await chatApi.createSession({ title: 'New chat' })
+        const res = await chatApi.createSession({ course_id: courseId, title: 'New chat' })
         const session = res.data
         const newSession: ChatSession = {
           id: session.id,
           title: session.title || 'New chat',
+          course_id: session.course_id || undefined,
+          context_type: session.context_type,
           preview: '',
           messages: []
         }

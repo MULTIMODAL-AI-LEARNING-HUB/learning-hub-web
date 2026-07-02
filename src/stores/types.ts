@@ -42,7 +42,7 @@ export interface ChatSlice {
     activeSessionId: string | null
     selectSession: (id: string) => void
     sendMessage: (content: string, documentIds?: string[]) => Promise<void>
-    addSession: () => Promise<void>
+    addSession: (courseId?: string) => Promise<void>
     deleteSession: (id: string) => void
   }
 }

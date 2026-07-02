@@ -86,12 +86,12 @@ export function HomePage() {
 
   const handleSessionClick = (id: string) => {
     selectSession(id)
-    navigate('/app/chat')
+    navigate('/app/student/chat')
   }
 
   const handleStartNewChat = async () => {
     await addSession()
-    navigate('/app/chat')
+    navigate('/app/student/chat')
   }
 
   return (
@@ -349,7 +349,7 @@ export function HomePage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate('/app/chat')}
+              onClick={() => navigate('/app/student/chat')}
               iconRight={<ChevronRight className="h-4 w-4" />}
             >
               View All

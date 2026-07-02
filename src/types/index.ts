@@ -27,6 +27,8 @@ export interface Message {
 export interface ChatSession {
   id: string
   title: string
+  course_id?: string
+  context_type?: string
   preview: string
   messages: Message[]
 }
