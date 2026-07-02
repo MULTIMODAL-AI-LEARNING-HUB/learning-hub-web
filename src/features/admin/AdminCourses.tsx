@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Search, RefreshCw, ChevronLeft, ChevronRight, Trash2, BookOpen } from 'lucide-react'
-import { adminApi } from '../../services/api'
+import { Search, RefreshCw, ChevronLeft, ChevronRight, Trash2, BookOpen, Edit2 } from 'lucide-react'
+import { adminApi, coursesApi } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
@@ -47,6 +47,10 @@ export function AdminCourses() {
   const [deletingCourse, setDeletingCourse] = useState<AdminCourse | null>(null)
   const [deleting, setDeleting] = useState(false)
 
+  const [editingCourse, setEditingCourse] = useState<AdminCourse | null>(null)
+  const [selectedStatus, setSelectedStatus] = useState<'draft' | 'published' | 'archived'>('')
+  const [updatingStatus, setUpdatingStatus] = useState(false)
+
   const fetchCourses = useCallback(async (p: number) => {
     setLoading(true)
     try {
@@ -85,6 +89,29 @@ export function AdminCourses() {
       toast({ type: 'error', title: err?.response?.data?.detail || 'Failed to delete course' })
     } finally {
       setDeleting(false)
+    }
+  }
+
+  const handleUpdateStatus = async () => {
+    if (!editingCourse) return
+    setUpdatingStatus(true)
+    try {
+      if (selectedStatus === 'published') {
+        await coursesApi.publish(editingCourse.id)
+      } else if (selectedStatus === 'archived') {
+        await coursesApi.archive(editingCourse.id)
+      } else {
+        // Fallback to update if the status is draft or anything else
+        await coursesApi.update(editingCourse.id, { status: selectedStatus })
+      }
+      toast({ type: 'success', title: 'Course status updated successfully' })
+      setEditingCourse(null)
+      fetchCourses(page)
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { detail?: string } } }
+      toast({ type: 'error', title: err?.response?.data?.detail || 'Failed to update status' })
+    } finally {
+      setUpdatingStatus(false)
     }
   }
 
@@ -172,7 +199,13 @@ export function AdminCourses() {
                     <td className="py-3 px-5 text-xs text-muted-foreground tabular-nums">
                       {c.created_at ? new Date(c.created_at).toLocaleDateString() : '—'}
                     </td>
-                    <td className="py-3 px-5 text-right">
+                    <td className="py-3 px-5 text-right flex justify-end gap-1">
+                      <button
+                        onClick={() => { setEditingCourse(c); setSelectedStatus(c.status) }}
+                        className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
                       <button
                         onClick={() => setDeletingCourse(c)}
                         className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition"
@@ -196,6 +229,33 @@ export function AdminCourses() {
           </div>
         </div>
       </Card>
+
+      {/* Edit Status Modal */}
+      <Modal open={!!editingCourse} onClose={() => setEditingCourse(null)} title="Update Course Status" size="sm">
+        {editingCourse && (
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Modify the visibility status of <span className="font-semibold text-foreground">"{editingCourse.title}"</span>.
+            </p>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground">Course Status</label>
+              <select
+                className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+              >
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+                <option value="archived">Archived</option>
+              </select>
+            </div>
+          </div>
+        )}
+        <div className="flex justify-end gap-2 mt-6">
+          <Button variant="outline" onClick={() => setEditingCourse(null)}>Cancel</Button>
+          <Button onClick={handleUpdateStatus} loading={updatingStatus}>Save Status</Button>
+        </div>
+      </Modal>
 
       {/* Delete Confirm */}
       <Modal open={!!deletingCourse} onClose={() => setDeletingCourse(null)} title="Delete Course" size="sm">
