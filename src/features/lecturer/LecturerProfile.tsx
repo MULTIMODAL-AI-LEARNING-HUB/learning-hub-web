@@ -31,6 +31,9 @@ export function LecturerProfile() {
     }
     setSaving(true)
     try {
+      await authApi.updateMe({ full_name: fullName })
+      const res = await authApi.me()
+      setRawUser(res.data)
       toast({ type: 'success', title: 'Profile updated' })
       setEditing(false)
     } catch {

@@ -658,6 +658,8 @@ export const authApi = {
   refresh: (refresh_token: string) =>
     api.post<{ access_token: string; refresh_token: string }>('/auth/refresh', { refresh_token }),
   me: () => api.get<AuthUser>('/auth/me'),
+  updateMe: (data: { full_name?: string; avatar_url?: string }) =>
+    api.put<AuthUser>('/auth/me', data),
   forgotPassword: (email: string) =>
     api.post<{ message: string }>('/auth/forgot-password', { email }),
   resetPassword: (token: string, password: string) =>

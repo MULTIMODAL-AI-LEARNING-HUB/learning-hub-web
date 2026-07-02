@@ -42,6 +42,9 @@ export function LecturerSettings() {
     }
     setSaving(true)
     try {
+      await authApi.updateMe({ full_name: fullName })
+      const res = await authApi.me()
+      setRawUser(res.data)
       toast({ type: 'success', title: 'Profile updated' })
     } catch {
       toast({ type: 'error', title: 'Failed to update profile' })
@@ -83,6 +86,13 @@ export function LecturerSettings() {
   }
 
   const quota = rawUser?.quota
+  ? {
+      storageUsed: rawUser.quota.storage_used_mb ?? 0,
+      storageTotal: rawUser.quota.storage_limit_mb ?? 0,
+      tokensUsed: rawUser.quota.token_used ?? 0,
+      tokensTotal: rawUser.quota.token_limit ?? 0,
+    }
+  : null
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -105,7 +115,7 @@ export function LecturerSettings() {
             </div>
             <div>
               <label className="text-sm font-medium text-foreground block mb-1">Email</label>
-              <Input value={email} onChange={setEmail} placeholder="your@email.com" type="email" />
+              <Input value={email} placeholder="your@email.com" type="email" disabled />
             </div>
             <div>
               <label className="text-sm font-medium text-foreground block mb-1">Role</label>
