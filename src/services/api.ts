@@ -166,15 +166,20 @@ export interface Category {
 
 export interface CourseMaterial {
   id: string
-  title: string
-  material_type: 'pdf' | 'docx' | 'image' | 'video' | 'url'
+  file_name: string | null
+  title: string | null
+  material_type: string
+  file_type: string
   file_url: string | null
   external_url: string | null
   file_size: number | null
-  duration_seconds: number | null
-  page_count: number | null
-  is_preview: boolean
-  order_index: number
+  status: string
+  is_indexed: boolean
+  file_metadata: Record<string, unknown> | null
+  course_id: string
+  lecturer_id: string
+  created_at: string
+  updated_at: string
 }
 
 export interface Course {
@@ -188,14 +193,14 @@ export interface Course {
   lecturer_id: string
   lecturer?: { id: string; full_name: string | null; avatar_url: string | null }
   status: 'draft' | 'published' | 'archived'
-  level?: string
-  language?: string
-  requirements?: string
-  learning_outcomes?: string
-  tags?: string
-  view_count?: number
-  rating_avg?: number
-  rating_count?: number
+  level: string
+  language: string
+  requirements: string | null
+  learning_outcomes: string | null
+  tags: string | null
+  view_count: number
+  rating_avg: number
+  rating_count: number
   enrollment_count: number
   materials: CourseMaterial[]
   created_at: string
@@ -355,6 +360,12 @@ export interface Review {
   course_title: string | null
 }
 
+export interface PaymentIntentResponse {
+  payment_url: string
+  transaction_id: string
+  amount_vnd: number
+}
+
 export interface Enrollment {
   id: string
   user_id: string
@@ -372,12 +383,10 @@ export interface MaterialProgress {
   id: string
   enrollment_id: string
   material_id: string
-  material?: CourseMaterial
+  completion_percent: number
   completed: boolean
-  progress_percent: number
+  last_position: Record<string, unknown> | null
   completed_at: string | null
-  last_position_seconds: number | null
-  last_position_percent: number | null
 }
 
 export const categoriesApi = {
@@ -570,18 +579,15 @@ export const enrollmentsApi = {
     api.get<{ items: Enrollment[]; total: number }>('/enrollments', { params }),
   get: (id: string) => api.get<Enrollment>(`/enrollments/${id}`),
   enroll: (courseId: string, paymentMethod?: 'vnpay' | 'momo') =>
-    api.post<{ enrollment: Enrollment; payment_url?: string }>('/enrollments', {
-      course_id: courseId,
+    api.post<PaymentIntentResponse>(`/courses/${courseId}/enroll/payment-intent`, {
       payment_method: paymentMethod,
     }),
   cancel: (id: string) => api.delete(`/enrollments/${id}`),
   getProgress: (id: string) => api.get<{ progress_percent: number; completed_materials: string[] }>(`/enrollments/${id}/progress`),
   updateProgress: (enrollmentId: string, materialId: string, data: {
-    completed?: boolean
-    progress_percent?: number
-    last_position_seconds?: number
-    last_position_percent?: number
-  }) => api.put<MaterialProgress>(`/enrollments/${enrollmentId}/progress/${materialId}`, data),
+    completion_percent?: number
+    last_position?: Record<string, unknown>
+  }) => api.post<MaterialProgress>(`/enrollments/${enrollmentId}/materials/${materialId}/progress`, data),
 }
 
 export const paymentsApi = {
@@ -624,7 +630,7 @@ export const documentsApi = {
 }
 
 export const chatApi = {
-  createSession: (data?: { document_id?: string; title?: string }) =>
+  createSession: (data?: { course_id?: string; title?: string }) =>
     api.post<ChatSession>('/chat/sessions', data),
   listSessions: (page = 1, pageSize = 20) =>
     api.get<{ items: ChatSession[]; total: number }>('/chat/sessions', {

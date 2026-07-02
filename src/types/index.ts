@@ -93,15 +93,19 @@ export interface Category {
 
 export interface CourseMaterial {
   id: string
-  title: string
-  material_type: MaterialType
+  file_name: string | null
+  title: string | null
+  material_type: string
+  file_type: string
   file_url: string | null
   external_url: string | null
   file_size: number | null
-  duration_seconds: number | null
-  page_count: number | null
-  is_preview: boolean
-  order_index: number
+  status: string
+  is_indexed: boolean
+  course_id: string
+  lecturer_id: string
+  created_at: string
+  updated_at: string
 }
 
 export interface Course {
@@ -115,6 +119,14 @@ export interface Course {
   lecturer_id: string
   lecturer?: { id: string; full_name: string | null; avatar_url: string | null }
   status: 'draft' | 'published' | 'archived'
+  level: string
+  language: string
+  requirements: string | null
+  learning_outcomes: string | null
+  tags: string | null
+  view_count: number
+  rating_avg: number
+  rating_count: number
   enrollment_count: number
   materials: CourseMaterial[]
   created_at: string
