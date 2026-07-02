@@ -54,7 +54,7 @@ export function MyCourses() {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-1">
-            <Link to={`/app/courses/${enrollment.course_id}`} className="font-semibold text-foreground hover:text-primary line-clamp-1">
+            <Link to={`/app/student/courses/${enrollment.course_id}`} className="font-semibold text-foreground hover:text-primary line-clamp-1">
               {enrollment.course?.title || 'Khóa học'}
             </Link>
             {enrollment.status === 'completed' && <Badge variant="success" label="Hoàn thành" className="shrink-0" />}
@@ -77,11 +77,11 @@ export function MyCourses() {
         </div>
       </div>
       <div className="flex gap-2 mt-3 justify-end">
-        <Link to={`/app/courses/${enrollment.course_id}`}>
+        <Link to={`/app/student/courses/${enrollment.course_id}`}>
           <Button variant="outline" size="sm">Xem khóa học</Button>
         </Link>
         {(enrollment.status === 'active' || enrollment.progress_percent === 0) && (
-          <Link to={`/app/courses/${enrollment.course_id}/learn`}>
+          <Link to={`/app/student/courses/${enrollment.course_id}/learn`}>
             <Button size="sm">
               {enrollment.progress_percent === 0 ? 'Bắt đầu học' : 'Tiếp tục'}
             </Button>
@@ -130,7 +130,7 @@ export function MyCourses() {
                 <span className="text-4xl mb-4 block">📚</span>
                 <h3 className="text-lg font-medium mb-2">Chưa có khóa học nào</h3>
                 <p className="text-gray-600 mb-4">Đăng ký khóa học để bắt đầu học tập</p>
-                <Link to="/app/courses">
+                <Link to="/app/student/browse">
                   <Button>Khám phá khóa học</Button>
                 </Link>
               </div>

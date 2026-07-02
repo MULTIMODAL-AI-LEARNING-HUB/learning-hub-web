@@ -59,7 +59,7 @@ export function CourseCatalog() {
   }
 
   const CourseCard = ({ course }: { course: Course }) => (
-    <Link to={`/app/courses/${course.id}`}>
+    <Link to={`/app/student/courses/${course.id}`}>
       <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
         <div className="aspect-video bg-gradient-to-br from-indigo-100 to-purple-100 rounded-t-lg flex items-center justify-center">
           {course.thumbnail_url ? (

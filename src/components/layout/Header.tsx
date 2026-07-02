@@ -26,10 +26,20 @@ export function Header() {
   const user = useAppStore((s) => s.auth.user)!
   const toggleSidebar = useAppStore((s) => s.ui.toggleSidebar)
   const notifications = useAppStore((s) => s.notifications.items)
+  const unreadCount = useAppStore((s) => s.notifications.unreadCount)
+  const fetchNotifs = useAppStore((s) => s.notifications.fetch)
+  const markRead = useAppStore((s) => s.notifications.markRead)
+  const markAllRead = useAppStore((s) => s.notifications.markAllRead)
   const dismissNotif = useAppStore((s) => s.notifications.dismiss)
   const clearNotifs = useAppStore((s) => s.notifications.clear)
   const logout = useAppStore((s) => s.auth.logout)
   const commandItems = useDefaultCommandItems()
+
+  useEffect(() => {
+    fetchNotifs()
+    const interval = setInterval(fetchNotifs, 30000)
+    return () => clearInterval(interval)
+  }, [fetchNotifs])
 
   const [paletteOpen, setPaletteOpen] = useState(false)
 
@@ -132,8 +142,11 @@ export function Header() {
           <ThemeToggle />
           <NotificationsDropdown
             notifications={notifications}
+            unreadCount={unreadCount}
             onDismiss={dismissNotif}
             onClear={clearNotifs}
+            onMarkRead={markRead}
+            onMarkAllRead={markAllRead}
           />
 
           <Dropdown
@@ -176,12 +189,18 @@ export function Header() {
 
 function NotificationsDropdown({
   notifications,
+  unreadCount,
   onDismiss,
-  onClear
+  onClear,
+  onMarkRead,
+  onMarkAllRead,
 }: {
-  notifications: Array<{ id: string; title: string; detail: string; time: string }>
+  notifications: Array<{ id: string; title: string; detail: string; time: string; isRead: boolean }>
+  unreadCount: number
   onDismiss: (id: string) => void
   onClear: () => void
+  onMarkRead: (id: string) => Promise<void>
+  onMarkAllRead: () => Promise<void>
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -207,9 +226,9 @@ function NotificationsDropdown({
         onClick={() => setOpen((p) => !p)}
       >
         <Bell className="h-4 w-4" />
-        {notifications.length > 0 && (
-          <span className="absolute top-1.5 right-1.5 flex h-2 w-2 rounded-full bg-destructive">
-            <span className="absolute inset-0 rounded-full bg-destructive animate-ping opacity-75" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-2xs font-bold text-destructive-foreground">
+            {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </Button>
@@ -221,14 +240,18 @@ function NotificationsDropdown({
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Notifications
             </p>
-            {notifications.length > 0 && (
-              <button
-                onClick={onClear}
-                className="text-xs font-medium text-primary hover:underline"
-              >
-                Clear all
-              </button>
-            )}
+            <div className="flex items-center gap-2">
+              {unreadCount > 0 && (
+                <button onClick={onMarkAllRead} className="text-xs font-medium text-primary hover:underline">
+                  Mark all read
+                </button>
+              )}
+              {notifications.length > 0 && (
+                <button onClick={onClear} className="text-xs font-medium text-muted-foreground hover:text-foreground">
+                  Clear all
+                </button>
+              )}
+            </div>
           </div>
           <div className="max-h-80 overflow-y-auto scrollbar-thin">
             {notifications.length === 0 ? (
@@ -241,16 +264,18 @@ function NotificationsDropdown({
                 {notifications.map((n) => (
                   <div
                     key={n.id}
-                    className="group flex items-start gap-2.5 rounded-lg px-2.5 py-2 hover:bg-muted transition"
+                    onClick={() => { if (!n.isRead) onMarkRead(n.id) }}
+                    className={`group flex items-start gap-2.5 rounded-lg px-2.5 py-2 hover:bg-muted transition cursor-pointer ${n.isRead ? '' : 'bg-muted/50'}`}
                   >
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                    {!n.isRead && <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />}
+                    {n.isRead && <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-transparent" />}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground">{n.title}</p>
+                      <p className={`text-sm ${n.isRead ? 'text-muted-foreground' : 'font-medium text-foreground'}`}>{n.title}</p>
                       <p className="text-xs text-muted-foreground">{n.detail}</p>
                       <p className="mt-0.5 text-2xs text-muted-foreground/70">{n.time}</p>
                     </div>
                     <button
-                      onClick={() => onDismiss(n.id)}
+                      onClick={(e) => { e.stopPropagation(); onDismiss(n.id) }}
                       className="shrink-0 -m-1 p-1 rounded text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-foreground transition"
                       aria-label="Dismiss"
                     >

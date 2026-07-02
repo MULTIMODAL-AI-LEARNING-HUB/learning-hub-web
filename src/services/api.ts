@@ -348,6 +348,39 @@ export interface Discussion {
   replies: Discussion[]
 }
 
+export interface NotificationItem {
+  id: string
+  user_id: string
+  title: string
+  detail: string | null
+  type: string
+  related_id: string | null
+  related_type: string | null
+  is_read: boolean
+  created_at: string
+}
+
+export interface WishlistItem {
+  id: string
+  user_id: string
+  course_id: string
+  course_title: string | null
+  course_thumbnail: string | null
+  course_price: number | null
+  created_at: string
+}
+
+export interface Announcement {
+  id: string
+  course_id: string
+  lecturer_id: string
+  lecturer_name: string | null
+  title: string
+  content: string
+  created_at: string
+  updated_at: string
+}
+
 export interface Review {
   id: string
   enrollment_id: string
@@ -444,6 +477,12 @@ export const coursesApi = {
   }>('/courses/stats'),
   getReviews: (courseId: string, page = 1, pageSize = 20) =>
     api.get<{ items: Review[]; total: number }>(`/courses/${courseId}/reviews`, { params: { page, page_size: pageSize } }),
+  createReview: (courseId: string, data: { rating: number; comment?: string }) =>
+    api.post<Review>(`/courses/${courseId}/reviews`, data),
+  getMyReview: (courseId: string) =>
+    api.get<Review>(`/courses/${courseId}/reviews/my-review`),
+  updateMyReview: (courseId: string, data: { rating?: number; comment?: string }) =>
+    api.put<Review>(`/courses/${courseId}/reviews/my-review`, data),
   replyReview: (courseId: string, reviewId: string, reply: string) =>
     api.post<Review>(`/courses/${courseId}/reviews/${reviewId}/reply`, { reply }),
   getDiscussionStats: (courseId: string) =>
@@ -561,6 +600,8 @@ export const assignmentsApi = {
     is_active?: boolean
   }) => api.put<Assignment>(`/lessons/${lessonId}/assignment`, data),
   delete: (assignmentId: string) => api.delete(`/lessons/${assignmentId}/assignment`),
+  submit: (lessonId: string, data: { submission_text?: string; attachments?: Record<string, unknown>[] }) =>
+    api.post<AssignmentSubmission>(`/lessons/${lessonId}/assignment/submissions`, data),
   getSubmissions: (assignmentId: string, page = 1, pageSize = 20) =>
     api.get<{ items: AssignmentSubmission[]; total: number }>(`/assignments/${assignmentId}/submissions`, {
       params: { page, page_size: pageSize },
@@ -683,6 +724,25 @@ export const adminApi = {
     api.delete(`/admin/courses/${courseId}`),
   analytics: () => api.get('/admin/analytics'),
   health: () => api.get('/admin/health'),
+}
+
+export const notificationsApi = {
+  list: (page = 1, pageSize = 20) =>
+    api.get<{ items: NotificationItem[]; total: number; unread_count: number }>('/notifications', { params: { page, page_size: pageSize } }),
+  markRead: (id: string) => api.put<NotificationItem>(`/notifications/${id}/read`),
+  markAllRead: () => api.put('/notifications/read-all'),
+  delete: (id: string) => api.delete(`/notifications/${id}`),
+}
+
+export const wishlistApi = {
+  list: () => api.get<WishlistItem[]>('/wishlist'),
+  add: (courseId: string) => api.post<WishlistItem>(`/wishlist/${courseId}`),
+  remove: (courseId: string) => api.delete(`/wishlist/${courseId}`),
+  check: (courseId: string) => api.get<{ is_wishlisted: boolean }>(`/wishlist/check/${courseId}`),
+}
+
+export const announcementsApi = {
+  list: (courseId: string) => api.get<Announcement[]>(`/courses/${courseId}/announcements`),
 }
 
 export default api

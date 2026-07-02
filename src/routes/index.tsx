@@ -29,6 +29,9 @@ import {
 } from '../pages/PlaceholderPage'
 import { MyCourses as StudentCourses } from '../features/courses/MyCourses'
 import { CourseDetail as StudentCourseDetail } from '../features/courses/CourseDetail'
+import { CourseCatalog } from '../features/courses/CourseCatalog'
+import { CourseLearning } from '../features/courses/CourseLearning'
+import { StudentWishlist } from '../features/student/StudentWishlist'
 import { LecturerStudents } from '../features/lecturer/LecturerStudents'
 import { LecturerAnalytics } from '../features/lecturer/LecturerAnalytics'
 import { LecturerDocuments } from '../features/lecturer/LecturerDocuments'
@@ -58,6 +61,9 @@ export const router = createBrowserRouter([
       { path: 'dashboard', element: <StudentDashboard /> },
       { path: 'courses', element: <StudentCourses /> },
       { path: 'courses/:id', element: <StudentCourseDetail /> },
+      { path: 'courses/:id/learn', element: <CourseLearning /> },
+      { path: 'browse', element: <CourseCatalog /> },
+      { path: 'wishlist', element: <StudentWishlist /> },
       { path: 'documents', element: <DocumentHub /> },
       { path: 'chat', element: <ChatPanel /> },
       { path: 'quiz', element: <QuizGenerator /> },

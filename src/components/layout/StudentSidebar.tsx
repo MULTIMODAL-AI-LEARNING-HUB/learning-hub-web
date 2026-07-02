@@ -1,12 +1,14 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, BookOpen, FileText, MessageSquare, BookOpen as QuizIcon, Layers, User, LogOut } from 'lucide-react'
+import { Home, BookOpen, FileText, MessageSquare, BookOpen as QuizIcon, Layers, User, LogOut, Compass, Heart } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { Avatar } from '../ui/Avatar'
 import { cn } from '../../utils/cn'
 
 const studentNavItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/app/student/dashboard' },
+  { id: 'browse', label: 'Browse Courses', icon: Compass, path: '/app/student/browse' },
   { id: 'courses', label: 'My Courses', icon: BookOpen, path: '/app/student/courses' },
+  { id: 'wishlist', label: 'Wishlist', icon: Heart, path: '/app/student/wishlist' },
   { id: 'documents', label: 'Documents', icon: FileText, path: '/app/student/documents' },
   { id: 'chat', label: 'AI Chat', icon: MessageSquare, path: '/app/student/chat' },
   { id: 'quiz', label: 'Quiz Generator', icon: QuizIcon, path: '/app/student/quiz' },

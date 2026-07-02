@@ -49,7 +49,11 @@ export interface ChatSlice {
 
 export interface NotificationsSlice {
   notifications: {
-    items: Notification[]
+    items: (Notification & { isRead: boolean })[]
+    unreadCount: number
+    fetch: () => Promise<void>
+    markRead: (id: string) => Promise<void>
+    markAllRead: () => Promise<void>
     dismiss: (id: string) => void
     clear: () => void
   }

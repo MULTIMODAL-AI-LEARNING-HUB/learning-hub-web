@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { BookOpen } from 'lucide-react'
-import { coursesApi, enrollmentsApi, type Course, type Enrollment } from '../../services/api'
+import { BookOpen, Heart } from 'lucide-react'
+import { coursesApi, enrollmentsApi, wishlistApi, type Course, type Enrollment } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { Skeleton } from '../../components/ui/Skeleton'
+import { ReviewSection } from './ReviewSection'
+import { Announcements } from './Announcements'
 
 export function CourseDetail() {
   const { id } = useParams<{ id: string }>()
@@ -15,24 +17,42 @@ export function CourseDetail() {
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null)
   const [loading, setLoading] = useState(true)
   const [enrolling, setEnrolling] = useState(false)
+  const [isWishlisted, setIsWishlisted] = useState(false)
 
   const loadCourse = useCallback(async () => {
     if (!id) return
     setLoading(true)
     try {
-      const [courseRes, enrollRes] = await Promise.all([
+      const [courseRes, enrollRes, wishRes] = await Promise.all([
         coursesApi.get(id),
-        enrollmentsApi.list({ status: 'active' }).catch(() => ({ data: { items: [] } }))
+        enrollmentsApi.list({ status: 'active' }).catch(() => ({ data: { items: [] } })),
+        wishlistApi.check(id).catch(() => ({ data: { is_wishlisted: false } })),
       ])
       setCourse(courseRes.data)
       const userEnrollment = enrollRes.data.items.find((e: Enrollment) => e.course_id === id)
       setEnrollment(userEnrollment || null)
+      setIsWishlisted(wishRes.data.is_wishlisted)
     } catch (err) {
       console.error('Failed to load course:', err)
     } finally {
       setLoading(false)
     }
   }, [id])
+
+  const toggleWishlist = async () => {
+    if (!id) return
+    try {
+      if (isWishlisted) {
+        await wishlistApi.remove(id)
+        setIsWishlisted(false)
+      } else {
+        await wishlistApi.add(id)
+        setIsWishlisted(true)
+      }
+    } catch {
+      // ignore
+    }
+  }
 
   useEffect(() => {
     loadCourse()
@@ -49,7 +69,7 @@ export function CourseDetail() {
       if (res.data.payment_url) {
         window.location.href = res.data.payment_url
       } else {
-        navigate(`/app/courses/${id}/learn`)
+        navigate(`/app/student/courses/${id}/learn`)
       }
     } catch (err) {
       const axiosErr = err as { response?: { data?: { detail?: string } } }
@@ -147,6 +167,8 @@ export function CourseDetail() {
             </div>
           </div>
 
+          <Announcements courseId={course.id} />
+
           <div>
             <h2 className="text-xl font-semibold mb-4 text-foreground">Nội dung khóa học ({course.materials?.length || 0} bài)</h2>
             <div className="space-y-2">
@@ -165,7 +187,7 @@ export function CourseDetail() {
                     </p>
                   </div>
                   {enrollment && (
-                    <Link to={`/app/courses/${course.id}/learn?material=${material.id}`}>
+                    <Link to={`/app/student/courses/${course.id}/learn?material=${material.id}`}>
                       <Button variant="ghost" size="sm">Học ngay</Button>
                     </Link>
                   )}
@@ -173,18 +195,29 @@ export function CourseDetail() {
               ))}
             </div>
           </div>
+
+          <ReviewSection courseId={course.id} />
         </div>
 
         <div className="space-y-4">
           <Card padding="responsive" className="lg:sticky lg:top-4">
             <div className="text-center mb-6">
-              {course.price === 0 ? (
-                <span className="text-3xl font-bold text-success">Miễn phí</span>
-              ) : (
-                <span className="text-3xl font-bold text-primary">
-                  {new Intl.NumberFormat('vi-VN').format(course.price)}đ
-                </span>
-              )}
+                <div className="flex items-center justify-between">
+                  {course.price === 0 ? (
+                    <span className="text-3xl font-bold text-success">Miễn phí</span>
+                  ) : (
+                    <span className="text-3xl font-bold text-primary">
+                      {new Intl.NumberFormat('vi-VN').format(course.price)}đ
+                    </span>
+                  )}
+                  <button
+                    onClick={toggleWishlist}
+                    className="p-2 rounded-lg hover:bg-muted transition"
+                    aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                  >
+                    <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`} />
+                  </button>
+                </div>
             </div>
 
             {enrollment ? (
@@ -204,7 +237,7 @@ export function CourseDetail() {
                     />
                   </div>
                 </div>
-                <Link to={`/app/courses/${course.id}/learn`} className="block">
+                <Link to={`/app/student/courses/${course.id}/learn`} className="block">
                   <Button className="w-full">Tiếp tục học</Button>
                 </Link>
               </div>
