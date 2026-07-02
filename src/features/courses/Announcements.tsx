@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { announcementsApi, type Announcement } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Skeleton } from '../../components/ui/Skeleton'
@@ -12,21 +12,19 @@ export function Announcements({ courseId }: Props) {
   const [items, setItems] = useState<Announcement[]>([])
   const [loading, setLoading] = useState(true)
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    try {
-      const res = await announcementsApi.list(courseId)
-      setItems(res.data)
-    } catch {
-      setItems([])
-    } finally {
-      setLoading(false)
-    }
-  }, [courseId])
-
   useEffect(() => {
-    load()
-  }, [load])
+    let cancelled = false
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLoading(true)
+    announcementsApi.list(courseId).then(res => {
+      if (!cancelled) setItems(res.data)
+    }).catch(() => {
+      if (!cancelled) setItems([])
+    }).finally(() => {
+      if (!cancelled) setLoading(false)
+    })
+    return () => { cancelled = true }
+  }, [courseId])
 
   if (loading) {
     return (

@@ -151,7 +151,7 @@ export function DiscussionPanel({ lessonId }: Props) {
 
                     {hasReplies && repliesExpanded && (
                       <div className="mt-3 space-y-2 pl-4 border-l-2 border-border">
-                        {discussion.replies.map((reply: any) => (
+                        {discussion.replies.map((reply) => (
                           <div key={reply.id} className="flex items-start gap-2">
                             <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs">
                               {reply.user_name?.[0] || '?'}

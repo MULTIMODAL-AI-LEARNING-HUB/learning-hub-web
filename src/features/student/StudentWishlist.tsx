@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { wishlistApi, type WishlistItem } from '../../services/api'
 import { Card } from '../../components/ui/Card'
@@ -10,21 +10,19 @@ export function StudentWishlist() {
   const [items, setItems] = useState<WishlistItem[]>([])
   const [loading, setLoading] = useState(true)
 
-  const loadWishlist = useCallback(async () => {
-    setLoading(true)
-    try {
-      const res = await wishlistApi.list()
-      setItems(res.data)
-    } catch {
-      setItems([])
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
   useEffect(() => {
-    loadWishlist()
-  }, [loadWishlist])
+    let cancelled = false
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLoading(true)
+    wishlistApi.list().then(res => {
+      if (!cancelled) setItems(res.data)
+    }).catch(() => {
+      if (!cancelled) setItems([])
+    }).finally(() => {
+      if (!cancelled) setLoading(false)
+    })
+    return () => { cancelled = true }
+  }, [])
 
   const removeItem = async (courseId: string) => {
     try {

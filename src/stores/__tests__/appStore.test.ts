@@ -43,6 +43,12 @@ vi.mock('../../services/api', () => ({
     analytics: vi.fn(),
     health: vi.fn(),
   },
+  notificationsApi: {
+    list: vi.fn().mockResolvedValue({ data: { items: [], total: 0, unread_count: 0 } }),
+    markRead: vi.fn().mockResolvedValue({}),
+    markAllRead: vi.fn().mockResolvedValue({}),
+    delete: vi.fn().mockResolvedValue({}),
+  },
 }))
 
 describe('appStore', () => {
@@ -172,7 +178,7 @@ describe('appStore', () => {
       expect(useAppStore.getState().notifications.items).toHaveLength(0)
     })
 
-    it('clears all notifications', () => {
+    it('clears all notifications', async () => {
       useAppStore.setState({
         notifications: {
           ...useAppStore.getState().notifications,
@@ -182,7 +188,7 @@ describe('appStore', () => {
           ]
         }
       })
-      useAppStore.getState().notifications.clear()
+      await useAppStore.getState().notifications.clear()
       expect(useAppStore.getState().notifications.items).toHaveLength(0)
     })
   })

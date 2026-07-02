@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { coursesApi, type Review } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -47,25 +47,22 @@ export function ReviewSection({ courseId }: Props) {
   const [formComment, setFormComment] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  const loadReviews = useCallback(async () => {
+  useEffect(() => {
+    let cancelled = false
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true)
-    try {
-      const [reviewsRes, myRes] = await Promise.all([
-        coursesApi.getReviews(courseId, 1, 50),
-        coursesApi.getMyReview(courseId).catch(() => null),
-      ])
+    Promise.all([
+      coursesApi.getReviews(courseId, 1, 50),
+      coursesApi.getMyReview(courseId).catch(() => null),
+    ]).then(([reviewsRes, myRes]) => {
+      if (cancelled) return
       setReviews(reviewsRes.data.items)
       if (myRes) setMyReview(myRes.data)
-    } catch {
-      // ignore
-    } finally {
-      setLoading(false)
-    }
+    }).catch(() => {}).finally(() => {
+      if (!cancelled) setLoading(false)
+    })
+    return () => { cancelled = true }
   }, [courseId])
-
-  useEffect(() => {
-    loadReviews()
-  }, [loadReviews])
 
   const handleSubmit = async () => {
     setSubmitting(true)

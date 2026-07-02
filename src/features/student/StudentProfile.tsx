@@ -17,10 +17,14 @@ export function StudentProfile() {
 
   useEffect(() => {
     if (user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFullName(user.name || '')
       setLoading(false)
     } else {
-      loadUser().finally(() => setLoading(false))
+      loadUser().then(() => {
+        // user will update via store subscription
+        setLoading(false)
+      }).catch(() => setLoading(false))
     }
   }, [user, loadUser])
 
