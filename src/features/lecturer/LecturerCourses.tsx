@@ -15,7 +15,7 @@ import { CourseContentManager } from './CourseContentManager'
 
 export function LecturerCourses() {
   const navigate = useNavigate()
-  const { courses, loading, stats, fetchCourses, fetchStats, createCourse, updateCourse, publishCourse, archiveCourse } = useLecturerCourses()
+  const { courses, loading, error, stats, fetchCourses, fetchStats, createCourse, updateCourse, publishCourse, archiveCourse } = useLecturerCourses()
   const [categories, setCategories] = useState<Category[]>([])
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -116,6 +116,12 @@ export function LecturerCourses() {
           Create Course
         </Button>
       </div>
+
+      {error && (
+        <div className="p-4 bg-destructive/10 text-destructive rounded-lg border border-destructive/20">
+          {error}
+        </div>
+      )}
 
       {stats && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
