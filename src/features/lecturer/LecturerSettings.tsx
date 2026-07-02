@@ -7,6 +7,33 @@ import { Card } from '../../components/ui/Card'
 import { PageHeader } from '../../components/ui/PageHeader'
 import { useToast } from '../../components/ui/useToast'
 
+type ApiUser = {
+  full_name: string | null
+  email: string
+  created_at: string | null
+  quota?: {
+    storage_limit_mb: number
+    storage_used_mb: number
+    token_limit: number
+    token_used: number
+  }
+}
+
+function mapApiUser(u: ApiUser | null) {
+  if (!u) return null
+  return {
+    full_name: u.full_name,
+    email: u.email,
+    created_at: u.created_at,
+    quota: u.quota ? {
+      storageUsed: u.quota.storage_used_mb,
+      storageTotal: u.quota.storage_limit_mb,
+      tokensUsed: u.quota.token_used,
+      tokensTotal: u.quota.token_limit,
+    } : undefined,
+  }
+}
+
 export function LecturerSettings() {
   const toast = useToast()
 
@@ -29,9 +56,10 @@ export function LecturerSettings() {
 
   useEffect(() => {
     authApi.me().then(res => {
-      setRawUser(res.data as typeof rawUser)
-      setFullName(res.data.full_name ?? '')
-      setEmail(res.data.email)
+      const u = res.data
+      setRawUser(mapApiUser(u))
+      setFullName(u?.full_name ?? '')
+      setEmail(u?.email ?? '')
     }).catch(() => {})
   }, [])
 
@@ -44,7 +72,7 @@ export function LecturerSettings() {
     try {
       await authApi.updateMe({ full_name: fullName })
       const res = await authApi.me()
-      setRawUser(res.data)
+      setRawUser(mapApiUser(res.data))
       toast({ type: 'success', title: 'Profile updated' })
     } catch {
       toast({ type: 'error', title: 'Failed to update profile' })
@@ -85,14 +113,7 @@ export function LecturerSettings() {
     }
   }
 
-  const quota = rawUser?.quota
-  ? {
-      storageUsed: rawUser.quota.storage_used_mb ?? 0,
-      storageTotal: rawUser.quota.storage_limit_mb ?? 0,
-      tokensUsed: rawUser.quota.token_used ?? 0,
-      tokensTotal: rawUser.quota.token_limit ?? 0,
-    }
-  : null
+  const quota = rawUser?.quota ?? null
 
   return (
     <div className="space-y-6 animate-fade-in">

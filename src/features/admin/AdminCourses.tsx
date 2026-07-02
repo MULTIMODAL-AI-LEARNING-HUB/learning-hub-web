@@ -48,7 +48,7 @@ export function AdminCourses() {
   const [deleting, setDeleting] = useState(false)
 
   const [editingCourse, setEditingCourse] = useState<AdminCourse | null>(null)
-  const [selectedStatus, setSelectedStatus] = useState<'draft' | 'published' | 'archived'>('')
+  const [selectedStatus, setSelectedStatus] = useState<'draft' | 'published' | 'archived'>(() => 'draft')
   const [updatingStatus, setUpdatingStatus] = useState(false)
 
   const fetchCourses = useCallback(async (p: number) => {
@@ -201,7 +201,7 @@ export function AdminCourses() {
                     </td>
                     <td className="py-3 px-5 text-right flex justify-end gap-1">
                       <button
-                        onClick={() => { setEditingCourse(c); setSelectedStatus(c.status) }}
+                        onClick={() => { setEditingCourse(c); setSelectedStatus(c.status as 'draft' | 'published' | 'archived') }}
                         className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition"
                       >
                         <Edit2 className="h-3.5 w-3.5" />
@@ -242,7 +242,7 @@ export function AdminCourses() {
               <select
                 className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                 value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
+                onChange={(e) => setSelectedStatus(e.target.value as 'draft' | 'published' | 'archived')}
               >
                 <option value="draft">Draft</option>
                 <option value="published">Published</option>
