@@ -50,10 +50,10 @@ export function CourseContentManager({ course }: CourseContentManagerProps) {
     fetchSections()
   }
 
-  const handleAddLesson = async (sectionId: string, type: 'VIDEO' | 'ARTICLE' | 'QUIZ' | 'ASSIGNMENT') => {
+  const handleAddLesson = async (sectionId: string, type: 'VIDEO' | 'ARTICLE' | 'QUIZ' | 'ASSIGNMENT' = 'ARTICLE') => {
     try {
       await lessonsApi.create(sectionId, {
-        title: `New ${type.charAt(0) + type.slice(1).toLowerCase()} Lesson`,
+        title: 'New Lesson',
         type,
       })
       fetchSections()

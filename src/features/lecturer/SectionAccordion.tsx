@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, Plus, Pencil, Trash2, GripVertical, Video, FileText, HelpCircle, ClipboardList } from 'lucide-react'
+import { ChevronDown, ChevronRight, Plus, Pencil, Trash2, GripVertical, Video, FileText, HelpCircle, ClipboardList, BookOpen } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Badge } from '../../components/ui/Badge'
@@ -26,7 +26,6 @@ export function SectionAccordion({
   const [editTitle, setEditTitle] = useState(section.title)
   const [editDescription] = useState(section.description || '')
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [showAddMenu, setShowAddMenu] = useState(false)
   const { lessons } = useLessons(section.id)
 
   const handleSave = async () => {
@@ -37,16 +36,6 @@ export function SectionAccordion({
   const handleDelete = async () => {
     await onSectionDelete(section.id)
     setShowDeleteModal(false)
-  }
-
-  const getLessonIcon = (type: string) => {
-    switch (type) {
-      case 'VIDEO': return <Video className="h-4 w-4 text-primary" />
-      case 'ARTICLE': return <FileText className="h-4 w-4 text-success" />
-      case 'QUIZ': return <HelpCircle className="h-4 w-4 text-accent" />
-      case 'ASSIGNMENT': return <ClipboardList className="h-4 w-4 text-warning" />
-      default: return <FileText className="h-4 w-4 text-muted-foreground" />
-    }
   }
 
   return (
@@ -89,52 +78,22 @@ export function SectionAccordion({
             </>
           ) : (
             <>
-              <div className="relative">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  icon={<Plus className="h-4 w-4" />}
-                  onClick={() => setShowAddMenu(!showAddMenu)}
-                  className="hidden sm:inline-flex"
-                >
-                  Add Lesson
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  icon={<Plus className="h-4 w-4" />}
-                  onClick={() => setShowAddMenu(!showAddMenu)}
-                  className="sm:hidden"
-                />
-                {showAddMenu && (
-                  <div className="absolute right-0 top-full mt-1 min-w-44 bg-surface-elevated border border-border rounded-lg shadow-lift z-10 py-1 animate-zoom-in-95">
-                    <button
-                      onClick={() => { onAddLesson(section.id, 'VIDEO'); setShowAddMenu(false) }}
-                      className="w-full px-3 py-2.5 text-left text-sm hover:bg-muted flex items-center gap-2 text-foreground"
-                    >
-                      <Video className="h-4 w-4 text-primary" /> Video
-                    </button>
-                    <button
-                      onClick={() => { onAddLesson(section.id, 'ARTICLE'); setShowAddMenu(false) }}
-                      className="w-full px-3 py-2.5 text-left text-sm hover:bg-muted flex items-center gap-2 text-foreground"
-                    >
-                      <FileText className="h-4 w-4 text-success" /> Article
-                    </button>
-                    <button
-                      onClick={() => { onAddLesson(section.id, 'QUIZ'); setShowAddMenu(false) }}
-                      className="w-full px-3 py-2.5 text-left text-sm hover:bg-muted flex items-center gap-2 text-foreground"
-                    >
-                      <HelpCircle className="h-4 w-4 text-accent" /> Quiz
-                    </button>
-                    <button
-                      onClick={() => { onAddLesson(section.id, 'ASSIGNMENT'); setShowAddMenu(false) }}
-                      className="w-full px-3 py-2.5 text-left text-sm hover:bg-muted flex items-center gap-2 text-foreground"
-                    >
-                      <ClipboardList className="h-4 w-4 text-warning" /> Assignment
-                    </button>
-                  </div>
-                )}
-              </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={<Plus className="h-4 w-4" />}
+                onClick={() => onAddLesson(section.id, 'ARTICLE')}
+                className="hidden sm:inline-flex"
+              >
+                Add Lesson
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                icon={<Plus className="h-4 w-4" />}
+                onClick={() => onAddLesson(section.id, 'ARTICLE')}
+                className="sm:hidden"
+              />
               <Button
                 size="sm"
                 variant="ghost"
@@ -161,17 +120,43 @@ export function SectionAccordion({
               onClick={() => onLessonClick(section.id, lesson)}
             >
               <div className="flex items-center gap-3">
-                {getLessonIcon(lesson.type)}
+                <BookOpen className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium text-foreground">{lesson.title}</p>
                   {lesson.description && (
-                    <p className="text-xs text-muted-foreground line-clamp-1">{lesson.description}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-1 mb-1">{lesson.description}</p>
                   )}
+                  {/* Inline content indicators */}
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {lesson.video_url && (
+                      <span className="flex items-center gap-1 text-[11px] text-primary" title="Video">
+                        <Video className="h-3 w-3" /> Video
+                      </span>
+                    )}
+                    {lesson.content && (
+                      <span className="flex items-center gap-1 text-[11px] text-success" title="Article">
+                        <FileText className="h-3 w-3" /> Article
+                      </span>
+                    )}
+                    {lesson.attachment_count > 0 && (
+                      <span className="flex items-center gap-1 text-[11px] text-info" title="Documents">
+                        <FileText className="h-3 w-3" /> Docs ({lesson.attachment_count})
+                      </span>
+                    )}
+                    {lesson.has_quiz && (
+                      <span className="flex items-center gap-1 text-[11px] text-accent" title="Quiz">
+                        <HelpCircle className="h-3 w-3" /> Quiz
+                      </span>
+                    )}
+                    {lesson.has_assignment && (
+                      <span className="flex items-center gap-1 text-[11px] text-warning" title="Assignment">
+                        <ClipboardList className="h-3 w-3" /> Assignment
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {lesson.has_quiz && <Badge variant="primary" label="Quiz" />}
-                {lesson.has_assignment && <Badge variant="warning" label="Assignment" />}
                 {lesson.is_preview && <Badge variant="info" label="Preview" />}
               </div>
             </div>

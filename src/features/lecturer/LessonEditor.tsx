@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Video, FileText, HelpCircle, ClipboardList, X, Check } from 'lucide-react'
+import { Video, FileText, HelpCircle, ClipboardList, X, Check, BookOpen } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
@@ -81,45 +81,43 @@ export function LessonEditor({
     onClose()
   }
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'VIDEO': return <Video className="h-5 w-5 text-primary" />
-      case 'ARTICLE': return <FileText className="h-5 w-5 text-success" />
-      case 'QUIZ': return <HelpCircle className="h-5 w-5 text-accent" />
-      case 'ASSIGNMENT': return <ClipboardList className="h-5 w-5 text-warning" />
-      default: return <FileText className="h-5 w-5 text-muted-foreground" />
-    }
-  }
-
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-card rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between px-4 py-3 sm:p-4 border-b border-border">
           <div className="flex items-center gap-3 min-w-0">
-            {getTypeIcon(lesson.type)}
+            <BookOpen className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold text-foreground truncate">Edit Lesson</h2>
-            <Badge variant="outline" label={lesson.type} />
+            <Badge variant="outline" label="Lesson" />
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">
             <X className="h-5 w-5" />
           </Button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          <div>
-            <label className="text-sm font-medium text-foreground">Title</label>
-            <Input value={title} onChange={setTitle} className="mt-1" />
+        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          {/* General Information */}
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-semibold text-foreground">Lesson Title</label>
+              <Input value={title} onChange={setTitle} className="mt-1" placeholder="Enter lesson title..." />
+            </div>
+
+            <div>
+              <label className="text-sm font-semibold text-foreground">Description</label>
+              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" rows={2} placeholder="Brief summary of the lesson..." />
+            </div>
           </div>
 
-          <div>
-            <label className="text-sm font-medium text-foreground">Description</label>
-            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" rows={2} />
-          </div>
-
-          {lesson.type === 'VIDEO' && (
-            <>
-              <div>
-                <label className="text-sm font-medium text-foreground">Video URL</label>
+          {/* Video Section */}
+          <div className="border border-border rounded-xl p-4 bg-muted/10 space-y-4">
+            <div className="flex items-center gap-2 border-b border-border pb-2">
+              <Video className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold text-foreground">Video Content</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-2">
+                <label className="text-xs font-medium text-muted-foreground">Video URL (YouTube, Vimeo, etc.)</label>
                 <Input
                   value={videoUrl}
                   onChange={setVideoUrl}
@@ -128,61 +126,73 @@ export function LessonEditor({
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-foreground">Duration (seconds)</label>
+                <label className="text-xs font-medium text-muted-foreground">Duration (seconds)</label>
                 <Input
                   type="number"
                   value={videoDuration || ''}
                   onChange={(v) => setVideoDuration(parseInt(v) || undefined)}
-                  className="mt-1 w-32"
+                  className="mt-1"
+                  placeholder="e.g. 600"
                 />
               </div>
-            </>
-          )}
+            </div>
+          </div>
 
-          {lesson.type === 'ARTICLE' && (
+          {/* Article Section */}
+          <div className="border border-border rounded-xl p-4 bg-muted/10 space-y-4">
+            <div className="flex items-center gap-2 border-b border-border pb-2">
+              <FileText className="h-5 w-5 text-success" />
+              <h3 className="font-semibold text-foreground">Text Content (Article)</h3>
+            </div>
             <div>
-              <label className="text-sm font-medium text-foreground">Content</label>
+              <label className="text-xs font-medium text-muted-foreground">Content (Markdown / HTML)</label>
               <Textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 className="mt-1"
-                rows={10}
-                placeholder="Write your lesson content here..."
+                rows={6}
+                placeholder="Write your lesson text content here..."
               />
             </div>
-          )}
+          </div>
 
-          {lesson.type === 'QUIZ' && (
-            <div className="bg-accent/10 border border-accent/30 rounded-lg p-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <h4 className="font-medium text-foreground">Quiz Attached</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {lesson.has_quiz ? 'This lesson has a quiz' : 'No quiz yet'}
-                  </p>
-                </div>
-                <Button onClick={() => onOpenQuiz(lesson.id)} variant="secondary" size="sm" fullWidthMobile>
-                  {lesson.has_quiz ? 'Edit Quiz' : 'Create Quiz'}
-                </Button>
-              </div>
+          {/* Quiz Section */}
+          <div className="border border-border rounded-xl p-4 bg-muted/10 space-y-4">
+            <div className="flex items-center gap-2 border-b border-border pb-2">
+              <HelpCircle className="h-5 w-5 text-accent" />
+              <h3 className="font-semibold text-foreground">Evaluation Quiz</h3>
             </div>
-          )}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card border border-border/60 p-3 rounded-lg">
+              <div>
+                <h4 className="text-sm font-medium text-foreground">Quiz Attachment</h4>
+                <p className="text-xs text-muted-foreground">
+                  {lesson.has_quiz ? 'This lesson has an attached quiz.' : 'No quiz attached yet.'}
+                </p>
+              </div>
+              <Button onClick={() => onOpenQuiz(lesson.id)} variant="secondary" size="sm" fullWidthMobile>
+                {lesson.has_quiz ? 'Edit Quiz' : 'Create Quiz'}
+              </Button>
+            </div>
+          </div>
 
-          {lesson.type === 'ASSIGNMENT' && (
-            <div className="bg-warning/10 border border-warning/30 rounded-lg p-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <h4 className="font-medium text-foreground">Assignment Attached</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {lesson.has_assignment ? 'This lesson has an assignment' : 'No assignment yet'}
-                  </p>
-                </div>
-                <Button onClick={() => onOpenAssignment(lesson.id)} variant="secondary" size="sm" fullWidthMobile>
-                  {lesson.has_assignment ? 'Edit Assignment' : 'Create Assignment'}
-                </Button>
-              </div>
+          {/* Assignment Section */}
+          <div className="border border-border rounded-xl p-4 bg-muted/10 space-y-4">
+            <div className="flex items-center gap-2 border-b border-border pb-2">
+              <ClipboardList className="h-5 w-5 text-warning" />
+              <h3 className="font-semibold text-foreground">Homework / Assignment</h3>
             </div>
-          )}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card border border-border/60 p-3 rounded-lg">
+              <div>
+                <h4 className="text-sm font-medium text-foreground">Assignment Attachment</h4>
+                <p className="text-xs text-muted-foreground">
+                  {lesson.has_assignment ? 'This lesson has an attached assignment.' : 'No assignment attached yet.'}
+                </p>
+              </div>
+              <Button onClick={() => onOpenAssignment(lesson.id)} variant="secondary" size="sm" fullWidthMobile>
+                {lesson.has_assignment ? 'Edit Assignment' : 'Create Assignment'}
+              </Button>
+            </div>
+          </div>
 
           <div className="flex items-center justify-between py-3 border-t border-border">
             <div className="flex items-center gap-4">
@@ -198,7 +208,7 @@ export function LessonEditor({
           </div>
 
           <div className="border-t border-border pt-4">
-            <h4 className="font-medium text-foreground mb-3">Attachments</h4>
+            <h4 className="font-medium text-foreground mb-3">Attachments (PDF or Word documents)</h4>
             <div className="space-y-2">
               {attachments?.map((att) => (
                 <div key={att.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
