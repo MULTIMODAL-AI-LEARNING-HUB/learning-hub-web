@@ -137,7 +137,7 @@ export function CourseLearning() {
     return (
       <div className="text-center py-12">
         <h2 className="text-xl font-semibold">Bạn chưa đăng ký khóa học này</h2>
-        <Link to={`/app/courses/${id}`} className="text-indigo-600 hover:underline mt-2 block">
+        <Link to={`/app/student/courses/${id}`} className="text-indigo-600 hover:underline mt-2 block">
           Quay lại trang khóa học
         </Link>
       </div>
@@ -156,7 +156,7 @@ export function CourseLearning() {
         >
           {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
         </Button>
-        <Link to={`/app/courses/${id}`} className="text-sm text-primary hover:underline">
+        <Link to={`/app/student/courses/${id}`} className="text-sm text-primary hover:underline">
           ← Quay lại
         </Link>
       </div>
@@ -168,7 +168,7 @@ export function CourseLearning() {
         sidebarOpen ? 'block' : 'hidden lg:block'
       )}>
         <div className="mb-4">
-          <Link to={`/app/courses/${id}`} className="text-sm text-primary hover:underline hidden lg:flex items-center gap-1 mb-2">
+          <Link to={`/app/student/courses/${id}`} className="text-sm text-primary hover:underline">
             ← Quay lại khóa học
           </Link>
           <h2 className="font-semibold line-clamp-2">{course.title}</h2>
@@ -315,7 +315,7 @@ export function CourseLearning() {
                 <Link to={`/app/student/chat?course_id=${id}&material_id=${currentMaterialId}`}>
                   <Button size="sm">Mở Chat AI</Button>
                 </Link>
-                <Link to={`/app/courses/${id}/quiz`}>
+                <Link to={`/app/student/quiz?course_id=${id}`}>
                   <Button variant="outline" size="sm">Làm Quiz</Button>
                 </Link>
               </div>

@@ -628,7 +628,7 @@ export const discussionsApi = {
 
 export const enrollmentsApi = {
   list: (params?: { status?: string; page?: number; page_size?: number }) =>
-    api.get<{ items: Enrollment[]; total: number }>('/enrollments', { params }),
+    api.get<{ items: Enrollment[]; total: number }>('/my-enrollments', { params }),
   get: (id: string) => api.get<Enrollment>(`/enrollments/${id}`),
   enroll: (courseId: string, paymentMethod?: 'vnpay' | 'momo') =>
     api.post<PaymentIntentResponse>(`/courses/${courseId}/enroll/payment-intent`, {
