@@ -137,15 +137,23 @@ export interface Course {
 
 export interface Enrollment {
   id: string
-  user_id: string
+  student_id: string
   course_id: string
   course?: Course
+  progress_percent?: number
+  payment_amount_vnd: number
+  payment_status: 'pending' | 'paid' | 'failed' | 'refunded'
+  payment_method: string | null
+  transaction_id: string | null
+  status: 'active' | 'completed' | 'cancelled'
   enrolled_at: string
   completed_at: string | null
-  progress_percent: number
-  status: 'active' | 'completed' | 'cancelled'
-  payment_id: string | null
-  payment_status: 'pending' | 'paid' | 'failed' | 'refunded'
+  course_title: string | null
+  course_thumbnail: string | null
+  lecturer_name: string | null
+  student_name?: string | null
+  student_email?: string | null
+  student_avatar_url?: string | null
 }
 
 export interface MaterialProgress {

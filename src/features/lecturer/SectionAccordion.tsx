@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronRight, Plus, Pencil, Trash2, GripVertical, Video, FileText, HelpCircle, ClipboardList, BookOpen } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
@@ -26,7 +26,11 @@ export function SectionAccordion({
   const [editTitle, setEditTitle] = useState(section.title)
   const [editDescription] = useState(section.description || '')
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const { lessons } = useLessons(section.id)
+  const { lessons, fetchLessons } = useLessons(section.id)
+
+  useEffect(() => {
+    fetchLessons()
+  }, [fetchLessons])
 
   const handleSave = async () => {
     await onSectionUpdate(section.id, { title: editTitle, description: editDescription })
@@ -36,6 +40,11 @@ export function SectionAccordion({
   const handleDelete = async () => {
     await onSectionDelete(section.id)
     setShowDeleteModal(false)
+  }
+
+  const handleAddLessonLocal = async (type: 'VIDEO' | 'ARTICLE' | 'QUIZ' | 'ASSIGNMENT') => {
+    await onAddLesson(section.id, type)
+    fetchLessons()
   }
 
   return (
@@ -82,7 +91,7 @@ export function SectionAccordion({
                 size="sm"
                 variant="ghost"
                 icon={<Plus className="h-4 w-4" />}
-                onClick={() => onAddLesson(section.id, 'ARTICLE')}
+                onClick={() => handleAddLessonLocal('ARTICLE')}
                 className="hidden sm:inline-flex"
               >
                 Add Lesson
@@ -91,7 +100,7 @@ export function SectionAccordion({
                 size="icon"
                 variant="ghost"
                 icon={<Plus className="h-4 w-4" />}
-                onClick={() => onAddLesson(section.id, 'ARTICLE')}
+                onClick={() => handleAddLessonLocal('ARTICLE')}
                 className="sm:hidden"
               />
               <Button

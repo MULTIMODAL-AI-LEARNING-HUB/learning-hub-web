@@ -84,6 +84,17 @@ export function useLecturerCourses() {
     }
   }, [toasts])
 
+  const unarchiveCourse = useCallback(async (id: string) => {
+    try {
+      const res = await coursesApi.publish(id)
+      toasts.add({ type: 'success', title: 'Course restored', message: 'Course has been restored to published status' })
+      return res.data
+    } catch (err: any) {
+      toasts.add({ type: 'error', title: 'Error', message: err.response?.data?.detail || 'Failed to restore course' })
+      throw err
+    }
+  }, [toasts])
+
   return {
     courses,
     loading,
@@ -95,6 +106,7 @@ export function useLecturerCourses() {
     updateCourse,
     publishCourse,
     archiveCourse,
+    unarchiveCourse,
   }
 }
 

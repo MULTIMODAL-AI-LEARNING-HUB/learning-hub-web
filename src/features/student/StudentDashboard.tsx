@@ -1,13 +1,21 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, FileText, MessageSquare, GraduationCap, Sparkles, ArrowRight, Clock, TrendingUp, Award } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
+import { useStudentDashboard } from '../../hooks/useStudentDashboard'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { Badge } from '../../components/ui/Badge'
+import { Skeleton } from '../../components/ui/Skeleton'
 
 export function StudentDashboard() {
   const navigate = useNavigate()
   const user = useAppStore((s) => s.auth.user)
+  const { courses, stats, recentActivity, loading, fetchDashboard } = useStudentDashboard()
+
+  useEffect(() => {
+    fetchDashboard()
+  }, [fetchDashboard])
 
   const getGreeting = () => {
     const hr = new Date().getHours()
@@ -16,17 +24,19 @@ export function StudentDashboard() {
     return 'Good evening'
   }
 
-  const courses = [
-    { id: 1, title: 'Introduction to Machine Learning', progress: 68, lessons: 12, completed: 8 },
-    { id: 2, title: 'Data Structures & Algorithms', progress: 45, lessons: 20, completed: 9 },
-    { id: 3, title: 'Web Development Fundamentals', progress: 82, lessons: 15, completed: 12 },
-  ]
+  const formatRelativeTime = (dateStr: string) => {
+    const date = new Date(dateStr)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMins / 60)
+    const diffDays = Math.floor(diffHours / 24)
 
-  const recentActivity = [
-    { type: 'quiz', title: 'Completed ML Quiz', score: 85, time: '2 hours ago' },
-    { type: 'chat', title: 'AI Chat about Neural Networks', time: '4 hours ago' },
-    { type: 'flashcard', title: 'Reviewed 25 flashcards', time: 'Yesterday' },
-  ]
+    if (diffMins < 60) return `${diffMins} min${diffMins !== 1 ? 's' : ''} ago`
+    if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`
+    if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`
+    return date.toLocaleDateString('vi-VN')
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -52,7 +62,11 @@ export function StudentDashboard() {
               <BookOpen className="h-4 w-4" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">{courses.length}</p>
+          {loading ? (
+            <Skeleton className="h-8 w-16 mt-2" />
+          ) : (
+            <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">{stats?.total_enrolled ?? 0}</p>
+          )}
           <p className="text-xs text-muted-foreground">Active courses</p>
         </Card>
 
@@ -63,30 +77,42 @@ export function StudentDashboard() {
               <FileText className="h-4 w-4" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">12</p>
-          <p className="text-xs text-muted-foreground">Uploaded files</p>
+          {loading ? (
+            <Skeleton className="h-8 w-16 mt-2" />
+          ) : (
+            <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">{stats?.total_materials ?? 0}</p>
+          )}
+          <p className="text-xs text-muted-foreground">Total materials</p>
         </Card>
 
         <Card padding="responsive">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">AI Sessions</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Completed</span>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/10 text-success">
               <MessageSquare className="h-4 w-4" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">8</p>
-          <p className="text-xs text-muted-foreground">Chat sessions</p>
+          {loading ? (
+            <Skeleton className="h-8 w-16 mt-2" />
+          ) : (
+            <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">{stats?.total_completed ?? 0}</p>
+          )}
+          <p className="text-xs text-muted-foreground">Materials done</p>
         </Card>
 
         <Card padding="responsive">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Avg Score</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Avg Progress</span>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-warning/10 text-warning">
               <Award className="h-4 w-4" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">78%</p>
-          <p className="text-xs text-muted-foreground">Quiz average</p>
+          {loading ? (
+            <Skeleton className="h-8 w-16 mt-2" />
+          ) : (
+            <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">{stats?.avg_progress ?? 0}%</p>
+          )}
+          <p className="text-xs text-muted-foreground">Overall progress</p>
         </Card>
       </div>
 
@@ -104,23 +130,49 @@ export function StudentDashboard() {
             </Button>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            {courses.map((course) => (
-              <Card key={course.id} padding="responsive" className="cursor-pointer hover:shadow-lift transition-all" onClick={() => navigate(`/app/student/courses/${course.id}`)}>
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <BookOpen className="h-5 w-5" />
+          {loading ? (
+            <div className="grid md:grid-cols-2 gap-4">
+              {[1, 2].map((i) => (
+                <Card key={i} padding="responsive">
+                  <div className="flex items-start justify-between mb-3">
+                    <Skeleton className="h-10 w-10 rounded-lg" />
+                    <Skeleton className="h-5 w-12" />
                   </div>
-                  <Badge variant={course.progress >= 70 ? 'success' : course.progress >= 50 ? 'warning' : 'default'} label={`${course.progress}%`} />
-                </div>
-                <h3 className="font-semibold text-foreground mb-1 line-clamp-1">{course.title}</h3>
-                <p className="text-xs text-muted-foreground mb-3">{course.completed}/{course.lessons} lessons completed</p>
-                <div className="h-1.5 w-full rounded-full bg-muted">
-                  <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${course.progress}%` }} />
-                </div>
-              </Card>
-            ))}
-          </div>
+                  <Skeleton className="h-4 w-3/4 mb-2" />
+                  <Skeleton className="h-3 w-1/2 mb-3" />
+                  <Skeleton className="h-1.5 w-full rounded-full" />
+                </Card>
+              ))}
+            </div>
+          ) : courses.length === 0 ? (
+            <Card padding="responsive" className="text-center py-8">
+              <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+              <p className="text-muted-foreground mb-4">You haven&apos;t enrolled in any courses yet.</p>
+              <Button onClick={() => navigate('/app/student/browse')}>Browse Courses</Button>
+            </Card>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-4">
+              {courses.slice(0, 4).map((course) => (
+                <Card key={course.id} padding="responsive" className="cursor-pointer hover:shadow-lift transition-all" onClick={() => navigate(`/app/student/courses/${course.course_id}`)}>
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary overflow-hidden">
+                      {course.course_thumbnail ? (
+                        <img src={course.course_thumbnail} alt={course.course_title} className="w-full h-full object-cover" />
+                      ) : (
+                        <BookOpen className="h-5 w-5" />
+                      )}
+                    </div>
+                    <Badge variant={course.completion_percent >= 70 ? 'success' : course.completion_percent >= 50 ? 'warning' : 'default'} label={`${Math.round(course.completion_percent)}%`} />
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-1 line-clamp-1">{course.course_title}</h3>
+                  <p className="text-xs text-muted-foreground mb-3">{course.completed_materials}/{course.total_materials} materials completed</p>
+                  <div className="h-1.5 w-full rounded-full bg-muted">
+                    <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${course.completion_percent}%` }} />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Activity Section */}
@@ -131,26 +183,45 @@ export function StudentDashboard() {
           </h2>
 
           <Card className="divide-y divide-border">
-            {recentActivity.map((activity, i) => (
-              <div key={i} className="p-4 flex items-start gap-3">
-                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                  activity.type === 'quiz' ? 'bg-success/10 text-success' :
-                  activity.type === 'chat' ? 'bg-primary/10 text-primary' :
-                  'bg-accent/10 text-accent'
-                }`}>
-                  {activity.type === 'quiz' ? <Award className="h-4 w-4" /> :
-                   activity.type === 'chat' ? <MessageSquare className="h-4 w-4" /> :
-                   <TrendingUp className="h-4 w-4" />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">{activity.title}</p>
-                  {activity.type === 'quiz' && 'score' in activity && (
-                    <p className="text-xs text-success font-medium">Score: {activity.score}%</p>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-0.5">{activity.time}</p>
-                </div>
+            {loading ? (
+              <div className="p-4 space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <Skeleton className="h-8 w-8 rounded-lg" />
+                    <div className="flex-1 space-y-1">
+                      <Skeleton className="h-3 w-3/4" />
+                      <Skeleton className="h-2 w-1/2" />
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : recentActivity.length === 0 ? (
+              <div className="p-4 text-center">
+                <Clock className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">No recent activity</p>
+              </div>
+            ) : (
+              recentActivity.map((activity) => (
+                <div key={activity.id} className="p-4 flex items-start gap-3">
+                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                    activity.activity_type === 'quiz' ? 'bg-success/10 text-success' :
+                    activity.activity_type === 'chat' ? 'bg-primary/10 text-primary' :
+                    'bg-accent/10 text-accent'
+                  }`}>
+                    {activity.activity_type === 'quiz' ? <Award className="h-4 w-4" /> :
+                     activity.activity_type === 'chat' ? <MessageSquare className="h-4 w-4" /> :
+                     <TrendingUp className="h-4 w-4" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">{activity.title}</p>
+                    {activity.activity_type === 'quiz' && activity.score !== null && (
+                      <p className="text-xs text-success font-medium">Score: {activity.score}%</p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-0.5">{formatRelativeTime(activity.created_at)}</p>
+                  </div>
+                </div>
+              ))
+            )}
           </Card>
 
           {/* Quick Actions */}

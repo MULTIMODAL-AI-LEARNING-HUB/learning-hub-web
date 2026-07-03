@@ -1,13 +1,18 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Users, BookOpen, TrendingUp } from 'lucide-react'
 import { Card } from '../../components/ui/Card'
 import { Badge } from '../../components/ui/Badge'
 import { PageHeader } from '../../components/ui/PageHeader'
+import { Modal } from '../../components/ui/Modal'
 import { useLecturerCourses } from '../../hooks/useLecturerCourses'
-import { coursesApi } from '../../services/api'
+import { coursesApi, type Enrollment } from '../../services/api'
 
 export function LecturerStudents() {
   const { stats, fetchStats } = useLecturerCourses()
+  const [selectedCourseTitle, setSelectedCourseTitle] = useState<string | null>(null)
+  const [enrolledStudents, setEnrolledStudents] = useState<Enrollment[]>([])
+  const [loadingStudents, setLoadingStudents] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     fetchStats()
@@ -20,6 +25,20 @@ export function LecturerStudents() {
   const topCourses = [...courseStats]
     .sort((a, b) => b.enrollment_count - a.enrollment_count)
     .slice(0, 5)
+
+  const handleCourseClick = async (courseId: string, courseTitle: string) => {
+    setSelectedCourseTitle(courseTitle)
+    setIsModalOpen(true)
+    setLoadingStudents(true)
+    try {
+      const res = await coursesApi.getEnrolledStudents(courseId)
+      setEnrolledStudents(res.data.items)
+    } catch (err) {
+      console.error('Failed to fetch enrolled students:', err)
+    } finally {
+      setLoadingStudents(false)
+    }
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -71,7 +90,11 @@ export function LecturerStudents() {
           </div>
           <div className="divide-y divide-border">
             {topCourses.length > 0 ? topCourses.map((c, i) => (
-              <div key={c.course_id} className="px-4 py-3 flex items-center justify-between">
+              <div
+                key={c.course_id}
+                onClick={() => handleCourseClick(c.course_id, c.title)}
+                className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-muted/40 transition"
+              >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary text-xs font-bold">
                     {i + 1}
@@ -99,7 +122,11 @@ export function LecturerStudents() {
           </div>
           <div className="divide-y divide-border">
             {courseStats.length > 0 ? courseStats.map((c) => (
-              <div key={c.course_id} className="px-4 py-3">
+              <div
+                key={c.course_id}
+                onClick={() => handleCourseClick(c.course_id, c.title)}
+                className="px-4 py-3 cursor-pointer hover:bg-muted/40 transition"
+              >
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm font-medium text-foreground truncate">{c.title}</p>
                   <span className="text-xs text-muted-foreground shrink-0 ml-2">${c.revenue.toLocaleString()}</span>
@@ -143,7 +170,11 @@ export function LecturerStudents() {
             </thead>
             <tbody className="divide-y divide-border">
               {courseStats.length > 0 ? courseStats.map((c) => (
-                <tr key={c.course_id} className="hover:bg-muted/30 transition">
+                <tr
+                  key={c.course_id}
+                  onClick={() => handleCourseClick(c.course_id, c.title)}
+                  className="hover:bg-muted/30 transition cursor-pointer"
+                >
                   <td className="px-4 py-3">
                     <p className="text-sm font-medium text-foreground">{c.title}</p>
                   </td>
@@ -168,6 +199,88 @@ export function LecturerStudents() {
           </table>
         </div>
       </Card>
+
+      <Modal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={`Enrolled Students - ${selectedCourseTitle}`}
+        size="lg"
+      >
+        <div className="space-y-4 py-2">
+          {loadingStudents ? (
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-center gap-4 p-3 bg-muted/20 rounded-lg">
+                  <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-1/3 bg-muted animate-pulse rounded" />
+                    <div className="h-3 w-1/2 bg-muted animate-pulse rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : enrolledStudents.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-2" />
+              <p>No students enrolled in this course yet.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto max-h-[50vh] overflow-y-auto pr-1">
+              <table className="w-full">
+                <thead className="border-b border-border bg-muted/30 sticky top-0 bg-background z-10">
+                  <tr>
+                    <th className="text-left px-3 py-2 text-xs font-semibold text-muted-foreground uppercase">Student</th>
+                    <th className="text-left px-3 py-2 text-xs font-semibold text-muted-foreground uppercase">Joined Date</th>
+                    <th className="text-left px-3 py-2 text-xs font-semibold text-muted-foreground uppercase">Payment</th>
+                    <th className="text-left px-3 py-2 text-xs font-semibold text-muted-foreground uppercase">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {enrolledStudents.map((enrollment) => {
+                    const studentInitials = enrollment.student_name
+                      ? enrollment.student_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                      : 'U'
+                    return (
+                      <tr key={enrollment.id} className="hover:bg-muted/10 transition">
+                        <td className="px-3 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">
+                              {enrollment.student_avatar_url ? (
+                                <img src={enrollment.student_avatar_url} alt="" className="h-full w-full rounded-full object-cover" />
+                              ) : (
+                                studentInitials
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-foreground truncate">{enrollment.student_name || 'Anonymous'}</p>
+                              <p className="text-xs text-muted-foreground truncate">{enrollment.student_email || 'No email'}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-3 py-3 text-xs text-muted-foreground">
+                          {new Date(enrollment.enrolled_at).toLocaleDateString('vi-VN')}
+                        </td>
+                        <td className="px-3 py-3">
+                          <div className="text-xs">
+                            <p className="font-semibold text-foreground">${enrollment.payment_amount_vnd?.toLocaleString() || 0}</p>
+                            <span className="text-[10px] text-muted-foreground capitalize">{enrollment.payment_method || 'Free'}</span>
+                          </div>
+                        </td>
+                        <td className="px-3 py-3">
+                          <Badge
+                            variant={enrollment.status === 'completed' ? 'success' : 'primary'}
+                            label={enrollment.status}
+                          />
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </Modal>
     </div>
   )
 }

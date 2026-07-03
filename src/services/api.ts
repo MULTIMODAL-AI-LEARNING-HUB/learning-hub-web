@@ -403,6 +403,7 @@ export interface PaymentIntentResponse {
 export interface Enrollment {
   id: string
   user_id: string
+  student_id?: string
   course_id: string
   course?: Course
   enrolled_at: string
@@ -411,6 +412,14 @@ export interface Enrollment {
   status: 'active' | 'completed' | 'cancelled'
   payment_id: string | null
   payment_status: 'pending' | 'paid' | 'failed' | 'refunded'
+  payment_amount_vnd?: number
+  payment_method?: string | null
+  course_title?: string | null
+  course_thumbnail?: string | null
+  lecturer_name?: string | null
+  student_name?: string | null
+  student_email?: string | null
+  student_avatar_url?: string | null
 }
 
 export interface MaterialProgressResponse {
@@ -431,6 +440,39 @@ export interface MaterialProgress {
   completed: boolean
   last_position: Record<string, unknown> | null
   completed_at: string | null
+}
+
+export interface DashboardCourseProgress {
+  id: string
+  course_id: string
+  course_title: string
+  course_thumbnail: string | null
+  lecturer_name: string | null
+  enrolled_at: string
+  completion_percent: number
+  total_materials: number
+  completed_materials: number
+}
+
+export interface DashboardStats {
+  total_enrolled: number
+  total_materials: number
+  total_completed: number
+  avg_progress: number
+}
+
+export interface DashboardActivity {
+  id: string
+  activity_type: string
+  title: string
+  score: number | null
+  created_at: string
+}
+
+export interface DashboardResponse {
+  courses: DashboardCourseProgress[]
+  stats: DashboardStats
+  recent_activity: DashboardActivity[]
 }
 
 export const categoriesApi = {
@@ -488,6 +530,8 @@ export const coursesApi = {
     api.post<Review>(`/courses/${courseId}/reviews/${reviewId}/reply`, { reply }),
   getDiscussionStats: (courseId: string) =>
     api.get<{ total_discussions: number; unanswered: number }>(`/courses/${courseId}/discussions/stats`),
+  getEnrolledStudents: (courseId: string) =>
+    api.get<{ items: Enrollment[]; total: number }>(`/courses/${courseId}/enrolled-students`),
 }
 
 // ============ NEW LECTURER API ENDPOINTS ============
@@ -648,6 +692,10 @@ export const paymentsApi = {
     api.post<{ payment_url: string }>('/payments/vnpay/create', { enrollment_id: enrollmentId, amount }),
   createMoMoUrl: (enrollmentId: string, amount: number) =>
     api.post<{ payment_url: string }>('/payments/momo/create', { enrollment_id: enrollmentId, amount }),
+}
+
+export const dashboardApi = {
+  getMyDashboard: () => api.get<DashboardResponse>('/dashboard/my-dashboard'),
 }
 
 export const authApi = {
