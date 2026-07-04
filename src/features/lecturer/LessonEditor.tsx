@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Video, FileText, HelpCircle, ClipboardList, X, Check, Plus } from 'lucide-react'
+import { Video, FileText, HelpCircle, ClipboardList, X, Check, Music, Film, FileImage, FileArchive, FileSpreadsheet, Download, Upload } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
@@ -7,6 +7,80 @@ import { Switch } from '../../components/ui/Switch'
 import { Modal } from '../../components/ui/Modal'
 import { useLessons, useLessonAttachments } from '../../hooks/useLessons'
 import type { Lesson } from '../../services/api'
+
+const getFileDetails = (fileName: string) => {
+  const ext = fileName.split('.').pop()?.toLowerCase() || ''
+  
+  if (['pdf'].includes(ext)) {
+    return {
+      icon: <FileText className="h-5 w-5 text-red-500" />,
+      bg: 'bg-red-500/10 border-red-500/20',
+      label: 'PDF Document'
+    }
+  }
+  if (['doc', 'docx'].includes(ext)) {
+    return {
+      icon: <FileText className="h-5 w-5 text-blue-500" />,
+      bg: 'bg-blue-500/10 border-blue-500/20',
+      label: 'Word Document'
+    }
+  }
+  if (['xls', 'xlsx', 'csv'].includes(ext)) {
+    return {
+      icon: <FileSpreadsheet className="h-5 w-5 text-emerald-500" />,
+      bg: 'bg-emerald-500/10 border-emerald-500/20',
+      label: 'Spreadsheet'
+    }
+  }
+  if (['ppt', 'pptx'].includes(ext)) {
+    return {
+      icon: <FileText className="h-5 w-5 text-orange-500" />,
+      bg: 'bg-orange-500/10 border-orange-500/20',
+      label: 'Presentation'
+    }
+  }
+  if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
+    return {
+      icon: <FileArchive className="h-5 w-5 text-purple-500" />,
+      bg: 'bg-purple-500/10 border-purple-500/20',
+      label: 'Archive'
+    }
+  }
+  if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext)) {
+    return {
+      icon: <FileImage className="h-5 w-5 text-cyan-500" />,
+      bg: 'bg-cyan-500/10 border-cyan-500/20',
+      label: 'Image File'
+    }
+  }
+  if (['mp3', 'wav', 'ogg', 'm4a'].includes(ext)) {
+    return {
+      icon: <Music className="h-5 w-5 text-indigo-500" />,
+      bg: 'bg-indigo-500/10 border-indigo-500/20',
+      label: 'Audio File'
+    }
+  }
+  if (['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext)) {
+    return {
+      icon: <Film className="h-5 w-5 text-pink-500" />,
+      bg: 'bg-pink-500/10 border-pink-500/20',
+      label: 'Video File'
+    }
+  }
+  return {
+    icon: <FileText className="h-5 w-5 text-muted-foreground" />,
+    bg: 'bg-muted/10 border-border/50',
+    label: 'Attachment'
+  }
+}
+
+const formatBytes = (bytes: number | null | undefined) => {
+  if (bytes === null || bytes === undefined || bytes === 0) return 'Unknown size'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+}
 
 interface LessonEditorProps {
   courseId: string
@@ -209,30 +283,87 @@ export function LessonEditor({
             </div>
           </div>
 
-          {/* Section 5: Attachments */}
-          <div className="bg-muted/20 p-4 rounded-xl border border-border/50 space-y-4">
-            <h3 className="text-xs font-semibold text-primary uppercase tracking-wider">Attachments (PDF, Word, etc.)</h3>
-            <div className="space-y-2">
-              {attachments?.map((att) => (
-                <div key={att.id} className="flex items-center justify-between p-2.5 bg-card border border-border/60 rounded-lg">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <FileText className="h-4 w-4 text-primary shrink-0" />
-                    <span className="text-sm text-foreground truncate">{att.file_name}</span>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    icon={<X className="h-4 w-4 text-destructive" />}
-                    onClick={() => deleteAttachment(att.id)}
-                  />
-                </div>
-              ))}
-              <label className="flex flex-col items-center justify-center gap-1.5 p-4 border-2 border-dashed border-border hover:border-primary/40 rounded-xl cursor-pointer hover:bg-muted/30 transition">
-                <input type="file" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) addAttachment(file); }} />
-                <Plus className="h-5 w-5 text-muted-foreground" />
-                <span className="text-xs font-medium text-muted-foreground">Click to upload file attachment</span>
-              </label>
+          {/* Section 5: Attachments & Lesson Materials */}
+          <div className="bg-muted/20 p-5 rounded-xl border border-border/50 space-y-4">
+            <div className="flex items-center justify-between border-b border-border/60 pb-2">
+              <div className="flex items-center gap-2">
+                <FileArchive className="h-5 w-5 text-primary" />
+                <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Attachments & Materials</h3>
+              </div>
+              <span className="text-2xs font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                {attachments?.length || 0} Files
+              </span>
             </div>
+
+            {/* Upload Area */}
+            <label className="group flex flex-col items-center justify-center gap-2 p-6 border-2 border-dashed border-border hover:border-primary/50 rounded-xl cursor-pointer hover:bg-primary/5 transition duration-200">
+              <input 
+                type="file" 
+                className="hidden" 
+                onChange={(e) => { const file = e.target.files?.[0]; if (file) addAttachment(file); }} 
+              />
+              <div className="p-3 bg-muted/40 rounded-full group-hover:bg-primary/10 group-hover:scale-110 transition duration-200">
+                <Upload className="h-6 w-6 text-muted-foreground group-hover:text-primary transition" />
+              </div>
+              <div className="text-center space-y-1">
+                <p className="text-xs font-semibold text-foreground group-hover:text-primary transition">Click to upload file attachment</p>
+                <p className="text-[10px] text-muted-foreground">Supports PDF, Word, Excel, Images, ZIP up to 50MB</p>
+              </div>
+            </label>
+
+            {/* Attachments List */}
+            {attachments && attachments.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                {attachments.map((att) => {
+                  const details = getFileDetails(att.file_name)
+                  return (
+                    <div 
+                      key={att.id} 
+                      className="flex items-start justify-between p-3 bg-card border border-border/70 hover:border-border-strong rounded-xl shadow-xs hover:shadow-sm transition"
+                    >
+                      <div className="flex items-start gap-3 min-w-0">
+                        <div className={`p-2 rounded-lg border ${details.bg} shrink-0`}>
+                          {details.icon}
+                        </div>
+                        <div className="min-w-0 space-y-0.5">
+                          <p 
+                            className="text-xs font-semibold text-foreground truncate max-w-[150px]" 
+                            title={att.file_name}
+                          >
+                            {att.file_name}
+                          </p>
+                          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                            <span>{formatBytes(att.file_size)}</span>
+                            <span>•</span>
+                            <span className="capitalize">{details.label}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-0.5 shrink-0 ml-2">
+                        {att.file_url && (
+                          <a 
+                            href={att.file_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="p-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition"
+                            title="Download/View file"
+                          >
+                            <Download className="h-3.5 w-3.5" />
+                          </a>
+                        )}
+                        <button
+                          onClick={() => deleteAttachment(att.id)}
+                          className="p-1 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition"
+                          title="Remove file"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </div>
       </Modal>
