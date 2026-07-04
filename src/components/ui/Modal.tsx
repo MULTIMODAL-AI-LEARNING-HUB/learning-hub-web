@@ -9,7 +9,7 @@ interface ModalProps {
   children: ReactNode
   footer?: ReactNode
   onClose?: () => void
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '3xl' | '4xl' | '5xl' | 'full'
   hideClose?: boolean
   fullScreenOnMobile?: boolean
 }
@@ -19,6 +19,9 @@ const sizes = {
   md: 'max-w-md',
   lg: 'max-w-lg',
   xl: 'max-w-2xl',
+  '3xl': 'max-w-3xl',
+  '4xl': 'max-w-4xl',
+  '5xl': 'max-w-5xl',
   full: 'max-w-full'
 }
 

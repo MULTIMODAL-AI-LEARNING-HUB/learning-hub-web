@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Search, RefreshCw, ChevronLeft, ChevronRight, Trash2, BookOpen, Edit2 } from 'lucide-react'
-import { adminApi, coursesApi } from '../../services/api'
+import { Search, RefreshCw, ChevronLeft, ChevronRight, Trash2, BookOpen, Edit2, Eye, Users, Calendar, Globe, Award } from 'lucide-react'
+import { adminApi, coursesApi, type Enrollment } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
@@ -51,6 +51,10 @@ export function AdminCourses() {
   const [selectedStatus, setSelectedStatus] = useState<'draft' | 'published' | 'archived'>(() => 'draft')
   const [updatingStatus, setUpdatingStatus] = useState(false)
 
+  const [selectedCourseDetail, setSelectedCourseDetail] = useState<AdminCourse | null>(null)
+  const [enrolledStudents, setEnrolledStudents] = useState<Enrollment[]>([])
+  const [loadingStudents, setLoadingStudents] = useState(false)
+
   const fetchCourses = useCallback(async (p: number) => {
     setLoading(true)
     try {
@@ -89,6 +93,21 @@ export function AdminCourses() {
       toast({ type: 'error', title: err?.response?.data?.detail || 'Failed to delete course' })
     } finally {
       setDeleting(false)
+    }
+  }
+
+  const handleViewDetails = async (course: AdminCourse) => {
+    setSelectedCourseDetail(course)
+    setLoadingStudents(true)
+    setEnrolledStudents([])
+    try {
+      const res = await coursesApi.getEnrolledStudents(course.id)
+      setEnrolledStudents(res.data.items)
+    } catch (err) {
+      console.error('Failed to fetch enrolled students:', err)
+      toast({ type: 'error', title: 'Failed to load enrolled students' })
+    } finally {
+      setLoadingStudents(false)
     }
   }
 
@@ -185,7 +204,12 @@ export function AdminCourses() {
                 courses.map((c) => (
                   <tr key={c.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition">
                     <td className="py-3 px-5">
-                      <p className="font-medium text-foreground truncate max-w-[200px]">{c.title}</p>
+                      <button
+                        onClick={() => handleViewDetails(c)}
+                        className="font-medium text-foreground hover:text-primary transition truncate text-left max-w-[200px] hover:underline focus:outline-none"
+                      >
+                        {c.title}
+                      </button>
                     </td>
                     <td className="py-3 px-5 text-muted-foreground text-xs">{c.lecturer_name || '—'}</td>
                     <td className="py-3 px-5 text-muted-foreground text-xs">{c.category_name || '—'}</td>
@@ -201,14 +225,23 @@ export function AdminCourses() {
                     </td>
                     <td className="py-3 px-5 text-right flex justify-end gap-1">
                       <button
+                        onClick={() => handleViewDetails(c)}
+                        className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition"
+                        title="View details"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </button>
+                      <button
                         onClick={() => { setEditingCourse(c); setSelectedStatus(c.status as 'draft' | 'published' | 'archived') }}
                         className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition"
+                        title="Update status"
                       >
                         <Edit2 className="h-3.5 w-3.5" />
                       </button>
                       <button
                         onClick={() => setDeletingCourse(c)}
                         className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition"
+                        title="Delete course"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -269,6 +302,183 @@ export function AdminCourses() {
         <div className="flex justify-end gap-2 mt-6">
           <Button variant="outline" onClick={() => setDeletingCourse(null)}>Cancel</Button>
           <Button variant="danger" onClick={handleDelete} loading={deleting} icon={<Trash2 className="h-4 w-4" />}>Delete Course</Button>
+        </div>
+      </Modal>
+
+      {/* Course Detail Modal */}
+      <Modal
+        open={!!selectedCourseDetail}
+        onClose={() => setSelectedCourseDetail(null)}
+        title="Course Details"
+        size="4xl"
+      >
+        {selectedCourseDetail && (
+          <div className="space-y-6">
+            {/* Course Header Banner */}
+            <div className="relative h-40 rounded-xl overflow-hidden bg-gradient-to-r from-primary/30 to-secondary/30 flex items-center justify-between px-6 border border-border">
+              <div className="space-y-2 z-10 max-w-[70%]">
+                <Badge variant={STATUS_COLORS[selectedCourseDetail.status] || 'default'} label={selectedCourseDetail.status} />
+                <h3 className="text-xl font-bold text-foreground line-clamp-1">{selectedCourseDetail.title}</h3>
+                <p className="text-xs text-muted-foreground line-clamp-2">{selectedCourseDetail.description || 'No description provided.'}</p>
+              </div>
+              {selectedCourseDetail.thumbnail_url ? (
+                <img
+                  src={selectedCourseDetail.thumbnail_url}
+                  alt={selectedCourseDetail.title}
+                  className="w-32 h-20 rounded-lg object-cover border border-border shadow-sm shrink-0"
+                />
+              ) : (
+                <div className="w-32 h-20 rounded-lg bg-muted/50 border border-border flex items-center justify-center shrink-0">
+                  <BookOpen className="h-8 w-8 text-muted-foreground/30" />
+                </div>
+              )}
+            </div>
+
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="p-3 rounded-xl border border-border bg-muted/10 space-y-1">
+                <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground block">Lecturer</span>
+                <span className="text-xs font-semibold text-foreground truncate block">{selectedCourseDetail.lecturer_name || '—'}</span>
+              </div>
+              <div className="p-3 rounded-xl border border-border bg-muted/10 space-y-1">
+                <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground block">Category</span>
+                <span className="text-xs font-semibold text-foreground truncate block">{selectedCourseDetail.category_name || '—'}</span>
+              </div>
+              <div className="p-3 rounded-xl border border-border bg-muted/10 space-y-1">
+                <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground block">Price</span>
+                <span className="text-xs font-semibold text-foreground block">
+                  {selectedCourseDetail.price_vnd === 0 ? (
+                    <span className="text-success font-semibold">Free</span>
+                  ) : (
+                    `${selectedCourseDetail.price_vnd.toLocaleString()} VND`
+                  )}
+                </span>
+              </div>
+              <div className="p-3 rounded-xl border border-border bg-muted/10 space-y-1">
+                <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground block">Total Students</span>
+                <span className="text-xs font-bold text-primary block flex items-center gap-1.5">
+                  <Users className="h-3.5 w-3.5 text-primary" />
+                  {selectedCourseDetail.enrollment_count}
+                </span>
+              </div>
+            </div>
+
+            {/* General Info Details */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-border pt-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5" />
+                <span>Created: {selectedCourseDetail.created_at ? new Date(selectedCourseDetail.created_at).toLocaleDateString('vi-VN') : '—'}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Globe className="h-3.5 w-3.5" />
+                <span className="capitalize">Language: {selectedCourseDetail.language || 'English'}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Award className="h-3.5 w-3.5" />
+                <span className="capitalize">Level: {selectedCourseDetail.level || 'All Levels'}</span>
+              </div>
+            </div>
+
+            {/* Enrolled Students List */}
+            <div className="border-t border-border pt-4 space-y-3">
+              <h4 className="text-xs font-bold text-foreground flex items-center gap-2 uppercase tracking-wider text-muted-foreground">
+                <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                Enrolled Students List
+              </h4>
+
+              {loadingStudents ? (
+                <div className="space-y-2">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-4 p-3 bg-muted/20 rounded-lg">
+                      <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+                      <div className="flex-1 space-y-1">
+                        <div className="h-3 w-1/4 bg-muted animate-pulse rounded" />
+                        <div className="h-2 w-1/3 bg-muted animate-pulse rounded" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : enrolledStudents.length === 0 ? (
+                <div className="text-center py-6 border border-dashed border-border rounded-xl">
+                  <Users className="h-8 w-8 mx-auto text-muted-foreground/30 mb-2" />
+                  <p className="text-xs text-muted-foreground">No students enrolled in this course yet.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto border border-border rounded-xl">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-border bg-muted/20 text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+                        <th className="py-2 px-3">Student</th>
+                        <th className="py-2 px-3">Joined Date</th>
+                        <th className="py-2 px-3">Payment</th>
+                        <th className="py-2 px-3 text-center">Progress</th>
+                        <th className="py-2 px-3 text-right">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {enrolledStudents.map((enrollment) => {
+                        const studentInitials = enrollment.student_name
+                          ? enrollment.student_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                          : 'U'
+                        return (
+                          <tr key={enrollment.id} className="hover:bg-muted/10 transition">
+                            <td className="py-2 px-3">
+                              <div className="flex items-center gap-2.5">
+                                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold overflow-hidden border border-border">
+                                  {enrollment.student_avatar_url ? (
+                                    <img src={enrollment.student_avatar_url} alt="" className="h-full w-full object-cover" />
+                                  ) : (
+                                    studentInitials
+                                  )}
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="font-semibold text-foreground truncate">{enrollment.student_name || 'Anonymous'}</p>
+                                  <p className="text-[9px] text-muted-foreground truncate">{enrollment.student_email || 'No email'}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-2 px-3 text-muted-foreground whitespace-nowrap">
+                              {new Date(enrollment.enrolled_at).toLocaleDateString('vi-VN')}
+                            </td>
+                            <td className="py-2 px-3">
+                              <div>
+                                <p className="font-semibold text-foreground">
+                                  {enrollment.payment_amount_vnd === 0 ? 'Free' : `${enrollment.payment_amount_vnd?.toLocaleString()} VND`}
+                                </p>
+                                <span className="text-[8px] text-muted-foreground capitalize">{enrollment.payment_method || '—'}</span>
+                              </div>
+                            </td>
+                            <td className="py-2 px-3">
+                              <div className="flex items-center gap-2 justify-center max-w-[100px] mx-auto">
+                                <div className="w-full bg-muted rounded-full h-1">
+                                  <div
+                                    className="bg-primary h-1 rounded-full"
+                                    style={{ width: `${enrollment.progress_percent ?? 0}%` }}
+                                  />
+                                </div>
+                                <span className="font-medium text-foreground tabular-nums text-[9px]">
+                                  {enrollment.progress_percent ?? 0}%
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-2 px-3 text-right">
+                              <Badge
+                                variant={enrollment.status === 'completed' ? 'success' : 'primary'}
+                                label={enrollment.status}
+                              />
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        <div className="flex justify-end mt-6">
+          <Button variant="outline" onClick={() => setSelectedCourseDetail(null)}>Close</Button>
         </div>
       </Modal>
     </div>
