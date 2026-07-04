@@ -219,7 +219,26 @@ export function SectionAccordion({
                 className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 cursor-pointer transition-colors"
                 onClick={() => onLessonClick(section.id, lesson)}
               >
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
+                  {/* Chevron Toggle at start of row (similar to Section) */}
+                  <div className="shrink-0 flex items-center justify-center w-5 h-5" onClick={(e) => e.stopPropagation()}>
+                    {lesson.attachment_count > 0 ? (
+                      <button
+                        onClick={(e) => toggleLessonExpand(e, lesson.id)}
+                        className="hover:bg-muted p-0.5 rounded transition-colors"
+                        title="Toggle documents list"
+                      >
+                        {expandedLessons[lesson.id] ? (
+                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </button>
+                    ) : (
+                      <div className="w-4 h-4" />
+                    )}
+                  </div>
+                  
                   <BookOpen className="h-4 w-4 text-muted-foreground shrink-0" />
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">{lesson.title}</p>
@@ -241,11 +260,10 @@ export function SectionAccordion({
                       {lesson.attachment_count > 0 && (
                         <button
                           onClick={(e) => toggleLessonExpand(e, lesson.id)}
-                          className="flex items-center gap-1 text-[11px] text-info bg-info/10 hover:bg-info/20 px-1.5 py-0.5 rounded border border-info/20 font-semibold transition-colors"
-                          title="Click to view/manage documents"
+                          className="flex items-center gap-1 text-[11px] text-info hover:underline transition-all font-semibold"
+                          title="Toggle documents list"
                         >
                           <FileText className="h-3 w-3" /> Docs ({lesson.attachment_count})
-                          <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${expandedLessons[lesson.id] ? 'rotate-180' : ''}`} />
                         </button>
                       )}
                       {lesson.has_quiz && (
