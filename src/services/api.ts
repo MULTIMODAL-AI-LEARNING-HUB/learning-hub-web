@@ -599,28 +599,28 @@ export const quizzesApi = {
     max_attempts?: number
     is_active?: boolean
   }) => api.put<Quiz>(`/lessons/${lessonId}/quiz`, data),
-  delete: (quizId: string) => api.delete(`/lessons/${quizId}/quiz`),
-  getQuestions: (quizId: string) => api.get<Question[]>(`/quizzes/${quizId}/questions`),
-  addQuestion: (quizId: string, data: {
+  delete: (lessonId: string) => api.delete(`/lessons/${lessonId}/quiz`),
+  getQuestions: (lessonId: string) => api.get<Question[]>(`/lessons/${lessonId}/quiz/questions`),
+  addQuestion: (lessonId: string, data: {
     question_text: string
     type: 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_BLANK'
     points?: number
     explanation?: string
     order_index?: number
     answers: { answer_text: string; is_correct: boolean }[]
-  }) => api.post<Question>(`/quizzes/${quizId}/questions`, data),
-  updateQuestion: (questionId: string, data: {
+  }) => api.post<Question>(`/lessons/${lessonId}/quiz/questions`, data),
+  updateQuestion: (lessonId: string, questionId: string, data: {
     question_text?: string
     type?: 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_BLANK'
     points?: number
     explanation?: string
-  }) => api.put<Question>(`/quizzes/questions/${questionId}`, data),
-  deleteQuestion: (questionId: string) => api.delete(`/quizzes/questions/${questionId}`),
-  reorderQuestions: (quizId: string, questionIds: string[]) =>
-    api.put<Question[]>(`/quizzes/${quizId}/questions/reorder`, { question_ids: questionIds }),
-  updateAnswers: (questionId: string, answers: { id?: string; answer_text: string; is_correct: boolean }[]) =>
-    api.put<Answer[]>(`/quizzes/questions/${questionId}/answers`, { answers }),
-  getAttempts: (quizId: string) => api.get<QuizAttempt[]>(`/quizzes/${quizId}/attempts`),
+  }) => api.put<Question>(`/lessons/${lessonId}/quiz/questions/${questionId}`, data),
+  deleteQuestion: (lessonId: string, questionId: string) => api.delete(`/lessons/${lessonId}/quiz/questions/${questionId}`),
+  reorderQuestions: (lessonId: string, questionIds: string[]) =>
+    api.put<Question[]>(`/lessons/${lessonId}/quiz/questions/reorder`, { question_ids: questionIds }),
+  updateAnswers: (lessonId: string, questionId: string, answers: { id?: string; answer_text: string; is_correct: boolean }[]) =>
+    api.put<Answer[]>(`/lessons/${lessonId}/quiz/questions/${questionId}/answers`, { answers }),
+  getAttempts: (lessonId: string) => api.get<QuizAttempt[]>(`/lessons/${lessonId}/quiz/attempts`),
 }
 
 export const assignmentsApi = {

@@ -68,9 +68,8 @@ export function useQuiz(lessonId: string) {
   }, [lessonId, toasts])
 
   const deleteQuiz = useCallback(async () => {
-    if (!quiz) return
     try {
-      await quizzesApi.delete(quiz.id)
+      await quizzesApi.delete(lessonId)
       setQuiz(null)
       setQuestions([])
       toasts.add({ type: 'success', title: 'Quiz deleted' })
@@ -78,7 +77,7 @@ export function useQuiz(lessonId: string) {
       toasts.add({ type: 'error', title: 'Error', message: err.response?.data?.detail || 'Failed to delete quiz' })
       throw err
     }
-  }, [quiz, toasts])
+  }, [lessonId, toasts])
 
   const addQuestion = useCallback(async (data: {
     question_text: string
@@ -88,9 +87,8 @@ export function useQuiz(lessonId: string) {
     order_index?: number
     answers: { answer_text: string; is_correct: boolean }[]
   }) => {
-    if (!quiz) return
     try {
-      const res = await quizzesApi.addQuestion(quiz.id, data)
+      const res = await quizzesApi.addQuestion(lessonId, data)
       setQuestions(prev => [...prev, res.data])
       toasts.add({ type: 'success', title: 'Question added' })
       return res.data
@@ -98,7 +96,7 @@ export function useQuiz(lessonId: string) {
       toasts.add({ type: 'error', title: 'Error', message: err.response?.data?.detail || 'Failed to add question' })
       throw err
     }
-  }, [quiz, toasts])
+  }, [lessonId, toasts])
 
   const updateQuestion = useCallback(async (questionId: string, data: {
     question_text?: string
@@ -107,7 +105,7 @@ export function useQuiz(lessonId: string) {
     explanation?: string
   }) => {
     try {
-      const res = await quizzesApi.updateQuestion(questionId, data)
+      const res = await quizzesApi.updateQuestion(lessonId, questionId, data)
       setQuestions(prev => prev.map(q => q.id === questionId ? { ...q, ...res.data } : q))
       toasts.add({ type: 'success', title: 'Question updated' })
       return res.data
@@ -115,23 +113,22 @@ export function useQuiz(lessonId: string) {
       toasts.add({ type: 'error', title: 'Error', message: err.response?.data?.detail || 'Failed to update question' })
       throw err
     }
-  }, [toasts])
+  }, [lessonId, toasts])
 
   const deleteQuestion = useCallback(async (questionId: string) => {
-    if (!quiz) return
     try {
-      await quizzesApi.deleteQuestion(questionId)
+      await quizzesApi.deleteQuestion(lessonId, questionId)
       setQuestions(prev => prev.filter(q => q.id !== questionId))
       toasts.add({ type: 'success', title: 'Question deleted' })
     } catch (err: any) {
       toasts.add({ type: 'error', title: 'Error', message: err.response?.data?.detail || 'Failed to delete question' })
       throw err
     }
-  }, [quiz, toasts])
+  }, [lessonId, toasts])
 
   const updateAnswers = useCallback(async (questionId: string, answers: { id?: string; answer_text: string; is_correct: boolean }[]) => {
     try {
-      const res = await quizzesApi.updateAnswers(questionId, answers)
+      const res = await quizzesApi.updateAnswers(lessonId, questionId, answers)
       setQuestions(prev => prev.map(q => q.id === questionId ? { ...q, answers: res.data } : q))
       toasts.add({ type: 'success', title: 'Answers updated' })
       return res.data
@@ -139,17 +136,16 @@ export function useQuiz(lessonId: string) {
       toasts.add({ type: 'error', title: 'Error', message: err.response?.data?.detail || 'Failed to update answers' })
       throw err
     }
-  }, [toasts])
+  }, [lessonId, toasts])
 
   const reorderQuestions = useCallback(async (questionIds: string[]) => {
-    if (!quiz) return
     try {
-      await quizzesApi.reorderQuestions(quiz.id, questionIds)
+      await quizzesApi.reorderQuestions(lessonId, questionIds)
     } catch (err: any) {
       toasts.add({ type: 'error', title: 'Error', message: err.response?.data?.detail || 'Failed to reorder questions' })
       throw err
     }
-  }, [quiz, toasts])
+  }, [lessonId, toasts])
 
   return {
     quiz,
