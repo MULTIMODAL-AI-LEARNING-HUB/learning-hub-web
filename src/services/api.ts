@@ -575,7 +575,7 @@ export const lessonsApi = {
     api.put<Lesson[]>(`/sections/${sectionId}/lessons/reorder`, { lesson_ids: lessonIds }),
   getAttachments: (sectionId: string, lessonId: string) => api.get<Attachment[]>(`/sections/${sectionId}/lessons/${lessonId}/attachments`),
   addAttachment: (sectionId: string, lessonId: string, data: FormData) =>
-    api.post<Attachment>(`/sections/${sectionId}/lessons/${lessonId}/attachments`, data, {
+    api.post<Attachment>(`/sections/${sectionId}/lessons/${lessonId}/attachments/upload`, data, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
   deleteAttachment: (sectionId: string, lessonId: string, attachmentId: string) =>
@@ -647,6 +647,19 @@ export const assignmentsApi = {
   delete: (assignmentId: string) => api.delete(`/lessons/${assignmentId}/assignment`),
   submit: (lessonId: string, data: { submission_text?: string; attachments?: Record<string, unknown>[] }) =>
     api.post<AssignmentSubmission>(`/lessons/${lessonId}/assignment/submissions`, data),
+  uploadSubmissionFile: (lessonId: string, file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return api.post<{
+      file_name: string
+      file_url: string
+      file_type: string
+      file_size: number
+      storage_key: string
+    }>(`/lessons/${lessonId}/assignment/submissions/upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
   getSubmissions: (assignmentId: string, page = 1, pageSize = 20) =>
     api.get<{ items: AssignmentSubmission[]; total: number }>(`/assignments/${assignmentId}/submissions`, {
       params: { page, page_size: pageSize },
