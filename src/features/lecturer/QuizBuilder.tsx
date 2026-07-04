@@ -139,8 +139,8 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-card rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-foreground/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+      <div className="bg-surface-elevated border border-border rounded-2xl shadow-lift w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-slide-in-from-bottom">
         <div className="flex items-center justify-between px-4 py-3 sm:p-4 border-b border-border">
           <h2 className="text-lg font-semibold text-foreground">Quiz Builder</h2>
           <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">

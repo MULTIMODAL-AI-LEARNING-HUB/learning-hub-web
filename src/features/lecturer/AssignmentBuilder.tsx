@@ -109,8 +109,8 @@ export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuild
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-card rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-foreground/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+      <div className="bg-surface-elevated border border-border rounded-2xl shadow-lift w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-slide-in-from-bottom">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-3">
             <ClipboardList className="h-5 w-5 text-warning" />
