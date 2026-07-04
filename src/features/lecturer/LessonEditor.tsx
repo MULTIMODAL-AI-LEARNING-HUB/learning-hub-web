@@ -6,7 +6,8 @@ import { Textarea } from '../../components/ui/Textarea'
 import { Switch } from '../../components/ui/Switch'
 import { Modal } from '../../components/ui/Modal'
 import { useLessons, useLessonAttachments } from '../../hooks/useLessons'
-import type { Lesson } from '../../services/api'
+import { lessonsApi, type Lesson } from '../../services/api'
+import { useToast } from '../../components/ui/useToast'
 
 const getFileDetails = (fileName: string) => {
   const ext = fileName.split('.').pop()?.toLowerCase() || ''
@@ -100,8 +101,42 @@ export function LessonEditor({
   onOpenQuiz,
   onOpenAssignment,
 }: LessonEditorProps) {
+  const toast = useToast()
   const { updateLesson, deleteLesson } = useLessons(sectionId)
   const { attachments, fetchAttachments, addAttachment, deleteAttachment } = useLessonAttachments(sectionId, lesson?.id || '')
+
+  const [uploadingVideo, setUploadingVideo] = useState(false)
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !lesson) return
+
+    setUploadingVideo(true)
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('file_name', file.name)
+    formData.append('file_type', file.type)
+
+    try {
+      const res = await lessonsApi.addAttachment(sectionId, lesson.id, formData)
+      setVideoUrl(res.data.file_url)
+      
+      // Auto-detect video duration locally
+      const videoElement = document.createElement('video')
+      videoElement.src = URL.createObjectURL(file)
+      videoElement.onloadedmetadata = () => {
+        setVideoDuration(Math.round(videoElement.duration))
+        URL.revokeObjectURL(videoElement.src)
+      }
+      
+      toast({ type: 'success', title: 'Video uploaded successfully' })
+    } catch (err) {
+      console.error('Failed to upload video:', err)
+      toast({ type: 'error', title: 'Failed to upload video' })
+    } finally {
+      setUploadingVideo(false)
+    }
+  }
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -206,14 +241,34 @@ export function LessonEditor({
               <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Video Content</h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="md:col-span-2">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Video URL (YouTube, Vimeo, etc.)</label>
-                <Input
-                  value={videoUrl}
-                  onChange={setVideoUrl}
-                  placeholder="https://youtube.com/..."
-                  className="mt-1.5"
-                />
+              <div className="md:col-span-2 space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Video URL (YouTube, Vimeo, or upload file)</label>
+                <div className="flex gap-2">
+                  <Input
+                    value={videoUrl}
+                    onChange={setVideoUrl}
+                    placeholder="https://youtube.com/... or upload a file"
+                    className="flex-1"
+                  />
+                  <label className="shrink-0 cursor-pointer">
+                    <input
+                      type="file"
+                      accept="video/*"
+                      className="hidden"
+                      onChange={handleVideoUpload}
+                      disabled={uploadingVideo}
+                    />
+                    <Button
+                      variant="secondary"
+                      as="span"
+                      loading={uploadingVideo}
+                      icon={<Upload className="h-4 w-4" />}
+                      className="h-9 px-3 text-xs cursor-pointer"
+                    >
+                      Upload Video
+                    </Button>
+                  </label>
+                </div>
               </div>
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Duration (seconds)</label>
