@@ -57,6 +57,118 @@ export function SectionAccordion({
   const [expandedLessons, setExpandedLessons] = useState<Record<string, boolean>>({})
   const [lessonAttachmentsMap, setLessonAttachmentsMap] = useState<Record<string, Attachment[]>>({})
   const [loadingAttachments, setLoadingAttachments] = useState<Record<string, boolean>>({})
+  const [showMaterialMenu, setShowMaterialMenu] = useState<Record<string, boolean>>({})
+  const [activeUploadLessonId, setActiveUploadLessonId] = useState<string | null>(null)
+  const [uploadingDoc, setUploadingDoc] = useState(false)
+  const [uploadingVideo, setUploadingVideo] = useState(false)
+
+  const handleDocumentUploadClick = (lessonId: string) => {
+    setActiveUploadLessonId(lessonId)
+    setTimeout(() => {
+      document.getElementById('document-upload-input')?.click()
+    }, 50)
+  }
+
+  const handleVideoUploadClick = (lessonId: string) => {
+    setActiveUploadLessonId(lessonId)
+    setTimeout(() => {
+      document.getElementById('video-upload-input')?.click()
+    }, 50)
+  }
+
+  const handleDocumentUploadSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !activeUploadLessonId) return
+
+    setUploadingDoc(true)
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('file_name', file.name)
+    formData.append('file_type', file.type)
+
+    try {
+      const res = await lessonsApi.addAttachment(section.id, activeUploadLessonId, formData)
+      
+      setLessonAttachmentsMap(prev => ({
+        ...prev,
+        [activeUploadLessonId]: [...(prev[activeUploadLessonId] || []), res.data]
+      }))
+
+      setExpandedLessons(prev => ({ ...prev, [activeUploadLessonId]: true }))
+      toast({ type: 'success', title: 'Document uploaded successfully' })
+      fetchLessons()
+    } catch (err) {
+      console.error('Failed to upload document:', err)
+      toast({ type: 'error', title: 'Failed to upload document' })
+    } finally {
+      setUploadingDoc(false)
+      setActiveUploadLessonId(null)
+      e.target.value = ''
+    }
+  }
+
+  const handleVideoUploadSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !activeUploadLessonId) return
+
+    setUploadingVideo(true)
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('file_name', file.name)
+    formData.append('file_type', file.type)
+
+    try {
+      const uploadRes = await lessonsApi.addAttachment(section.id, activeUploadLessonId, formData)
+      
+      const videoElement = document.createElement('video')
+      videoElement.src = URL.createObjectURL(file)
+      
+      videoElement.onloadedmetadata = async () => {
+        const duration = Math.round(videoElement.duration)
+        URL.revokeObjectURL(videoElement.src)
+        
+        try {
+          await lessonsApi.update(section.id, activeUploadLessonId, {
+            video_url: uploadRes.data.file_url,
+            video_duration: duration
+          })
+          
+          toast({ type: 'success', title: 'Video uploaded and attached successfully' })
+          fetchLessons()
+        } catch (err) {
+          console.error('Failed to update lesson video url:', err)
+          toast({ type: 'error', title: 'Failed to update lesson video url' })
+        }
+      }
+    } catch (err) {
+      console.error('Failed to upload video:', err)
+      toast({ type: 'error', title: 'Failed to upload video' })
+    } finally {
+      setUploadingVideo(false)
+      setActiveUploadLessonId(null)
+      e.target.value = ''
+    }
+  }
+
+  const handleAddVideoPrompt = async (lessonId: string) => {
+    const url = prompt("Nhập URL Video (ví dụ: YouTube, Vimeo) hoặc để trống và bấm OK để tải lên file video từ thiết bị:")
+    if (url === null) return
+
+    if (url.trim() !== "") {
+      try {
+        await lessonsApi.update(section.id, lessonId, {
+          video_url: url.trim()
+        })
+        toast({ type: 'success', title: 'Video URL updated successfully' })
+        fetchLessons()
+      } catch (err) {
+        console.error('Failed to update video url:', err)
+        toast({ type: 'error', title: 'Failed to update video url' })
+      }
+    } else {
+      handleVideoUploadClick(lessonId)
+    }
+  }
 
   useEffect(() => {
     fetchLessons()
@@ -331,6 +443,84 @@ export function SectionAccordion({
                 </div>
                 <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
                   {lesson.is_preview && <Badge variant="info" label="Preview" />}
+                  
+                  {/* Add Material Dropdown */}
+                  <div className="relative">
+                    <button
+                      disabled={uploadingDoc || uploadingVideo}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setShowMaterialMenu(prev => ({ ...prev, [lesson.id]: !prev[lesson.id] }))
+                      }}
+                      className="inline-flex items-center justify-center h-7 px-2.5 rounded-lg border border-primary/20 bg-card hover:bg-muted text-[11px] font-semibold text-primary gap-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Add content or documents to this lesson"
+                    >
+                      {activeUploadLessonId === lesson.id && (uploadingDoc || uploadingVideo) ? (
+                        <>
+                          <span className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent shrink-0" />
+                          <span>Uploading...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="h-3.5 w-3.5" />
+                          <span>Add Material</span>
+                        </>
+                      )}
+                    </button>
+                    
+                    {showMaterialMenu[lesson.id] && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setShowMaterialMenu(prev => ({ ...prev, [lesson.id]: false }))} />
+                        <div className="absolute right-0 mt-1 w-44 bg-surface-elevated border border-border rounded-xl shadow-lift py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-150 text-left">
+                          <button
+                            onClick={() => {
+                              setShowMaterialMenu(prev => ({ ...prev, [lesson.id]: false }))
+                              handleDocumentUploadClick(lesson.id)
+                            }}
+                            className="w-full text-left px-3.5 py-1.5 text-xs hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors font-medium"
+                          >
+                            <FileText className="h-3.5 w-3.5 text-rose-500" /> Upload Document
+                          </button>
+                          
+                          {!lesson.video_url && (
+                            <button
+                              onClick={() => {
+                                setShowMaterialMenu(prev => ({ ...prev, [lesson.id]: false }))
+                                handleAddVideoPrompt(lesson.id)
+                              }}
+                              className="w-full text-left px-3.5 py-1.5 text-xs hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors font-medium"
+                            >
+                              <Video className="h-3.5 w-3.5 text-primary" /> Add Video
+                            </button>
+                          )}
+                          
+                          {!lesson.has_quiz && (
+                            <button
+                              onClick={() => {
+                                setShowMaterialMenu(prev => ({ ...prev, [lesson.id]: false }))
+                                onOpenQuiz(lesson.id)
+                              }}
+                              className="w-full text-left px-3.5 py-1.5 text-xs hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors font-medium"
+                            >
+                              <HelpCircle className="h-3.5 w-3.5 text-accent" /> Add Quiz
+                            </button>
+                          )}
+                          
+                          {!lesson.has_assignment && (
+                            <button
+                              onClick={() => {
+                                setShowMaterialMenu(prev => ({ ...prev, [lesson.id]: false }))
+                                onOpenAssignment(lesson.id)
+                              }}
+                              className="w-full text-left px-3.5 py-1.5 text-xs hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors font-medium"
+                            >
+                              <ClipboardList className="h-3.5 w-3.5 text-warning" /> Add Assignment
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -343,10 +533,10 @@ export function SectionAccordion({
                   <div className="absolute left-[40px] top-0 bottom-6 w-[1.5px] bg-border/40" />
 
                   {/* Documents list (each taking exactly 1 full row) */}
-                  {loadingAttachments[lesson.id] ? (
+                  {loadingAttachments[lesson.id] || (activeUploadLessonId === lesson.id && uploadingDoc) ? (
                     <div className="text-xs text-muted-foreground py-1.5 pl-2 animate-pulse flex items-center gap-2">
                       <span className="h-2 w-2 rounded-full bg-primary animate-ping" />
-                      Loading lesson contents...
+                      {uploadingDoc ? 'Uploading document...' : 'Loading lesson contents...'}
                     </div>
                   ) : lessonAttachmentsMap[lesson.id] && lessonAttachmentsMap[lesson.id].length > 0 ? (
                     <div className="space-y-2">
@@ -490,6 +680,21 @@ export function SectionAccordion({
           </div>
         </div>
       </Modal>
+      
+      {/* Hidden file inputs for direct uploads from lesson row */}
+      <input
+        type="file"
+        id="document-upload-input"
+        className="hidden"
+        onChange={handleDocumentUploadSelected}
+      />
+      <input
+        type="file"
+        id="video-upload-input"
+        className="hidden"
+        accept="video/*"
+        onChange={handleVideoUploadSelected}
+      />
     </div>
   )
 }
