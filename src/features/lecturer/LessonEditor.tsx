@@ -228,23 +228,7 @@ export function LessonEditor({
             </div>
           </div>
 
-          {/* Section 3: Text Content */}
-          <div className="bg-muted/20 p-4 rounded-xl border border-border/50 space-y-4">
-            <div className="flex items-center gap-2 border-b border-border/60 pb-2">
-              <FileText className="h-5 w-5 text-success" />
-              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Text Content (Article)</h3>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Content (Markdown / HTML)</label>
-              <Textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="mt-1.5 font-mono text-sm"
-                rows={6}
-                placeholder="Write your lesson text content here..."
-              />
-            </div>
-          </div>
+
 
           {/* Section 4: Interactive Components */}
           <div className="bg-muted/20 p-4 rounded-xl border border-border/50 space-y-4">
