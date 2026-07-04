@@ -132,7 +132,7 @@ export function CourseContentManager({ course }: CourseContentManagerProps) {
           courseId={course.id}
           sectionId={editingLesson.sectionId}
           lesson={editingLesson.lesson}
-          isOpen={!!editingLesson}
+          isOpen={!!editingLesson && !showQuizBuilder && !showAssignmentBuilder}
           onClose={() => {
             setEditingLesson(null)
             fetchSections()
