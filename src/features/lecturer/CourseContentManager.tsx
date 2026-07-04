@@ -52,11 +52,12 @@ export function CourseContentManager({ course }: CourseContentManagerProps) {
 
   const handleAddLesson = async (sectionId: string, type: 'VIDEO' | 'ARTICLE' | 'QUIZ' | 'ASSIGNMENT' = 'ARTICLE') => {
     try {
-      await lessonsApi.create(sectionId, {
+      const res = await lessonsApi.create(sectionId, {
         title: 'New Lesson',
         type,
       })
-      fetchSections()
+      await fetchSections()
+      setEditingLesson({ sectionId, lesson: res.data })
     } catch (err) {
       console.error('Failed to create lesson:', err)
     }
