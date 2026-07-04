@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
-import { ChevronDown, ChevronRight, Plus, Pencil, Trash2, GripVertical, Video, FileText, HelpCircle, ClipboardList, BookOpen } from 'lucide-react'
+import { ChevronDown, ChevronRight, Plus, Pencil, Trash2, GripVertical, Video, FileText, HelpCircle, ClipboardList, BookOpen, Paperclip, Download } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Badge } from '../../components/ui/Badge'
 import { Modal } from '../../components/ui/Modal'
 import { useLessons } from '../../hooks/useLessons'
-import type { Section, Lesson } from '../../services/api'
+import { lessonsApi, type Section, type Lesson, type Attachment } from '../../services/api'
+import { useToast } from '../../components/ui/useToast'
+
 interface SectionAccordionProps {
   section: Section
   onSectionUpdate: (sectionId: string, data: { title?: string; description?: string }) => void
@@ -21,12 +23,18 @@ export function SectionAccordion({
   onLessonClick,
   onAddLesson,
 }: SectionAccordionProps) {
+  const toast = useToast()
   const [isOpen, setIsOpen] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(section.title)
   const [editDescription] = useState(section.description || '')
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const { lessons, fetchLessons } = useLessons(section.id)
+
+  const [showTypeMenu, setShowTypeMenu] = useState(false)
+  const [expandedLessons, setExpandedLessons] = useState<Record<string, boolean>>({})
+  const [lessonAttachmentsMap, setLessonAttachmentsMap] = useState<Record<string, Attachment[]>>({})
+  const [loadingAttachments, setLoadingAttachments] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     fetchLessons()
@@ -44,7 +52,54 @@ export function SectionAccordion({
 
   const handleAddLessonLocal = async (type: 'VIDEO' | 'ARTICLE' | 'QUIZ' | 'ASSIGNMENT') => {
     await onAddLesson(section.id, type)
+    setShowTypeMenu(false)
     fetchLessons()
+  }
+
+  const toggleLessonExpand = async (e: React.MouseEvent, lessonId: string) => {
+    e.stopPropagation() // Prevent opening the edit modal
+    
+    const isCurrentlyExpanded = !!expandedLessons[lessonId]
+    setExpandedLessons(prev => ({ ...prev, [lessonId]: !isCurrentlyExpanded }))
+    
+    if (!isCurrentlyExpanded && !lessonAttachmentsMap[lessonId]) {
+      setLoadingAttachments(prev => ({ ...prev, [lessonId]: true }))
+      try {
+        const res = await lessonsApi.getAttachments(section.id, lessonId)
+        setLessonAttachmentsMap(prev => ({ ...prev, [lessonId]: res.data }))
+      } catch (err) {
+        console.error('Failed to fetch attachments:', err)
+        toast({ type: 'error', title: 'Failed to load documents' })
+      } finally {
+        setLoadingAttachments(prev => ({ ...prev, [lessonId]: false }))
+      }
+    }
+  }
+
+  const handleDeleteAttachment = async (e: React.MouseEvent, lessonId: string, attachmentId: string) => {
+    e.stopPropagation() // Prevent opening the edit modal
+    if (!confirm('Are you sure you want to delete this document?')) return
+
+    try {
+      await lessonsApi.deleteAttachment(section.id, lessonId, attachmentId)
+      
+      // Update attachments list map
+      setLessonAttachmentsMap(prev => {
+        const current = prev[lessonId] || []
+        return {
+          ...prev,
+          [lessonId]: current.filter(att => att.id !== attachmentId)
+        }
+      })
+      
+      toast({ type: 'success', title: 'Document deleted successfully' })
+      
+      // Re-fetch lessons to update the Docs count indicator badge
+      fetchLessons()
+    } catch (err) {
+      console.error('Failed to delete attachment:', err)
+      toast({ type: 'error', title: 'Failed to delete document' })
+    }
   }
 
   return (
@@ -75,7 +130,7 @@ export function SectionAccordion({
           </span>
         </button>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 relative">
           {isEditing ? (
             <>
               <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)}>
@@ -86,12 +141,12 @@ export function SectionAccordion({
               </Button>
             </>
           ) : (
-            <>
+            <div className="relative">
               <Button
                 size="sm"
                 variant="ghost"
                 icon={<Plus className="h-4 w-4" />}
-                onClick={() => handleAddLessonLocal('ARTICLE')}
+                onClick={() => setShowTypeMenu(!showTypeMenu)}
                 className="hidden sm:inline-flex"
               >
                 Add Lesson
@@ -100,9 +155,45 @@ export function SectionAccordion({
                 size="icon"
                 variant="ghost"
                 icon={<Plus className="h-4 w-4" />}
-                onClick={() => handleAddLessonLocal('ARTICLE')}
+                onClick={() => setShowTypeMenu(!showTypeMenu)}
                 className="sm:hidden"
               />
+              
+              {showTypeMenu && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowTypeMenu(false)} />
+                  <div className="absolute right-0 mt-1 w-48 bg-surface-elevated border border-border rounded-xl shadow-lift py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                    <button
+                      onClick={() => handleAddLessonLocal('VIDEO')}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors"
+                    >
+                      <Video className="h-4 w-4 text-primary" /> Video Lesson
+                    </button>
+                    <button
+                      onClick={() => handleAddLessonLocal('ARTICLE')}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors"
+                    >
+                      <FileText className="h-4 w-4 text-success" /> Article Lesson
+                    </button>
+                    <button
+                      onClick={() => handleAddLessonLocal('QUIZ')}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors"
+                    >
+                      <HelpCircle className="h-4 w-4 text-accent" /> Add Quiz
+                    </button>
+                    <button
+                      onClick={() => handleAddLessonLocal('ASSIGNMENT')}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors"
+                    >
+                      <ClipboardList className="h-4 w-4 text-warning" /> Add Assignment
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+          {!isEditing && (
+            <>
               <Button
                 size="sm"
                 variant="ghost"
@@ -123,51 +214,104 @@ export function SectionAccordion({
       {isOpen && (
         <div className="divide-y divide-border">
           {lessons?.map((lesson) => (
-            <div
-              key={lesson.id}
-              className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 cursor-pointer"
-              onClick={() => onLessonClick(section.id, lesson)}
-            >
-              <div className="flex items-center gap-3">
-                <BookOpen className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium text-foreground">{lesson.title}</p>
-                  {lesson.description && (
-                    <p className="text-xs text-muted-foreground line-clamp-1 mb-1">{lesson.description}</p>
-                  )}
-                  {/* Inline content indicators */}
-                  <div className="flex items-center gap-2 mt-0.5">
-                    {lesson.video_url && (
-                      <span className="flex items-center gap-1 text-[11px] text-primary" title="Video">
-                        <Video className="h-3 w-3" /> Video
-                      </span>
+            <div key={lesson.id} className="border-b border-border last:border-b-0">
+              <div
+                className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 cursor-pointer transition-colors"
+                onClick={() => onLessonClick(section.id, lesson)}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <BookOpen className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{lesson.title}</p>
+                    {lesson.description && (
+                      <p className="text-xs text-muted-foreground line-clamp-1 mb-1">{lesson.description}</p>
                     )}
-                    {lesson.content && (
-                      <span className="flex items-center gap-1 text-[11px] text-success" title="Article">
-                        <FileText className="h-3 w-3" /> Article
-                      </span>
-                    )}
-                    {lesson.attachment_count > 0 && (
-                      <span className="flex items-center gap-1 text-[11px] text-info" title="Documents">
-                        <FileText className="h-3 w-3" /> Docs ({lesson.attachment_count})
-                      </span>
-                    )}
-                    {lesson.has_quiz && (
-                      <span className="flex items-center gap-1 text-[11px] text-accent" title="Quiz">
-                        <HelpCircle className="h-3 w-3" /> Quiz
-                      </span>
-                    )}
-                    {lesson.has_assignment && (
-                      <span className="flex items-center gap-1 text-[11px] text-warning" title="Assignment">
-                        <ClipboardList className="h-3 w-3" /> Assignment
-                      </span>
-                    )}
+                    
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                      {lesson.video_url && (
+                        <span className="flex items-center gap-1 text-[11px] text-primary" title="Video">
+                          <Video className="h-3 w-3" /> Video
+                        </span>
+                      )}
+                      {lesson.content && (
+                        <span className="flex items-center gap-1 text-[11px] text-success" title="Article">
+                          <FileText className="h-3 w-3" /> Article
+                        </span>
+                      )}
+                      {lesson.attachment_count > 0 && (
+                        <button
+                          onClick={(e) => toggleLessonExpand(e, lesson.id)}
+                          className="flex items-center gap-1 text-[11px] text-info bg-info/10 hover:bg-info/20 px-1.5 py-0.5 rounded border border-info/20 font-semibold transition-colors"
+                          title="Click to view/manage documents"
+                        >
+                          <FileText className="h-3 w-3" /> Docs ({lesson.attachment_count})
+                          <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${expandedLessons[lesson.id] ? 'rotate-180' : ''}`} />
+                        </button>
+                      )}
+                      {lesson.has_quiz && (
+                        <span className="flex items-center gap-1 text-[11px] text-accent" title="Quiz">
+                          <HelpCircle className="h-3 w-3" /> Quiz
+                        </span>
+                      )}
+                      {lesson.has_assignment && (
+                        <span className="flex items-center gap-1 text-[11px] text-warning" title="Assignment">
+                          <ClipboardList className="h-3 w-3" /> Assignment
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
+                <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                  {lesson.is_preview && <Badge variant="info" label="Preview" />}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                {lesson.is_preview && <Badge variant="info" label="Preview" />}
-              </div>
+
+              {expandedLessons[lesson.id] && (
+                <div 
+                  className="bg-muted/10 px-12 pb-3 pt-1 space-y-1.5 border-t border-border/40"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {loadingAttachments[lesson.id] ? (
+                    <div className="text-xs text-muted-foreground py-1 animate-pulse">Loading documents...</div>
+                  ) : lessonAttachmentsMap[lesson.id] && lessonAttachmentsMap[lesson.id].length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {lessonAttachmentsMap[lesson.id].map((att) => (
+                        <div 
+                          key={att.id}
+                          className="flex items-center justify-between gap-3 p-2 bg-card hover:bg-muted/40 border border-border/60 rounded-lg text-xs transition-colors"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Paperclip className="h-3.5 w-3.5 text-primary shrink-0" />
+                            <span className="truncate font-medium text-foreground" title={att.file_name}>
+                              {att.file_name}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <a
+                              href={att.file_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1.5 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-colors"
+                              title="Download document"
+                            >
+                              <Download className="h-3.5 w-3.5" />
+                            </a>
+                            <button
+                              onClick={(e) => handleDeleteAttachment(e, lesson.id, att.id)}
+                              className="p-1.5 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive transition-colors"
+                              title="Delete document"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-muted-foreground py-1">No documents attached.</div>
+                  )}
+                </div>
+              )}
             </div>
           ))}
           {(!lessons || lessons.length === 0) && (
