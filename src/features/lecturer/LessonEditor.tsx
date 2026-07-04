@@ -106,6 +106,30 @@ export function LessonEditor({
   const { attachments, fetchAttachments, addAttachment, deleteAttachment } = useLessonAttachments(sectionId, lesson?.id || '')
 
   const [uploadingVideo, setUploadingVideo] = useState(false)
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [videoUrl, setVideoUrl] = useState('')
+  const [videoDuration, setVideoDuration] = useState<number | undefined>()
+  const [content, setContent] = useState('')
+  const [isPreview, setIsPreview] = useState(false)
+  const [isActive, setIsActive] = useState(true)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const initializedRef = useRef(false)
+
+  const handleDeleteAttachment = async (attachmentId: string, fileUrl?: string) => {
+    await deleteAttachment(attachmentId)
+    // If the deleted file was the current lesson video, clear it from the form and DB
+    if (fileUrl && lesson && (videoUrl === fileUrl || (videoUrl && fileUrl && (videoUrl.includes(fileUrl) || fileUrl.includes(videoUrl))))) {
+      setVideoUrl('')
+      setVideoDuration(undefined)
+      try {
+        await lessonsApi.update(sectionId, lesson.id, { video_url: undefined, video_duration: undefined })
+        toast({ type: 'success', title: 'Video removed from lesson' })
+      } catch (err) {
+        console.error('Failed to clear video url:', err)
+      }
+    }
+  }
 
   const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -138,15 +162,6 @@ export function LessonEditor({
     }
   }
 
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [videoUrl, setVideoUrl] = useState('')
-  const [videoDuration, setVideoDuration] = useState<number | undefined>()
-  const [content, setContent] = useState('')
-  const [isPreview, setIsPreview] = useState(false)
-  const [isActive, setIsActive] = useState(true)
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const initializedRef = useRef(false)
 
   useEffect(() => {
     if (isOpen && lesson) {
@@ -244,12 +259,24 @@ export function LessonEditor({
               <div className="md:col-span-2 space-y-2">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Video URL (YouTube, Vimeo, or upload file)</label>
                 <div className="flex gap-2">
-                  <Input
-                    value={videoUrl}
-                    onChange={setVideoUrl}
-                    placeholder="https://youtube.com/... or upload a file"
-                    className="flex-1"
-                  />
+                  <div className="relative flex-1">
+                    <Input
+                      value={videoUrl}
+                      onChange={setVideoUrl}
+                      placeholder="https://youtube.com/... or upload a file"
+                      className="flex-1 pr-8"
+                    />
+                    {videoUrl && (
+                      <button
+                        type="button"
+                        onClick={() => { setVideoUrl(''); setVideoDuration(undefined) }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition"
+                        title="Clear video URL"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
                   <label className="shrink-0 cursor-pointer">
                     <input
                       type="file"
@@ -391,7 +418,7 @@ export function LessonEditor({
                           </a>
                         )}
                         <button
-                          onClick={() => deleteAttachment(att.id)}
+                          onClick={() => handleDeleteAttachment(att.id, att.file_url || undefined)}
                           className="p-1 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition"
                           title="Remove file"
                         >
