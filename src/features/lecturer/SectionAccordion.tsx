@@ -5,7 +5,7 @@ import { Input } from '../../components/ui/Input'
 import { Badge } from '../../components/ui/Badge'
 import { Modal } from '../../components/ui/Modal'
 import { useLessons } from '../../hooks/useLessons'
-import { lessonsApi, type Section, type Lesson, type Attachment } from '../../services/api'
+import { lessonsApi, quizzesApi, assignmentsApi, type Section, type Lesson, type Attachment } from '../../services/api'
 import { useToast } from '../../components/ui/useToast'
 
 interface SectionAccordionProps {
@@ -14,6 +14,8 @@ interface SectionAccordionProps {
   onSectionDelete: (sectionId: string) => void
   onLessonClick: (sectionId: string, lesson: Lesson) => void
   onAddLesson: (sectionId: string, type: 'VIDEO' | 'ARTICLE' | 'QUIZ' | 'ASSIGNMENT') => void
+  onOpenQuiz: (lessonId: string) => void
+  onOpenAssignment: (lessonId: string) => void
 }
 
 export function SectionAccordion({
@@ -22,6 +24,8 @@ export function SectionAccordion({
   onSectionDelete,
   onLessonClick,
   onAddLesson,
+  onOpenQuiz,
+  onOpenAssignment,
 }: SectionAccordionProps) {
   const toast = useToast()
   const [isOpen, setIsOpen] = useState(true)
@@ -99,6 +103,34 @@ export function SectionAccordion({
     } catch (err) {
       console.error('Failed to delete attachment:', err)
       toast({ type: 'error', title: 'Failed to delete document' })
+    }
+  }
+
+  const handleDeleteQuiz = async (e: React.MouseEvent, lessonId: string) => {
+    e.stopPropagation()
+    if (!confirm('Are you sure you want to delete this quiz?')) return
+
+    try {
+      await quizzesApi.delete(lessonId)
+      toast({ type: 'success', title: 'Quiz deleted successfully' })
+      fetchLessons()
+    } catch (err) {
+      console.error('Failed to delete quiz:', err)
+      toast({ type: 'error', title: 'Failed to delete quiz' })
+    }
+  }
+
+  const handleDeleteAssignmentItem = async (e: React.MouseEvent, lessonId: string) => {
+    e.stopPropagation()
+    if (!confirm('Are you sure you want to delete this assignment?')) return
+
+    try {
+      await assignmentsApi.delete(lessonId)
+      toast({ type: 'success', title: 'Assignment deleted successfully' })
+      fetchLessons()
+    } catch (err) {
+      console.error('Failed to delete assignment:', err)
+      toast({ type: 'error', title: 'Failed to delete assignment' })
     }
   }
 
@@ -286,17 +318,18 @@ export function SectionAccordion({
 
               {expandedLessons[lesson.id] && (
                 <div 
-                  className="bg-muted/10 px-12 pb-3 pt-1 space-y-1.5 border-t border-border/40"
+                  className="bg-muted/10 px-12 pb-3 pt-1.5 space-y-1.5 border-t border-border/40"
                   onClick={(e) => e.stopPropagation()}
                 >
+                  {/* Documents list (each taking exactly 1 full row) */}
                   {loadingAttachments[lesson.id] ? (
                     <div className="text-xs text-muted-foreground py-1 animate-pulse">Loading documents...</div>
                   ) : lessonAttachmentsMap[lesson.id] && lessonAttachmentsMap[lesson.id].length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="space-y-1.5">
                       {lessonAttachmentsMap[lesson.id].map((att) => (
                         <div 
                           key={att.id}
-                          className="flex items-center justify-between gap-3 p-2 bg-card hover:bg-muted/40 border border-border/60 rounded-lg text-xs transition-colors"
+                          className="flex items-center justify-between gap-3 p-2 bg-card hover:bg-muted/40 border border-border/60 rounded-lg text-xs transition-colors w-full"
                         >
                           <div className="flex items-center gap-2 min-w-0">
                             <Paperclip className="h-3.5 w-3.5 text-primary shrink-0" />
@@ -325,8 +358,70 @@ export function SectionAccordion({
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <div className="text-xs text-muted-foreground py-1">No documents attached.</div>
+                  ) : null}
+
+                  {/* Quiz (1 full row if present) */}
+                  {lesson.has_quiz && (
+                    <div className="flex items-center justify-between gap-3 p-2 bg-card hover:bg-muted/40 border border-border/60 rounded-lg text-xs transition-colors w-full">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <HelpCircle className="h-3.5 w-3.5 text-accent shrink-0" />
+                        <span className="truncate font-semibold text-foreground">
+                          Quiz: Bài kiểm tra trắc nghiệm
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => onOpenQuiz(lesson.id)}
+                          className="p-1.5 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-colors"
+                          title="Edit Quiz"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteQuiz(e, lesson.id)}
+                          className="p-1.5 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive transition-colors"
+                          title="Delete Quiz"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Assignment (1 full row if present) */}
+                  {lesson.has_assignment && (
+                    <div className="flex items-center justify-between gap-3 p-2 bg-card hover:bg-muted/40 border border-border/60 rounded-lg text-xs transition-colors w-full">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <ClipboardList className="h-3.5 w-3.5 text-warning shrink-0" />
+                        <span className="truncate font-semibold text-foreground">
+                          Assignment: Bài tập làm tự luận
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => onOpenAssignment(lesson.id)}
+                          className="p-1.5 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-colors"
+                          title="Edit Assignment"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteAssignmentItem(e, lesson.id)}
+                          className="p-1.5 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive transition-colors"
+                          title="Delete Assignment"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* If nothing is in the expanded dropdown */}
+                  {!loadingAttachments[lesson.id] && 
+                   (!lessonAttachmentsMap[lesson.id] || lessonAttachmentsMap[lesson.id].length === 0) && 
+                   !lesson.has_quiz && 
+                   !lesson.has_assignment && (
+                    <div className="text-xs text-muted-foreground py-1">No content or documents in this lesson.</div>
                   )}
                 </div>
               )}

@@ -87,6 +87,8 @@ export function CourseContentManager({ course }: CourseContentManagerProps) {
               onSectionDelete={handleSectionDelete}
               onLessonClick={(sectionId, lesson) => setEditingLesson({ sectionId, lesson })}
               onAddLesson={handleAddLesson}
+              onOpenQuiz={(lessonId) => setShowQuizBuilder(lessonId)}
+              onOpenAssignment={(lessonId) => setShowAssignmentBuilder(lessonId)}
             />
           ))
         ) : (
