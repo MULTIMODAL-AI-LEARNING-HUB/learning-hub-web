@@ -266,7 +266,7 @@ export function SectionAccordion({
           {lessons?.map((lesson) => (
             <div key={lesson.id} className="border-b border-border last:border-b-0">
               <div
-                className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 cursor-pointer transition-colors"
+                className="flex items-center justify-between pl-8 pr-4 py-2.5 hover:bg-muted/30 cursor-pointer transition-colors"
                 onClick={() => onLessonClick(section.id, lesson)}
               >
                 <div className="flex items-center gap-2 min-w-0">
@@ -289,40 +289,40 @@ export function SectionAccordion({
                     )}
                   </div>
                   
-                  <BookOpen className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <BookOpen className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{lesson.title}</p>
+                    <p className="text-[13px] font-semibold text-foreground/90 truncate">{lesson.title}</p>
                     {lesson.description && (
-                      <p className="text-xs text-muted-foreground line-clamp-1 mb-1">{lesson.description}</p>
+                      <p className="text-[11px] text-muted-foreground/80 line-clamp-1 mb-0.5">{lesson.description}</p>
                     )}
                     
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                       {lesson.video_url && (
-                        <span className="flex items-center gap-1 text-[11px] text-primary" title="Video">
+                        <span className="flex items-center gap-1 text-[10px] text-primary" title="Video">
                           <Video className="h-3 w-3" /> Video
                         </span>
                       )}
                       {lesson.content && (
-                        <span className="flex items-center gap-1 text-[11px] text-success" title="Article">
+                        <span className="flex items-center gap-1 text-[10px] text-success" title="Article">
                           <FileText className="h-3 w-3" /> Article
                         </span>
                       )}
                       {lesson.attachment_count > 0 && (
                         <button
                           onClick={(e) => toggleLessonExpand(e, lesson.id)}
-                          className="flex items-center gap-1 text-[11px] text-info hover:underline transition-all font-semibold"
+                          className="flex items-center gap-1 text-[10px] text-info hover:underline transition-all font-semibold"
                           title="Toggle documents list"
                         >
                           <FileText className="h-3 w-3" /> Docs ({lesson.attachment_count})
                         </button>
                       )}
                       {lesson.has_quiz && (
-                        <span className="flex items-center gap-1 text-[11px] text-accent" title="Quiz">
+                        <span className="flex items-center gap-1 text-[10px] text-accent" title="Quiz">
                           <HelpCircle className="h-3 w-3" /> Quiz
                         </span>
                       )}
                       {lesson.has_assignment && (
-                        <span className="flex items-center gap-1 text-[11px] text-warning" title="Assignment">
+                        <span className="flex items-center gap-1 text-[10px] text-warning" title="Assignment">
                           <ClipboardList className="h-3 w-3" /> Assignment
                         </span>
                       )}
@@ -336,11 +336,11 @@ export function SectionAccordion({
 
               {expandedLessons[lesson.id] && (
                 <div 
-                  className="relative pl-10 pr-4 pb-3.5 pt-2 space-y-2 bg-muted/5 border-t border-border/20"
+                  className="relative pl-16 pr-4 pb-3.5 pt-2 space-y-2 bg-muted/5 border-t border-border/20"
                   onClick={(e) => e.stopPropagation()}
                 >
                   {/* Vertical tree explorer line */}
-                  <div className="absolute left-6 top-0 bottom-6 w-[1.5px] bg-border/40" />
+                  <div className="absolute left-[40px] top-0 bottom-6 w-[1.5px] bg-border/40" />
 
                   {/* Documents list (each taking exactly 1 full row) */}
                   {loadingAttachments[lesson.id] ? (
@@ -353,36 +353,36 @@ export function SectionAccordion({
                       {lessonAttachmentsMap[lesson.id].map((att) => (
                         <div 
                           key={att.id}
-                          className="relative flex items-center justify-between gap-3 pl-3 pr-2.5 py-2 bg-card/65 hover:bg-card border border-border/40 hover:border-primary/30 rounded-xl text-xs transition-all duration-200 hover:translate-x-1 shadow-sm hover:shadow group w-full"
+                          className="relative flex items-center justify-between gap-3 pl-3 pr-2 py-1.5 bg-card/65 hover:bg-card border border-border/40 hover:border-primary/30 rounded-xl text-[11px] transition-all duration-200 hover:translate-x-1 shadow-sm hover:shadow group w-full"
                         >
                           {/* Horizontal connection branch line */}
-                          <div className="absolute -left-[16px] top-1/2 w-4 h-px bg-border/40" />
+                          <div className="absolute -left-[24px] top-1/2 w-6 h-px bg-border/40" />
                           
                           <div className="flex items-center gap-2.5 min-w-0">
                             {getFileIcon(att.file_name)}
-                            <span className="truncate font-semibold text-foreground/90" title={att.file_name}>
+                            <span className="truncate font-semibold text-foreground/80" title={att.file_name}>
                               {att.file_name}
                             </span>
                             {att.file_size !== null && att.file_size !== undefined && (
-                              <span className="text-[10px] text-muted-foreground shrink-0 font-medium">
+                              <span className="text-[9px] text-muted-foreground shrink-0 font-medium">
                                 ({formatBytes(att.file_size || undefined)})
                               </span>
                             )}
                           </div>
                           
-                          <div className="flex items-center gap-1 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center gap-0.5 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
                             <a
                               href={att.file_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                              className="p-1 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground transition-colors"
                               title="Download document"
                             >
                               <Download className="h-3.5 w-3.5" />
                             </a>
                             <button
                               onClick={(e) => handleDeleteAttachment(e, lesson.id, att.id)}
-                              className="p-1.5 hover:bg-destructive/10 rounded-lg text-muted-foreground hover:text-destructive transition-colors"
+                              className="p-1 hover:bg-destructive/10 rounded-md text-muted-foreground hover:text-destructive transition-colors"
                               title="Delete document"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -395,28 +395,28 @@ export function SectionAccordion({
 
                   {/* Quiz (1 full row if present) */}
                   {lesson.has_quiz && (
-                    <div className="relative flex items-center justify-between gap-3 pl-3 pr-2.5 py-2 bg-card/65 hover:bg-card border border-border/40 hover:border-accent/30 rounded-xl text-xs transition-all duration-200 hover:translate-x-1 shadow-sm hover:shadow group w-full">
+                    <div className="relative flex items-center justify-between gap-3 pl-3 pr-2 py-1.5 bg-card/65 hover:bg-card border border-border/40 hover:border-accent/30 rounded-xl text-[11px] transition-all duration-200 hover:translate-x-1 shadow-sm hover:shadow group w-full">
                       {/* Horizontal connection branch line */}
-                      <div className="absolute -left-[16px] top-1/2 w-4 h-px bg-border/40" />
+                      <div className="absolute -left-[24px] top-1/2 w-6 h-px bg-border/40" />
                       
                       <div className="flex items-center gap-2.5 min-w-0">
                         <HelpCircle className="h-4 w-4 text-accent shrink-0" />
-                        <span className="truncate font-semibold text-foreground/90">
+                        <span className="truncate font-semibold text-foreground/80">
                           Quiz: Bài kiểm tra trắc nghiệm
                         </span>
                       </div>
                       
-                      <div className="flex items-center gap-1 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-0.5 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => onOpenQuiz(lesson.id)}
-                          className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                          className="p-1 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground transition-colors"
                           title="Edit Quiz"
                         >
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
                         <button
                           onClick={(e) => handleDeleteQuiz(e, lesson.id)}
-                          className="p-1.5 hover:bg-destructive/10 rounded-lg text-muted-foreground hover:text-destructive transition-colors"
+                          className="p-1 hover:bg-destructive/10 rounded-md text-muted-foreground hover:text-destructive transition-colors"
                           title="Delete Quiz"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -427,28 +427,28 @@ export function SectionAccordion({
 
                   {/* Assignment (1 full row if present) */}
                   {lesson.has_assignment && (
-                    <div className="relative flex items-center justify-between gap-3 pl-3 pr-2.5 py-2 bg-card/65 hover:bg-card border border-border/40 hover:border-warning/30 rounded-xl text-xs transition-all duration-200 hover:translate-x-1 shadow-sm hover:shadow group w-full">
+                    <div className="relative flex items-center justify-between gap-3 pl-3 pr-2 py-1.5 bg-card/65 hover:bg-card border border-border/40 hover:border-warning/30 rounded-xl text-[11px] transition-all duration-200 hover:translate-x-1 shadow-sm hover:shadow group w-full">
                       {/* Horizontal connection branch line */}
-                      <div className="absolute -left-[16px] top-1/2 w-4 h-px bg-border/40" />
+                      <div className="absolute -left-[24px] top-1/2 w-6 h-px bg-border/40" />
                       
                       <div className="flex items-center gap-2.5 min-w-0">
                         <ClipboardList className="h-4 w-4 text-warning shrink-0" />
-                        <span className="truncate font-semibold text-foreground/90">
+                        <span className="truncate font-semibold text-foreground/80">
                           Assignment: Bài tập làm tự luận
                         </span>
                       </div>
                       
-                      <div className="flex items-center gap-1 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-0.5 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => onOpenAssignment(lesson.id)}
-                          className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                          className="p-1 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground transition-colors"
                           title="Edit Assignment"
                         >
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
                         <button
                           onClick={(e) => handleDeleteAssignmentItem(e, lesson.id)}
-                          className="p-1.5 hover:bg-destructive/10 rounded-lg text-muted-foreground hover:text-destructive transition-colors"
+                          className="p-1 hover:bg-destructive/10 rounded-md text-muted-foreground hover:text-destructive transition-colors"
                           title="Delete Assignment"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -463,7 +463,7 @@ export function SectionAccordion({
                    !lesson.has_quiz && 
                    !lesson.has_assignment && (
                     <div className="relative text-xs text-muted-foreground py-2 pl-3 flex items-center gap-2">
-                      <div className="absolute -left-[16px] top-1/2 w-4 h-px bg-border/40" />
+                      <div className="absolute -left-[24px] top-1/2 w-6 h-px bg-border/40" />
                       No content or documents in this lesson.
                     </div>
                   )}
