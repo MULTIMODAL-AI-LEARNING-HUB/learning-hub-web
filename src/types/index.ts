@@ -28,6 +28,7 @@ export interface ChatSession {
   id: string
   title: string
   course_id?: string
+  lesson_id?: string
   context_type?: string
   preview: string
   messages: Message[]

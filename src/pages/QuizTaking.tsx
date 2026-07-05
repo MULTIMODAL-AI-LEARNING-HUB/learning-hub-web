@@ -38,6 +38,7 @@ export function QuizTaking() {
   const [submitted, setSubmitted] = useState(false)
   const [results, setResults] = useState<QuizResult[] | null>(null)
   const [score, setScore] = useState({ correct: 0, total: 0, percentage: 0 })
+  const [jobId, setJobId] = useState<string | null>(null)
 
   const mountedRef = useRef(false)
 
@@ -92,6 +93,7 @@ export function QuizTaking() {
       if (!res.ok) throw new Error('Failed to start quiz generation')
 
       const data = await res.json()
+      setJobId(data.job_id)
       pollForQuizResult(data.job_id)
     } catch (err) {
       console.error('Failed to generate quiz:', err)
@@ -131,7 +133,7 @@ export function QuizTaking() {
   }
 
   const handleSubmit = async () => {
-    if (!questions.length) return
+    if (!questions.length || !jobId) return
 
     const answerList = Object.entries(answers).map(([question_id, answer]) => ({
       question_id,
@@ -139,7 +141,7 @@ export function QuizTaking() {
     }))
 
     try {
-      const res = await fetch('http://localhost:8000/api/v1/study/quiz/submit', {
+      const res = await fetch(`http://localhost:8000/api/v1/study/quiz/${jobId}/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -169,6 +171,7 @@ export function QuizTaking() {
     setAnswers({})
     setSubmitted(false)
     setResults(null)
+    setJobId(null)
   }
 
   if (loading) {

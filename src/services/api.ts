@@ -131,6 +131,7 @@ export interface ChatSession {
   id: string
   title: string | null
   course_id: string | null
+  lesson_id: string | null
   context_type: string
   created_at: string
   updated_at: string
