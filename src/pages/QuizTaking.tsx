@@ -72,12 +72,12 @@ export function QuizTaking() {
     if (!id) return
     setGenerating(true)
     try {
-      const payload: { course_id: string; question_count: number; material_ids?: string[] } = {
+      const payload: { course_id: string; question_count: number; lesson_ids?: string[] } = {
         course_id: id,
         question_count: 5,
       }
       if (fromMaterialId) {
-        payload.material_ids = [fromMaterialId]
+        payload.lesson_ids = [fromMaterialId]
       }
 
       const res = await fetch('http://localhost:8000/api/v1/study/quiz/by-course', {

@@ -752,7 +752,7 @@ export const chatApi = {
       params: { page, page_size: pageSize },
     }),
   deleteSession: (id: string) => api.delete(`/chat/sessions/${id}`),
-  ask: (data: { session_id: string; query: string; document_ids?: string[] }) =>
+  ask: (data: { session_id: string; query: string; lesson_id?: string; document_ids?: string[] }) =>
     api.post<ChatAskResponse>('/chat/ask', data),
   listMessages: (sessionId: string, page = 1, pageSize = 50) =>
     api.get<{ items: ChatMessage[]; total: number }>(`/chat/sessions/${sessionId}/messages`, {
