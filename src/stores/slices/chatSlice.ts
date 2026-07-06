@@ -10,7 +10,7 @@ export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never
     selectSession: (id) => set((state) => ({
       chat: { ...state.chat, activeSessionId: id }
     }), false, 'chat/selectSession'),
-    sendMessage: async (content, documentIds) => {
+    sendMessage: async (content, documentIds, courseId, lessonId) => {
       const sessionId = get().chat.activeSessionId
       if (!sessionId || !content.trim()) return
 
@@ -23,7 +23,6 @@ export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never
         timestamp: ts
       }
 
-      // Add user message to state
       set((state) => ({
         chat: {
           ...state.chat,
@@ -39,6 +38,8 @@ export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never
         const res = await chatApi.ask({
           session_id: sessionId,
           query: content.trim(),
+          course_id: courseId,
+          lesson_id: lessonId,
           document_ids: documentIds
         })
         const data = res.data
@@ -78,14 +79,15 @@ export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never
         }), false, 'chat/receiveAIMessageError')
       }
     },
-    addSession: async (courseId?: string) => {
+    addSession: async (courseId?: string, lessonId?: string) => {
       try {
-        const res = await chatApi.createSession({ course_id: courseId, title: 'New chat' })
+        const res = await chatApi.createSession({ course_id: courseId, lesson_id: lessonId, title: 'New chat' })
         const session = res.data
         const newSession: ChatSession = {
           id: session.id,
           title: session.title || 'New chat',
           course_id: session.course_id || undefined,
+          lesson_id: session.lesson_id || undefined,
           context_type: session.context_type,
           preview: '',
           messages: []

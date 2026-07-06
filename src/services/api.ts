@@ -131,6 +131,7 @@ export interface ChatSession {
   id: string
   title: string | null
   course_id: string | null
+  lesson_id: string | null
   context_type: string
   created_at: string
   updated_at: string
@@ -621,6 +622,8 @@ export const quizzesApi = {
   updateAnswers: (lessonId: string, questionId: string, answers: { id?: string; answer_text: string; is_correct: boolean }[]) =>
     api.put<Answer[]>(`/lessons/${lessonId}/quiz/questions/${questionId}/answers`, { answers }),
   getAttempts: (lessonId: string) => api.get<QuizAttempt[]>(`/lessons/${lessonId}/quiz/attempts`),
+  generateQuizAI: (lessonId: string, questionCount: number = 5) =>
+    api.post<Quiz>(`/lessons/${lessonId}/quiz/generate-ai`, null, { params: { question_count: questionCount } }),
 }
 
 export const assignmentsApi = {
@@ -745,14 +748,14 @@ export const documentsApi = {
 }
 
 export const chatApi = {
-  createSession: (data?: { course_id?: string; title?: string }) =>
+  createSession: (data?: { course_id?: string; lesson_id?: string; title?: string }) =>
     api.post<ChatSession>('/chat/sessions', data),
   listSessions: (page = 1, pageSize = 20) =>
     api.get<{ items: ChatSession[]; total: number }>('/chat/sessions', {
       params: { page, page_size: pageSize },
     }),
   deleteSession: (id: string) => api.delete(`/chat/sessions/${id}`),
-  ask: (data: { session_id: string; query: string; lesson_id?: string; document_ids?: string[] }) =>
+  ask: (data: { session_id: string; query: string; course_id?: string; lesson_id?: string; document_ids?: string[] }) =>
     api.post<ChatAskResponse>('/chat/ask', data),
   listMessages: (sessionId: string, page = 1, pageSize = 50) =>
     api.get<{ items: ChatMessage[]; total: number }>(`/chat/sessions/${sessionId}/messages`, {

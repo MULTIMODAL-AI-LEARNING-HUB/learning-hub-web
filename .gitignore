@@ -23,3 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# E2E test artifacts
+e2e/reports/
+e2e/.auth/
+test-results/
+playwright-report/
