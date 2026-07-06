@@ -377,13 +377,13 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
                 <div>
                   <label className="text-sm font-medium">Number of Questions</label>
                   <Select
-                    value={aiQuestionCount}
+                    value={String(aiQuestionCount)}
                     onChange={(val) => setAiQuestionCount(Number(val))}
                     options={[
-                      { value: 3, label: '3 Questions' },
-                      { value: 5, label: '5 Questions' },
-                      { value: 10, label: '10 Questions' },
-                      { value: 15, label: '15 Questions' },
+                      { value: '3', label: '3 Questions' },
+                      { value: '5', label: '5 Questions' },
+                      { value: '10', label: '10 Questions' },
+                      { value: '15', label: '15 Questions' },
                     ]}
                     className="mt-1"
                   />

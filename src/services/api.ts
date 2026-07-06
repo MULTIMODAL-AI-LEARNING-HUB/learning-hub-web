@@ -748,14 +748,14 @@ export const documentsApi = {
 }
 
 export const chatApi = {
-  createSession: (data?: { course_id?: string; title?: string }) =>
+  createSession: (data?: { course_id?: string; lesson_id?: string; title?: string }) =>
     api.post<ChatSession>('/chat/sessions', data),
   listSessions: (page = 1, pageSize = 20) =>
     api.get<{ items: ChatSession[]; total: number }>('/chat/sessions', {
       params: { page, page_size: pageSize },
     }),
   deleteSession: (id: string) => api.delete(`/chat/sessions/${id}`),
-  ask: (data: { session_id: string; query: string; lesson_id?: string; document_ids?: string[] }) =>
+  ask: (data: { session_id: string; query: string; course_id?: string; lesson_id?: string; document_ids?: string[] }) =>
     api.post<ChatAskResponse>('/chat/ask', data),
   listMessages: (sessionId: string, page = 1, pageSize = 50) =>
     api.get<{ items: ChatMessage[]; total: number }>(`/chat/sessions/${sessionId}/messages`, {
