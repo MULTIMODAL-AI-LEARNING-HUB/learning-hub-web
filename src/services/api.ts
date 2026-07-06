@@ -622,6 +622,8 @@ export const quizzesApi = {
   updateAnswers: (lessonId: string, questionId: string, answers: { id?: string; answer_text: string; is_correct: boolean }[]) =>
     api.put<Answer[]>(`/lessons/${lessonId}/quiz/questions/${questionId}/answers`, { answers }),
   getAttempts: (lessonId: string) => api.get<QuizAttempt[]>(`/lessons/${lessonId}/quiz/attempts`),
+  generateQuizAI: (lessonId: string, questionCount: number = 5) =>
+    api.post<Quiz>(`/lessons/${lessonId}/quiz/generate-ai`, null, { params: { question_count: questionCount } }),
 }
 
 export const assignmentsApi = {

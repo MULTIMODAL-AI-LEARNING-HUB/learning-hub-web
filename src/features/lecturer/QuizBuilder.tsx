@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Plus, Trash2, X, Check, GripVertical, HelpCircle } from 'lucide-react'
+import { Plus, Trash2, X, Check, GripVertical, HelpCircle, Sparkles } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
@@ -26,13 +26,18 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
   const {
     quiz,
     questions,
+    loading,
     fetchQuiz,
     createQuiz,
     updateQuiz,
     deleteQuiz,
     addQuestion,
     deleteQuestion,
+    generateQuizAI,
   } = useQuiz(lessonId)
+
+  const [showAiModal, setShowAiModal] = useState(false)
+  const [aiQuestionCount, setAiQuestionCount] = useState(5)
 
   const [showQuizForm, setShowQuizForm] = useState(false)
   const [showQuestionForm, setShowQuestionForm] = useState(false)
@@ -153,10 +158,15 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
             <div className="text-center py-8">
               <HelpCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium mb-2">No Quiz Yet</h3>
-              <p className="text-muted-foreground mb-4">Create a quiz to add questions</p>
-              <Button onClick={() => setShowQuizForm(true)} icon={<Plus className="h-4 w-4" />}>
-                Create Quiz
-              </Button>
+              <p className="text-muted-foreground mb-4">Create a quiz manually or generate one instantly using AI from uploaded lesson materials</p>
+              <div className="flex justify-center gap-3">
+                <Button onClick={() => setShowQuizForm(true)} icon={<Plus className="h-4 w-4" />}>
+                  Create Quiz
+                </Button>
+                <Button onClick={() => setShowAiModal(true)} variant="outline" icon={<Sparkles className="h-4 w-4 text-primary" />}>
+                  Generate with AI
+                </Button>
+              </div>
             </div>
           )}
 
@@ -229,9 +239,14 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
 
               <div className="flex items-center justify-between">
                 <h3 className="font-medium">Questions ({questions.length})</h3>
-                <Button onClick={() => setShowQuestionForm(true)} size="sm" icon={<Plus className="h-4 w-4" />}>
-                  Add Question
-                </Button>
+                <div className="flex gap-2">
+                  <Button onClick={() => setShowAiModal(true)} size="sm" variant="outline" icon={<Sparkles className="h-4 w-4 text-primary" />}>
+                    Generate with AI
+                  </Button>
+                  <Button onClick={() => setShowQuestionForm(true)} size="sm" icon={<Plus className="h-4 w-4" />}>
+                    Add Question
+                  </Button>
+                </div>
               </div>
 
               <div className="space-y-3">
@@ -279,6 +294,7 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
 
           {showQuestionForm && (
             <Modal open={showQuestionForm} onClose={() => setShowQuestionForm(false)} title="Add Question">
+              {/* Question form content */}
               <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium">Question</label>
@@ -343,6 +359,57 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
                 </div>
               </div>
             </Modal>
+          )}
+
+          {showAiModal && (
+            <Modal open={showAiModal} onClose={() => setShowAiModal(false)} title="Generate Quiz with AI">
+              <div className="space-y-4">
+                <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 flex gap-3 items-start">
+                  <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-semibold text-primary">AI Quiz Generator</p>
+                    <p className="text-muted-foreground mt-0.5">
+                      This will analyze the lesson content and any attached PDF/text documents in this lesson to generate high-quality multiple choice questions.
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">Number of Questions</label>
+                  <Select
+                    value={aiQuestionCount}
+                    onChange={(val) => setAiQuestionCount(Number(val))}
+                    options={[
+                      { value: 3, label: '3 Questions' },
+                      { value: 5, label: '5 Questions' },
+                      { value: 10, label: '10 Questions' },
+                      { value: 15, label: '15 Questions' },
+                    ]}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-4 border-t border-border">
+                  <Button variant="ghost" onClick={() => setShowAiModal(false)}>Cancel</Button>
+                  <Button
+                    onClick={async () => {
+                      setShowAiModal(false)
+                      await generateQuizAI(aiQuestionCount)
+                    }}
+                  >
+                    Generate Quiz
+                  </Button>
+                </div>
+              </div>
+            </Modal>
+          )}
+
+          {loading && (
+            <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] flex flex-col items-center justify-center z-50">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
+              <p className="font-medium text-foreground">AI is generating your quiz...</p>
+              <p className="text-sm text-muted-foreground mt-1">Analyzing lesson documents and content</p>
+            </div>
           )}
         </div>
       </div>
