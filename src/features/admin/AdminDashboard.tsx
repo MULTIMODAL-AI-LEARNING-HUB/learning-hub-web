@@ -12,6 +12,7 @@ import { Skeleton } from '../../components/ui/Skeleton'
 import { useToast } from '../../components/ui/useToast'
 import { Input } from '../../components/ui/Input'
 import { EmptyState } from '../../components/ui/EmptyState'
+import { cn } from '../../utils/cn'
 
 interface AnalyticsData {
   total_users: number

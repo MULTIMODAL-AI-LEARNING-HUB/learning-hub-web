@@ -5,6 +5,7 @@ import { useAppStore } from '../stores/appStore'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { AuthInput } from '../components/auth/AuthInput'
+import { cn } from '../utils/cn'
 
 type Variant = 'login' | 'register'
 

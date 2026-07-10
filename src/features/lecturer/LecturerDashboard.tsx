@@ -5,6 +5,7 @@ import { useAppStore } from '../../stores/appStore'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { useLecturerCourses } from '../../hooks/useLecturerCourses'
+import { cn } from '../../utils/cn'
 
 export function LecturerDashboard() {
   const navigate = useNavigate()

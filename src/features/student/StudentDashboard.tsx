@@ -7,6 +7,7 @@ import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { Badge } from '../../components/ui/Badge'
 import { Skeleton } from '../../components/ui/Skeleton'
+import { cn } from '../../utils/cn'
 
 export function StudentDashboard() {
   const navigate = useNavigate()
