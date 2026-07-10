@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, BookOpen, Users, BarChart3, FileText, Settings, User, LogOut, GraduationCap, Users2, Award } from 'lucide-react'
+import { Home, BookOpen, Users, BarChart3, FileText, Settings, User, LogOut, GraduationCap, Users2 } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { Avatar } from '../ui/Avatar'
 import { cn } from '../../utils/cn'
