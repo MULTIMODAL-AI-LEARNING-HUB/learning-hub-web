@@ -71,15 +71,42 @@ export function Header() {
     navigate('/login')
   }, [logout, navigate])
 
+  const role = user?.role || 'student'
+  const roleThemes = {
+    admin: {
+      bg: 'bg-indigo-500/10 dark:bg-indigo-500/20',
+      text: 'text-indigo-600 dark:text-indigo-400',
+      border: 'border-indigo-500/20',
+      label: 'Admin'
+    },
+    lecturer: {
+      bg: 'bg-violet-500/10 dark:bg-violet-500/20',
+      text: 'text-violet-600 dark:text-violet-400',
+      border: 'border-violet-500/20',
+      label: 'Lecturer'
+    },
+    student: {
+      bg: 'bg-blue-500/10 dark:bg-blue-500/20',
+      text: 'text-blue-600 dark:text-blue-400',
+      border: 'border-blue-500/20',
+      label: 'Student'
+    }
+  }[role as 'admin' | 'lecturer' | 'student'] || {
+    bg: 'bg-blue-500/10',
+    text: 'text-blue-600',
+    border: 'border-blue-500/20',
+    label: 'Student'
+  }
+
   return (
     <>
-      <header className="sticky top-0 z-30 mb-6 flex flex-col gap-3 rounded-2xl border border-border bg-surface-elevated/80 px-4 py-3 shadow-soft backdrop-blur-md lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-center gap-2.5">
+      <header className="sticky top-0 z-30 mb-6 flex flex-col gap-3 rounded-2xl border border-border bg-surface-elevated/80 px-4 py-3 shadow-soft backdrop-blur-md lg:flex-row lg:items-center lg:justify-between font-body">
+        <div className="flex items-center gap-3 w-full lg:w-auto">
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleSidebar}
-            className="lg:hidden"
+            className="lg:hidden shrink-0"
             aria-label="Toggle sidebar"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -88,12 +115,34 @@ export function Header() {
               <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </Button>
+
+          {/* Logo & Role Brand */}
+          <div className="hidden sm:flex items-center gap-2 mr-2 shrink-0">
+            <div className={cn(
+              "flex h-8 w-8 items-center justify-center rounded-lg text-white shadow-sm bg-gradient-to-br",
+              role === 'admin' ? 'from-indigo-500 to-indigo-600' :
+              role === 'lecturer' ? 'from-violet-500 to-purple-600' :
+              'from-blue-500 to-cyan-500'
+            )}>
+              <Zap className="h-4.5 w-4.5 fill-current" />
+            </div>
+            <span className="text-sm font-bold text-foreground">Learning Hub</span>
+            <span className={cn(
+              "text-3xs font-semibold px-2 py-0.5 rounded-full border uppercase tracking-wider",
+              roleThemes.bg,
+              roleThemes.text,
+              roleThemes.border
+            )}>
+              {roleThemes.label}
+            </span>
+          </div>
+
           <button
             onClick={() => setPaletteOpen(true)}
             className={cn(
-              'group flex h-9 w-full items-center gap-2.5 rounded-lg border border-input bg-surface px-3 text-sm text-muted-foreground transition',
+              'group flex h-9 w-full items-center gap-2.5 rounded-xl border border-input bg-surface px-3 text-sm text-muted-foreground transition',
               'hover:border-primary/30 hover:bg-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20',
-              'lg:w-72 lg:max-w-sm'
+              'lg:w-64'
             )}
             aria-label="Open search"
           >

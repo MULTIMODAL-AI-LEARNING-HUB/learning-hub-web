@@ -118,67 +118,77 @@ export function AdminDashboard() {
   })
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        subtitle="Admin"
-        title="Dashboard"
-        description="Monitor system performance, services health, and manage user accounts."
-        icon={<Settings />}
-        actions={
-          <Button
-            onClick={() => {
-              fetchAnalytics()
-              fetchHealth()
-              fetchUsers(page)
-            }}
-            variant="outline"
-            size="sm"
-            icon={<RefreshCw className="h-3.5 w-3.5" />}
-          >
-            Refresh All
-          </Button>
-        }
-      />
+    <div className="space-y-6 font-body">
+      <div className="relative overflow-hidden rounded-2xl border border-indigo-500/10 bg-gradient-to-r from-indigo-500/5 via-transparent to-transparent p-6 glow-admin">
+        <div className="absolute right-0 top-0 h-32 w-32 bg-indigo-500/5 rounded-full blur-2xl" />
+        <PageHeader
+          subtitle="System Controls"
+          title="Admin Dashboard"
+          description="Monitor performance, services health, and manage user directory in real-time."
+          icon={<Settings className="text-indigo-600 dark:text-indigo-400" />}
+          actions={
+            <Button
+              onClick={() => {
+                fetchAnalytics()
+                fetchHealth()
+                fetchUsers(page)
+              }}
+              variant="outline"
+              size="sm"
+              className="border-indigo-500/20 hover:bg-indigo-500/10 hover:text-indigo-600"
+              icon={<RefreshCw className="h-3.5 w-3.5" />}
+            >
+              Refresh Data
+            </Button>
+          }
+        />
+      </div>
 
       {/* Analytics Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Total Users"
           value={analytics?.total_users ?? 0}
-          icon={<Users />}
+          icon={<Users className="text-indigo-600 dark:text-indigo-400" />}
+          variant="primary"
           loading={loadingAnalytics}
+          className="border-indigo-500/10 bg-gradient-to-b from-indigo-500/5 to-transparent shadow-soft hover:shadow-indigo-500/10 hover:-translate-y-0.5 transition-all"
         />
         <StatCard
           label="Total Documents"
           value={analytics?.total_documents ?? 0}
-          icon={<FileText />}
+          icon={<FileText className="text-indigo-600 dark:text-indigo-400" />}
+          variant="primary"
           loading={loadingAnalytics}
+          className="border-indigo-500/10 bg-gradient-to-b from-indigo-500/5 to-transparent shadow-soft hover:shadow-indigo-500/10 hover:-translate-y-0.5 transition-all"
         />
         <StatCard
           label="Ready Documents"
           value={analytics?.documents_ready ?? 0}
-          icon={<CheckCircle2 />}
+          icon={<CheckCircle2 className="text-emerald-500" />}
           variant="success"
           loading={loadingAnalytics}
+          className="border-emerald-500/10 hover:shadow-emerald-500/10 hover:-translate-y-0.5 transition-all"
         />
         <StatCard
           label="Processing"
           value={analytics?.documents_processing ?? 0}
-          icon={<Clock />}
+          icon={<Clock className="text-amber-500" />}
           variant="warning"
           loading={loadingAnalytics}
+          className="border-amber-500/10 hover:shadow-amber-500/10 hover:-translate-y-0.5 transition-all"
         />
       </div>
 
       {/* Services Health */}
-      <Card>
+      <Card className="border-indigo-500/10 shadow-soft bg-surface-elevated/40 backdrop-blur-md">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div>
-            <h2 className="font-display text-base font-semibold text-foreground">
-              System Services
+            <h2 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">
+              Core System Services
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Overall:{' '}
+              Current status:{' '}
               <Badge
                 variant={health?.status === 'healthy' ? 'success' : 'error'}
                 label={health?.status || 'checking...'}
@@ -191,39 +201,43 @@ export function AdminDashboard() {
             variant="outline"
             size="sm"
             loading={loadingHealth}
+            className="border-border hover:bg-muted text-foreground"
             icon={<RefreshCw className="h-3.5 w-3.5" />}
           >
-            Refresh
+            Check Health
           </Button>
         </div>
 
-        <div className="grid gap-3 p-5 md:grid-cols-3">
+        <div className="grid gap-4 p-5 md:grid-cols-3">
           <ServiceCard
             name="PostgreSQL"
-            description="Relational Storage"
-            icon={<Database />}
+            description="Database Instance"
+            icon={<Database className="text-blue-500" />}
             status={health?.services.database || 'offline'}
+            className="bg-surface-elevated hover:shadow-indigo-500/5 border border-indigo-500/5"
           />
           <ServiceCard
             name="AI LangGraph"
-            description="LLM Workflow"
-            icon={<Bot />}
+            description="Cognitive Pipeline"
+            icon={<Bot className="text-indigo-500" />}
             status={health?.services.ai_service || 'offline'}
+            className="bg-surface-elevated hover:shadow-indigo-500/5 border border-indigo-500/5 glow-admin"
           />
           <ServiceCard
             name="Redis Cache"
-            description="Key-Value Memory"
-            icon={<Zap />}
+            description="Cache & Broker"
+            icon={<Zap className="text-amber-500" />}
             status={health?.services.redis || 'offline'}
+            className="bg-surface-elevated hover:shadow-indigo-500/5 border border-indigo-500/5"
           />
         </div>
       </Card>
 
       {/* User Management */}
-      <Card>
+      <Card className="border-indigo-500/10 shadow-soft bg-surface-elevated/40 backdrop-blur-md">
         <div className="flex flex-col gap-3 border-b border-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="font-display text-base font-semibold text-foreground">User Directory</h2>
+            <h2 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">User Directory</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
               {totalUsers} registered {totalUsers === 1 ? 'user' : 'users'}
             </p>
@@ -233,7 +247,7 @@ export function AdminDashboard() {
               placeholder="Search users..."
               value={searchQuery}
               onChange={setSearchQuery}
-              prefixIcon={<Search className="h-4 w-4" />}
+              prefixIcon={<Search className="h-4 w-4 text-muted-foreground" />}
               className="w-56"
             />
             <Button
@@ -251,11 +265,11 @@ export function AdminDashboard() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-border bg-muted/30 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
-                <th className="py-2.5 px-5 font-semibold">User</th>
-                <th className="py-2.5 px-5 font-semibold">Role</th>
-                <th className="py-2.5 px-5 font-semibold">Status</th>
-                <th className="py-2.5 px-5 font-semibold">Registered</th>
+              <tr className="border-b border-border bg-muted/40 text-3xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="py-3 px-5 font-semibold">User details</th>
+                <th className="py-3 px-5 font-semibold">System Role</th>
+                <th className="py-3 px-5 font-semibold">Activity Status</th>
+                <th className="py-3 px-5 font-semibold">Creation Date</th>
               </tr>
             </thead>
             <tbody>
@@ -280,7 +294,7 @@ export function AdminDashboard() {
                 <tr>
                   <td colSpan={4} className="py-12">
                     <EmptyState
-                      icon={<Users />}
+                      icon={<Users className="text-muted-foreground/60 h-8 w-8" />}
                       title={searchQuery ? 'No matching users' : 'No users found'}
                       description={searchQuery ? 'Try a different search term' : 'No users have registered yet.'}
                       compact
@@ -290,25 +304,31 @@ export function AdminDashboard() {
                 </tr>
               ) : (
                 filteredUsers.map((u) => (
-                  <tr key={u.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition">
+                  <tr key={u.id} className="border-b border-border/60 last:border-0 hover:bg-indigo-500/5 hover:text-foreground transition-all duration-150">
                     <td className="py-3 px-5">
                       <div className="flex items-center gap-2.5">
                         <Avatar
                           fallback={(u.full_name || u.email).split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
                           size="sm"
+                          className="ring-1 ring-indigo-500/10"
                         />
                         <div className="min-w-0">
-                          <p className="font-medium text-foreground truncate">
+                          <p className="font-semibold text-foreground truncate">
                             {u.full_name || 'No name provided'}
                           </p>
-                          <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                          <p className="text-2xs text-muted-foreground truncate">{u.email}</p>
                         </div>
                       </div>
                     </td>
                     <td className="py-3 px-5">
                       <Badge
-                        variant={u.role === 'admin' ? 'primary' : 'default'}
+                        variant={u.role === 'admin' ? 'primary' : u.role === 'lecturer' ? 'warning' : 'default'}
                         label={u.role}
+                        className={cn(
+                          u.role === 'admin' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20' : 
+                          u.role === 'lecturer' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20' : 
+                          'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'
+                        )}
                       />
                     </td>
                     <td className="py-3 px-5">
@@ -316,14 +336,14 @@ export function AdminDashboard() {
                         <span
                           className={
                             u.is_active
-                              ? 'h-2 w-2 rounded-full bg-success animate-pulse-soft'
+                              ? 'h-2 w-2 rounded-full bg-success animate-pulse'
                               : 'h-2 w-2 rounded-full bg-muted-foreground'
                           }
                         />
                         <span
                           className={
                             u.is_active
-                              ? 'text-xs font-medium text-success'
+                              ? 'text-xs font-semibold text-success'
                               : 'text-xs font-medium text-muted-foreground'
                           }
                         >
