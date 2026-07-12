@@ -18,7 +18,7 @@ export interface TestData {
 export async function createTestData(): Promise<TestData> {
   const ts = Date.now()
   const data: TestData = {
-    admin: { email: 'admin@learninghub.com', password: 'admin123', token: '' },
+    admin: { email: 'admin@learninghub.com', password: 'AdminPass123!', token: '' },
     lecturer: { email: `e2e_lecturer_${ts}@test.com`, password: 'TestPass123!', id: '' },
     student: { email: `e2e_student_${ts}@test.com`, password: 'TestPass123!', id: '' },
     course: { id: '', title: '' },
@@ -30,39 +30,29 @@ export async function createTestData(): Promise<TestData> {
     enrollment: { id: '' },
   }
 
-  const ctx = request.newContext({ baseURL: API_BASE })
-
-  // Login admin
-  const adminRes = await (await ctx).post('auth/login', {
-    data: { email: data.admin.email, password: data.admin.password }
-  })
-  if (adminRes.ok()) {
-    data.admin.token = (await adminRes.json()).access_token
+  async function ensureLogin(creds: { email: string; password: string; role?: string; full_name?: string }): Promise<string> {
+    const ctx = await request.newContext({ baseURL: API_BASE })
+    const loginR = await ctx.post('auth/login', { data: { email: creds.email, password: creds.password } })
+    if (loginR.ok()) {
+      const j = await loginR.json()
+      return j.token?.access_token || j.access_token || ''
+    }
+    await ctx.post('auth/register', {
+      data: { email: creds.email, password: creds.password, full_name: creds.full_name || creds.role || 'User', role: creds.role || 'student' }
+    }).catch(() => {})
+    const loginR2 = await ctx.post('auth/login', { data: { email: creds.email, password: creds.password } })
+    if (loginR2.ok()) {
+      const j = await loginR2.json()
+      return j.token?.access_token || j.access_token || ''
+    }
+    return ''
   }
 
-  // Register lecturer
-  const lectCtx = request.newContext({ baseURL: API_BASE })
-  await (await lectCtx).post('auth/register', {
-    data: { email: data.lecturer.email, password: data.lecturer.password, full_name: 'E2E Lecturer', role: 'lecturer' }
-  }).catch(() => {})
-  const lectLogin = await (await lectCtx).post('auth/login', {
-    data: { email: data.lecturer.email, password: data.lecturer.password }
-  })
-  if (lectLogin.ok()) {
-    data.lecturer.token = (await lectLogin.json()).access_token
-  }
+  data.admin.token = await ensureLogin({ email: data.admin.email, password: data.admin.password, role: 'admin', full_name: 'System Admin' })
 
-  // Register student
-  const stuCtx = request.newContext({ baseURL: API_BASE })
-  await (await stuCtx).post('auth/register', {
-    data: { email: data.student.email, password: data.student.password, full_name: 'E2E Student', role: 'student' }
-  }).catch(() => {})
-  const stuLogin = await (await stuCtx).post('auth/login', {
-    data: { email: data.student.email, password: data.student.password }
-  })
-  if (stuLogin.ok()) {
-    data.student.token = (await stuLogin.json()).access_token
-  }
+  data.lecturer.token = await ensureLogin({ email: data.lecturer.email, password: data.lecturer.password, role: 'lecturer', full_name: 'E2E Lecturer' })
+
+  data.student.token = await ensureLogin({ email: data.student.email, password: data.student.password, role: 'student', full_name: 'E2E Student' })
 
   const lectApi = await request.newContext({
     baseURL: API_BASE,

@@ -25,7 +25,7 @@ test.describe('Student Features API', () => {
   })
 
   test('S01: Enroll free course (instant enrollment)', async () => {
-    const res = await stuApi.post(`/courses/${td.course.id}/enroll/payment-intent`, {
+    const res = await stuApi.post(`courses/${td.course.id}/enroll/payment-intent`, {
       data: { payment_method: 'vnpay' }
     })
     expect([200, 400, 409]).toContain(res.status())
@@ -36,26 +36,26 @@ test.describe('Student Features API', () => {
   })
 
   test('S02: Check enrollment status', async () => {
-    const res = await stuApi.get(`/courses/${td.course.id}/enrollment-status`)
+    const res = await stuApi.get(`courses/${td.course.id}/enrollment-status`)
     expect(res.status()).toBe(200)
     const body = await res.json()
     expect(typeof body.is_enrolled).toBe('boolean')
   })
 
   test('S03: My enrollments list', async () => {
-    const res = await stuApi.get('enrollments/my-enrollments')
+    const res = await stuApi.get('my-enrollments')
     expect(res.status()).toBe(200)
     const body = await res.json()
     expect(Array.isArray(body.items)).toBeTruthy()
   })
 
   test('S04: Get enrollment progress', async () => {
-    const enrollRes = await stuApi.get('enrollments/my-enrollments')
+    const enrollRes = await stuApi.get('my-enrollments')
     if (!enrollRes.ok()) { test.skip(); return }
     const items = (await enrollRes.json()).items
     if (!items || items.length === 0) { test.skip(); return }
     const enrollId = items[0].id
-    const res = await stuApi.get(`/progress/enrollments/${enrollId}/progress`)
+    const res = await stuApi.get(`enrollments/${enrollId}/progress`)
     expect(res.status()).toBe(200)
   })
 
@@ -65,7 +65,7 @@ test.describe('Student Features API', () => {
     const items = (await enrollRes.json()).items
     if (!items || items.length === 0) { test.skip(); return }
     const enrollId = items[0].id
-    const res = await stuApi.post(`/progress/enrollments/${enrollId}/materials/${td.lesson.id}/progress`, {
+    const res = await stuApi.post(`progress/enrollments/${enrollId}/materials/${td.lesson.id}/progress`, {
       data: { progress_percent: 100 }
     })
     expect([200, 404]).toContain(res.status())
@@ -73,24 +73,24 @@ test.describe('Student Features API', () => {
 
   test('S06: Start quiz attempt', async () => {
     if (!td.quiz.id) { test.skip(); return }
-    const res = await stuApi.post(`/lessons/${td.lesson.id}/quiz/attempt`, { data: {} })
+    const res = await stuApi.post(`lessons/${td.lesson.id}/quiz/attempt`, { data: {} })
     expect([201, 400, 404]).toContain(res.status())
   })
 
   test('S07: Get my quiz attempts', async () => {
-    const res = await stuApi.get(`/lessons/${td.lesson.id}/quiz/my-attempts`)
+    const res = await stuApi.get(`lessons/${td.lesson.id}/quiz/my-attempts`)
     expect([200, 404]).toContain(res.status())
   })
 
   test('S08: Submit assignment', async () => {
-    const res = await stuApi.post(`/lessons/${td.lesson.id}/assignment/submissions`, {
+    const res = await stuApi.post(`lessons/${td.lesson.id}/assignment/submissions`, {
       data: { submission_text: 'My homework submission for E2E test' }
     })
     expect([201, 400, 404]).toContain(res.status())
   })
 
   test('S09: Get my submissions', async () => {
-    const res = await stuApi.get(`/lessons/${td.lesson.id}/assignment/submissions`)
+    const res = await stuApi.get(`lessons/${td.lesson.id}/assignment/submissions`)
     expect([200, 404]).toContain(res.status())
   })
 
@@ -139,7 +139,7 @@ test.describe('Student Features API', () => {
     if (!sessionRes.ok()) { test.skip(); return }
     const sessionId = (await sessionRes.json()).id
 
-    const res = await stuApi.get(`/chat/sessions/${sessionId}/messages`)
+    const res = await stuApi.get(`chat/sessions/${sessionId}/messages`)
     expect(res.status()).toBe(200)
   })
 
@@ -150,7 +150,7 @@ test.describe('Student Features API', () => {
     if (!sessionRes.ok()) { test.skip(); return }
     const sessionId = (await sessionRes.json()).id
 
-    const res = await stuApi.delete(`/chat/sessions/${sessionId}`)
+    const res = await stuApi.delete(`chat/sessions/${sessionId}`)
     expect([204, 200]).toContain(res.status())
   })
 
@@ -181,7 +181,7 @@ test.describe('Student Features API', () => {
 
   test('S19: Unauthenticated enrollment request blocked', async () => {
     const unauthApi = await request.newContext({ baseURL: API_BASE })
-    const res = await unauthApi.post(`/courses/${td.course.id}/enroll/payment-intent`, {
+    const res = await unauthApi.post(`courses/${td.course.id}/enroll/payment-intent`, {
       data: { payment_method: 'vnpay' }
     })
     expect(res.status()).toBe(401)
@@ -189,20 +189,20 @@ test.describe('Student Features API', () => {
 
   test('S20: Enroll non-existent course returns 404', async () => {
     const fakeId = '00000000-0000-0000-0000-000000000000'
-    const res = await stuApi.post(`/courses/${fakeId}/enroll/payment-intent`, {
+    const res = await stuApi.post(`courses/${fakeId}/enroll/payment-intent`, {
       data: { payment_method: 'vnpay' }
     })
     expect([400, 404]).toContain(res.status())
   })
 
   test('S21: Grade submission (lecturer)', async () => {
-    const subRes = await stuApi.post(`/lessons/${td.lesson.id}/assignment/submissions`, {
+    const subRes = await stuApi.post(`lessons/${td.lesson.id}/assignment/submissions`, {
       data: { submission_text: 'Please grade this' }
     })
     if (!subRes.ok()) { test.skip(); return }
     const subId = (await subRes.json()).id
 
-    const gradeRes = await lectApi.post(`/lessons/${td.lesson.id}/assignment/submissions/${subId}/grade`, {
+    const gradeRes = await lectApi.post(`lessons/${td.lesson.id}/assignment/submissions/${subId}/grade`, {
       data: { score: 85, feedback: 'Good work!' }
     })
     expect([200, 404]).toContain(gradeRes.status())

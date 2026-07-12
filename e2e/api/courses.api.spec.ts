@@ -17,8 +17,10 @@ test.describe('Courses & Categories API', () => {
   })
 
   test('C01: List published courses (pagination)', async () => {
-    const api = await request.newContext({ baseURL: API_BASE })
-    const res = await api.get('courses?page=1&page_size=10')
+    const stuApi = await request.newContext({
+      baseURL: API_BASE, extraHTTPHeaders: { Authorization: `Bearer ${td.student.token}` }
+    })
+    const res = await stuApi.get('courses?page=1&page_size=10')
     expect(res.status()).toBe(200)
     const body = await res.json()
     expect(Array.isArray(body.items)).toBeTruthy()
@@ -28,8 +30,10 @@ test.describe('Courses & Categories API', () => {
   })
 
   test('C02: View course detail', async () => {
-    const api = await request.newContext({ baseURL: API_BASE })
-    const res = await api.get(`/courses/${td.course.id}`)
+    const lectApiCtx = await request.newContext({
+      baseURL: API_BASE, extraHTTPHeaders: { Authorization: `Bearer ${td.lecturer.token}` }
+    })
+    const res = await lectApiCtx.get(`courses/${td.course.id}`)
     expect(res.status()).toBe(200)
     const body = await res.json()
     expect(body.id).toBe(td.course.id)
@@ -37,9 +41,11 @@ test.describe('Courses & Categories API', () => {
   })
 
   test('C03: View non-existent course returns 404', async () => {
-    const api = await request.newContext({ baseURL: API_BASE })
+    const lectApiCtx = await request.newContext({
+      baseURL: API_BASE, extraHTTPHeaders: { Authorization: `Bearer ${td.lecturer.token}` }
+    })
     const fakeId = '00000000-0000-0000-0000-000000000000'
-    const res = await api.get(`/courses/${fakeId}`)
+    const res = await lectApiCtx.get(`courses/${fakeId}`)
     expect(res.status()).toBe(404)
   })
 
@@ -48,7 +54,7 @@ test.describe('Courses & Categories API', () => {
       baseURL: API_BASE, extraHTTPHeaders: { Authorization: `Bearer ${td.lecturer.token}` }
     })
     const res = await lectApi.post('courses', {
-      data: { title: 'New Draft Course', description: 'Draft', price_vnd: 99000 }
+      data: { title: 'New Draft Course', description: 'Draft', price: 99000 }
     })
     expect(res.status()).toBe(201)
     const body = await res.json()
@@ -68,7 +74,7 @@ test.describe('Courses & Categories API', () => {
     const lectApi = await request.newContext({
       baseURL: API_BASE, extraHTTPHeaders: { Authorization: `Bearer ${td.lecturer.token}` }
     })
-    const res = await lectApi.put(`/courses/${td.course.id}`, {
+    const res = await lectApi.put(`courses/${td.course.id}`, {
       data: { description: 'Updated description' }
     })
     expect(res.status()).toBe(200)
@@ -78,7 +84,7 @@ test.describe('Courses & Categories API', () => {
     const stuApi = await request.newContext({
       baseURL: API_BASE, extraHTTPHeaders: { Authorization: `Bearer ${td.student.token}` }
     })
-    const res = await stuApi.put(`/courses/${td.course.id}`, {
+    const res = await stuApi.put(`courses/${td.course.id}`, {
       data: { title: 'Hacked!' }
     })
     expect(res.status()).toBe(403)
@@ -88,7 +94,7 @@ test.describe('Courses & Categories API', () => {
     const lectApi = await request.newContext({
       baseURL: API_BASE, extraHTTPHeaders: { Authorization: `Bearer ${td.lecturer.token}` }
     })
-    const res = await lectApi.post(`/courses/${td.course.id}/publish`)
+    const res = await lectApi.post(`courses/${td.course.id}/publish`)
     expect(res.status()).toBe(200)
   })
 
@@ -96,9 +102,9 @@ test.describe('Courses & Categories API', () => {
     const lectApi = await request.newContext({
       baseURL: API_BASE, extraHTTPHeaders: { Authorization: `Bearer ${td.lecturer.token}` }
     })
-    const res = await lectApi.post(`/courses/${td.course.id}/archive`)
+    const res = await lectApi.post(`courses/${td.course.id}/archive`)
     expect(res.status()).toBe(200)
-    const getRes = await lectApi.get(`/courses/${td.course.id}`)
+    const getRes = await lectApi.get(`courses/${td.course.id}`)
     expect((await getRes.json()).status).toBe('archived')
   })
 
@@ -106,7 +112,7 @@ test.describe('Courses & Categories API', () => {
     const lectApi = await request.newContext({
       baseURL: API_BASE, extraHTTPHeaders: { Authorization: `Bearer ${td.lecturer.token}` }
     })
-    const res = await lectApi.post(`/courses/${td.course.id}/unarchive`)
+    const res = await lectApi.post(`courses/${td.course.id}/unarchive`)
     expect(res.status()).toBe(200)
   })
 
@@ -131,15 +137,19 @@ test.describe('Courses & Categories API', () => {
   })
 
   test('C13: List categories', async () => {
-    const api = await request.newContext({ baseURL: API_BASE })
-    const res = await api.get('categories')
+    const lectApiCtx = await request.newContext({
+      baseURL: API_BASE, extraHTTPHeaders: { Authorization: `Bearer ${td.lecturer.token}` }
+    })
+    const res = await lectApiCtx.get('categories')
     expect(res.status()).toBe(200)
     expect(Array.isArray(await res.json())).toBeTruthy()
   })
 
   test('C14: Category tree', async () => {
-    const api = await request.newContext({ baseURL: API_BASE })
-    const res = await api.get('categories/tree')
+    const lectApiCtx = await request.newContext({
+      baseURL: API_BASE, extraHTTPHeaders: { Authorization: `Bearer ${td.lecturer.token}` }
+    })
+    const res = await lectApiCtx.get('categories/tree')
     expect(res.status()).toBe(200)
     expect(Array.isArray(await res.json())).toBeTruthy()
   })

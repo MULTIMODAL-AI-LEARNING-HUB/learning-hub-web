@@ -55,7 +55,7 @@ test.describe('Quiz Generation API', () => {
     if (!startRes.ok()) { test.skip(); return }
     const { job_id: jobId } = await startRes.json()
 
-    const pollRes = await lectApi.get(`/study/quiz/job/${jobId}`)
+    const pollRes = await lectApi.get(`study/quiz/job/${jobId}`)
     expect(pollRes.ok()).toBeTruthy()
     const body = await pollRes.json()
     expect(body.job_id).toBe(jobId)

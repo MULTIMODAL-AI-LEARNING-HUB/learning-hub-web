@@ -21,7 +21,7 @@ test.describe('Payment & Webhook API', () => {
   })
 
   test('P01: VNPay payment intent returns URL', async () => {
-    const res = await stuApi.post(`/courses/${td.course.id}/enroll/payment-intent`, {
+    const res = await stuApi.post(`courses/${td.course.id}/enroll/payment-intent`, {
       data: { payment_method: 'vnpay' }
     })
     expect([200, 400, 409]).toContain(res.status())
@@ -33,7 +33,7 @@ test.describe('Payment & Webhook API', () => {
   })
 
   test('P02: MoMo payment intent returns URL', async () => {
-    const res = await stuApi.post(`/courses/${td.course.id}/enroll/payment-intent`, {
+    const res = await stuApi.post(`courses/${td.course.id}/enroll/payment-intent`, {
       data: { payment_method: 'momo' }
     })
     expect([200, 400, 409]).toContain(res.status())
@@ -45,14 +45,14 @@ test.describe('Payment & Webhook API', () => {
   })
 
   test('P03: Invalid payment method returns 422', async () => {
-    const res = await stuApi.post(`/courses/${td.course.id}/enroll/payment-intent`, {
+    const res = await stuApi.post(`courses/${td.course.id}/enroll/payment-intent`, {
       data: { payment_method: 'bitcoin' }
     })
     expect(res.status()).toBe(422)
   })
 
   test('P04: Confirm enrollment without payment', async () => {
-    const res = await stuApi.post(`/courses/${td.course.id}/enroll/confirm`, {
+    const res = await stuApi.post(`courses/${td.course.id}/enroll/confirm`, {
       data: { payment_method: 'vnpay', transaction_id: 'test-txn-123' }
     })
     expect([200, 400, 404]).toContain(res.status())
@@ -74,7 +74,7 @@ test.describe('Payment & Webhook API', () => {
 
   test('P06: Unauthenticated payment intent returns 401', async () => {
     const unauthApi = await request.newContext({ baseURL: API_BASE })
-    const res = await unauthApi.post(`/courses/${td.course.id}/enroll/payment-intent`, {
+    const res = await unauthApi.post(`courses/${td.course.id}/enroll/payment-intent`, {
       data: { payment_method: 'vnpay' }
     })
     expect(res.status()).toBe(401)

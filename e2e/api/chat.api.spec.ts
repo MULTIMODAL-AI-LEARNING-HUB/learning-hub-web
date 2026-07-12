@@ -94,7 +94,7 @@ test.describe('Chat API', () => {
     const sessionRes = await stuApi.post('chat/sessions', { data: { title: 'Msg Test' } })
     const session = await sessionRes.json()
 
-    const msgRes = await stuApi.get(`/chat/sessions/${session.id}/messages`)
+    const msgRes = await stuApi.get(`chat/sessions/${session.id}/messages`)
     expect(msgRes.ok()).toBeTruthy()
     const data = await msgRes.json()
     expect(Array.isArray(data.items)).toBeTruthy()
@@ -103,7 +103,7 @@ test.describe('Chat API', () => {
   test('C10: Delete session', async () => {
     const sessionRes = await stuApi.post('chat/sessions', { data: { title: 'To Delete' } })
     const session = await sessionRes.json()
-    const deleteRes = await stuApi.delete(`/chat/sessions/${session.id}`)
+    const deleteRes = await stuApi.delete(`chat/sessions/${session.id}`)
     expect([204, 200]).toContain(deleteRes.status())
   })
 
@@ -112,7 +112,7 @@ test.describe('Chat API', () => {
     if (!lectSessionRes.ok()) { test.skip(); return }
     const lectSession = await lectSessionRes.json()
 
-    const accessRes = await stuApi.get(`/chat/sessions/${lectSession.id}`)
+    const accessRes = await stuApi.get(`chat/sessions/${lectSession.id}`)
     expect(accessRes.status()).toBe(404)
   })
 })

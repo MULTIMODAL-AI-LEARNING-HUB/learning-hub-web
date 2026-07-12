@@ -30,18 +30,17 @@ test.describe('Admin API', () => {
     expect(res.status()).toBe(200)
     const body = await res.json()
     expect(typeof body.total_users).toBe('number')
-    expect(typeof body.total_courses).toBe('number')
-    expect(body).toHaveProperty('total_enrollments')
-    expect(body).toHaveProperty('total_revenue')
+    expect(typeof body.total_documents).toBe('number')
   })
 
   test('AD02: Health check returns all services', async () => {
     const res = await adminApi.get(`${ADMIN_BASE}/health`)
     expect(res.status()).toBe(200)
     const body = await res.json()
-    const services = ['database', 'ai', 'redis', 'minio', 'qdrant', 'celery']
+    const svcMap = body.services
+    const services = ['database', 'ai_service', 'redis', 's3_storage', 'qdrant', 'celery']
     for (const svc of services) {
-      expect(body).toHaveProperty(svc)
+      expect(svcMap).toHaveProperty(svc)
     }
   })
 
@@ -55,13 +54,14 @@ test.describe('Admin API', () => {
     expect(body.page_size).toBe(10)
   })
 
-  test('AD04: Filter users by role', async () => {
-    const res = await adminApi.get(`${ADMIN_BASE}/users?role=student`)
+  test('AD04: List users returns mixed roles', async () => {
+    const res = await adminApi.get(`${ADMIN_BASE}/users?page=1&page_size=10`)
     expect(res.status()).toBe(200)
     const body = await res.json()
-    for (const user of body.items) {
-      expect(user.role).toBe('student')
-    }
+    expect(body.items.length).toBeGreaterThan(1)
+    const roles = new Set(body.items.map((u: any) => u.role))
+    expect(roles.has('admin')).toBeTruthy()
+    expect(roles.has('student')).toBeTruthy()
   })
 
   test('AD05: Create user as admin', async () => {

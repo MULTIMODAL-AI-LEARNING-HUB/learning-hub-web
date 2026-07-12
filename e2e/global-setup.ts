@@ -15,6 +15,7 @@ interface TestCredential {
 }
 
 const CREDENTIALS: TestCredential[] = [
+  { email: 'admin@learninghub.com', password: 'AdminPass123!', role: 'admin' },
   { email: 'e2e_lecturer@test.com', password: 'TestPass123!', role: 'lecturer' },
   { email: 'e2e_student@test.com', password: 'TestPass123!', role: 'student' }
 ]
@@ -42,14 +43,15 @@ async function globalSetup(config: FullConfig) {
     })
     if (loginRes.ok()) {
       const body = await loginRes.json()
+      const t = body.token || body
       const storageData = {
         cookies: [],
         origins: [
           {
             origin: 'http://localhost:5173',
             localStorage: [
-              { name: 'token', value: body.access_token },
-              { name: 'access_token', value: body.access_token },
+              { name: 'token', value: t.access_token },
+              { name: 'access_token', value: t.access_token },
               { name: 'user', value: JSON.stringify(body.user || {}) }
             ]
           }

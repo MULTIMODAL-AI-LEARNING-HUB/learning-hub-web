@@ -14,8 +14,8 @@ test.describe('Auth API', () => {
     })
     expect(res.status()).toBe(201)
     const body = await res.json()
-    expect(body.email).toBe(email)
-    expect(body.role).toBe('student')
+    expect(body.user.email).toBe(email)
+    expect(body.user.role).toBe('student')
   })
 
   test('A02: Register with duplicate email returns 409', async () => {
@@ -92,7 +92,7 @@ test.describe('Auth API', () => {
     const loginRes = await api.post('auth/login', {
       data: { email, password: 'TestPass123!' }
     })
-    const token = (await loginRes.json()).access_token
+    const token = (await loginRes.json()).token.access_token
     const authApi = await request.newContext({
       baseURL: API_BASE, extraHTTPHeaders: { Authorization: `Bearer ${token}` }
     })
@@ -113,7 +113,7 @@ test.describe('Auth API', () => {
     const loginRes = await api.post('auth/login', {
       data: { email, password: 'TestPass123!' }
     })
-    const token = (await loginRes.json()).access_token
+    const token = (await loginRes.json()).token.access_token
     const authApi = await request.newContext({
       baseURL: API_BASE, extraHTTPHeaders: { Authorization: `Bearer ${token}` }
     })
