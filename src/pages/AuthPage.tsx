@@ -272,8 +272,10 @@ function AuthShell({ variant }: { variant: Variant }) {
                 type="submit"
                 loading={loading}
                 className={cn(
-                  "w-full text-white font-bold tracking-wide shadow-md",
-                  isStudent ? "bg-gradient-to-r from-blue-500 to-cyan-500" : "bg-gradient-to-r from-violet-500 to-purple-600"
+                  "w-full text-white font-bold tracking-wide shadow-md transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0",
+                  isStudent 
+                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-lg hover:shadow-blue-500/25 active:from-blue-600 active:to-cyan-600" 
+                    : "bg-gradient-to-r from-violet-500 to-purple-600 hover:shadow-lg hover:shadow-purple-500/25 active:from-violet-600 active:to-purple-700"
                 )}
                 size="lg"
                 iconRight={!loading ? <ArrowRight className="h-4 w-4" /> : undefined}
