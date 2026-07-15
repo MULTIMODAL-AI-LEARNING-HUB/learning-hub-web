@@ -77,20 +77,20 @@ export function CourseCatalog() {
                 <Badge variant="success" label="Miễn phí" />
               )}
             </div>
-          <h3 className="font-semibold text-lg mb-1 line-clamp-2">{course.title}</h3>
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{course.description}</p>
+          <h3 className="font-semibold text-lg mb-1 line-clamp-2 text-foreground">{course.title}</h3>
+          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{course.description}</p>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-medium">
+              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
                 {course.lecturer?.full_name?.[0] || 'L'}
               </div>
-              <span className="text-sm text-gray-600">{course.lecturer?.full_name || 'Giảng viên'}</span>
+              <span className="text-sm text-muted-foreground">{course.lecturer?.full_name || 'Giảng viên'}</span>
             </div>
-            <span className="text-sm font-medium text-indigo-600">
+            <span className="text-sm font-medium text-primary">
               {course.price === 0 ? 'Miễn phí' : `${formatPrice(course.price)}đ`}
             </span>
           </div>
-          <div className="mt-2 text-xs text-gray-500">
+          <div className="mt-2 text-xs text-muted-foreground">
             {course.enrollment_count} học viên • {course.materials?.length || 0} bài học
           </div>
         </div>
@@ -103,7 +103,7 @@ export function CourseCatalog() {
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
         <div>
           <h1 className="text-fluid-2xl font-bold text-foreground">Khóa học</h1>
-          <p className="text-gray-600">Khám phá các khóa học chất lượng từ giảng viên</p>
+          <p className="text-muted-foreground">Khám phá các khóa học chất lượng từ giảng viên</p>
         </div>
         <div className="flex gap-2 w-full md:w-auto">
           <Input
@@ -117,13 +117,13 @@ export function CourseCatalog() {
         </div>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-2">
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
         <button
           onClick={() => setSelectedCategory(null)}
-          className={`px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
+          className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all duration-200 ${
             !selectedCategory
-              ? 'bg-indigo-600 text-white'
-              : 'bg-gray-100 hover:bg-gray-200'
+              ? 'bg-primary text-primary-foreground shadow-soft'
+              : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
           }`}
         >
           Tất cả
@@ -132,10 +132,10 @@ export function CourseCatalog() {
           <button
             key={cat.id}
             onClick={() => setSelectedCategory(cat.id)}
-            className={`px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
+            className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all duration-200 ${
               selectedCategory === cat.id
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-100 hover:bg-gray-200'
+                ? 'bg-primary text-primary-foreground shadow-soft'
+                : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
             }`}
           >
             {cat.icon && <span className="mr-1">{cat.icon}</span>}
@@ -161,8 +161,8 @@ export function CourseCatalog() {
       ) : courses.length === 0 ? (
         <div className="text-center py-12">
           <span className="text-4xl mb-4 block">📚</span>
-          <h3 className="text-lg font-medium mb-2">Không tìm thấy khóa học</h3>
-          <p className="text-gray-600">Thử thay đổi bộ lọc hoặc tìm kiếm khác</p>
+          <h3 className="text-lg font-medium mb-2 text-foreground">Không tìm thấy khóa học</h3>
+          <p className="text-muted-foreground">Thử thay đổi bộ lọc hoặc tìm kiếm khác</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
