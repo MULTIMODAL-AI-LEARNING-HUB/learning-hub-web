@@ -14,17 +14,17 @@ export function MainLayout({ sidebar, children }: MainLayoutProps) {
   const toggleSidebar = useAppStore((s) => s.ui.toggleSidebar)
 
   return (
-    <div className="min-h-screen gradient-mesh">
-      <div className="mx-auto flex min-h-screen max-w-[1600px] flex-col px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
+    <div className="h-screen flex flex-col gradient-mesh overflow-hidden">
+      <div className="mx-auto flex flex-col flex-1 w-full max-w-[1600px] px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6 overflow-hidden">
         <Header />
 
-        <div className="flex flex-1 gap-4">
+        <div className="flex flex-1 gap-4 overflow-hidden">
           {/* Desktop sidebar */}
           {sidebar && (
             <aside
               className={cn(
                 'hidden shrink-0 rounded-2xl border border-border bg-surface-elevated p-4 shadow-soft lg:block',
-                'w-[280px] xl:w-[300px]'
+                'w-[280px] xl:w-[300px] overflow-y-auto scrollbar-thin'
               )}
             >
               {sidebar}
@@ -38,7 +38,7 @@ export function MainLayout({ sidebar, children }: MainLayoutProps) {
             </MobileDrawer>
           )}
 
-          <main className="flex-1 min-w-0">
+          <main className="flex-1 min-w-0 overflow-y-auto scrollbar-thin pr-1">
             {children}
           </main>
         </div>
