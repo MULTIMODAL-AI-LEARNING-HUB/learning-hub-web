@@ -58,10 +58,10 @@ export function CourseDetail() {
     loadCourse()
   }, [loadCourse])
 
-  const handleEnroll = async (paymentMethod?: 'vnpay' | 'momo') => {
+  const handleEnroll = async (paymentMethod?: 'vnpay' | 'momo' | 'free') => {
     if (!id) return
     if (course?.price === 0) {
-      paymentMethod = undefined
+      paymentMethod = 'free'
     }
     setEnrolling(true)
     try {
