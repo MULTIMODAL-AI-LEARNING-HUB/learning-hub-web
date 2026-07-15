@@ -15,10 +15,15 @@ let cachedUsers: TestUser[] | null = null
 export async function getTestUsers(): Promise<TestUser[]> {
   if (cachedUsers) return cachedUsers
 
+  const lecturerEmail = process.env.E2E_LECTURER_EMAIL ?? 'e2e_lecturer@test.com'
+  const lecturerPassword = process.env.E2E_LECTURER_PASSWORD ?? 'TestPass123!'
+  const studentEmail = process.env.E2E_STUDENT_EMAIL ?? 'e2e_student@test.com'
+  const studentPassword = process.env.E2E_STUDENT_PASSWORD ?? 'TestPass123!'
+
   const lecturerRes = await request.post(`${API_BASE}/auth/register`, {
     data: {
-        email: 'e2e_lecturer@test.com',
-        password: 'TestPass123!',
+        email: lecturerEmail,
+        password: lecturerPassword,
         full_name: 'E2E Lecturer',
         role: 'lecturer'
     }
@@ -26,18 +31,18 @@ export async function getTestUsers(): Promise<TestUser[]> {
 
   const studentRes = await request.post(`${API_BASE}/auth/register`, {
     data: {
-        email: 'e2e_student@test.com',
-        password: 'TestPass123!',
+        email: studentEmail,
+        password: studentPassword,
         full_name: 'E2E Student',
         role: 'student'
     }
   }).catch(() => null)
 
   const lecturerLogin = await request.post(`${API_BASE}/auth/login`, {
-    data: { email: 'e2e_lecturer@test.com', password: 'TestPass123!' }
+    data: { email: lecturerEmail, password: lecturerPassword }
   })
   const studentLogin = await request.post(`${API_BASE}/auth/login`, {
-    data: { email: 'e2e_student@test.com', password: 'TestPass123!' }
+    data: { email: studentEmail, password: studentPassword }
   })
 
   const lecturerToken = lecturerLogin.ok() ? (await lecturerLogin.json()).access_token : ''
@@ -46,14 +51,14 @@ export async function getTestUsers(): Promise<TestUser[]> {
   cachedUsers = [
     {
       id: '',
-      email: 'e2e_lecturer@test.com',
+      email: lecturerEmail,
       full_name: 'E2E Lecturer',
       role: 'lecturer',
       token: lecturerToken
     },
     {
       id: '',
-      email: 'e2e_student@test.com',
+      email: studentEmail,
       full_name: 'E2E Student',
       role: 'student',
       token: studentToken

@@ -18,7 +18,11 @@ export interface TestData {
 export async function createTestData(): Promise<TestData> {
   const ts = Date.now()
   const data: TestData = {
-    admin: { email: 'admin@learninghub.com', password: 'AdminPass123!', token: '' },
+    admin: {
+      email: process.env.E2E_ADMIN_EMAIL ?? 'admin@learninghub.com',
+      password: process.env.E2E_ADMIN_PASSWORD ?? 'AdminPass123!',
+      token: '',
+    },
     lecturer: { email: `e2e_lecturer_${ts}@test.com`, password: 'TestPass123!', id: '' },
     student: { email: `e2e_student_${ts}@test.com`, password: 'TestPass123!', id: '' },
     course: { id: '', title: '' },

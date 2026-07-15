@@ -15,9 +15,21 @@ interface TestCredential {
 }
 
 const CREDENTIALS: TestCredential[] = [
-  { email: 'admin@learninghub.com', password: 'AdminPass123!', role: 'admin' },
-  { email: 'e2e_lecturer@test.com', password: 'TestPass123!', role: 'lecturer' },
-  { email: 'e2e_student@test.com', password: 'TestPass123!', role: 'student' }
+  {
+    email: process.env.E2E_ADMIN_EMAIL ?? 'admin@learninghub.com',
+    password: process.env.E2E_ADMIN_PASSWORD ?? 'AdminPass123!',
+    role: 'admin',
+  },
+  {
+    email: process.env.E2E_LECTURER_EMAIL ?? 'e2e_lecturer@test.com',
+    password: process.env.E2E_LECTURER_PASSWORD ?? 'TestPass123!',
+    role: 'lecturer',
+  },
+  {
+    email: process.env.E2E_STUDENT_EMAIL ?? 'e2e_student@test.com',
+    password: process.env.E2E_STUDENT_PASSWORD ?? 'TestPass123!',
+    role: 'student',
+  },
 ]
 
 async function globalSetup(config: FullConfig) {

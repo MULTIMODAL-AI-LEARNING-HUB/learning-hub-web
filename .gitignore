@@ -23,6 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.env.e2e
 
 # E2E test artifacts
 e2e/reports/
