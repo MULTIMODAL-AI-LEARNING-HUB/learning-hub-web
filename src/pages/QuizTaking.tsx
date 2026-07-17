@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { BookOpen, CheckCircle2, XCircle, Trophy, ArrowLeft, ArrowRight } from 'lucide-react'
-import { coursesApi, enrollmentsApi, type Course, type Enrollment } from '../services/api'
+import { coursesApi, enrollmentsApi, studyApi, type Course, type Enrollment } from '../services/api'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
-import { useAppStore } from '../stores/appStore'
 import { cn } from '../utils/cn'
 import { Badge } from '../components/ui/Badge'
 import { Skeleton } from '../components/ui/Skeleton'
@@ -26,8 +25,6 @@ interface QuizResult {
 
 export function QuizTaking() {
   const { id } = useParams<{ id: string }>()
-  const { auth } = useAppStore()
-
   const [course, setCourse] = useState<Course | null>(null)
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null)
   const [loading, setLoading] = useState(true)
@@ -81,18 +78,7 @@ export function QuizTaking() {
         payload.lesson_ids = [fromMaterialId]
       }
 
-      const res = await fetch('http://localhost:8000/api/v1/study/quiz/by-course', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${auth.token}`,
-        },
-        body: JSON.stringify(payload),
-      })
-
-      if (!res.ok) throw new Error('Failed to start quiz generation')
-
-      const data = await res.json()
+      const { data } = await studyApi.generateCourseQuiz(payload)
       setJobId(data.job_id)
       pollForQuizResult(data.job_id)
     } catch (err) {
@@ -104,12 +90,7 @@ export function QuizTaking() {
   const pollForQuizResult = async (jobId: string) => {
     const poll = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/v1/study/quiz/job/${jobId}`, {
-          headers: {
-            'Authorization': `Bearer ${auth.token}`,
-          },
-        })
-        const data = await res.json()
+        const { data } = await studyApi.getQuizJob(jobId)
         if (data.status === 'ready' && data.questions) {
           setQuestions(data.questions)
           setGenerating(false)
@@ -141,25 +122,14 @@ export function QuizTaking() {
     }))
 
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/study/quiz/${jobId}/submit`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${auth.token}`,
-        },
-        body: JSON.stringify({ answers: answerList }),
+      const { data } = await studyApi.submitQuiz(jobId, answerList)
+      setResults(data.results)
+      setScore({
+        correct: data.score,
+        total: data.total,
+        percentage: data.percentage
       })
-
-      if (res.ok) {
-        const data = await res.json()
-        setResults(data.results)
-        setScore({
-          correct: data.score,
-          total: data.total,
-          percentage: data.percentage
-        })
-        setSubmitted(true)
-      }
+      setSubmitted(true)
     } catch (err) {
       console.error('Failed to submit quiz:', err)
     }

@@ -105,7 +105,7 @@ function AuthShell({ variant }: { variant: Variant }) {
     if (!email.trim()) errs.email = 'Email is required'
     else if (!/\S+@\S+\.\S+/.test(email)) errs.email = 'Invalid email address'
     if (!password) errs.password = 'Password is required'
-    else if (password.length < 8) errs.password = 'Minimum 8 characters'
+    else if (variant === 'register' && password.length < 12) errs.password = 'Minimum 12 characters'
     if (variant === 'register' && password !== confirmPassword) {
       errs.confirmPassword = 'Passwords do not match'
     }

@@ -1,6 +1,9 @@
 import axios from 'axios'
 
-let API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
+const PRODUCTION_API_URL = 'https://learning-hub-api-777c1ae9c7d3.herokuapp.com/api/v1'
+const LOCAL_API_URL = 'http://localhost:8000/api/v1'
+
+let API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? PRODUCTION_API_URL : LOCAL_API_URL)
 
 // Auto-append /api/v1 if the VITE_API_URL is an absolute domain but misses the prefix
 if (API_BASE.startsWith('http') && !API_BASE.includes('/api/v1')) {
@@ -769,6 +772,8 @@ export const studyApi = {
   getQuizJob: (jobId: string) => api.get(`/study/quiz/job/${jobId}`),
   submitQuiz: (quizId: string, answers: Array<{ question_id: string; answer: string }>) =>
     api.post(`/study/quiz/${quizId}/submit`, { answers }),
+  generateCourseQuiz: (data: { course_id: string; question_count: number; lesson_ids?: string[] }) =>
+    api.post<{ job_id: string; status: string }>('/study/quiz/by-course', data),
   generateFlashcards: (data: { document_id: string; set_name: string; count?: number }) =>
     api.post('/study/flashcards/generate', data),
   getFlashcard: (id: string) => api.get(`/study/flashcards/${id}`),
