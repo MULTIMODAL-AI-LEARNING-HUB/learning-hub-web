@@ -151,7 +151,7 @@ export function SectionAccordion({
   }
 
   const handleAddVideoPrompt = async (lessonId: string) => {
-    const url = prompt("Nhập URL Video (ví dụ: YouTube, Vimeo) hoặc để trống và bấm OK để tải lên file video từ thiết bị:")
+    const url = prompt('Enter a video URL (for example, YouTube or Vimeo), or leave this blank and select OK to upload a video from your device:')
     if (url === null) return
 
     if (url.trim() !== "") {
@@ -592,7 +592,7 @@ export function SectionAccordion({
                       <div className="flex items-center gap-2.5 min-w-0">
                         <HelpCircle className="h-4 w-4 text-accent shrink-0" />
                         <span className="truncate font-semibold text-foreground/80">
-                          Quiz: Bài kiểm tra trắc nghiệm
+                          Quiz: Multiple-choice assessment
                         </span>
                       </div>
                       
@@ -624,7 +624,7 @@ export function SectionAccordion({
                       <div className="flex items-center gap-2.5 min-w-0">
                         <ClipboardList className="h-4 w-4 text-warning shrink-0" />
                         <span className="truncate font-semibold text-foreground/80">
-                          Assignment: Bài tập làm tự luận
+                          Assignment: Written exercise
                         </span>
                       </div>
                       

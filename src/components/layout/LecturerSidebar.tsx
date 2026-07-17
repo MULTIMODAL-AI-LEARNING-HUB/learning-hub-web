@@ -5,15 +5,15 @@ import { Avatar } from '../ui/Avatar'
 import { cn } from '../../utils/cn'
 
 const mainNavItems = [
-  { id: 'dashboard', label: 'Tổng quan', icon: Home, path: '/app/lecturer/dashboard' },
-  { id: 'courses', label: 'Khóa học', icon: BookOpen, path: '/app/lecturer/courses' },
-  { id: 'grading', label: 'Bài cần chấm', icon: ClipboardCheck, path: '/app/lecturer/courses' },
-  { id: 'students', label: 'Sinh viên', icon: Users, path: '/app/lecturer/students' },
+  { id: 'dashboard', label: 'Overview', icon: Home, path: '/app/lecturer/dashboard' },
+  { id: 'courses', label: 'Courses', icon: BookOpen, path: '/app/lecturer/courses' },
+  { id: 'grading', label: 'To Grade', icon: ClipboardCheck, path: '/app/lecturer/courses' },
+  { id: 'students', label: 'Students', icon: Users, path: '/app/lecturer/students' },
 ]
 
 const adminNavItems = [
-  { id: 'documents', label: 'Thư viện nội dung', icon: FileText, path: '/app/lecturer/documents' },
-  { id: 'analytics', label: 'Phân tích', icon: BarChart3, path: '/app/lecturer/analytics' },
+  { id: 'documents', label: 'Content Library', icon: FileText, path: '/app/lecturer/documents' },
+  { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/app/lecturer/analytics' },
 ]
 
 export function LecturerSidebar() {
@@ -58,13 +58,13 @@ export function LecturerSidebar() {
       <div className="flex-1 flex flex-col gap-4 overflow-y-auto scrollbar-thin">
         {/* Teaching section */}
         <div className="flex flex-col gap-1">
-          <span className="px-3.5 metadata-text font-semibold uppercase tracking-wider text-muted-foreground mb-1">Giảng dạy</span>
+          <span className="px-3.5 metadata-text font-semibold uppercase tracking-wider text-muted-foreground mb-1">Teaching</span>
           {mainNavItems.map(renderNavButton)}
         </div>
 
         {/* Management & Setup section */}
         <div className="flex flex-col gap-1">
-          <span className="px-3.5 metadata-text font-semibold uppercase tracking-wider text-muted-foreground mb-1">Quản lý</span>
+          <span className="px-3.5 metadata-text font-semibold uppercase tracking-wider text-muted-foreground mb-1">Management</span>
           {adminNavItems.map(renderNavButton)}
         </div>
 
@@ -77,21 +77,21 @@ export function LecturerSidebar() {
           className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition"
         >
           <User className="h-4 w-4 text-foreground/75" />
-          <span>Hồ sơ</span>
+          <span>Profile</span>
         </button>
         <button
           onClick={() => navigate('/app/lecturer/settings')}
           className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition"
         >
           <Settings className="h-4 w-4 text-foreground/75" />
-          <span>Cài đặt</span>
+          <span>Settings</span>
         </button>
         <button
           onClick={() => { logout(); navigate('/welcome') }}
           className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition"
         >
           <LogOut className="h-4 w-4" />
-          <span>Đăng xuất</span>
+          <span>Sign out</span>
         </button>
       </div>
     </div>
