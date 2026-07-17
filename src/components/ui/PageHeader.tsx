@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { cn } from '../../utils/cn'
 
 interface PageHeaderProps {
@@ -44,11 +45,11 @@ export function PageHeader({
                 {subtitle}
               </p>
             )}
-            <h1 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            <h1 className="page-title font-display text-foreground">
               {title}
             </h1>
             {description && (
-              <p className="mt-1 text-sm text-muted-foreground max-w-2xl">{description}</p>
+              <p className="mt-1 supporting-text text-muted-foreground max-w-[75ch]">{description}</p>
             )}
           </div>
         </div>
@@ -65,12 +66,12 @@ export function Breadcrumb({ items }: { items: Array<{ label: string; to?: strin
         <span key={i} className="flex items-center gap-1.5">
           {i > 0 && <span className="text-muted-foreground/40">/</span>}
           {item.to ? (
-            <a
-              href={item.to}
+            <Link
+              to={item.to}
               className="hover:text-foreground transition"
             >
               {item.label}
-            </a>
+            </Link>
           ) : (
             <span className="text-foreground font-medium">{item.label}</span>
           )}

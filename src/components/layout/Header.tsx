@@ -219,7 +219,7 @@ export function Header() {
               { id: 'logout', label: 'Log out', icon: <LogOut />, danger: true }
             ]}
             onSelect={(id) => {
-              if (id === 'profile') navigate('/app/documents')
+              if (id === 'profile') navigate(`/app/${role}/profile`)
               if (id === 'admin') navigate('/app/admin')
               if (id === 'logout') handleLogout()
             }}

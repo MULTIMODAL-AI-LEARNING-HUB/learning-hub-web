@@ -356,7 +356,7 @@ export function LessonEditor({
                 <FileArchive className="h-5 w-5 text-primary" />
                 <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Attachments & Materials</h3>
               </div>
-              <span className="text-2xs font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+              <span className="metadata-text font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                 {attachments?.length || 0} Files
               </span>
             </div>

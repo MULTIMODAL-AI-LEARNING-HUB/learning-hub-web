@@ -98,6 +98,8 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     min-height: 100svh;
+    font-size: 1rem;
+    line-height: 1.5;
   }
 
   ::selection {
@@ -113,6 +115,39 @@
 }
 
 @layer components {
+  .page-title {
+    font-size: clamp(1.5rem, 1.3rem + 0.75vw, 1.75rem);
+    line-height: 1.25;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  .section-title {
+    font-size: clamp(1.125rem, 1rem + 0.35vw, 1.25rem);
+    line-height: 1.35;
+    font-weight: 650;
+  }
+
+  .body-copy {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .field-label {
+    font-size: 0.875rem;
+    line-height: 1.4;
+    font-weight: 600;
+  }
+
+  .supporting-text {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .metadata-text {
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
   .gradient-mesh {
     background-image:
       radial-gradient(at 0% 0%, hsl(var(--primary) / 0.08) 0px, transparent 50%),
@@ -167,7 +202,7 @@
   }
 
   @media (max-width: 639px) {
-    html { font-size: 15px; }
+    input, select, textarea { font-size: 16px; }
   }
 
   /* Glassmorphism card */

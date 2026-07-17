@@ -106,7 +106,7 @@ export function LecturerAnalytics() {
                         title={`${e.count} enrollments on ${e.date}`}
                       />
                     </div>
-                    <span className="text-2xs text-muted-foreground truncate w-full text-center">
+                  <span className="metadata-text text-muted-foreground truncate w-full text-center">
                       {new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </span>
                   </div>
