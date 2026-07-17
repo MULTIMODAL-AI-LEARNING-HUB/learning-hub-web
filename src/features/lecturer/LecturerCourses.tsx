@@ -11,7 +11,6 @@ import { Modal } from '../../components/ui/Modal'
 import { useLecturerCourses } from '../../hooks/useLecturerCourses'
 import { categoriesApi } from '../../services/api'
 import type { Course, Category } from '../../services/api'
-import { CourseContentManager } from './CourseContentManager'
 
 export function LecturerCourses() {
   const navigate = useNavigate()
@@ -20,7 +19,6 @@ export function LecturerCourses() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
-  const [viewMode, setViewMode] = useState<'list' | 'content'>('list')
   const [newCourse, setNewCourse] = useState({ title: '', description: '', price: 0, category_id: '' })
   const [editCourse, setEditCourse] = useState({ title: '', description: '', price: 0, category_id: '', level: '', language: '', requirements: '', learning_outcomes: '', tags: '' })
 
@@ -86,31 +84,13 @@ export function LecturerCourses() {
     }
   }
 
-  const viewCourseContent = (course: Course) => {
-    setSelectedCourse(course)
-    setViewMode('content')
+  const openCourseWorkspace = (courseId: string) => {
+    navigate(`/app/lecturer/courses/${courseId}`)
   }
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {viewMode === 'content' && selectedCourse ? (
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <button onClick={() => setViewMode('list')} className="text-sm text-muted-foreground hover:text-foreground mb-2 flex items-center gap-1">
-                ← Back to Courses
-              </button>
-              <h1 className="text-2xl font-bold text-foreground">{selectedCourse.title}</h1>
-              <div className="mt-1">{getStatusBadge(selectedCourse.status)}</div>
-            </div>
-            <Button variant="outline" onClick={() => openEditModal(selectedCourse)} icon={<Edit className="h-4 w-4" />} fullWidthMobile>
-              Edit Details
-            </Button>
-          </div>
-          <CourseContentManager course={selectedCourse} />
-        </div>
-      ) : (
-        <>
+      <>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-fluid-2xl font-bold text-foreground">My Courses</h1>
@@ -207,7 +187,7 @@ export function LecturerCourses() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="sm" icon={<Eye className="h-4 w-4" />} onClick={() => viewCourseContent(course)} title="Manage Content" />
+                          <Button variant="ghost" size="sm" icon={<Eye className="h-4 w-4" />} onClick={() => openCourseWorkspace(course.id)} title="Open course workspace" />
                           <Button variant="ghost" size="sm" icon={<Edit className="h-4 w-4" />} onClick={() => openEditModal(course)} title="Edit" />
                           {course.status === 'draft' && (
                             <Button variant="ghost" size="sm" icon={<Send className="h-4 w-4" />} onClick={() => handlePublish(course.id)} title="Publish" />
@@ -236,8 +216,7 @@ export function LecturerCourses() {
               </div>
             )}
           </Card>
-        </>
-      )}
+      </>
 
       <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Create Course">
         <div className="space-y-4">
