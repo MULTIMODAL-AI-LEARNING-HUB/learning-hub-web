@@ -181,6 +181,35 @@ export interface CourseChatMessage {
   created_at: string
 }
 
+export interface SocialChatUser {
+  id: string
+  full_name: string | null
+  email: string
+  avatar_url: string | null
+  role: string
+}
+
+export interface SocialChatRoom {
+  id: string
+  name: string
+  description: string | null
+  kind: 'group' | 'direct'
+  member_count: number
+  last_message: string | null
+  updated_at: string
+}
+
+export interface SocialChatMessage {
+  id: string
+  room_id: string
+  sender_id: string
+  sender_name: string | null
+  sender_avatar_url: string | null
+  sender_role: string
+  content: string
+  created_at: string
+}
+
 export interface Category {
   id: string
   name: string
@@ -793,6 +822,21 @@ export const courseChatApi = {
     }),
   sendMessage: (courseId: string, content: string) =>
     api.post<CourseChatMessage>(`/courses/${courseId}/chat/messages`, { content }),
+}
+
+export const socialChatApi = {
+  searchUsers: (q = '', limit = 20) =>
+    api.get<SocialChatUser[]>('/social-chat/users', { params: { q, limit } }),
+  listRooms: () =>
+    api.get<{ items: SocialChatRoom[]; total: number }>('/social-chat/rooms'),
+  createRoom: (data: { name: string; description?: string; member_ids?: string[] }) =>
+    api.post<SocialChatRoom>('/social-chat/rooms', data),
+  listMessages: (roomId: string, limit = 50, before?: string) =>
+    api.get<{ items: SocialChatMessage[]; total: number }>(`/social-chat/rooms/${roomId}/messages`, {
+      params: { limit, before },
+    }),
+  sendMessage: (roomId: string, content: string) =>
+    api.post<SocialChatMessage>(`/social-chat/rooms/${roomId}/messages`, { content }),
 }
 
 export const studyApi = {
