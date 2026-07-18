@@ -15,7 +15,7 @@ export function MainLayout({ sidebar, children }: MainLayoutProps) {
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
-      <div className="mx-auto flex flex-col flex-1 w-full max-w-[1440px] px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6 overflow-hidden">
+      <div className="mx-auto flex flex-col flex-1 w-full max-w-[1520px] px-3 py-3 sm:px-4 lg:px-5 overflow-hidden">
         <Header />
 
         <div className="flex flex-1 gap-4 overflow-hidden">
@@ -23,8 +23,8 @@ export function MainLayout({ sidebar, children }: MainLayoutProps) {
           {sidebar && (
             <aside
               className={cn(
-                'hidden shrink-0 rounded-2xl border border-border bg-surface-elevated p-4 shadow-soft lg:block',
-                'w-[260px] xl:w-[272px] overflow-y-auto scrollbar-thin'
+                'hidden shrink-0 rounded-xl border border-border bg-surface-elevated p-3 shadow-soft lg:block',
+                'w-[248px] xl:w-[264px] overflow-y-auto scrollbar-thin'
               )}
             >
               {sidebar}
@@ -38,7 +38,7 @@ export function MainLayout({ sidebar, children }: MainLayoutProps) {
             </MobileDrawer>
           )}
 
-          <main className="flex-1 min-w-0 overflow-y-auto scrollbar-thin pr-1">
+          <main className="flex-1 min-w-0 overflow-y-auto scrollbar-thin pr-1 pb-6">
             {children}
           </main>
         </div>

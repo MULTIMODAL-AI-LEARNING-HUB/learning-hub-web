@@ -150,17 +150,13 @@ function AuthShell({ variant }: { variant: Variant }) {
   }
 
   return (
-    <div className="relative min-h-screen gradient-mesh-auth animate-fade-in overflow-hidden font-body">
-      {/* Decorative Orbs */}
-      <div className="orb bg-blue-500 w-80 h-80 -top-24 -left-24" />
-      <div className="orb bg-purple-500 w-96 h-96 -bottom-36 -right-24" />
-
-      <div className="mx-auto flex min-h-screen max-w-5xl flex-col gap-10 px-6 py-8 lg:flex-row lg:items-center lg:justify-between lg:gap-16 relative z-10">
+    <div className="relative min-h-screen animate-fade-in overflow-hidden bg-background font-body">
+      <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 py-8 lg:flex-row lg:items-center lg:justify-between lg:gap-16 relative z-10">
         {/* Left: Brand + Form */}
         <section className="flex w-full flex-col gap-6 lg:w-[480px] animate-zoom-in-95">
           {/* Brand */}
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-glow">
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-soft">
               <Sparkles className="h-5.5 w-5.5" />
             </div>
             <div>
@@ -187,7 +183,7 @@ function AuthShell({ variant }: { variant: Variant }) {
           )}
 
           {/* Form Card */}
-          <Card className="border-border/40 bg-surface-elevated/45 backdrop-blur-xl p-6 sm:p-8 shadow-lift relative">
+          <Card className="border-border bg-surface-elevated p-6 sm:p-8 shadow-lift relative">
             <form onSubmit={handleSubmit} className="grid gap-5">
               {errors.form && (
                 <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-xs text-destructive animate-shake-in" role="alert">
@@ -272,10 +268,7 @@ function AuthShell({ variant }: { variant: Variant }) {
                 type="submit"
                 loading={loading}
                 className={cn(
-                  "w-full text-white font-bold tracking-wide shadow-md transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0",
-                  isStudent 
-                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-lg hover:shadow-blue-500/25 active:from-blue-600 active:to-cyan-600" 
-                    : "bg-gradient-to-r from-violet-500 to-purple-600 hover:shadow-lg hover:shadow-purple-500/25 active:from-violet-600 active:to-purple-700"
+                  "w-full font-semibold"
                 )}
                 size="lg"
                 iconRight={!loading ? <ArrowRight className="h-4 w-4" /> : undefined}
@@ -301,14 +294,10 @@ function AuthShell({ variant }: { variant: Variant }) {
         <aside className="hidden w-full lg:block lg:w-[400px] animate-slide-in-from-right">
           <div className="space-y-6">
             {/* Role Info Card */}
-            <Card className={cn(
-              "p-6 border bg-surface-elevated/45 backdrop-blur-md transition-all duration-300",
-              isStudent ? "border-blue-500/10 glow-student" : "border-purple-500/10 glow-lecturer"
-            )}>
+            <Card className="p-6 border-border bg-surface-elevated shadow-soft">
               <div className="flex items-center gap-3 mb-4">
                 <div className={cn(
-                  "flex h-12 w-12 items-center justify-center rounded-xl ring-1",
-                  isStudent ? "bg-blue-500/10 text-blue-500 ring-blue-500/20" : "bg-purple-500/10 text-purple-500 ring-purple-500/20"
+                  "flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20"
                 )}>
                   {roleIcon}
                 </div>
@@ -353,7 +342,7 @@ function AuthShell({ variant }: { variant: Variant }) {
             </Card>
 
             {/* Quote Card */}
-            <Card className="p-6 border-border/40 bg-surface-elevated/45 backdrop-blur-md">
+            <Card className="p-6 border-border bg-surface-elevated">
               <p className="text-xs italic text-foreground/80 leading-relaxed">
                 "Education is the most powerful weapon which you can use to change the world."
               </p>

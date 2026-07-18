@@ -96,7 +96,7 @@ export function LecturerDashboard() {
           {statCards.map((stat) => {
             const Icon = stat.icon
             return (
-              <Card key={stat.label} className="border-border bg-surface-elevated shadow-soft" padding="responsive">
+              <Card key={stat.label} padding="responsive" interactive>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="supporting-text font-medium text-muted-foreground">{stat.label}</p>
@@ -135,10 +135,10 @@ export function LecturerDashboard() {
                 key={item.title}
                 type="button"
                 onClick={item.action}
-                className="group rounded-2xl border border-border bg-surface-elevated p-5 text-left shadow-soft transition hover:-translate-y-0.5 hover:border-violet-500/30 hover:shadow-lift"
+                className="group rounded-xl border border-border bg-surface-elevated p-5 text-left shadow-soft transition hover:border-primary/30 hover:shadow-lift"
               >
                 <div className="flex items-start justify-between gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <Icon className="h-5 w-5" aria-hidden="true" />
                   </div>
                   <span className="rounded-full bg-muted px-2.5 py-1 text-sm font-semibold text-foreground tabular-nums">
@@ -147,7 +147,7 @@ export function LecturerDashboard() {
                 </div>
                 <h3 className="mt-4 text-base font-semibold text-foreground">{item.title}</h3>
                 <p className="mt-1 supporting-text text-muted-foreground">{item.description}</p>
-                <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-violet-600 dark:text-violet-400">
+                <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
                   View details
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                 </span>
@@ -196,7 +196,7 @@ export function LecturerDashboard() {
                           {metrics?.enrollment_count ?? 0} students · {metrics?.rating_avg ? `${metrics.rating_avg.toFixed(1)} rating` : 'No ratings yet'}
                         </p>
                       </div>
-                      <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-violet-600 dark:text-violet-400">
+                      <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
                         Continue editing <ArrowRight className="h-4 w-4" aria-hidden="true" />
                       </span>
                     </button>

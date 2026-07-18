@@ -42,8 +42,7 @@ export function StudentDashboard() {
   return (
     <div className="space-y-6 animate-fade-in font-body">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl border border-blue-500/10 bg-gradient-to-r from-blue-500/5 via-transparent to-transparent p-6 glow-student">
-        <div className="absolute right-0 top-0 h-32 w-32 bg-blue-500/5 rounded-full blur-2xl animate-pulse" />
+      <div className="relative overflow-hidden rounded-xl border border-border bg-surface-elevated p-6 shadow-soft">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-fluid-2xl font-bold text-foreground">
@@ -54,8 +53,7 @@ export function StudentDashboard() {
           <Button 
             onClick={() => navigate('/app/student/quiz')} 
             icon={<Sparkles className="h-4 w-4" />} 
-            variant="gradient"
-            className="shadow-soft shadow-blue-500/20 bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:opacity-95"
+            variant="primary"
           >
             Generate AI Quiz
           </Button>
@@ -64,7 +62,7 @@ export function StudentDashboard() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card padding="responsive" className="border-blue-500/10 hover:shadow-blue-500/5 hover:-translate-y-0.5 transition-all">
+        <Card padding="responsive" interactive>
           <div className="flex items-center justify-between">
             <span className="text-2xs font-bold text-muted-foreground uppercase tracking-wider">Enrolled</span>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
@@ -79,7 +77,7 @@ export function StudentDashboard() {
           <p className="text-xs text-muted-foreground mt-1">Active courses</p>
         </Card>
 
-        <Card padding="responsive" className="border-cyan-500/10 hover:shadow-cyan-500/5 hover:-translate-y-0.5 transition-all">
+        <Card padding="responsive" interactive>
           <div className="flex items-center justify-between">
             <span className="text-2xs font-bold text-muted-foreground uppercase tracking-wider">Materials</span>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
@@ -94,7 +92,7 @@ export function StudentDashboard() {
           <p className="text-xs text-muted-foreground mt-1">Reference materials</p>
         </Card>
 
-        <Card padding="responsive" className="border-emerald-500/10 hover:shadow-emerald-500/5 hover:-translate-y-0.5 transition-all">
+        <Card padding="responsive" interactive>
           <div className="flex items-center justify-between">
             <span className="text-2xs font-bold text-muted-foreground uppercase tracking-wider">Completed</span>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -109,7 +107,7 @@ export function StudentDashboard() {
           <p className="text-xs text-muted-foreground mt-1">Lessons done</p>
         </Card>
 
-        <Card padding="responsive" className="border-amber-500/10 hover:shadow-amber-500/5 hover:-translate-y-0.5 transition-all glow-student">
+        <Card padding="responsive" interactive>
           <div className="flex items-center justify-between">
             <span className="text-2xs font-bold text-muted-foreground uppercase tracking-wider">Avg Progress</span>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">

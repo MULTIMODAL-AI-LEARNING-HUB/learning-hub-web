@@ -26,14 +26,14 @@ export function AdminLayout() {
       {/* Sidebar */}
       <aside 
         className={cn(
-          "flex flex-col border-r border-border bg-surface-elevated/80 backdrop-blur-md transition-all duration-300 relative",
+          "flex flex-col border-r border-border bg-surface-elevated transition-all duration-200 relative",
           isCollapsed ? "w-20" : "w-64"
         )}
       >
         {/* Collapse Toggle Button */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-3 top-8 z-50 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-surface-elevated text-foreground hover:bg-muted shadow-soft transition-transform"
+          className="absolute -right-3 top-8 z-50 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-surface-elevated text-foreground hover:bg-muted shadow-soft transition"
         >
           {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
         </button>
@@ -43,7 +43,7 @@ export function AdminLayout() {
           "flex items-center gap-3 p-4 border-b border-border transition-all",
           isCollapsed ? "justify-center px-2" : "px-4"
         )}>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
             <Sparkles className="h-5.5 w-5.5" />
           </div>
           {!isCollapsed && (
@@ -56,27 +56,27 @@ export function AdminLayout() {
 
         {/* Profile Card */}
         <div className={cn(
-          "flex items-center gap-3 p-4 border-b border-border bg-muted/10",
+          "flex items-center gap-3 p-4 border-b border-border bg-muted/20",
           isCollapsed ? "justify-center px-2" : "px-4"
         )}>
           <Avatar fallback={user.initials} size={isCollapsed ? "sm" : "md"} status="online" />
           {!isCollapsed && (
             <div className="flex-1 min-w-0 animate-fade-in">
               <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
-              <p className="text-xs text-indigo-500 font-medium capitalize">{user.role}</p>
+              <p className="text-xs text-muted-foreground font-medium capitalize">{user.role}</p>
             </div>
           )}
         </div>
 
         {/* Admin Badge */}
         {!isCollapsed ? (
-          <div className="flex items-center gap-2 mx-3 my-3 px-3 py-2 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 animate-fade-in">
+          <div className="flex items-center gap-2 mx-3 my-3 px-3 py-2 rounded-lg bg-primary/10 text-primary animate-fade-in">
             <ShieldCheck className="h-4 w-4" />
             <span className="text-xs font-semibold">Admin Mode</span>
           </div>
         ) : (
           <div className="flex justify-center my-3">
-            <ShieldCheck className="h-4 w-4 text-indigo-500" />
+            <ShieldCheck className="h-4 w-4 text-primary" />
           </div>
         )}
 
@@ -94,15 +94,15 @@ export function AdminLayout() {
                 key={item.id}
                 onClick={() => navigate(item.path)}
                 className={cn(
-                  'flex items-center gap-3 rounded-xl px-3.5 py-3 text-left text-sm font-medium transition-all group duration-200',
+                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-all group duration-150',
                   active
-                    ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-soft shadow-indigo-500/10'
+                    ? 'bg-primary text-primary-foreground shadow-soft'
                     : 'text-foreground/70 hover:bg-muted hover:text-foreground'
                 )}
               >
-                <Icon className={cn("h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110", active ? "text-white" : "text-foreground/75")} />
+                <Icon className={cn("h-4 w-4 shrink-0", active ? "text-primary-foreground" : "text-muted-foreground")} />
                 {!isCollapsed && <span className="flex-1 truncate">{item.label}</span>}
-                {!isCollapsed && active && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                {!isCollapsed && active && <span className="h-1.5 w-1.5 rounded-full bg-primary-foreground" />}
               </button>
             )
 
@@ -124,7 +124,7 @@ export function AdminLayout() {
             <Tooltip content="Logout" side="right">
               <button
                 onClick={logout}
-                className="flex items-center justify-center w-full gap-3 rounded-xl py-3 text-sm font-medium text-foreground/70 hover:bg-destructive/10 hover:text-destructive transition-all"
+                className="flex items-center justify-center w-full gap-3 rounded-lg py-2.5 text-sm font-medium text-foreground/70 hover:bg-destructive/10 hover:text-destructive transition-all"
               >
                 <LogOut className="h-4 w-4 shrink-0" />
               </button>
@@ -132,7 +132,7 @@ export function AdminLayout() {
           ) : (
             <button
               onClick={logout}
-              className="flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-left text-sm font-medium text-foreground/70 hover:bg-destructive/10 hover:text-destructive transition-all"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-foreground/70 hover:bg-destructive/10 hover:text-destructive transition-all"
             >
               <LogOut className="h-4 w-4 shrink-0" />
               <span>Logout</span>
@@ -142,7 +142,7 @@ export function AdminLayout() {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto bg-surface/30">
+      <main className="flex-1 overflow-y-auto bg-background p-4 lg:p-6">
         <Outlet />
       </main>
     </div>

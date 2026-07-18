@@ -19,24 +19,24 @@ interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'typ
 
 const variants: Record<Variant, string> = {
   primary:
-    'bg-primary text-primary-foreground hover:bg-primary/95 border border-primary/10 shadow-soft hover:shadow-[0_6px_16px_-4px_rgba(99,102,241,0.3)] dark:hover:shadow-[0_6px_20px_-2px_rgba(99,102,241,0.5)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200',
+    'bg-primary text-primary-foreground hover:bg-primary/95 border border-primary/10 shadow-soft hover:shadow-glow active:bg-primary/90 transition-all duration-150',
   secondary:
-    'bg-secondary/60 backdrop-blur-sm text-secondary-foreground hover:bg-secondary/90 border border-border/80 shadow-sm hover:shadow-[0_4px_12px_-2px_rgba(0,0,0,0.05)] dark:hover:shadow-[0_4px_16px_-2px_rgba(0,0,0,0.2)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200',
+    'bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border shadow-sm transition-all duration-150',
   outline:
-    'border border-border/85 bg-transparent text-foreground hover:bg-muted/80 hover:border-foreground/15 shadow-sm hover:shadow-[0_4px_12px_-2px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200',
+    'border border-border bg-surface-elevated text-foreground hover:bg-muted hover:border-foreground/20 shadow-sm transition-all duration-150',
   ghost:
-    'bg-transparent text-foreground hover:bg-muted/50 dark:hover:bg-muted/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200',
+    'bg-transparent text-foreground hover:bg-muted/70 transition-all duration-150',
   danger:
-    'bg-destructive text-destructive-foreground hover:bg-destructive/95 border border-destructive/10 shadow-soft hover:shadow-[0_6px_16px_-4px_rgba(239,68,68,0.3)] dark:hover:shadow-[0_6px_20px_-2px_rgba(239,68,68,0.5)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200',
+    'bg-destructive text-destructive-foreground hover:bg-destructive/95 border border-destructive/10 shadow-soft transition-all duration-150',
   gradient:
-    'bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] text-primary-foreground shadow-glow hover:bg-[position:right_center] hover:shadow-[0_8px_24px_-4px_rgba(139,92,246,0.4)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300'
+    'bg-primary text-primary-foreground shadow-soft hover:shadow-glow active:bg-primary/90 transition-all duration-150'
 }
 
 const sizes: Record<Size, string> = {
-  sm: 'h-8 px-3 text-xs rounded-lg gap-1.5',
-  md: 'h-9 px-4 text-sm rounded-lg gap-2',
-  lg: 'h-11 px-6 text-sm rounded-xl gap-2',
-  icon: 'h-9 w-9 rounded-lg gap-0'
+  sm: 'h-8 px-3 text-xs rounded-md gap-1.5',
+  md: 'h-9 px-4 text-sm rounded-md gap-2',
+  lg: 'h-11 px-5 text-sm rounded-lg gap-2',
+  icon: 'h-9 w-9 rounded-md gap-0'
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -69,8 +69,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         type={Component === 'button' ? type : undefined}
         disabled={disabled || loading}
         className={cn(
-          'inline-flex items-center justify-center font-medium transition-all duration-200 ease-out',
-          'active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:translate-y-0 disabled:hover:shadow-none',
+          'inline-flex items-center justify-center font-medium',
+          'active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:shadow-none',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background',
           variants[variant],
           sizeClasses,

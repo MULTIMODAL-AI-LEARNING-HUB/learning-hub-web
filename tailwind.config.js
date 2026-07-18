@@ -39,6 +39,10 @@ export default {
           DEFAULT: 'hsl(var(--destructive) / <alpha-value>)',
           foreground: 'hsl(var(--destructive-foreground) / <alpha-value>)'
         },
+        info: {
+          DEFAULT: 'hsl(var(--info) / <alpha-value>)',
+          foreground: 'hsl(var(--info-foreground) / <alpha-value>)'
+        },
         success: {
           DEFAULT: 'hsl(var(--success) / <alpha-value>)',
           foreground: 'hsl(var(--success-foreground) / <alpha-value>)'
@@ -65,9 +69,9 @@ export default {
         '2xs': ['0.6875rem', { lineHeight: '1rem' }]
       },
       boxShadow: {
-        soft: '0 1px 2px 0 hsl(var(--shadow) / 0.04), 0 1px 3px 0 hsl(var(--shadow) / 0.06)',
-        lift: '0 4px 6px -1px hsl(var(--shadow) / 0.06), 0 10px 25px -5px hsl(var(--shadow) / 0.10)',
-        glow: '0 0 0 1px hsl(var(--ring) / 0.15), 0 8px 24px -8px hsl(var(--ring) / 0.35)',
+        soft: '0 1px 2px 0 hsl(var(--shadow) / 0.05)',
+        lift: '0 12px 30px -18px hsl(var(--shadow) / 0.35), 0 2px 8px -6px hsl(var(--shadow) / 0.18)',
+        glow: '0 0 0 1px hsl(var(--ring) / 0.12), 0 12px 28px -18px hsl(var(--ring) / 0.4)',
         'glow-admin': '0 0 0 1px rgba(99, 102, 241, 0.15), 0 8px 24px -8px rgba(99, 102, 241, 0.35)',
         'glow-lecturer': '0 0 0 1px rgba(139, 92, 246, 0.15), 0 8px 24px -8px rgba(139, 92, 246, 0.35)',
         'glow-student': '0 0 0 1px rgba(59, 130, 246, 0.15), 0 8px 24px -8px rgba(59, 130, 246, 0.35)'

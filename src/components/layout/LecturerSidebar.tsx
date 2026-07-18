@@ -29,15 +29,15 @@ export function LecturerSidebar() {
         key={item.id}
         onClick={() => navigate(item.path)}
         className={cn(
-          'flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-left text-sm font-medium transition-all duration-200 group',
+          'flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-all duration-150 group',
           active
-            ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-soft shadow-violet-500/10'
+            ? 'bg-primary text-primary-foreground shadow-soft'
             : 'text-foreground/80 hover:bg-muted hover:text-foreground'
         )}
       >
-        <Icon className={cn("h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110", active ? "text-white" : "text-foreground/75")} />
+        <Icon className={cn("h-4 w-4 shrink-0", active ? "text-primary-foreground" : "text-muted-foreground")} />
         <span className="flex-1">{item.label}</span>
-        {active && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+        {active && <span className="h-1.5 w-1.5 rounded-full bg-primary-foreground" />}
       </button>
     )
   }
@@ -45,11 +45,11 @@ export function LecturerSidebar() {
   return (
     <div className="flex h-full flex-col gap-4 font-body">
       {/* Profile Card */}
-      <div className="flex items-center gap-3 p-3.5 rounded-2xl border border-violet-500/10 bg-gradient-to-br from-violet-500/5 to-purple-500/5 glow-lecturer">
+      <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/25 p-3">
         <Avatar fallback={user.initials} size="md" status="online" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
-          <p className="text-xs text-violet-500 font-medium capitalize">{user.role}</p>
+          <p className="text-xs text-muted-foreground font-medium capitalize">{user.role}</p>
         </div>
       </div>
 
@@ -57,13 +57,13 @@ export function LecturerSidebar() {
       <div className="flex-1 flex flex-col gap-4 overflow-y-auto scrollbar-thin">
         {/* Teaching section */}
         <div className="flex flex-col gap-1">
-          <span className="px-3.5 metadata-text font-semibold uppercase tracking-wider text-muted-foreground mb-1">Teaching</span>
+          <span className="px-3 text-xs font-medium text-muted-foreground mb-1">Teaching</span>
           {mainNavItems.map(renderNavButton)}
         </div>
 
         {/* Management & Setup section */}
         <div className="flex flex-col gap-1">
-          <span className="px-3.5 metadata-text font-semibold uppercase tracking-wider text-muted-foreground mb-1">Management</span>
+          <span className="px-3 text-xs font-medium text-muted-foreground mb-1">Management</span>
           {adminNavItems.map(renderNavButton)}
         </div>
 

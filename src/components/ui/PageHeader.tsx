@@ -32,16 +32,16 @@ export function PageHeader({
   return (
     <header className={cn(sizes[size], className)}>
       {breadcrumb && <div className="mb-3">{breadcrumb}</div>}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3 min-w-0">
           {icon && (
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary [&>svg]:h-5 [&>svg]:w-5">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary [&>svg]:h-5 [&>svg]:w-5">
               {icon}
             </div>
           )}
           <div className="min-w-0">
             {subtitle && (
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+              <p className="text-xs font-medium text-muted-foreground">
                 {subtitle}
               </p>
             )}

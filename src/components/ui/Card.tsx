@@ -37,10 +37,10 @@ export function Card({
   return (
     <div
       className={cn(
-        'rounded-2xl transition-all duration-200',
+        'rounded-xl transition-all duration-150',
         variants[variant],
         padding && paddings[padding],
-        interactive && 'cursor-pointer hover:shadow-lift hover:-translate-y-0.5 hover:border-primary/30',
+        interactive && 'cursor-pointer hover:shadow-lift hover:border-primary/30',
         className
       )}
       {...rest}
@@ -72,7 +72,7 @@ function CardBody({ className, children, ...rest }: HTMLAttributes<HTMLDivElemen
 function CardFooter({ className, children, ...rest }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('px-4 sm:px-5 py-3 border-t border-border bg-muted/30 rounded-b-2xl', className)}
+      className={cn('px-4 sm:px-5 py-3 border-t border-border bg-muted/30 rounded-b-xl', className)}
       {...rest}
     >
       {children}

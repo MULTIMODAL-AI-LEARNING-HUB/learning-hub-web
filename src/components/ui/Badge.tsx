@@ -8,12 +8,12 @@ interface BadgeProps {
 }
 
 const variants = {
-  default: 'bg-muted text-foreground/80',
-  primary: 'bg-primary/10 text-primary',
-  success: 'bg-success/10 text-success',
-  warning: 'bg-warning/10 text-warning',
-  error: 'bg-destructive/10 text-destructive',
-  info: 'bg-info/10 text-info',
+  default: 'bg-muted text-muted-foreground ring-1 ring-border',
+  primary: 'bg-primary/10 text-primary ring-1 ring-primary/20',
+  success: 'bg-success/10 text-success ring-1 ring-success/20',
+  warning: 'bg-warning/15 text-warning ring-1 ring-warning/25',
+  error: 'bg-destructive/10 text-destructive ring-1 ring-destructive/20',
+  info: 'bg-info/10 text-info ring-1 ring-info/20',
   outline: 'border border-border text-foreground/80 bg-transparent'
 }
 
@@ -31,7 +31,7 @@ export function Badge({ variant = 'default', label, dot = false, className = '' 
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+        'inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium',
         variants[variant],
         className
       )}

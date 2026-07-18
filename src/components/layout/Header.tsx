@@ -100,7 +100,7 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 mb-6 flex flex-col gap-3 rounded-2xl border border-border bg-surface-elevated/80 px-4 py-3 shadow-soft backdrop-blur-md lg:flex-row lg:items-center lg:justify-between font-body">
+      <header className="sticky top-0 z-30 mb-5 flex flex-col gap-3 rounded-xl border border-border bg-surface-elevated/90 px-3 py-3 shadow-soft backdrop-blur-md lg:flex-row lg:items-center lg:justify-between font-body">
         <div className="flex items-center gap-3 w-full lg:w-auto">
           <Button
             variant="ghost"
@@ -118,17 +118,12 @@ export function Header() {
 
           {/* Logo & Role Brand */}
           <div className="hidden sm:flex items-center gap-2 mr-2 shrink-0">
-            <div className={cn(
-              "flex h-8 w-8 items-center justify-center rounded-lg text-white shadow-sm bg-gradient-to-br",
-              role === 'admin' ? 'from-indigo-500 to-indigo-600' :
-              role === 'lecturer' ? 'from-violet-500 to-purple-600' :
-              'from-blue-500 to-cyan-500'
-            )}>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
               <Zap className="h-4.5 w-4.5 fill-current" />
             </div>
             <span className="text-sm font-bold text-foreground">Learning Hub</span>
             <span className={cn(
-              "text-3xs font-semibold px-2 py-0.5 rounded-full border uppercase tracking-wider",
+              "text-2xs font-medium px-2 py-0.5 rounded-full border",
               roleThemes.bg,
               roleThemes.text,
               roleThemes.border
@@ -140,7 +135,7 @@ export function Header() {
           <button
             onClick={() => setPaletteOpen(true)}
             className={cn(
-              'group flex h-9 w-full items-center gap-2.5 rounded-xl border border-input bg-surface px-3 text-sm text-muted-foreground transition',
+              'group flex h-9 w-full items-center gap-2.5 rounded-lg border border-input bg-surface px-3 text-sm text-muted-foreground transition',
               'hover:border-primary/30 hover:bg-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20',
               'lg:w-64'
             )}
@@ -203,7 +198,7 @@ export function Header() {
             menuClassName="w-56 p-1.5"
             trigger={
               <button
-                className="flex items-center gap-2 rounded-lg p-1 pr-2 hover:bg-muted transition"
+                className="flex items-center gap-2 rounded-md p-1 pr-2 hover:bg-muted transition"
                 aria-label="User menu"
               >
                 <Avatar fallback={user.initials} size="sm" />

@@ -5,35 +5,38 @@
 @layer base {
   :root {
     --background: 240 20% 99%;
-    --foreground: 240 10% 9%;
+    --foreground: 240 10% 8%;
 
-    --surface: 240 16% 97%;
+    --surface: 240 16% 98%;
     --surface-elevated: 0 0% 100%;
-    --surface-deep: 240 14% 94%;
+    --surface-deep: 240 12% 95%;
 
-    --muted: 240 12% 94%;
-    --muted-foreground: 240 6% 46%;
+    --muted: 240 10% 94%;
+    --muted-foreground: 240 5% 42%;
 
-    --primary: 244 75% 57%;
+    --primary: 243 75% 59%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 240 12% 94%;
     --secondary-foreground: 240 10% 18%;
 
-    --accent: 262 83% 58%;
+    --accent: 221 83% 53%;
     --accent-foreground: 0 0% 100%;
 
-    --success: 142 71% 45%;
+    --success: 151 65% 38%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --warning-foreground: 240 10% 9%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 12% 90%;
-    --input: 240 12% 90%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 240 10% 88%;
+    --input: 240 10% 88%;
     --ring: 244 75% 57%;
 
     --ink: 240 10% 9%;
@@ -44,23 +47,23 @@
   }
 
   .dark {
-    --background: 240 10% 6%;
+    --background: 240 10% 5%;
     --foreground: 0 0% 96%;
 
-    --surface: 240 9% 9%;
-    --surface-elevated: 240 8% 12%;
-    --surface-deep: 240 9% 14%;
+    --surface: 240 8% 8%;
+    --surface-elevated: 240 7% 11%;
+    --surface-deep: 240 7% 14%;
 
     --muted: 240 6% 14%;
     --muted-foreground: 240 5% 64%;
 
-    --primary: 244 75% 67%;
+    --primary: 243 75% 68%;
     --primary-foreground: 240 10% 9%;
 
     --secondary: 240 6% 16%;
     --secondary-foreground: 0 0% 96%;
 
-    --accent: 262 83% 70%;
+    --accent: 221 83% 67%;
     --accent-foreground: 240 10% 9%;
 
     --success: 142 71% 50%;
@@ -71,6 +74,9 @@
 
     --destructive: 0 72% 58%;
     --destructive-foreground: 0 0% 100%;
+
+    --info: 199 89% 58%;
+    --info-foreground: 240 10% 9%;
 
     --border: 240 6% 18%;
     --input: 240 6% 18%;
@@ -96,9 +102,10 @@
 
   body {
     background-color: hsl(var(--background));
+    background-image: linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--background)) 260px);
     color: hsl(var(--foreground));
     min-height: 100svh;
-    font-size: 1rem;
+    font-size: 0.9375rem;
     line-height: 1.5;
   }
 
@@ -116,10 +123,10 @@
 
 @layer components {
   .page-title {
-    font-size: clamp(1.5rem, 1.3rem + 0.75vw, 1.75rem);
+    font-size: clamp(1.5rem, 1.3rem + 0.75vw, 1.875rem);
     line-height: 1.25;
     font-weight: 700;
-    letter-spacing: -0.025em;
+    letter-spacing: 0;
   }
 
   .section-title {
@@ -148,19 +155,9 @@
     font-size: 0.75rem;
     line-height: 1.4;
   }
-  .gradient-mesh {
-    background-image:
-      radial-gradient(at 0% 0%, hsl(var(--primary) / 0.08) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsl(var(--accent) / 0.08) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsl(var(--primary) / 0.05) 0px, transparent 50%);
-  }
+  .gradient-mesh { background-image: linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--background)) 100%); }
 
-    .dark .gradient-mesh {
-    background-image:
-      radial-gradient(at 0% 0%, hsl(var(--primary) / 0.15) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsl(var(--accent) / 0.12) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsl(var(--primary) / 0.08) 0px, transparent 50%);
-  }
+  .dark .gradient-mesh { background-image: linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--background)) 100%); }
 
   .gradient-mesh-auth {
     background-image:
@@ -222,23 +219,23 @@
 
   /* Role Specific Glow Effects */
   .glow-admin {
-    box-shadow: 0 0 15px -3px rgba(99, 102, 241, 0.2), 0 0 6px -2px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.04), 0 12px 28px -20px hsl(var(--primary) / 0.45);
   }
   .glow-lecturer {
-    box-shadow: 0 0 15px -3px rgba(139, 92, 246, 0.2), 0 0 6px -2px rgba(139, 92, 246, 0.1);
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.04), 0 12px 28px -20px hsl(var(--primary) / 0.45);
   }
   .glow-student {
-    box-shadow: 0 0 15px -3px rgba(59, 130, 246, 0.2), 0 0 6px -2px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 1px 2px hsl(var(--shadow) / 0.04), 0 12px 28px -20px hsl(var(--accent) / 0.45);
   }
 
   /* Animated Gradient Text */
   .gradient-text-animated {
-    background: linear-gradient(to right, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--primary)));
+    background: linear-gradient(to right, hsl(var(--foreground)), hsl(var(--primary)));
     background-size: 200% auto;
     color: transparent;
     -webkit-background-clip: text;
     background-clip: text;
-    animation: shine 4s linear infinite;
+    animation: none;
   }
 
   @keyframes shine {
@@ -250,10 +247,10 @@
     position: absolute;
     border-radius: 50%;
     filter: blur(80px);
-    opacity: 0.15;
+    opacity: 0.08;
     z-index: 0;
     pointer-events: none;
-    animation: float 20s ease-in-out infinite;
+    animation: none;
   }
 
   .dark .orb {

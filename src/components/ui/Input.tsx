@@ -44,7 +44,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             onKeyDown={onKeyDown}
             disabled={disabled}
             className={cn(
-              'h-9 w-full rounded-lg border border-input bg-surface-elevated px-3 text-sm text-foreground',
+              'h-10 w-full rounded-md border border-input bg-surface-elevated px-3 text-sm text-foreground shadow-sm',
               'placeholder:text-muted-foreground/70 transition',
               'focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none',
               'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -116,7 +116,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, {
         disabled={disabled}
         rows={rows}
         className={cn(
-          'w-full rounded-lg border border-input bg-surface-elevated px-3 py-2.5 text-sm text-foreground',
+          'w-full rounded-md border border-input bg-surface-elevated px-3 py-2.5 text-sm text-foreground shadow-sm',
           'placeholder:text-muted-foreground/70 transition resize-none',
           'focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none',
           'disabled:opacity-50 disabled:cursor-not-allowed',

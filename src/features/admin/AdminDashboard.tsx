@@ -120,8 +120,7 @@ export function AdminDashboard() {
 
   return (
     <div className="space-y-6 font-body">
-      <div className="relative overflow-hidden rounded-2xl border border-indigo-500/10 bg-gradient-to-r from-indigo-500/5 via-transparent to-transparent p-6 glow-admin">
-        <div className="absolute right-0 top-0 h-32 w-32 bg-indigo-500/5 rounded-full blur-2xl" />
+      <div className="relative overflow-hidden rounded-xl border border-border bg-surface-elevated p-6 shadow-soft">
         <PageHeader
           subtitle="System Controls"
           title="Admin Dashboard"
@@ -136,7 +135,7 @@ export function AdminDashboard() {
               }}
               variant="outline"
               size="sm"
-              className="border-indigo-500/20 hover:bg-indigo-500/10 hover:text-indigo-600"
+              className="border-border hover:bg-muted"
               icon={<RefreshCw className="h-3.5 w-3.5" />}
             >
               Refresh Data
@@ -153,7 +152,7 @@ export function AdminDashboard() {
           icon={<Users className="text-indigo-600 dark:text-indigo-400" />}
           variant="primary"
           loading={loadingAnalytics}
-          className="border-indigo-500/10 bg-gradient-to-b from-indigo-500/5 to-transparent shadow-soft hover:shadow-indigo-500/10 hover:-translate-y-0.5 transition-all"
+          className="border-border bg-surface-elevated"
         />
         <StatCard
           label="Total Documents"
@@ -161,7 +160,7 @@ export function AdminDashboard() {
           icon={<FileText className="text-indigo-600 dark:text-indigo-400" />}
           variant="primary"
           loading={loadingAnalytics}
-          className="border-indigo-500/10 bg-gradient-to-b from-indigo-500/5 to-transparent shadow-soft hover:shadow-indigo-500/10 hover:-translate-y-0.5 transition-all"
+          className="border-border bg-surface-elevated"
         />
         <StatCard
           label="Ready Documents"
@@ -169,7 +168,7 @@ export function AdminDashboard() {
           icon={<CheckCircle2 className="text-emerald-500" />}
           variant="success"
           loading={loadingAnalytics}
-          className="border-emerald-500/10 hover:shadow-emerald-500/10 hover:-translate-y-0.5 transition-all"
+          className="border-border bg-surface-elevated"
         />
         <StatCard
           label="Processing"
@@ -177,12 +176,12 @@ export function AdminDashboard() {
           icon={<Clock className="text-amber-500" />}
           variant="warning"
           loading={loadingAnalytics}
-          className="border-amber-500/10 hover:shadow-amber-500/10 hover:-translate-y-0.5 transition-all"
+          className="border-border bg-surface-elevated"
         />
       </div>
 
       {/* Services Health */}
-      <Card className="border-indigo-500/10 shadow-soft bg-surface-elevated/40 backdrop-blur-md">
+      <Card className="border-border shadow-soft bg-surface-elevated">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div>
             <h2 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">
@@ -235,7 +234,7 @@ export function AdminDashboard() {
       </Card>
 
       {/* User Management */}
-      <Card className="border-indigo-500/10 shadow-soft bg-surface-elevated/40 backdrop-blur-md">
+      <Card className="border-border shadow-soft bg-surface-elevated">
         <div className="flex flex-col gap-3 border-b border-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">User Directory</h2>

@@ -61,7 +61,7 @@ export function SkeletonText({ lines = 3, className }: { lines?: number; classNa
 
 export function SkeletonCard({ children }: { children?: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface-elevated p-5 space-y-3">
+    <div className="rounded-xl border border-border bg-surface-elevated p-5 space-y-3">
       <Skeleton variant="rounded" height={120} />
       {children ?? (
         <>
