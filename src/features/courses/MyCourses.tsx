@@ -10,9 +10,9 @@ import { EmptyState } from '../../components/ui/EmptyState'
 import { Input } from '../../components/ui/Input'
 import { Progress } from '../../components/ui/Progress'
 import { Skeleton } from '../../components/ui/Skeleton'
-import { Tabs } from '../../components/ui/Tabs'
 
 type CourseFilter = 'all' | 'not-started' | 'in-progress' | 'completed'
+type CourseSort = 'recent' | 'progress-desc' | 'progress-asc' | 'title'
 
 function formatDate(dateStr: string | null) {
   if (!dateStr) return 'No date'
@@ -42,6 +42,7 @@ export function MyCourses() {
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
   const [activeTab, setActiveTab] = useState<CourseFilter>('all')
+  const [sortBy, setSortBy] = useState<CourseSort>('recent')
 
   const loadEnrollments = useCallback(async () => {
     setLoading(true)
@@ -76,10 +77,22 @@ export function MyCourses() {
     }
   }, [enrollments])
 
+  const continueEnrollment = useMemo(() => {
+    return [...enrollments]
+      .filter((item) => getEnrollmentState(item) !== 'completed')
+      .sort((a, b) => {
+        const aProgress = getCourseProgress(a)
+        const bProgress = getCourseProgress(b)
+        if (aProgress === 0 && bProgress > 0) return 1
+        if (bProgress === 0 && aProgress > 0) return -1
+        return bProgress - aProgress
+      })[0]
+  }, [enrollments])
+
   const filteredEnrollments = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
 
-    return enrollments.filter((enrollment) => {
+    const filtered = enrollments.filter((enrollment) => {
       const matchesTab = activeTab === 'all' || getEnrollmentState(enrollment) === activeTab
       const matchesQuery = !normalizedQuery || [
         getCourseTitle(enrollment),
@@ -89,7 +102,14 @@ export function MyCourses() {
 
       return matchesTab && matchesQuery
     })
-  }, [activeTab, enrollments, query])
+
+    return filtered.sort((a, b) => {
+      if (sortBy === 'progress-desc') return getCourseProgress(b) - getCourseProgress(a)
+      if (sortBy === 'progress-asc') return getCourseProgress(a) - getCourseProgress(b)
+      if (sortBy === 'title') return getCourseTitle(a).localeCompare(getCourseTitle(b))
+      return new Date(b.enrolled_at).getTime() - new Date(a.enrolled_at).getTime()
+    })
+  }, [activeTab, enrollments, query, sortBy])
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -115,26 +135,37 @@ export function MyCourses() {
         <Metric icon={<GraduationCap />} label="Average progress" value={`${counts.avgProgress}%`} />
       </div>
 
+      {!loading && continueEnrollment && (
+        <ContinueLearningHero enrollment={continueEnrollment} />
+      )}
+
       <Card padding="none" className="overflow-hidden">
-        <div className="flex flex-col gap-3 border-b border-border p-4 lg:flex-row lg:items-center lg:justify-between">
-          <Tabs
-            activeTab={activeTab}
-            onChange={(id) => setActiveTab(id as CourseFilter)}
-            tabs={[
-              { id: 'all', label: `All (${counts.all})` },
-              { id: 'not-started', label: `Not started (${counts.notStarted})` },
-              { id: 'in-progress', label: `In progress (${counts.inProgress})` },
-              { id: 'completed', label: `Completed (${counts.completed})` },
-            ]}
-          />
-          <Input
-            value={query}
-            onChange={setQuery}
-            placeholder="Search your courses..."
-            prefixIcon={<Search className="h-4 w-4" />}
-            aria-label="Search enrolled courses"
-            className="lg:w-80"
-          />
+        <div className="border-b border-border p-4">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+            <FilterPills activeTab={activeTab} counts={counts} onChange={setActiveTab} />
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Input
+                value={query}
+                onChange={setQuery}
+                placeholder="Search your courses..."
+                prefixIcon={<Search className="h-4 w-4" />}
+                aria-label="Search enrolled courses"
+                className="sm:w-80"
+              />
+              <label className="sr-only" htmlFor="course-sort">Sort courses</label>
+              <select
+                id="course-sort"
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value as CourseSort)}
+                className="h-10 rounded-md border border-input bg-surface-elevated px-3 text-sm text-foreground shadow-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              >
+                <option value="recent">Recently enrolled</option>
+                <option value="progress-desc">Progress: high to low</option>
+                <option value="progress-asc">Progress: low to high</option>
+                <option value="title">Course title</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         {loading ? (
@@ -192,6 +223,94 @@ function Metric({ icon, label, value }: { icon: ReactNode; label: string; value:
         </div>
       </div>
       <p className="mt-2 text-2xl font-semibold text-foreground tabular-nums">{value}</p>
+    </Card>
+  )
+}
+
+function FilterPills({
+  activeTab,
+  counts,
+  onChange,
+}: {
+  activeTab: CourseFilter
+  counts: { all: number; notStarted: number; inProgress: number; completed: number; avgProgress: number }
+  onChange: (filter: CourseFilter) => void
+}) {
+  const filters: Array<{ id: CourseFilter; label: string; count: number }> = [
+    { id: 'all', label: 'All', count: counts.all },
+    { id: 'not-started', label: 'Not started', count: counts.notStarted },
+    { id: 'in-progress', label: 'In progress', count: counts.inProgress },
+    { id: 'completed', label: 'Completed', count: counts.completed },
+  ]
+
+  return (
+    <div className="overflow-x-auto">
+      <div className="inline-flex min-w-max items-center gap-1 rounded-xl border border-border bg-muted/35 p-1">
+        {filters.map((filter) => {
+          const active = activeTab === filter.id
+          return (
+            <button
+              key={filter.id}
+              onClick={() => onChange(filter.id)}
+              className={[
+                'inline-flex h-9 items-center gap-2 whitespace-nowrap rounded-lg px-3 text-sm font-medium transition',
+                active
+                  ? 'bg-surface-elevated text-foreground shadow-soft'
+                  : 'text-muted-foreground hover:bg-surface-elevated/70 hover:text-foreground',
+              ].join(' ')}
+            >
+              <span>{filter.label}</span>
+              <span
+                className={[
+                  'inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular-nums',
+                  active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground',
+                ].join(' ')}
+              >
+                {filter.count}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function ContinueLearningHero({ enrollment }: { enrollment: Enrollment }) {
+  const progress = getCourseProgress(enrollment)
+  const title = getCourseTitle(enrollment)
+  const thumbnail = enrollment.course?.thumbnail_url || enrollment.course_thumbnail
+
+  return (
+    <Card padding="responsive" className="overflow-hidden border-primary/20 bg-primary/5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex min-w-0 gap-4">
+          <div className="hidden h-20 w-28 shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-primary/15 to-accent/15 sm:flex sm:items-center sm:justify-center">
+            {thumbnail ? (
+              <img src={thumbnail} alt={title} className="h-full w-full object-cover" />
+            ) : (
+              <PlayCircle className="h-8 w-8 text-primary" />
+            )}
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Continue learning</p>
+            <h2 className="mt-1 line-clamp-2 text-lg font-semibold text-foreground">{title}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Pick up from your current course and keep your momentum.</p>
+            <div className="mt-3 max-w-md">
+              <div className="mb-1 flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">Progress</span>
+                <span className="font-medium text-foreground">{progress}%</span>
+              </div>
+              <Progress value={progress} />
+            </div>
+          </div>
+        </div>
+        <Link to={`/app/student/courses/${enrollment.course_id}/learn`} className="shrink-0">
+          <Button iconRight={<ArrowRight className="h-4 w-4" />} fullWidthMobile>
+            {progress === 0 ? 'Start learning' : 'Continue'}
+          </Button>
+        </Link>
+      </div>
     </Card>
   )
 }

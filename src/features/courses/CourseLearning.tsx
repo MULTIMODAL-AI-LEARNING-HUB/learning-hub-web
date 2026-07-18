@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -10,6 +10,8 @@ import {
   Menu,
   MessageSquare,
   PlayCircle,
+  Sparkles,
+  StickyNote,
   X,
 } from 'lucide-react'
 import {
@@ -36,6 +38,7 @@ import { CourseChatPanel } from './CourseChatPanel'
 type LearningItem =
   | { kind: 'lesson'; id: string; sectionId: string; title: string; description: string | null; lesson: Lesson }
   | { kind: 'material'; id: string; sectionId: 'materials'; title: string; description: string | null; material: CourseMaterial }
+type WorkspaceTab = 'learn' | 'discussion' | 'resources' | 'ai' | 'notes'
 
 interface LearningSection {
   id: string
@@ -71,6 +74,7 @@ export function CourseLearning() {
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<WorkspaceTab>('learn')
 
   const loadData = useCallback(async () => {
     if (!id) return
@@ -218,6 +222,7 @@ export function CourseLearning() {
   const completedMaterials = Array.from(progress.values()).filter((item) => item.completed || item.completion_percent >= 100).length
   const totalMaterials = course?.materials?.length || 0
   const overallProgress = Math.round(enrollment?.progress_percent || 0)
+  const currentLesson = currentItem?.kind === 'lesson' ? (currentLessonDetail || currentItem.lesson) : null
 
   if (loading) {
     return (
@@ -344,31 +349,45 @@ export function CourseLearning() {
               {currentItem.kind === 'material' ? (
                 <MaterialViewer item={currentItem.material} onVideoEnded={markCurrentComplete} />
               ) : (
-                <LessonViewer lesson={currentLessonDetail || currentItem.lesson} />
+                <LessonViewer lesson={currentLesson || currentItem.lesson} />
               )}
 
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex gap-2">
-                  <Button variant="outline" disabled={!previousItem} onClick={() => goToItem(previousItem)}>
-                    Previous
-                  </Button>
-                  <Button variant="outline" disabled={!nextItem} onClick={() => goToItem(nextItem)}>
-                    Next
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Link to={`/app/student/chat?course_id=${id}`}>
-                    <Button variant="outline" icon={<MessageSquare className="h-4 w-4" />}>
-                      Ask AI Tutor
-                    </Button>
-                  </Link>
-                  <Link to={`/app/student/quiz?course_id=${id}`}>
-                    <Button variant="outline">Generate Quiz</Button>
-                  </Link>
-                </div>
-              </div>
+              <Card padding="none" className="overflow-hidden">
+                <WorkspaceTabs activeTab={activeWorkspaceTab} onChange={setActiveWorkspaceTab} />
+                <div className="p-4">
+                  {activeWorkspaceTab === 'learn' && (
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex gap-2">
+                        <Button variant="outline" disabled={!previousItem} onClick={() => goToItem(previousItem)}>
+                          Previous
+                        </Button>
+                        <Button variant="outline" disabled={!nextItem} onClick={() => goToItem(nextItem)}>
+                          Next
+                        </Button>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {currentIndex + 1} of {flatItems.length} learning items
+                      </div>
+                    </div>
+                  )}
 
-              <CourseChatPanel courseId={course.id} compact />
+                  {activeWorkspaceTab === 'discussion' && (
+                    <CourseChatPanel courseId={course.id} compact />
+                  )}
+
+                  {activeWorkspaceTab === 'resources' && (
+                    <ResourcesPanel item={currentItem} lesson={currentLesson} />
+                  )}
+
+                  {activeWorkspaceTab === 'ai' && (
+                    <AiTutorPanel courseId={id} />
+                  )}
+
+                  {activeWorkspaceTab === 'notes' && (
+                    <NotesPanel />
+                  )}
+                </div>
+              </Card>
             </>
           ) : (
             <EmptyState
@@ -426,6 +445,131 @@ function CurriculumButton({
         </div>
       </div>
     </button>
+  )
+}
+
+function WorkspaceTabs({ activeTab, onChange }: { activeTab: WorkspaceTab; onChange: (tab: WorkspaceTab) => void }) {
+  const tabs: Array<{ id: WorkspaceTab; label: string; icon: ReactNode }> = [
+    { id: 'learn', label: 'Learn', icon: <BookOpen /> },
+    { id: 'discussion', label: 'Discussion', icon: <MessageSquare /> },
+    { id: 'resources', label: 'Resources', icon: <FileText /> },
+    { id: 'ai', label: 'AI Tutor', icon: <Sparkles /> },
+    { id: 'notes', label: 'Notes', icon: <StickyNote /> },
+  ]
+
+  return (
+    <div className="overflow-x-auto border-b border-border bg-muted/20 p-2">
+      <div className="inline-flex min-w-max gap-1">
+        {tabs.map((tab) => {
+          const active = activeTab === tab.id
+          return (
+            <button
+              key={tab.id}
+              onClick={() => onChange(tab.id)}
+              className={cn(
+                'inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-medium transition [&>svg]:h-4 [&>svg]:w-4',
+                active
+                  ? 'bg-surface-elevated text-foreground shadow-soft'
+                  : 'text-muted-foreground hover:bg-surface-elevated/70 hover:text-foreground'
+              )}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function ResourcesPanel({ item, lesson }: { item: LearningItem; lesson: Lesson | null }) {
+  const attachments = lesson?.attachments || []
+
+  if (item.kind === 'material') {
+    const resourceUrl = item.material.external_url || item.material.file_url
+    return (
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold text-foreground">Current material</h3>
+        <div className="rounded-lg border border-border p-4">
+          <p className="font-medium text-foreground">{item.title}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{materialTypeLabel(item.material.material_type)}</p>
+          {resourceUrl ? (
+            <a href={resourceUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex">
+              <Button variant="outline" size="sm">Open resource</Button>
+            </a>
+          ) : (
+            <p className="mt-3 text-sm text-muted-foreground">No downloadable resource is attached.</p>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  if (attachments.length === 0) {
+    return (
+      <EmptyState
+        compact
+        icon={<FileText />}
+        title="No resources for this lesson"
+        description="Lesson attachments and downloadable resources will appear here."
+      />
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold text-foreground">Lesson resources</h3>
+      <div className="grid gap-2">
+        {attachments.map((attachment) => (
+          <a
+            key={attachment.id}
+            href={attachment.file_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between rounded-lg border border-border p-3 text-sm transition hover:bg-muted/60"
+          >
+            <span className="font-medium text-foreground">{attachment.file_name}</span>
+            <span className="text-xs text-muted-foreground">Open</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function AiTutorPanel({ courseId }: { courseId: string | undefined }) {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      <Card padding="responsive" variant="outlined">
+        <Sparkles className="h-5 w-5 text-primary" />
+        <h3 className="mt-3 font-semibold text-foreground">Ask about this course</h3>
+        <p className="mt-1 text-sm text-muted-foreground">Open the AI tutor with this course context and ask for explanations, summaries, or practice ideas.</p>
+        <Link to={`/app/student/chat?course_id=${courseId}`} className="mt-4 inline-flex">
+          <Button size="sm">Open AI Tutor</Button>
+        </Link>
+      </Card>
+      <Card padding="responsive" variant="outlined">
+        <ListChecks className="h-5 w-5 text-primary" />
+        <h3 className="mt-3 font-semibold text-foreground">Generate practice quiz</h3>
+        <p className="mt-1 text-sm text-muted-foreground">Create a quiz from course context to check understanding after a lesson.</p>
+        <Link to={`/app/student/quiz?course_id=${courseId}`} className="mt-4 inline-flex">
+          <Button size="sm" variant="outline">Generate Quiz</Button>
+        </Link>
+      </Card>
+    </div>
+  )
+}
+
+function NotesPanel() {
+  return (
+    <EmptyState
+      compact
+      icon={<StickyNote />}
+      title="Lesson notes are not connected yet"
+      description="The note-taking UI is planned, but it needs a notes API before saving real student notes."
+      action={<Button variant="outline" disabled>Coming soon</Button>}
+    />
   )
 }
 
