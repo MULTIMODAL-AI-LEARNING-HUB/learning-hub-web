@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, BookOpen, FileText, MessageSquare, BookOpen as QuizIcon, Layers, User, LogOut, Compass, Heart, GraduationCap, Award } from 'lucide-react'
+import { Home, BookOpen, FileText, MessageSquare, BookOpen as QuizIcon, Layers, User, LogOut, Compass, Heart, GraduationCap, Award, MessagesSquare } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { Avatar } from '../ui/Avatar'
 import { cn } from '../../utils/cn'
@@ -9,6 +9,7 @@ const mainNavItems = [
   { id: 'browse', label: 'Browse Courses', icon: Compass, path: '/app/student/browse' },
   { id: 'courses', label: 'My Courses', icon: BookOpen, path: '/app/student/courses' },
   { id: 'wishlist', label: 'Wishlist', icon: Heart, path: '/app/student/wishlist' },
+  { id: 'friends-chat', label: 'Friends Chat', icon: MessagesSquare, path: '/app/student/friends-chat' },
 ]
 
 const toolNavItems = [

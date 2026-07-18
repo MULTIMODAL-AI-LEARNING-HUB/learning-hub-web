@@ -32,6 +32,7 @@ import { CourseDetail as StudentCourseDetail } from '../features/courses/CourseD
 import { CourseCatalog } from '../features/courses/CourseCatalog'
 import { CourseLearning } from '../features/courses/CourseLearning'
 import { StudentWishlist } from '../features/student/StudentWishlist'
+import { StudentSocialChat } from '../features/student/StudentSocialChat'
 import { LecturerStudents } from '../features/lecturer/LecturerStudents'
 import { LecturerAnalytics } from '../features/lecturer/LecturerAnalytics'
 import { LecturerDocuments } from '../features/lecturer/LecturerDocuments'
@@ -64,6 +65,7 @@ export const router = createBrowserRouter([
       { path: 'courses/:id/learn', element: <CourseLearning /> },
       { path: 'browse', element: <CourseCatalog /> },
       { path: 'wishlist', element: <StudentWishlist /> },
+      { path: 'friends-chat', element: <StudentSocialChat /> },
       { path: 'documents', element: <DocumentHub /> },
       { path: 'chat', element: <ChatPanel /> },
       { path: 'quiz', element: <QuizGenerator /> },
