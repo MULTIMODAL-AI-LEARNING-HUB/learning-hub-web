@@ -9,6 +9,7 @@ import { Badge } from '../../components/ui/Badge'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { Progress } from '../../components/ui/Progress'
 import { cn } from '../../utils/cn'
+import { CourseChatPanel } from './CourseChatPanel'
 
 export function CourseLearning() {
   const { id } = useParams<{ id: string }>()
@@ -320,6 +321,10 @@ export function CourseLearning() {
                 </Link>
               </div>
             </Card>
+
+            <div className="mt-6">
+              <CourseChatPanel courseId={course.id} compact />
+            </div>
           </div>
         ) : (
           <div className="text-center py-12">

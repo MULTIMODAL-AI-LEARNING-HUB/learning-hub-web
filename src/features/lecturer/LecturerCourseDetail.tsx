@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Edit, Users, BarChart3, BookOpen, Star, DollarSign, TrendingUp } from 'lucide-react'
+import { ArrowLeft, Edit, Users, BarChart3, BookOpen, Star, DollarSign, TrendingUp, ClipboardCheck } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { Card } from '../../components/ui/Card'
@@ -8,8 +8,9 @@ import { coursesApi } from '../../services/api'
 import type { Course } from '../../services/api'
 import { CourseContentManager } from './CourseContentManager'
 import { ReviewsManager } from './ReviewsManager'
+import { CourseChatPanel } from '../courses/CourseChatPanel'
 
-type Tab = 'content' | 'reviews' | 'students' | 'analytics'
+type Tab = 'content' | 'chat' | 'grading' | 'reviews' | 'students' | 'analytics'
 
 interface CourseAnalytics {
   total_students: number
@@ -71,6 +72,8 @@ export function LecturerCourseDetail() {
 
   const tabs = [
     { id: 'content' as Tab, label: 'Content' },
+    { id: 'chat' as Tab, label: 'Chat' },
+    { id: 'grading' as Tab, label: 'To Grade' },
     { id: 'reviews' as Tab, label: 'Reviews' },
     { id: 'students' as Tab, label: 'Students' },
     { id: 'analytics' as Tab, label: 'Analytics' },
@@ -114,6 +117,20 @@ export function LecturerCourseDetail() {
 
       <div>
         {activeTab === 'content' && <CourseContentManager course={course} />}
+        {activeTab === 'chat' && <CourseChatPanel courseId={course.id} />}
+        {activeTab === 'grading' && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <ClipboardCheck className="h-5 w-5 text-accent" />
+              To Grade
+            </h2>
+            <Card className="p-8 text-center">
+              <ClipboardCheck className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">Course submissions</h3>
+              <p className="text-muted-foreground">Assignment submissions for this course will appear here.</p>
+            </Card>
+          </div>
+        )}
         {activeTab === 'reviews' && <ReviewsManager courseId={course.id} />}
         {activeTab === 'students' && (
           <div className="space-y-4">

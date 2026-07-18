@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, BookOpen, Users, BarChart3, FileText, Settings, User, LogOut, ClipboardCheck } from 'lucide-react'
+import { Home, BookOpen, Users, BarChart3, FileText, Settings, User, LogOut } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { Avatar } from '../ui/Avatar'
 import { cn } from '../../utils/cn'
@@ -7,7 +7,6 @@ import { cn } from '../../utils/cn'
 const mainNavItems = [
   { id: 'dashboard', label: 'Overview', icon: Home, path: '/app/lecturer/dashboard' },
   { id: 'courses', label: 'Courses', icon: BookOpen, path: '/app/lecturer/courses' },
-  { id: 'grading', label: 'To Grade', icon: ClipboardCheck, path: '/app/lecturer/courses' },
   { id: 'students', label: 'Students', icon: Users, path: '/app/lecturer/students' },
 ]
 
@@ -23,7 +22,7 @@ export function LecturerSidebar() {
   const logout = useAppStore((s) => s.auth.logout)
 
   const renderNavButton = (item: typeof mainNavItems[0]) => {
-    const active = item.id !== 'grading' && location.pathname.startsWith(item.path)
+    const active = location.pathname.startsWith(item.path)
     const Icon = item.icon
     return (
       <button

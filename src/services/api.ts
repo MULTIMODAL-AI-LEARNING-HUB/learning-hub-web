@@ -161,6 +161,22 @@ export interface ChatAskResponse {
   token_usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number }
 }
 
+export interface CourseChatSender {
+  id: string
+  full_name: string | null
+  avatar_url: string | null
+  role: string
+}
+
+export interface CourseChatMessage {
+  id: string
+  course_id: string
+  sender: CourseChatSender
+  content: string
+  created_at: string
+  is_mine: boolean
+}
+
 export interface Category {
   id: string
   name: string
@@ -764,6 +780,15 @@ export const chatApi = {
     api.get<{ items: ChatMessage[]; total: number }>(`/chat/sessions/${sessionId}/messages`, {
       params: { page, page_size: pageSize },
     }),
+}
+
+export const courseChatApi = {
+  listMessages: (courseId: string, limit = 50, before?: string) =>
+    api.get<{ items: CourseChatMessage[]; total: number }>(`/courses/${courseId}/chat/messages`, {
+      params: { limit, before },
+    }),
+  sendMessage: (courseId: string, content: string) =>
+    api.post<CourseChatMessage>(`/courses/${courseId}/chat/messages`, { content }),
 }
 
 export const studyApi = {
