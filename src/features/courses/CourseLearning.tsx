@@ -1,23 +1,73 @@
-import { useState, useEffect, useCallback } from 'react'
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useParams, useSearchParams, Link } from 'react-router-dom'
-import { Menu, X } from 'lucide-react'
-import { coursesApi, enrollmentsApi, type Course, type Enrollment, type MaterialProgress } from '../../services/api'
-import { Card } from '../../components/ui/Card'
-import { Button } from '../../components/ui/Button'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
+import {
+  ArrowLeft,
+  BookOpen,
+  CheckCircle2,
+  FileText,
+  ListChecks,
+  Menu,
+  MessageSquare,
+  PlayCircle,
+  X,
+} from 'lucide-react'
+import {
+  coursesApi,
+  enrollmentsApi,
+  lessonsApi,
+  sectionsApi,
+  type Course,
+  type CourseMaterial,
+  type Enrollment,
+  type Lesson,
+  type MaterialProgress,
+  type Section,
+} from '../../services/api'
 import { Badge } from '../../components/ui/Badge'
-import { Skeleton } from '../../components/ui/Skeleton'
+import { Button } from '../../components/ui/Button'
+import { Card } from '../../components/ui/Card'
+import { EmptyState } from '../../components/ui/EmptyState'
 import { Progress } from '../../components/ui/Progress'
+import { Skeleton } from '../../components/ui/Skeleton'
 import { cn } from '../../utils/cn'
 import { CourseChatPanel } from './CourseChatPanel'
+
+type LearningItem =
+  | { kind: 'lesson'; id: string; sectionId: string; title: string; description: string | null; lesson: Lesson }
+  | { kind: 'material'; id: string; sectionId: 'materials'; title: string; description: string | null; material: CourseMaterial }
+
+interface LearningSection {
+  id: string
+  title: string
+  description: string | null
+  items: LearningItem[]
+}
+
+function itemKey(item: LearningItem) {
+  return `${item.kind}:${item.id}`
+}
+
+function formatDuration(seconds: number | null | undefined) {
+  if (!seconds) return null
+  const mins = Math.max(1, Math.round(seconds / 60))
+  return `${mins} min`
+}
+
+function materialTypeLabel(type: string) {
+  if (!type) return 'Resource'
+  return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()
+}
 
 export function CourseLearning() {
   const { id } = useParams<{ id: string }>()
   const [searchParams, setSearchParams] = useSearchParams()
   const [course, setCourse] = useState<Course | null>(null)
+  const [sections, setSections] = useState<Section[]>([])
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null)
   const [progress, setProgress] = useState<Map<string, MaterialProgress>>(new Map())
-  const [currentMaterialId, setCurrentMaterialId] = useState<string | null>(null)
+  const [currentItemKey, setCurrentItemKey] = useState<string | null>(null)
+  const [currentLessonDetail, setCurrentLessonDetail] = useState<Lesson | null>(null)
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -26,24 +76,30 @@ export function CourseLearning() {
     if (!id) return
     setLoading(true)
     try {
-      const [courseRes, enrollRes] = await Promise.all([
+      const [courseRes, sectionsRes, enrollRes] = await Promise.all([
         coursesApi.get(id),
-        enrollmentsApi.list({ status: 'active' }).catch(() => ({ data: { items: [] } }))
+        sectionsApi.list(id).catch(() => ({ data: [] as Section[] })),
+        enrollmentsApi.list({ status: 'active' }).catch(() => ({ data: { items: [] as Enrollment[] } })),
       ])
+
       setCourse(courseRes.data)
-      const userEnrollment = enrollRes.data.items.find((e: Enrollment) => e.course_id === id)
+      setSections(sectionsRes.data)
+
+      const userEnrollment = enrollRes.data.items.find((item: Enrollment) => item.course_id === id)
       if (userEnrollment) {
         setEnrollment(userEnrollment)
-        const progressRes = await enrollmentsApi.getProgress(userEnrollment.id)
-        setEnrollment(prev => prev ? { ...prev, progress_percent: progressRes.data.completion_percent } : null)
-        const progressMap = new Map<string, MaterialProgress>()
-        progressRes.data.materials.forEach(mp => {
-          progressMap.set(mp.material_id, { ...mp } as MaterialProgress)
-        })
-        setProgress(progressMap)
+        const progressRes = await enrollmentsApi.getProgress(userEnrollment.id).catch(() => null)
+        if (progressRes) {
+          setEnrollment((prev) => prev ? { ...prev, progress_percent: progressRes.data.completion_percent } : null)
+          const nextProgress = new Map<string, MaterialProgress>()
+          progressRes.data.materials.forEach((item) => {
+            nextProgress.set(item.material_id, { ...item } as MaterialProgress)
+          })
+          setProgress(nextProgress)
+        }
       }
     } catch (err) {
-      console.error('Failed to load course:', err)
+      console.error('Failed to load course learning workspace:', err)
     } finally {
       setLoading(false)
     }
@@ -53,285 +109,415 @@ export function CourseLearning() {
     loadData()
   }, [loadData])
 
-  useEffect(() => {
-    const materialIdFromParams = searchParams.get('material')
-    if (materialIdFromParams && course?.materials) {
-      setCurrentMaterialId(materialIdFromParams)
-    } else if (course?.materials?.length && !currentMaterialId) {
-      setCurrentMaterialId(course.materials[0].id)
-    }
-  }, [course, searchParams, currentMaterialId])
+  const learningSections = useMemo<LearningSection[]>(() => {
+    const sectionGroups: LearningSection[] = sections.map((section) => ({
+      id: section.id,
+      title: section.title,
+      description: section.description,
+      items: (section.lessons || []).map((lesson) => ({
+        kind: 'lesson' as const,
+        id: lesson.id,
+        sectionId: section.id,
+        title: lesson.title,
+        description: lesson.description,
+        lesson,
+      })),
+    })).filter((section) => section.items.length > 0)
 
-  const updateProgress = useCallback(async (materialId: string, data: {
-    completed?: boolean
-    completion_percent?: number
-    last_position?: Record<string, unknown>
-  }) => {
+    const materialItems = (course?.materials || []).map((material) => ({
+      kind: 'material' as const,
+      id: material.id,
+      sectionId: 'materials' as const,
+      title: material.title || material.file_name || 'Untitled material',
+      description: material.file_name,
+      material,
+    }))
+
+    if (materialItems.length > 0) {
+      sectionGroups.push({
+        id: 'materials',
+        title: sectionGroups.length > 0 ? 'Additional Materials' : 'Course Materials',
+        description: 'Downloadable or embedded resources provided by the lecturer.',
+        items: materialItems,
+      })
+    }
+
+    return sectionGroups
+  }, [course?.materials, sections])
+
+  const flatItems = useMemo(() => learningSections.flatMap((section) => section.items), [learningSections])
+  const currentItem = flatItems.find((item) => itemKey(item) === currentItemKey) || flatItems[0]
+  const currentIndex = currentItem ? flatItems.findIndex((item) => itemKey(item) === itemKey(currentItem)) : -1
+  const previousItem = currentIndex > 0 ? flatItems[currentIndex - 1] : null
+  const nextItem = currentIndex >= 0 && currentIndex < flatItems.length - 1 ? flatItems[currentIndex + 1] : null
+
+  useEffect(() => {
+    if (flatItems.length === 0) return
+    const itemFromParams = searchParams.get('item')
+    const legacyMaterialId = searchParams.get('material')
+    const nextKey = itemFromParams || (legacyMaterialId ? `material:${legacyMaterialId}` : itemKey(flatItems[0]))
+    if (flatItems.some((item) => itemKey(item) === nextKey)) {
+      setCurrentItemKey(nextKey)
+    } else {
+      setCurrentItemKey(itemKey(flatItems[0]))
+    }
+  }, [flatItems, searchParams])
+
+  useEffect(() => {
+    if (!currentItem || currentItem.kind !== 'lesson') {
+      setCurrentLessonDetail(null)
+      return
+    }
+
+    let cancelled = false
+    lessonsApi.get(currentItem.sectionId, currentItem.id)
+      .then((res) => {
+        if (!cancelled) setCurrentLessonDetail(res.data)
+      })
+      .catch(() => {
+        if (!cancelled) setCurrentLessonDetail(currentItem.lesson)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [currentItem])
+
+  const goToItem = (item: LearningItem | null) => {
+    if (!item) return
+    const nextKey = itemKey(item)
+    setCurrentItemKey(nextKey)
+    setSearchParams({ item: nextKey })
+    setSidebarOpen(false)
+  }
+
+  const updateMaterialProgress = useCallback(async (materialId: string, completionPercent: number) => {
     if (!enrollment) return
     setUpdating(true)
     try {
-      await enrollmentsApi.updateProgress(enrollment.id, materialId, { completion_percent: data.completion_percent, last_position: data.last_position })
+      await enrollmentsApi.updateProgress(enrollment.id, materialId, { completion_percent: completionPercent })
       const progressRes = await enrollmentsApi.getProgress(enrollment.id)
-      setEnrollment(prev => prev ? { ...prev, progress_percent: progressRes.data.completion_percent } : prev)
-      if (data.completed) {
-        setProgress(prev => {
-          const newMap = new Map(prev)
-          newMap.set(materialId, {
-            id: materialId,
-            enrollment_id: enrollment.id,
-            material_id: materialId,
-            completed: true,
-            completion_percent: 100,
-            last_position: null,
-            completed_at: new Date().toISOString()
-          } as MaterialProgress)
-          return newMap
-        })
-      }
+      setEnrollment((prev) => prev ? { ...prev, progress_percent: progressRes.data.completion_percent } : prev)
+      const nextProgress = new Map<string, MaterialProgress>()
+      progressRes.data.materials.forEach((item) => {
+        nextProgress.set(item.material_id, { ...item } as MaterialProgress)
+      })
+      setProgress(nextProgress)
     } catch (err) {
-      console.error('Failed to update progress:', err)
+      console.error('Failed to update material progress:', err)
     } finally {
       setUpdating(false)
     }
   }, [enrollment])
 
-  const currentMaterial = course?.materials?.find(m => m.id === currentMaterialId)
-
-  const markComplete = async () => {
-    if (!currentMaterialId) return
-    await updateProgress(currentMaterialId, { completed: true, completion_percent: 100 })
+  const markCurrentComplete = async () => {
+    if (!currentItem || currentItem.kind !== 'material') return
+    await updateMaterialProgress(currentItem.id, 100)
   }
 
-  const goToMaterial = (materialId: string) => {
-    setCurrentMaterialId(materialId)
-    setSearchParams({ material: materialId })
-  }
-
-  const getMaterialIcon = (type: string) => {
-    switch (type) {
-      case 'pdf': return '📄'
-      case 'docx': return '📝'
-      case 'video': return '🎬'
-      case 'image': return '🖼️'
-      case 'url': return '🔗'
-      default: return '📎'
-    }
-  }
-
-  const completedCount = progress.size
-  const totalCount = course?.materials?.length || 0
+  const completedMaterials = Array.from(progress.values()).filter((item) => item.completed || item.completion_percent >= 100).length
+  const totalMaterials = course?.materials?.length || 0
+  const overallProgress = Math.round(enrollment?.progress_percent || 0)
 
   if (loading) {
     return (
-      <div className="flex gap-6 h-full">
-        <div className="w-64 border-r pr-4">
-          <Skeleton className="h-full" />
-        </div>
-        <div className="flex-1 space-y-4">
-          <Skeleton className="h-96" />
-        </div>
+      <div className="grid gap-6 lg:grid-cols-[20rem_1fr]">
+        <Skeleton className="h-[34rem] rounded-xl" />
+        <Skeleton className="h-[34rem] rounded-xl" />
       </div>
     )
   }
 
   if (!course || !enrollment) {
     return (
-      <div className="text-center py-12">
-        <h2 className="text-xl font-semibold">Bạn chưa đăng ký khóa học này</h2>
-        <Link to={`/app/student/courses/${id}`} className="text-indigo-600 hover:underline mt-2 block">
-          Quay lại trang khóa học
-        </Link>
-      </div>
+      <EmptyState
+        icon={<BookOpen />}
+        title="You are not enrolled in this course"
+        description="Enroll in the course before opening the learning workspace."
+        action={(
+          <Link to={`/app/student/courses/${id}`}>
+            <Button variant="outline">Back to course details</Button>
+          </Link>
+        )}
+      />
     )
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-full">
-      {/* Mobile sidebar toggle */}
-      <div className="flex items-center gap-2 lg:hidden mb-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          aria-label="Toggle lessons"
-        >
-          {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-        </Button>
-        <Link to={`/app/student/courses/${id}`} className="text-sm text-primary hover:underline">
-          ← Quay lại
-        </Link>
-      </div>
-
-      {/* Sidebar - desktop fixed, mobile drawer */}
-      <div className={cn(
-        'w-full lg:w-72 lg:border-r lg:pr-4 lg:flex-shrink-0',
-        'lg:block',
-        sidebarOpen ? 'block' : 'hidden lg:block'
-      )}>
-        <div className="mb-4">
-          <Link to={`/app/student/courses/${id}`} className="text-sm text-primary hover:underline">
-            ← Quay lại khóa học
+    <div className="space-y-4 animate-fade-in">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <Link to={`/app/student/courses/${id}`}>
+            <Button variant="ghost" size="sm" icon={<ArrowLeft className="h-4 w-4" />}>
+              Back to course
+            </Button>
           </Link>
-          <h2 className="font-semibold line-clamp-2">{course.title}</h2>
-          <div className="mt-2">
-            <div className="flex justify-between text-sm mb-1">
-              <span>Tiến độ</span>
-              <span>{enrollment.progress_percent || 0}%</span>
-            </div>
-            <Progress value={enrollment.progress_percent || 0} />
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            {completedCount}/{totalCount} bài đã hoàn thành
-          </p>
+          <h1 className="mt-2 text-fluid-xl font-semibold text-foreground">{course.title}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Focused learning workspace with lessons, resources, AI help, and course discussion.</p>
         </div>
-        <div className="space-y-1 overflow-y-auto max-h-[calc(100vh-200px)]">
-          {course.materials?.map((material, index) => {
-            const isCompleted = progress.get(material.id)?.completed
-            const isActive = material.id === currentMaterialId
-            return (
-              <button
-                key={material.id}
-                onClick={() => { goToMaterial(material.id); setSidebarOpen(false) }}
-                className={cn(
-                  'w-full text-left p-3 rounded-lg transition-colors text-foreground',
-                  isActive ? 'bg-primary/10 border border-primary/30' : 'hover:bg-muted'
-                )}
-              >
-                <div className="flex items-start gap-3">
-                  <div className={cn(
-                    'w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5',
-                    isCompleted ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'
-                  )}>
-                    {isCompleted ? '✓' : index + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={cn('text-sm font-medium line-clamp-2', isCompleted && 'text-success')}>
-                      {material.title}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {getMaterialIcon(material.material_type)} {material.material_type.toUpperCase()}
-                    </p>
-                  </div>
-                </div>
-              </button>
-            )
-          })}
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="lg:hidden"
+          onClick={() => setSidebarOpen((value) => !value)}
+          icon={sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+        >
+          {sidebarOpen ? 'Hide curriculum' : 'Show curriculum'}
+        </Button>
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 min-w-0">
-        {currentMaterial ? (
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <h2 className="text-lg sm:text-xl font-semibold">{currentMaterial.title}</h2>
-              <div className="flex items-center gap-2">
-                {progress.get(currentMaterial.id)?.completed ? (
-                  <Badge variant="success" label="Đã hoàn thành" />
-                ) : (
-                  <Button onClick={markComplete} disabled={updating} size="sm">
-                    {updating ? 'Đang lưu...' : 'Đánh dấu hoàn thành'}
-                  </Button>
-                )}
+      <div className="grid gap-5 lg:grid-cols-[20rem_1fr]">
+        <aside className={cn('lg:block', sidebarOpen ? 'block' : 'hidden')}>
+          <Card padding="none" className="overflow-hidden lg:sticky lg:top-4">
+            <div className="border-b border-border p-4">
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <span className="font-medium text-foreground">Course progress</span>
+                <span className="font-semibold text-foreground tabular-nums">{overallProgress}%</span>
               </div>
+              <Progress value={overallProgress} />
+              <p className="mt-2 text-xs text-muted-foreground">
+                {totalMaterials > 0
+                  ? `${completedMaterials}/${totalMaterials} tracked materials completed`
+                  : 'Lesson progress tracking is not available for this course yet.'}
+              </p>
             </div>
 
-            <div className="aspect-video bg-muted rounded-lg flex items-center justify-center overflow-hidden">
-              {currentMaterial.material_type === 'video' && currentMaterial.file_url ? (
-                <video
-                  src={currentMaterial.file_url}
-                  controls
-                  className="w-full h-full"
-                  onEnded={() => markComplete()}
-                />
-              ) : currentMaterial.material_type === 'image' && currentMaterial.file_url ? (
-                <img src={currentMaterial.file_url} alt={currentMaterial.title ?? undefined} className="max-w-full max-h-full object-contain" />
-              ) : currentMaterial.material_type === 'url' && currentMaterial.external_url ? (
-                <iframe
-                  src={currentMaterial.external_url}
-                  className="w-full h-full"
-                  title={currentMaterial.title ?? undefined}
-                />
-              ) : currentMaterial.file_url ? (
-                <iframe
-                  src={currentMaterial.file_url}
-                  className="w-full h-full"
-                  title={currentMaterial.title ?? undefined}
+            <div className="max-h-[calc(100vh-15rem)] space-y-4 overflow-y-auto p-3">
+              {learningSections.length === 0 ? (
+                <EmptyState
+                  compact
+                  icon={<ListChecks />}
+                  title="No curriculum yet"
+                  description="The lecturer has not added lessons or materials."
                 />
               ) : (
-                <div className="text-center p-8">
-                  <span className="text-4xl mb-4 block">{getMaterialIcon(currentMaterial.material_type)}</span>
-                  <p className="text-muted-foreground">Không thể xem trước tài liệu này</p>
-                  {currentMaterial.external_url && (
-                    <a
-                      href={currentMaterial.external_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline mt-2 block"
-                    >
-                      Mở trong tab mới
-                    </a>
+                learningSections.map((section) => (
+                  <div key={section.id}>
+                    <p className="px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{section.title}</p>
+                    <div className="mt-2 space-y-1">
+                      {section.items.map((item, index) => (
+                        <CurriculumButton
+                          key={itemKey(item)}
+                          item={item}
+                          index={index}
+                          active={currentItem ? itemKey(item) === itemKey(currentItem) : false}
+                          completed={item.kind === 'material' && (progress.get(item.id)?.completed || (progress.get(item.id)?.completion_percent || 0) >= 100)}
+                          onClick={() => goToItem(item)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
+        </aside>
+
+        <main className="min-w-0 space-y-5">
+          {currentItem ? (
+            <>
+              <Card padding="responsive">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                  <div>
+                    <Badge
+                      variant={currentItem.kind === 'lesson' ? 'primary' : 'info'}
+                      label={currentItem.kind === 'lesson' ? currentItem.lesson.type : materialTypeLabel(currentItem.material.material_type)}
+                    />
+                    <h2 className="mt-3 text-fluid-lg font-semibold text-foreground">{currentItem.title}</h2>
+                    {currentItem.description && (
+                      <p className="mt-2 max-w-3xl text-sm text-muted-foreground">{currentItem.description}</p>
+                    )}
+                  </div>
+
+                  {currentItem.kind === 'material' && (
+                    progress.get(currentItem.id)?.completed || (progress.get(currentItem.id)?.completion_percent || 0) >= 100 ? (
+                      <Badge variant="success" label="Completed" />
+                    ) : (
+                      <Button onClick={markCurrentComplete} loading={updating} icon={<CheckCircle2 className="h-4 w-4" />}>
+                        Mark complete
+                      </Button>
+                    )
                   )}
                 </div>
-              )}
-            </div>
+              </Card>
 
-            <div className="flex flex-wrap gap-2">
-              {currentMaterialId !== course.materials?.[0]?.id && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const idx = course.materials?.findIndex(m => m.id === currentMaterialId) ?? -1
-                    if (idx > 0 && course.materials) {
-                      goToMaterial(course.materials[idx - 1].id)
-                    }
-                  }}
-                >
-                  ← Bài trước
-                </Button>
+              {currentItem.kind === 'material' ? (
+                <MaterialViewer item={currentItem.material} onVideoEnded={markCurrentComplete} />
+              ) : (
+                <LessonViewer lesson={currentLessonDetail || currentItem.lesson} />
               )}
-              {currentMaterialId !== course.materials?.[course.materials?.length - 1]?.id && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const idx = course.materials?.findIndex(m => m.id === currentMaterialId) ?? -1
-                    if (course.materials && idx < course.materials.length - 1) {
-                      goToMaterial(course.materials[idx + 1].id)
-                    }
-                  }}
-                >
-                  Bài tiếp →
-                </Button>
-              )}
-            </div>
 
-            <Card padding="responsive" className="mt-6">
-              <h3 className="font-semibold mb-2">Chat với AI về bài học này</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                Hỏi đáp, tóm tắt, hoặc tạo quiz từ nội dung bài học
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <Link to={`/app/student/chat?course_id=${id}&material_id=${currentMaterialId}`}>
-                  <Button size="sm">Mở Chat AI</Button>
-                </Link>
-                <Link to={`/app/student/quiz?course_id=${id}`}>
-                  <Button variant="outline" size="sm">Làm Quiz</Button>
-                </Link>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex gap-2">
+                  <Button variant="outline" disabled={!previousItem} onClick={() => goToItem(previousItem)}>
+                    Previous
+                  </Button>
+                  <Button variant="outline" disabled={!nextItem} onClick={() => goToItem(nextItem)}>
+                    Next
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Link to={`/app/student/chat?course_id=${id}`}>
+                    <Button variant="outline" icon={<MessageSquare className="h-4 w-4" />}>
+                      Ask AI Tutor
+                    </Button>
+                  </Link>
+                  <Link to={`/app/student/quiz?course_id=${id}`}>
+                    <Button variant="outline">Generate Quiz</Button>
+                  </Link>
+                </div>
               </div>
-            </Card>
 
-            <div className="mt-6">
               <CourseChatPanel courseId={course.id} compact />
-            </div>
-          </div>
+            </>
+          ) : (
+            <EmptyState
+              icon={<BookOpen />}
+              title="Choose a lesson to start"
+              description="Select a lesson or material from the curriculum."
+            />
+          )}
+        </main>
+      </div>
+    </div>
+  )
+}
+
+function CurriculumButton({
+  item,
+  index,
+  active,
+  completed,
+  onClick,
+}: {
+  item: LearningItem
+  index: number
+  active: boolean
+  completed?: boolean
+  onClick: () => void
+}) {
+  const Icon = item.kind === 'lesson'
+    ? item.lesson.type === 'VIDEO'
+      ? PlayCircle
+      : BookOpen
+    : FileText
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'w-full rounded-lg border px-3 py-2.5 text-left transition',
+        active ? 'border-primary bg-primary/10 text-foreground' : 'border-transparent hover:bg-muted/70'
+      )}
+    >
+      <div className="flex gap-3">
+        <div className={cn(
+          'mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium',
+          completed ? 'bg-success/10 text-success' : active ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+        )}>
+          {completed ? <CheckCircle2 className="h-3.5 w-3.5" /> : index + 1}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="line-clamp-2 text-sm font-medium">{item.title}</p>
+          <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Icon className="h-3.5 w-3.5" />
+            {item.kind === 'lesson' ? item.lesson.type : materialTypeLabel(item.material.material_type)}
+          </p>
+        </div>
+      </div>
+    </button>
+  )
+}
+
+function MaterialViewer({ item, onVideoEnded }: { item: CourseMaterial; onVideoEnded: () => void }) {
+  return (
+    <Card padding="none" className="overflow-hidden">
+      <div className="flex aspect-video items-center justify-center bg-muted/50">
+        {item.material_type === 'video' && item.file_url ? (
+          <video src={item.file_url} controls className="h-full w-full" onEnded={onVideoEnded} />
+        ) : item.material_type === 'image' && item.file_url ? (
+          <img src={item.file_url} alt={item.title ?? undefined} className="max-h-full max-w-full object-contain" />
+        ) : item.material_type === 'url' && item.external_url ? (
+          <iframe src={item.external_url} className="h-full w-full" title={item.title ?? undefined} />
+        ) : item.file_url ? (
+          <iframe src={item.file_url} className="h-full w-full" title={item.title ?? undefined} />
         ) : (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Chọn một bài học để bắt đầu</p>
+          <EmptyState
+            compact
+            icon={<FileText />}
+            title="Preview unavailable"
+            description="Open the attached resource in a new tab if a link is provided."
+          />
+        )}
+      </div>
+      {(item.external_url || item.file_url) && (
+        <div className="border-t border-border p-4">
+          <a href={item.external_url || item.file_url || '#'} target="_blank" rel="noopener noreferrer">
+            <Button variant="outline" size="sm">Open resource</Button>
+          </a>
+        </div>
+      )}
+    </Card>
+  )
+}
+
+function LessonViewer({ lesson }: { lesson: Lesson }) {
+  const hasVideo = lesson.type === 'VIDEO' && lesson.video_url
+  const attachments = lesson.attachments || []
+
+  return (
+    <Card padding="responsive" className="space-y-5">
+      {hasVideo && (
+        <div className="overflow-hidden rounded-lg border border-border bg-muted">
+          <iframe
+            src={lesson.video_url || undefined}
+            title={lesson.title}
+            className="aspect-video w-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      )}
+
+      <div className="prose prose-sm max-w-none dark:prose-invert">
+        {lesson.content ? (
+          <div className="whitespace-pre-wrap text-sm leading-6 text-foreground">{lesson.content}</div>
+        ) : (
+          <div className="rounded-lg border border-dashed border-border bg-muted/25 p-4">
+            <p className="text-sm text-muted-foreground">
+              {lesson.description || 'This lesson currently contains overview information only. Check resources or ask the course chat for more context.'}
+            </p>
           </div>
         )}
       </div>
-    </div>
+
+      {lesson.video_duration && (
+        <p className="text-xs text-muted-foreground">Estimated video duration: {formatDuration(lesson.video_duration)}</p>
+      )}
+
+      {attachments.length > 0 && (
+        <div>
+          <h3 className="mb-2 text-sm font-semibold text-foreground">Resources</h3>
+          <div className="space-y-2">
+            {attachments.map((attachment) => (
+              <a
+                key={attachment.id}
+                href={attachment.file_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between rounded-lg border border-border p-3 text-sm transition hover:bg-muted/60"
+              >
+                <span className="font-medium text-foreground">{attachment.file_name}</span>
+                <span className="text-xs text-muted-foreground">Open</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="rounded-lg bg-info/10 p-4 text-sm text-info">
+        Lesson completion tracking is coming next. Materials with progress support can already be marked complete.
+      </div>
+    </Card>
   )
 }
