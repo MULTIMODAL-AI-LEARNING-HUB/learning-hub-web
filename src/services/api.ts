@@ -44,6 +44,13 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config
+    const requestUrl = originalRequest?.url || ''
+    const isAuthRequest = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register')
+
+    if (error.response?.status === 401 && isAuthRequest) {
+      return Promise.reject(error)
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise(function (resolve, reject) {
@@ -82,6 +89,9 @@ api.interceptors.response.use(
           isRefreshing = false
         }
       }
+
+      isRefreshing = false
+      return Promise.reject(error)
     }
     if (error.response?.status === 429) {
       const msg = error.response.data?.message || 'Too many requests. Please try again later.'
