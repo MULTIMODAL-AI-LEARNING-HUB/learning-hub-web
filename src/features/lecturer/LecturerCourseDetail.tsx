@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Edit, Users, BarChart3, BookOpen, Star, DollarSign, TrendingUp } from 'lucide-react'
+import { ArrowLeft, Edit, BarChart3, BookOpen, Star, DollarSign } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { Card } from '../../components/ui/Card'
@@ -11,6 +11,7 @@ import { ReviewsManager } from './ReviewsManager'
 import { CourseChatPanel } from '../courses/CourseChatPanel'
 import { CourseGradingWorkspace } from './CourseGradingWorkspace'
 import { EditCourseDetailsModal } from './EditCourseDetailsModal'
+import { CourseStudentsWorkspace } from './CourseStudentsWorkspace'
 
 type Tab = 'content' | 'chat' | 'grading' | 'reviews' | 'students' | 'analytics'
 
@@ -123,54 +124,7 @@ export function LecturerCourseDetail() {
         {activeTab === 'chat' && <CourseChatPanel courseId={course.id} />}
         {activeTab === 'grading' && <CourseGradingWorkspace courseId={course.id} />}
         {activeTab === 'reviews' && <ReviewsManager courseId={course.id} />}
-        {activeTab === 'students' && (
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-              <Users className="h-5 w-5 text-accent" />
-              Enrolled Students
-            </h2>
-            {analytics ? (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card padding="responsive">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Students</span>
-                    <Users className="h-4 w-4 text-primary" />
-                  </div>
-                  <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">{analytics.total_students}</p>
-                </Card>
-                <Card padding="responsive">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Rating</span>
-                    <Star className="h-4 w-4 text-warning" />
-                  </div>
-                  <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">
-                    {analytics.rating_avg > 0 ? `${analytics.rating_avg.toFixed(1)} / 5` : '—'}
-                  </p>
-                </Card>
-                <Card padding="responsive">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Revenue</span>
-                    <DollarSign className="h-4 w-4 text-success" />
-                  </div>
-                  <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">${analytics.revenue.toLocaleString()}</p>
-                </Card>
-                <Card padding="responsive">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Course Status</span>
-                    <TrendingUp className="h-4 w-4 text-accent" />
-                  </div>
-                  <p className="text-2xl font-bold text-foreground mt-2 capitalize">{course.status}</p>
-                </Card>
-              </div>
-            ) : (
-              <Card className="p-8 text-center">
-                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No student data yet</h3>
-                <p className="text-muted-foreground">Student enrollments will appear here once your course is published and students enroll.</p>
-              </Card>
-            )}
-          </div>
-        )}
+        {activeTab === 'students' && <CourseStudentsWorkspace courseId={course.id} />}
         {activeTab === 'analytics' && (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
