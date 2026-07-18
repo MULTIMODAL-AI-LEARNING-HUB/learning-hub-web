@@ -364,27 +364,29 @@ export function CourseLearning() {
                 </div>
               </Card>
 
-              {currentItem.kind === 'material' ? (
-                <MaterialViewer item={currentItem.material} onVideoEnded={markCurrentComplete} />
-              ) : (
-                <LessonViewer lesson={currentLesson || currentItem.lesson} />
-              )}
-
               <Card padding="none" className="overflow-hidden">
                 <WorkspaceTabs activeTab={activeWorkspaceTab} onChange={changeWorkspaceTab} />
                 <div className="p-4">
                   {activeWorkspaceTab === 'learn' && (
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex gap-2">
-                        <Button variant="outline" disabled={!previousItem} onClick={() => goToItem(previousItem)}>
-                          Previous
-                        </Button>
-                        <Button variant="outline" disabled={!nextItem} onClick={() => goToItem(nextItem)}>
-                          Next
-                        </Button>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {currentIndex + 1} of {flatItems.length} learning items
+                    <div className="space-y-4">
+                      {currentItem.kind === 'material' ? (
+                        <MaterialViewer item={currentItem.material} onVideoEnded={markCurrentComplete} />
+                      ) : (
+                        <LessonViewer lesson={currentLesson || currentItem.lesson} />
+                      )}
+
+                      <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex gap-2">
+                          <Button variant="outline" disabled={!previousItem} onClick={() => goToItem(previousItem)}>
+                            Previous
+                          </Button>
+                          <Button variant="outline" disabled={!nextItem} onClick={() => goToItem(nextItem)}>
+                            Next
+                          </Button>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {currentIndex + 1} of {flatItems.length} learning items
+                        </div>
                       </div>
                     </div>
                   )}
