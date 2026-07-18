@@ -339,36 +339,38 @@ export function CourseLearning() {
         <main className="min-w-0 space-y-5">
           {currentItem ? (
             <>
-              <Card padding="responsive">
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                  <div>
-                    <Badge
-                      variant={currentItem.kind === 'lesson' ? 'primary' : 'info'}
-                      label={currentItem.kind === 'lesson' ? currentItem.lesson.type : materialTypeLabel(currentItem.material.material_type)}
-                    />
-                    <h2 className="mt-3 text-fluid-lg font-semibold text-foreground">{currentItem.title}</h2>
-                    {currentItem.description && (
-                      <p className="mt-2 max-w-3xl text-sm text-muted-foreground">{currentItem.description}</p>
-                    )}
-                  </div>
-
-                  {currentItem.kind === 'material' && (
-                    progress.get(currentItem.id)?.completed || (progress.get(currentItem.id)?.completion_percent || 0) >= 100 ? (
-                      <Badge variant="success" label="Completed" />
-                    ) : (
-                      <Button onClick={markCurrentComplete} loading={updating} icon={<CheckCircle2 className="h-4 w-4" />}>
-                        Mark complete
-                      </Button>
-                    )
-                  )}
-                </div>
-              </Card>
-
               <Card padding="none" className="overflow-hidden">
                 <WorkspaceTabs activeTab={activeWorkspaceTab} onChange={changeWorkspaceTab} />
-                <div className="p-4">
-                  {activeWorkspaceTab === 'learn' && (
-                    <div className="space-y-4">
+              </Card>
+
+              {activeWorkspaceTab === 'learn' && (
+                <>
+                  <Card padding="responsive">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                      <div>
+                        <Badge
+                          variant={currentItem.kind === 'lesson' ? 'primary' : 'info'}
+                          label={currentItem.kind === 'lesson' ? currentItem.lesson.type : materialTypeLabel(currentItem.material.material_type)}
+                        />
+                        <h2 className="mt-3 text-fluid-lg font-semibold text-foreground">{currentItem.title}</h2>
+                        {currentItem.description && (
+                          <p className="mt-2 max-w-3xl text-sm text-muted-foreground">{currentItem.description}</p>
+                        )}
+                      </div>
+
+                      {currentItem.kind === 'material' && (
+                        progress.get(currentItem.id)?.completed || (progress.get(currentItem.id)?.completion_percent || 0) >= 100 ? (
+                          <Badge variant="success" label="Completed" />
+                        ) : (
+                          <Button onClick={markCurrentComplete} loading={updating} icon={<CheckCircle2 className="h-4 w-4" />}>
+                            Mark complete
+                          </Button>
+                        )
+                      )}
+                    </div>
+                  </Card>
+
+                  <div className="space-y-4">
                       {currentItem.kind === 'material' ? (
                         <MaterialViewer item={currentItem.material} onVideoEnded={markCurrentComplete} />
                       ) : (
@@ -388,30 +390,33 @@ export function CourseLearning() {
                           {currentIndex + 1} of {flatItems.length} learning items
                         </div>
                       </div>
-                    </div>
-                  )}
+                  </div>
+                </>
+              )}
 
-                  {activeWorkspaceTab === 'discussion' && (
-                    <CourseChatPanel courseId={course.id} compact />
-                  )}
+              {activeWorkspaceTab === 'discussion' && (
+                <CourseChatPanel courseId={course.id} compact />
+              )}
 
-                  {activeWorkspaceTab === 'assignments' && (
-                    <StudentAssignmentsPanel courseId={course.id} />
-                  )}
+              {activeWorkspaceTab === 'assignments' && (
+                <StudentAssignmentsPanel courseId={course.id} />
+              )}
 
-                  {activeWorkspaceTab === 'resources' && (
-                    <ResourcesPanel item={currentItem} lesson={currentLesson} />
-                  )}
+              {activeWorkspaceTab === 'resources' && (
+                <Card padding="responsive">
+                  <ResourcesPanel item={currentItem} lesson={currentLesson} />
+                </Card>
+              )}
 
-                  {activeWorkspaceTab === 'ai' && (
-                    <AiTutorPanel courseId={id} />
-                  )}
+              {activeWorkspaceTab === 'ai' && (
+                <AiTutorPanel courseId={id} />
+              )}
 
-                  {activeWorkspaceTab === 'notes' && (
-                    <NotesPanel />
-                  )}
-                </div>
-              </Card>
+              {activeWorkspaceTab === 'notes' && (
+                <Card padding="responsive">
+                  <NotesPanel />
+                </Card>
+              )}
             </>
           ) : (
             <EmptyState
