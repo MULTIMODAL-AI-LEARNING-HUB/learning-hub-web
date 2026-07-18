@@ -4,6 +4,7 @@ import { MessageCircle, RefreshCcw, Send } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { courseChatApi, type CourseChatMessage } from '../../services/api'
+import { useAppStore } from '../../stores/appStore'
 import { cn } from '../../utils/cn'
 
 interface CourseChatPanelProps {
@@ -20,7 +21,7 @@ function formatMessageTime(value: string) {
 }
 
 function senderName(message: CourseChatMessage) {
-  return message.sender.full_name || message.sender.role || 'Course member'
+  return message.sender_name || message.sender_role || 'Course member'
 }
 
 function senderInitial(message: CourseChatMessage) {
@@ -33,6 +34,7 @@ export function CourseChatPanel({ courseId, compact = false }: CourseChatPanelPr
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const currentUserId = useAppStore((state) => state.auth.user?.id)
   const bottomRef = useRef<HTMLDivElement | null>(null)
 
   const loadMessages = useCallback(async (silent = false) => {
@@ -114,24 +116,21 @@ export function CourseChatPanel({ courseId, compact = false }: CourseChatPanelPr
           ) : (
             <div className="space-y-3">
               {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn('flex gap-2', message.is_mine && 'justify-end')}
-                >
-                  {!message.is_mine && (
+                <div key={message.id} className={cn('flex gap-2', message.sender_id === currentUserId && 'justify-end')}>
+                  {message.sender_id !== currentUserId && (
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground">
                       {senderInitial(message)}
                     </div>
                   )}
-                  <div className={cn('max-w-[78%]', message.is_mine && 'text-right')}>
-                    <div className={cn('mb-1 flex items-center gap-2 text-xs text-muted-foreground', message.is_mine && 'justify-end')}>
-                      <span>{message.is_mine ? 'You' : senderName(message)}</span>
+                  <div className={cn('max-w-[78%]', message.sender_id === currentUserId && 'text-right')}>
+                    <div className={cn('mb-1 flex items-center gap-2 text-xs text-muted-foreground', message.sender_id === currentUserId && 'justify-end')}>
+                      <span>{message.sender_id === currentUserId ? 'You' : senderName(message)}</span>
                       <span>{formatMessageTime(message.created_at)}</span>
                     </div>
                     <div
                       className={cn(
                         'rounded-2xl px-3 py-2 text-sm leading-relaxed',
-                        message.is_mine
+                        message.sender_id === currentUserId
                           ? 'bg-primary text-primary-foreground'
                           : 'border border-border bg-muted/40 text-foreground'
                       )}

@@ -161,20 +161,14 @@ export interface ChatAskResponse {
   token_usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number }
 }
 
-export interface CourseChatSender {
-  id: string
-  full_name: string | null
-  avatar_url: string | null
-  role: string
-}
-
 export interface CourseChatMessage {
   id: string
   course_id: string
-  sender: CourseChatSender
+  sender_id: string
+  sender_name: string | null
+  sender_role: string
   content: string
   created_at: string
-  is_mine: boolean
 }
 
 export interface Category {

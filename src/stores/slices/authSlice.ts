@@ -4,6 +4,7 @@ import { authApi, type AuthUser } from '../../services/api'
 
 // Helper to map API User structure to frontend UserProfile structure
 export const mapApiUser = (user: AuthUser) => ({
+  id: user.id,
   name: user.full_name || user.email,
   role: user.role,
   initials: (user.full_name || user.email)
