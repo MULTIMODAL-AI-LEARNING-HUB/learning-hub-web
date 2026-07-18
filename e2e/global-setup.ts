@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-const API_BASE = 'http://localhost:8000/api/v1/'
+const API_BASE = process.env.E2E_API_BASE ?? 'http://localhost:8000/api/v1/'
 
 interface TestCredential {
   email: string
@@ -33,8 +33,11 @@ const CREDENTIALS: TestCredential[] = [
 ]
 
 async function globalSetup(config: FullConfig) {
-  const projectRoot = path.resolve(__dirname, '..')
-  const stateDir = path.join(projectRoot, '.auth')
+  if (process.env.E2E_SKIP_GLOBAL_SETUP === 'true') {
+    return
+  }
+
+  const stateDir = path.join(__dirname, '.auth')
   if (!fs.existsSync(stateDir)) {
     fs.mkdirSync(stateDir, { recursive: true })
   }

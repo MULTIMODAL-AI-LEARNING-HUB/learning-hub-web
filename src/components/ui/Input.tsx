@@ -105,10 +105,11 @@ export const Textarea = forwardRef<HTMLTextAreaElement, {
   rows?: number
   className?: string
   onKeyDown?: (e: React.KeyboardEvent) => void
-}) {
+}, ref) {
   return (
     <div className="grid gap-1.5 w-full">
       <textarea
+        ref={ref}
         placeholder={placeholder}
         value={value}
         onChange={onChange}

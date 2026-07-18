@@ -1,4 +1,4 @@
-import { forwardRef, useState, type InputHTMLAttributes, type ReactNode } from 'react'
+import { forwardRef, useId, useState, type InputHTMLAttributes, type ReactNode } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { cn } from '../../utils/cn'
 
@@ -12,14 +12,16 @@ interface AuthInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'on
 
 export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
   ({ type = 'text', placeholder, value, onChange, prefixIcon, error, hint, label, disabled, className = '', ...rest }, ref) => {
+    const generatedId = useId()
     const [showPassword, setShowPassword] = useState(false)
     const isPassword = type === 'password'
     const inputType = isPassword ? (showPassword ? 'text' : 'password') : type
+    const inputId = rest.id ?? generatedId
 
     return (
       <div className="grid gap-1.5 w-full">
         {label && (
-          <label className="text-sm font-medium text-foreground/80">
+          <label htmlFor={inputId} className="text-sm font-medium text-foreground/80">
             {label}
           </label>
         )}
@@ -31,6 +33,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
           )}
           <input
             ref={ref}
+            id={inputId}
             type={inputType}
             placeholder={placeholder}
             value={value}

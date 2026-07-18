@@ -205,7 +205,7 @@ export function StudentSocialChat() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="flex h-full min-h-0 flex-col gap-6 animate-fade-in">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -228,7 +228,10 @@ export function StudentSocialChat() {
         </div>
       )}
 
-      <div className="grid min-h-[calc(100vh-15rem)] overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-soft lg:grid-cols-[22rem_1fr]">
+      <div
+        className="grid min-h-0 flex-1 overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-soft lg:grid-cols-[22rem_1fr]"
+        data-testid="friends-chat-shell"
+      >
         <aside className="flex min-h-0 flex-col border-b border-border lg:border-b-0 lg:border-r">
           <div className="space-y-3 border-b border-border p-4">
             <div className="flex items-center justify-between">
@@ -248,7 +251,7 @@ export function StudentSocialChat() {
             <Input value={query} onChange={setQuery} placeholder="Search people or groups..." prefixIcon={<Search />} />
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto p-3">
+          <div className="min-h-0 flex-1 overflow-y-auto p-3" data-testid="friends-chat-room-list">
             {roomsLoading ? (
               <div className="space-y-2">
                 <Skeleton className="h-16 rounded-xl" />
@@ -273,7 +276,7 @@ export function StudentSocialChat() {
           </div>
         </aside>
 
-        <main className="flex min-h-[36rem] min-w-0 flex-col">
+        <main className="flex min-h-0 min-w-0 flex-col">
           {selectedRoom ? (
             <>
               <div className="flex items-center justify-between gap-3 border-b border-border p-4">
@@ -299,7 +302,7 @@ export function StudentSocialChat() {
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto bg-muted/10 p-4">
+              <div className="min-h-0 flex-1 overflow-y-auto bg-muted/10 p-4" data-testid="friends-chat-messages">
                 {messagesLoading ? (
                   <div className="space-y-3">
                     <Skeleton className="h-12 w-2/3 rounded-2xl" />
@@ -333,7 +336,7 @@ export function StudentSocialChat() {
                 )}
               </div>
 
-              <form onSubmit={sendMessage} className="border-t border-border p-4">
+              <form onSubmit={sendMessage} className="border-t border-border p-4" data-testid="friends-chat-composer">
                 <div className="flex items-end gap-2 rounded-2xl border border-border bg-background p-2">
                   <Button variant="ghost" size="icon" type="button" aria-label="Emoji">
                     <Smile className="h-4 w-4" />
