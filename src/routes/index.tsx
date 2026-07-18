@@ -25,8 +25,8 @@ import { AdminCategories } from '../features/admin/AdminCategories'
 import { AdminSettings } from '../features/admin/AdminSettings'
 import {
   PlaceholderPage,
-  StudentProfile,
 } from '../pages/PlaceholderPage'
+import { StudentProfile } from '../features/student/StudentProfile'
 import { MyCourses as StudentCourses } from '../features/courses/MyCourses'
 import { CourseDetail as StudentCourseDetail } from '../features/courses/CourseDetail'
 import { CourseCatalog } from '../features/courses/CourseCatalog'

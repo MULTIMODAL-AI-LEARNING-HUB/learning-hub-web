@@ -32,7 +32,7 @@ export function StudentProfile() {
     setSaving(true)
     setMessage(null)
     try {
-      await authApi.me()
+      await authApi.updateMe({ full_name: fullName.trim() })
       setMessage({ type: 'success', text: 'Profile updated' })
       await loadUser()
     } catch {
