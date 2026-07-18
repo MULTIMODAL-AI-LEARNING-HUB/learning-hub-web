@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Edit, Users, BarChart3, BookOpen, Star, DollarSign, TrendingUp, ClipboardCheck } from 'lucide-react'
+import { ArrowLeft, Edit, Users, BarChart3, BookOpen, Star, DollarSign, TrendingUp } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { Card } from '../../components/ui/Card'
@@ -9,6 +9,8 @@ import type { Course } from '../../services/api'
 import { CourseContentManager } from './CourseContentManager'
 import { ReviewsManager } from './ReviewsManager'
 import { CourseChatPanel } from '../courses/CourseChatPanel'
+import { CourseGradingWorkspace } from './CourseGradingWorkspace'
+import { EditCourseDetailsModal } from './EditCourseDetailsModal'
 
 type Tab = 'content' | 'chat' | 'grading' | 'reviews' | 'students' | 'analytics'
 
@@ -26,6 +28,7 @@ export function LecturerCourseDetail() {
   const [course, setCourse] = useState<Course | null>(null)
   const [analytics, setAnalytics] = useState<CourseAnalytics | null>(null)
   const [loading, setLoading] = useState(true)
+  const [editingDetails, setEditingDetails] = useState(false)
 
   const [activeTab, setActiveTab] = useState<Tab>('content')
 
@@ -92,7 +95,7 @@ export function LecturerCourseDetail() {
           </div>
           <p className="text-muted-foreground mt-1">{course.description}</p>
         </div>
-        <Button variant="outline" icon={<Edit className="h-4 w-4" />} onClick={() => navigate('/app/lecturer/courses')} fullWidthMobile>
+        <Button variant="outline" icon={<Edit className="h-4 w-4" />} onClick={() => setEditingDetails(true)} fullWidthMobile>
           Edit Details
         </Button>
       </div>
@@ -118,19 +121,7 @@ export function LecturerCourseDetail() {
       <div>
         {activeTab === 'content' && <CourseContentManager course={course} />}
         {activeTab === 'chat' && <CourseChatPanel courseId={course.id} />}
-        {activeTab === 'grading' && (
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-              <ClipboardCheck className="h-5 w-5 text-accent" />
-              To Grade
-            </h2>
-            <Card className="p-8 text-center">
-              <ClipboardCheck className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Course submissions</h3>
-              <p className="text-muted-foreground">Assignment submissions for this course will appear here.</p>
-            </Card>
-          </div>
-        )}
+        {activeTab === 'grading' && <CourseGradingWorkspace courseId={course.id} />}
         {activeTab === 'reviews' && <ReviewsManager courseId={course.id} />}
         {activeTab === 'students' && (
           <div className="space-y-4">
@@ -237,6 +228,12 @@ export function LecturerCourseDetail() {
           </div>
         )}
       </div>
+      <EditCourseDetailsModal
+        course={course}
+        open={editingDetails}
+        onClose={() => setEditingDetails(false)}
+        onSaved={setCourse}
+      />
     </div>
   )
 }
