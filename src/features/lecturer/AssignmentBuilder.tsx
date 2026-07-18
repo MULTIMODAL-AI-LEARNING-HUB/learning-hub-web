@@ -17,7 +17,7 @@ interface AssignmentBuilderProps {
 
 export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuilderProps) {
   const { assignment, fetchAssignment, createAssignment, updateAssignment, deleteAssignment } = useAssignment(lessonId)
-  const { submissions, total, fetchSubmissions, gradeSubmission } = useAssignmentSubmissions(assignment?.id || '')
+  const { submissions, total, fetchSubmissions, gradeSubmission } = useAssignmentSubmissions(assignment ? lessonId : '')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [showSubmissions, setShowSubmissions] = useState(false)
   const [title, setTitle] = useState('')

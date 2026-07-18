@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   BookOpen,
   CheckCircle2,
+  ClipboardCheck,
   FileText,
   ListChecks,
   Menu,
@@ -34,11 +35,14 @@ import { Progress } from '../../components/ui/Progress'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { cn } from '../../utils/cn'
 import { CourseChatPanel } from './CourseChatPanel'
+import { StudentAssignmentsPanel } from './StudentAssignmentsPanel'
 
 type LearningItem =
   | { kind: 'lesson'; id: string; sectionId: string; title: string; description: string | null; lesson: Lesson }
   | { kind: 'material'; id: string; sectionId: 'materials'; title: string; description: string | null; material: CourseMaterial }
-type WorkspaceTab = 'learn' | 'discussion' | 'resources' | 'ai' | 'notes'
+type WorkspaceTab = 'learn' | 'discussion' | 'assignments' | 'resources' | 'ai' | 'notes'
+
+const WORKSPACE_TABS: WorkspaceTab[] = ['learn', 'discussion', 'assignments', 'resources', 'ai', 'notes']
 
 interface LearningSection {
   id: string
@@ -112,6 +116,13 @@ export function CourseLearning() {
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    if (tab && WORKSPACE_TABS.includes(tab as WorkspaceTab)) {
+      setActiveWorkspaceTab(tab as WorkspaceTab)
+    }
+  }, [searchParams])
 
   const learningSections = useMemo<LearningSection[]>(() => {
     const sectionGroups: LearningSection[] = sections.map((section) => ({
@@ -191,8 +202,15 @@ export function CourseLearning() {
     if (!item) return
     const nextKey = itemKey(item)
     setCurrentItemKey(nextKey)
-    setSearchParams({ item: nextKey })
+    setSearchParams({ item: nextKey, tab: activeWorkspaceTab })
     setSidebarOpen(false)
+  }
+
+  const changeWorkspaceTab = (tab: WorkspaceTab) => {
+    setActiveWorkspaceTab(tab)
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.set('tab', tab)
+    setSearchParams(nextParams)
   }
 
   const updateMaterialProgress = useCallback(async (materialId: string, completionPercent: number) => {
@@ -353,7 +371,7 @@ export function CourseLearning() {
               )}
 
               <Card padding="none" className="overflow-hidden">
-                <WorkspaceTabs activeTab={activeWorkspaceTab} onChange={setActiveWorkspaceTab} />
+                <WorkspaceTabs activeTab={activeWorkspaceTab} onChange={changeWorkspaceTab} />
                 <div className="p-4">
                   {activeWorkspaceTab === 'learn' && (
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -373,6 +391,10 @@ export function CourseLearning() {
 
                   {activeWorkspaceTab === 'discussion' && (
                     <CourseChatPanel courseId={course.id} compact />
+                  )}
+
+                  {activeWorkspaceTab === 'assignments' && (
+                    <StudentAssignmentsPanel courseId={course.id} />
                   )}
 
                   {activeWorkspaceTab === 'resources' && (
@@ -452,6 +474,7 @@ function WorkspaceTabs({ activeTab, onChange }: { activeTab: WorkspaceTab; onCha
   const tabs: Array<{ id: WorkspaceTab; label: string; icon: ReactNode }> = [
     { id: 'learn', label: 'Learn', icon: <BookOpen /> },
     { id: 'discussion', label: 'Discussion', icon: <MessageSquare /> },
+    { id: 'assignments', label: 'Assignments', icon: <ClipboardCheck /> },
     { id: 'resources', label: 'Resources', icon: <FileText /> },
     { id: 'ai', label: 'AI Tutor', icon: <Sparkles /> },
     { id: 'notes', label: 'Notes', icon: <StickyNote /> },

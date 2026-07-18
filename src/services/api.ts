@@ -670,7 +670,7 @@ export const assignmentsApi = {
     max_resubmits?: number
     is_active?: boolean
   }) => api.put<Assignment>(`/lessons/${lessonId}/assignment`, data),
-  delete: (assignmentId: string) => api.delete(`/lessons/${assignmentId}/assignment`),
+  delete: (lessonId: string) => api.delete(`/lessons/${lessonId}/assignment`),
   submit: (lessonId: string, data: { submission_text?: string; attachments?: Record<string, unknown>[] }) =>
     api.post<AssignmentSubmission>(`/lessons/${lessonId}/assignment/submissions`, data),
   uploadSubmissionFile: (lessonId: string, file: File) => {
@@ -686,12 +686,12 @@ export const assignmentsApi = {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
-  getSubmissions: (assignmentId: string, page = 1, pageSize = 20) =>
-    api.get<{ items: AssignmentSubmission[]; total: number }>(`/assignments/${assignmentId}/submissions`, {
-      params: { page, page_size: pageSize },
-    }),
-  gradeSubmission: (submissionId: string, data: { score: number; feedback?: string }) =>
-    api.put<AssignmentSubmission>(`/assignments/submissions/${submissionId}/grade`, data),
+  getMySubmissions: (lessonId: string) =>
+    api.get<AssignmentSubmission[]>(`/lessons/${lessonId}/assignment/submissions`),
+  getAllSubmissions: (lessonId: string) =>
+    api.get<AssignmentSubmission[]>(`/lessons/${lessonId}/assignment/submissions/all`),
+  gradeSubmission: (lessonId: string, submissionId: string, data: { score: number; feedback?: string }) =>
+    api.post<AssignmentSubmission>(`/lessons/${lessonId}/assignment/submissions/${submissionId}/grade`, data),
 }
 
 export const discussionsApi = {

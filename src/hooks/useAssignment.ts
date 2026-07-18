@@ -70,14 +70,14 @@ export function useAssignment(lessonId: string) {
   const deleteAssignment = useCallback(async () => {
     if (!assignment) return
     try {
-      await assignmentsApi.delete(assignment.id)
+      await assignmentsApi.delete(lessonId)
       setAssignment(null)
       toasts.add({ type: 'success', title: 'Assignment deleted' })
     } catch (err: any) {
       toasts.add({ type: 'error', title: 'Error', message: err.response?.data?.detail || 'Failed to delete assignment' })
       throw err
     }
-  }, [assignment, toasts])
+  }, [assignment, lessonId, toasts])
 
   return {
     assignment,
@@ -90,29 +90,29 @@ export function useAssignment(lessonId: string) {
   }
 }
 
-export function useAssignmentSubmissions(assignmentId: string) {
+export function useAssignmentSubmissions(lessonId: string) {
   const [submissions, setSubmissions] = useState<AssignmentSubmission[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
   const toasts = useAppStore((s) => s.toasts)
 
   const fetchSubmissions = useCallback(async (page = 1, pageSize = 20) => {
-    if (!assignmentId) return
+    if (!lessonId) return
     setLoading(true)
     try {
-      const res = await assignmentsApi.getSubmissions(assignmentId, page, pageSize)
-      setSubmissions(res.data.items)
-      setTotal(res.data.total)
+      const res = await assignmentsApi.getAllSubmissions(lessonId)
+      setSubmissions(res.data.slice((page - 1) * pageSize, page * pageSize))
+      setTotal(res.data.length)
     } catch (err) {
       console.error('Failed to fetch submissions:', err)
     } finally {
       setLoading(false)
     }
-  }, [assignmentId])
+  }, [lessonId])
 
   const gradeSubmission = useCallback(async (submissionId: string, score: number, feedback?: string) => {
     try {
-      const res = await assignmentsApi.gradeSubmission(submissionId, { score, feedback })
+      const res = await assignmentsApi.gradeSubmission(lessonId, submissionId, { score, feedback })
       setSubmissions(prev => prev.map(s => s.id === submissionId ? res.data : s))
       toasts.add({ type: 'success', title: 'Submission graded' })
       return res.data
@@ -120,7 +120,7 @@ export function useAssignmentSubmissions(assignmentId: string) {
       toasts.add({ type: 'error', title: 'Error', message: err.response?.data?.detail || 'Failed to grade submission' })
       throw err
     }
-  }, [toasts])
+  }, [lessonId, toasts])
 
   return {
     submissions,

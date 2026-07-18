@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { BookOpen, Heart } from 'lucide-react'
+import { BookOpen, ClipboardCheck, Heart, MessageSquare } from 'lucide-react'
 import { coursesApi, enrollmentsApi, wishlistApi, type Course, type Enrollment } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -240,6 +240,18 @@ export function CourseDetail() {
                 <Link to={`/app/student/courses/${course.id}/learn`} className="block">
                   <Button className="w-full">Tiếp tục học</Button>
                 </Link>
+                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+                  <Link to={`/app/student/courses/${course.id}/learn?tab=discussion`} className="block">
+                    <Button variant="outline" className="w-full" icon={<MessageSquare className="h-4 w-4" />}>
+                      Course Discussion
+                    </Button>
+                  </Link>
+                  <Link to={`/app/student/courses/${course.id}/learn?tab=assignments`} className="block">
+                    <Button variant="outline" className="w-full" icon={<ClipboardCheck className="h-4 w-4" />}>
+                      Assignments
+                    </Button>
+                  </Link>
+                </div>
               </div>
             ) : (
               <div className="space-y-3">

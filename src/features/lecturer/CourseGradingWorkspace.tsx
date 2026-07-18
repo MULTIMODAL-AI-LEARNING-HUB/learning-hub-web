@@ -84,8 +84,8 @@ export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps
       const validAssignments = assignmentResults.filter((item): item is { section: Section; lesson: Lesson; assignment: Assignment } => Boolean(item))
       const submissionResults = await Promise.all(
         validAssignments.map(async ({ section, lesson, assignment }) => {
-          const submissionsRes = await assignmentsApi.getSubmissions(assignment.id, 1, 100)
-          return submissionsRes.data.items.map((submission) => ({ section, lesson, assignment, submission }))
+          const submissionsRes = await assignmentsApi.getAllSubmissions(lesson.id)
+          return submissionsRes.data.map((submission) => ({ section, lesson, assignment, submission }))
         })
       )
 
@@ -140,7 +140,7 @@ export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps
 
     setSaving(true)
     try {
-      const res = await assignmentsApi.gradeSubmission(selected.submission.id, {
+      const res = await assignmentsApi.gradeSubmission(selected.lesson.id, selected.submission.id, {
         score: parsedScore,
         feedback: feedback.trim() || undefined,
       })
