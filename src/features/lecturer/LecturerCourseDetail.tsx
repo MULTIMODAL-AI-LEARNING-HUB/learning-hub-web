@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Edit, BarChart3, BookOpen, Star, DollarSign } from 'lucide-react'
+import { ArrowLeft, Edit, BarChart3, BookOpen, Star, DollarSign, Megaphone } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { Card } from '../../components/ui/Card'
@@ -12,8 +12,9 @@ import { CourseChatPanel } from '../courses/CourseChatPanel'
 import { CourseGradingWorkspace } from './CourseGradingWorkspace'
 import { EditCourseDetailsModal } from './EditCourseDetailsModal'
 import { CourseStudentsWorkspace } from './CourseStudentsWorkspace'
+import { LecturerTeachingOps } from './LecturerTeachingOps'
 
-type Tab = 'content' | 'chat' | 'grading' | 'reviews' | 'students' | 'analytics'
+type Tab = 'content' | 'teaching' | 'chat' | 'grading' | 'reviews' | 'students' | 'analytics'
 
 interface CourseAnalytics {
   total_students: number
@@ -76,6 +77,7 @@ export function LecturerCourseDetail() {
 
   const tabs = [
     { id: 'content' as Tab, label: 'Content' },
+    { id: 'teaching' as Tab, label: 'Teaching Ops' },
     { id: 'chat' as Tab, label: 'Chat' },
     { id: 'grading' as Tab, label: 'To Grade' },
     { id: 'reviews' as Tab, label: 'Reviews' },
@@ -121,6 +123,7 @@ export function LecturerCourseDetail() {
 
       <div>
         {activeTab === 'content' && <CourseContentManager course={course} />}
+        {activeTab === 'teaching' && <LecturerTeachingOps courseId={course.id} courseTitle={course.title} />}
         {activeTab === 'chat' && <CourseChatPanel courseId={course.id} />}
         {activeTab === 'grading' && <CourseGradingWorkspace courseId={course.id} />}
         {activeTab === 'reviews' && <ReviewsManager courseId={course.id} />}
@@ -131,6 +134,17 @@ export function LecturerCourseDetail() {
               <BarChart3 className="h-5 w-5 text-accent" />
               Course Analytics
             </h2>
+            <Card padding="responsive" className="border-accent/20 bg-accent/5">
+              <div className="flex items-start gap-3">
+                <Megaphone className="mt-0.5 h-5 w-5 text-accent" />
+                <div>
+                  <p className="font-medium text-foreground">Teaching insights are now grouped in Teaching Ops.</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Use it for announcements, lesson Q&A, AI lesson planning, exports, and quiz weak-point analysis.
+                  </p>
+                </div>
+              </div>
+            </Card>
             {analytics ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <Card padding="responsive" className="text-center">

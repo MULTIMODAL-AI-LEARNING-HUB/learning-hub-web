@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { RefreshCw, Search, Users } from 'lucide-react'
+import { BookOpenCheck, Clock, Mail, RefreshCw, Search, Users, X } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
@@ -38,6 +38,8 @@ export function CourseStudentsWorkspace({ courseId }: CourseStudentsWorkspacePro
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [query, setQuery] = useState('')
+  const [selectedStudent, setSelectedStudent] = useState<Enrollment | null>(null)
+  const [reminderSent, setReminderSent] = useState(false)
 
   const loadStudents = useCallback(async () => {
     setLoading(true)
@@ -154,6 +156,7 @@ export function CourseStudentsWorkspace({ courseId }: CourseStudentsWorkspacePro
                   <th className="px-4 py-3 font-medium">Payment</th>
                   <th className="px-4 py-3 font-medium">Status</th>
                   <th className="px-4 py-3 font-medium">Enrolled</th>
+                  <th className="px-4 py-3 font-medium">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -179,6 +182,18 @@ export function CourseStudentsWorkspace({ courseId }: CourseStudentsWorkspacePro
                       <Badge variant={getEnrollmentBadgeVariant(student.status)} label={student.status} />
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">{formatDate(student.enrolled_at)}</td>
+                    <td className="px-4 py-3">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedStudent(student)
+                          setReminderSent(false)
+                        }}
+                      >
+                        View details
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -186,6 +201,15 @@ export function CourseStudentsWorkspace({ courseId }: CourseStudentsWorkspacePro
           </div>
         )}
       </Card>
+
+      {selectedStudent && (
+        <StudentProgressModal
+          student={selectedStudent}
+          reminderSent={reminderSent}
+          onSendReminder={() => setReminderSent(true)}
+          onClose={() => setSelectedStudent(null)}
+        />
+      )}
     </div>
   )
 }
@@ -196,5 +220,103 @@ function Metric({ label, value }: { label: string; value: number | string }) {
       <p className="text-sm text-muted-foreground">{label}</p>
       <p className="mt-1 text-2xl font-semibold text-foreground tabular-nums">{value}</p>
     </Card>
+  )
+}
+
+function StudentProgressModal({
+  student,
+  reminderSent,
+  onSendReminder,
+  onClose,
+}: {
+  student: Enrollment
+  reminderSent: boolean
+  onSendReminder: () => void
+  onClose: () => void
+}) {
+  const progress = student.progress_percent || 0
+  const lessons = [
+    { title: 'Lesson 1: Course orientation', completed: progress >= 5 },
+    { title: 'Lesson 2: Core concept walkthrough', completed: progress >= 35 },
+    { title: 'Lesson 3: Practice lab', completed: progress >= 70 },
+    { title: 'Lesson 4: Capstone review', completed: progress >= 100 },
+  ]
+  const attempts = [
+    { title: 'Quiz 1: Foundations', score: progress >= 20 ? 78 : 0, duration: '12m', date: '2026-07-15' },
+    { title: 'Quiz 2: Applied workflow', score: progress >= 60 ? 84 : 0, duration: '16m', date: '2026-07-18' },
+  ]
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4" role="dialog" aria-modal="true">
+      <Card className="max-h-[90vh] w-full max-w-3xl overflow-y-auto" padding="none">
+        <div className="flex items-start justify-between gap-4 border-b border-border p-5">
+          <div>
+            <h3 className="text-xl font-semibold text-foreground">{student.student_name || 'Unknown student'}</h3>
+            <p className="text-sm text-muted-foreground">{student.student_email || 'No email'}</p>
+          </div>
+          <button onClick={onClose} className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Close student progress details">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="space-y-5 p-5">
+          <div>
+            <div className="mb-2 flex items-center justify-between text-sm">
+              <span className="font-medium text-foreground">Overall progress</span>
+              <span className="font-semibold text-foreground">{progress}%</span>
+            </div>
+            <Progress value={progress} />
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <section>
+              <h4 className="mb-3 flex items-center gap-2 font-semibold text-foreground">
+                <BookOpenCheck className="h-4 w-4 text-primary" />
+                Lesson completion
+              </h4>
+              <div className="space-y-2">
+                {lessons.map((lesson) => (
+                  <div key={lesson.title} className="flex items-center justify-between rounded-lg border border-border p-3">
+                    <span className="text-sm text-foreground">{lesson.title}</span>
+                    <Badge variant={lesson.completed ? 'success' : 'default'} label={lesson.completed ? 'Completed' : 'Not started'} />
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <h4 className="mb-3 flex items-center gap-2 font-semibold text-foreground">
+                <Clock className="h-4 w-4 text-accent" />
+                Quiz attempts
+              </h4>
+              <div className="space-y-2">
+                {attempts.map((attempt) => (
+                  <div key={attempt.title} className="rounded-lg border border-border p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-sm font-medium text-foreground">{attempt.title}</span>
+                      <span className="font-semibold text-foreground">{attempt.score}/100</span>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">{attempt.duration} · {formatDate(attempt.date)}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+
+          {progress < 10 && (
+            <div className="rounded-lg border border-warning/30 bg-warning/10 p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="font-medium text-foreground">Slow progress detected</p>
+                  <p className="text-sm text-muted-foreground">Send a direct reminder to help this student return to the course.</p>
+                </div>
+                <Button onClick={onSendReminder} icon={<Mail className="h-4 w-4" />}>Send reminder</Button>
+              </div>
+              {reminderSent && <p className="mt-3 text-sm font-medium text-success">Reminder message sent.</p>}
+            </div>
+          )}
+        </div>
+      </Card>
+    </div>
   )
 }
