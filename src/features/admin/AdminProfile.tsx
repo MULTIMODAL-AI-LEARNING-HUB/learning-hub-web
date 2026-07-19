@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Mail, ShieldCheck, CalendarDays, Award, User } from 'lucide-react'
-import { authApi } from '../../services/api'
+import { authApi, type AuthUser } from '../../services/api'
 import { useAppStore } from '../../stores/appStore'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -12,26 +12,32 @@ import { useToast } from '../../components/ui/useToast'
 
 export function AdminProfile() {
   const toast = useToast()
-  const user = useAppStore((s) => s.auth.user)
-  const loadUser = useAppStore((s) => s.auth.loadUser)
+  const loadStoreUser = useAppStore((s) => s.auth.loadUser)
+  const [user, setUser] = useState<AuthUser | null>(null)
   const [fullName, setFullName] = useState('')
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (user) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setFullName(user.name || '')
-      setLoading(false)
-    } else {
-      loadUser().then(() => {
-        setLoading(false)
-      }).catch(() => {
-        toast({ type: 'error', title: 'Failed to load user profile' })
-        setLoading(false)
-      })
+    let cancelled = false
+    async function loadProfile() {
+      setLoading(true)
+      try {
+        const res = await authApi.me()
+        if (cancelled) return
+        setUser(res.data)
+        setFullName(res.data.full_name || '')
+      } catch {
+        if (!cancelled) toast({ type: 'error', title: 'Failed to load profile' })
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
     }
-  }, [user, loadUser, toast])
+    loadProfile()
+    return () => {
+      cancelled = true
+    }
+  }, [toast])
 
   const handleSave = async () => {
     if (!fullName.trim()) {
@@ -41,9 +47,12 @@ export function AdminProfile() {
 
     setSaving(true)
     try {
-      await authApi.updateMe({ full_name: fullName.trim() })
+      const res = await authApi.updateMe({ full_name: fullName.trim() })
       toast({ type: 'success', title: 'Profile updated successfully' })
-      await loadUser()
+      setUser(res.data)
+      setFullName(res.data.full_name || '')
+      // Sync change with main app layout store
+      await loadStoreUser()
     } catch {
       toast({ type: 'error', title: 'Failed to update profile' })
     } finally {
@@ -72,9 +81,13 @@ export function AdminProfile() {
     )
   }
 
-  const initials = user?.name
-    ? user.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
-    : 'A'
+  const displayName = fullName.trim() || user?.full_name || user?.email || 'Administrator'
+  const initials = displayName
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
 
   return (
     <div className="space-y-6 p-6 animate-fade-in font-body">
@@ -92,7 +105,7 @@ export function AdminProfile() {
           <div className="flex items-center gap-4 border-b border-border pb-6">
             <Avatar fallback={initials} size="lg" className="ring-4 ring-indigo-500/10" />
             <div>
-              <h2 className="text-xl font-bold text-foreground">{user?.name || 'Administrator'}</h2>
+              <h2 className="text-xl font-bold text-foreground">{displayName}</h2>
               <p className="text-xs text-muted-foreground capitalize flex items-center gap-1.5 mt-0.5">
                 <span className="h-2 w-2 rounded-full bg-indigo-500" />
                 {user?.role} Mode
@@ -141,7 +154,7 @@ export function AdminProfile() {
                 <CalendarDays className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-2xs text-muted-foreground">Member since</p>
-                  <p className="text-xs font-semibold text-foreground tabular-nums">{formatDate(user?.createdAt || null)}</p>
+                  <p className="text-xs font-semibold text-foreground tabular-nums">{formatDate(user?.created_at || null)}</p>
                 </div>
               </div>
 
