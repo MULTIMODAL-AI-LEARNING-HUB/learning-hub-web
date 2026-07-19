@@ -241,7 +241,7 @@ export function AdminLayout() {
                 { id: 'logout', label: 'Log out', icon: <LogOut className="h-4 w-4" />, danger: true }
               ]}
               onSelect={(id) => {
-                if (id === 'profile') navigate(`/app/admin/settings`)
+                if (id === 'profile') navigate(`/app/admin/profile`)
                 if (id === 'logout') handleLogout()
               }}
             />
