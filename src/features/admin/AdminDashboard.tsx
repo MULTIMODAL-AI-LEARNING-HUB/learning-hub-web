@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Settings, Users, FileText, CheckCircle2, Clock, RefreshCw, Database, Bot, Zap, ChevronLeft, ChevronRight, Search } from 'lucide-react'
+import { Settings, Users, FileText, CheckCircle2, Clock, RefreshCw, Database, Bot, Zap, ChevronLeft, ChevronRight, Search, HardDrive, Cpu, Activity } from 'lucide-react'
 import { adminApi } from '../../services/api'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -27,6 +27,9 @@ interface HealthData {
     database: string
     ai_service: string
     redis: string
+    s3_storage: string
+    qdrant: string
+    celery: string
   }
 }
 
@@ -208,26 +211,47 @@ export function AdminDashboard() {
           </Button>
         </div>
 
-        <div className="grid gap-4 p-5 md:grid-cols-3">
+        <div className="grid gap-4 p-5 sm:grid-cols-2 md:grid-cols-3">
           <ServiceCard
-            name="PostgreSQL"
-            description="Database Instance"
+            name="PostgreSQL Database"
+            description="Relational data storage"
             icon={<Database className="text-blue-500" />}
             status={health?.services.database || 'offline'}
             className="bg-surface-elevated hover:shadow-indigo-500/5 border border-indigo-500/5"
           />
           <ServiceCard
-            name="AI LangGraph"
-            description="Cognitive Pipeline"
+            name="AI LangGraph Service"
+            description="LLM workflow engine"
             icon={<Bot className="text-indigo-500" />}
             status={health?.services.ai_service || 'offline'}
             className="bg-surface-elevated hover:shadow-indigo-500/5 border border-indigo-500/5 glow-admin"
           />
           <ServiceCard
-            name="Redis Cache"
-            description="Cache & Broker"
+            name="Redis (Upstash)"
+            description="Session & query caching"
             icon={<Zap className="text-amber-500" />}
             status={health?.services.redis || 'offline'}
+            className="bg-surface-elevated hover:shadow-indigo-500/5 border border-indigo-500/5"
+          />
+          <ServiceCard
+            name="Cloudflare R2 Storage"
+            description="S3-compatible object storage"
+            icon={<HardDrive className="text-sky-500" />}
+            status={health?.services.s3_storage || 'offline'}
+            className="bg-surface-elevated hover:shadow-indigo-500/5 border border-indigo-500/5"
+          />
+          <ServiceCard
+            name="Qdrant Vector DB"
+            description="Vector embeddings database"
+            icon={<Cpu className="text-violet-500" />}
+            status={health?.services.qdrant || 'offline'}
+            className="bg-surface-elevated hover:shadow-indigo-500/5 border border-indigo-500/5"
+          />
+          <ServiceCard
+            name="Celery Worker"
+            description="Background task processing"
+            icon={<Activity className="text-rose-500" />}
+            status={health?.services.celery || 'offline'}
             className="bg-surface-elevated hover:shadow-indigo-500/5 border border-indigo-500/5"
           />
         </div>
@@ -325,8 +349,8 @@ export function AdminDashboard() {
                         variant={u.role === 'admin' ? 'primary' : u.role === 'lecturer' ? 'warning' : 'default'}
                         label={u.role}
                         className={cn(
-                          u.role === 'admin' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20' : 
-                          u.role === 'lecturer' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20' : 
+                          u.role === 'admin' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20' :
+                          u.role === 'lecturer' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20' :
                           'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'
                         )}
                       />
