@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Sparkles, ArrowRight, Mail, Lock, User, GraduationCap, BookOpen } from 'lucide-react'
+import { useGoogleLogin } from '@react-oauth/google'
 import { useAppStore } from '../stores/appStore'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { AuthInput } from '../components/auth/AuthInput'
+import { SocialLoginButton } from '../components/auth/SocialLoginButton'
 import { cn } from '../utils/cn'
 
 type Variant = 'login' | 'register'
@@ -75,6 +77,8 @@ function AuthShell({ variant }: { variant: Variant }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const login = useAppStore((s) => s.auth.login)
   const register = useAppStore((s) => s.auth.register)
+  const googleLogin = useAppStore((s) => s.auth.googleLogin)
+  const facebookLogin = useAppStore((s) => s.auth.facebookLogin)
 
   const roleFromUrl = searchParams.get('role') || 'student'
 
@@ -84,11 +88,62 @@ function AuthShell({ variant }: { variant: Variant }) {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
+  const [socialLoading, setSocialLoading] = useState<'google' | 'facebook' | null>(null)
   const [currentRole, setCurrentRole] = useState(roleFromUrl)
 
   useEffect(() => {
     setSearchParams({ role: currentRole })
   }, [currentRole, setSearchParams])
+
+  const handleFacebookTokenLogin = async (accessToken: string) => {
+    setSocialLoading('facebook')
+    setErrors({})
+    try {
+      await facebookLogin(accessToken)
+      const user = useAppStore.getState().auth.user
+      const redirectPath =
+        user?.role === 'admin'
+          ? '/app/admin'
+          : user?.role === 'lecturer'
+          ? '/app/lecturer/dashboard'
+          : '/app/student/dashboard'
+      navigate(redirectPath)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Facebook login failed'
+      setErrors({ form: msg })
+    } finally {
+      setSocialLoading(null)
+    }
+  }
+
+  useEffect(() => {
+    const appId = import.meta.env.VITE_FACEBOOK_APP_ID
+    if (appId && typeof window !== 'undefined' && !(window as any).FB) {
+      const script = document.createElement('script')
+      script.src = 'https://connect.facebook.net/en_US/sdk.js'
+      script.async = true
+      script.defer = true
+      script.crossOrigin = 'anonymous'
+      script.onload = () => {
+        ;(window as any).FB.init({
+          appId,
+          cookie: true,
+          xfbml: true,
+          version: 'v18.0',
+        })
+      }
+      document.body.appendChild(script)
+    }
+
+    if (window.location.hash.includes('access_token=')) {
+      const params = new URLSearchParams(window.location.hash.substring(1))
+      const fbToken = params.get('access_token')
+      if (fbToken) {
+        window.history.replaceState(null, '', window.location.pathname)
+        handleFacebookTokenLogin(fbToken)
+      }
+    }
+  }, [])
 
   const handleRoleChange = (role: string) => {
     setCurrentRole(role)
@@ -98,6 +153,57 @@ function AuthShell({ variant }: { variant: Variant }) {
   const isStudent = currentRole === 'student'
   const roleLabel = isStudent ? 'Student' : 'Lecturer'
   const roleIcon = isStudent ? <GraduationCap className="h-5 w-5" /> : <BookOpen className="h-5 w-5" />
+
+  const triggerGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setSocialLoading('google')
+      setErrors({})
+      try {
+        await googleLogin(tokenResponse.access_token)
+        const user = useAppStore.getState().auth.user
+        const redirectPath =
+          user?.role === 'admin'
+            ? '/app/admin'
+            : user?.role === 'lecturer'
+            ? '/app/lecturer/dashboard'
+            : '/app/student/dashboard'
+        navigate(redirectPath)
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Google login failed'
+        setErrors({ form: msg })
+      } finally {
+        setSocialLoading(null)
+      }
+    },
+    onError: () => {
+      setErrors({ form: 'Google login was cancelled or failed.' })
+    }
+  })
+
+  const handleFacebookClick = () => {
+    const appId = import.meta.env.VITE_FACEBOOK_APP_ID
+    if (typeof window !== 'undefined' && (window as any).FB) {
+      setSocialLoading('facebook')
+      ;(window as any).FB.login(
+        (response: any) => {
+          if (response.authResponse?.accessToken) {
+            handleFacebookTokenLogin(response.authResponse.accessToken)
+          } else {
+            setSocialLoading(null)
+          }
+        },
+        { scope: 'email,public_profile' }
+      )
+    } else if (appId) {
+      const redirectUri = window.location.origin + '/login'
+      const fbUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(
+        redirectUri
+      )}&response_type=token&scope=email,public_profile`
+      window.location.href = fbUrl
+    } else {
+      setErrors({ form: 'Facebook App ID is not configured yet in .env' })
+    }
+  }
 
   const validate = () => {
     const errs: Record<string, string> = {}
@@ -184,6 +290,32 @@ function AuthShell({ variant }: { variant: Variant }) {
 
           {/* Form Card */}
           <Card className="border-border bg-surface-elevated p-6 sm:p-8 shadow-lift relative">
+            {/* Social Login Buttons */}
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              <SocialLoginButton
+                provider="google"
+                onClick={() => triggerGoogleLogin()}
+                loading={socialLoading === 'google'}
+                disabled={loading || socialLoading !== null}
+              />
+              <SocialLoginButton
+                provider="facebook"
+                onClick={handleFacebookClick}
+                loading={socialLoading === 'facebook'}
+                disabled={loading || socialLoading !== null}
+              />
+            </div>
+
+            {/* Divider */}
+            <div className="relative my-4 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border/60" />
+              </div>
+              <div className="relative bg-surface-elevated px-3 text-3xs font-bold uppercase tracking-wider text-muted-foreground">
+                Or continue with email
+              </div>
+            </div>
+
             <form onSubmit={handleSubmit} className="grid gap-5">
               {errors.form && (
                 <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-xs text-destructive animate-shake-in" role="alert">

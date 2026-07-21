@@ -771,6 +771,10 @@ export const authApi = {
     api.post<AuthResponse>('/auth/register', data),
   login: (data: { email: string; password: string }) =>
     api.post<AuthResponse>('/auth/login', data),
+  googleLogin: (idToken: string) =>
+    api.post<AuthResponse>('/auth/google', { id_token: idToken }),
+  facebookLogin: (accessToken: string) =>
+    api.post<AuthResponse>('/auth/facebook', { access_token: accessToken }),
   refresh: (refresh_token: string) =>
     api.post<{ access_token: string; refresh_token: string }>('/auth/refresh', { refresh_token }),
   me: () => api.get<AuthUser>('/auth/me'),

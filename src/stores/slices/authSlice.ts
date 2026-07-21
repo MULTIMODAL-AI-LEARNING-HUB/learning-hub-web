@@ -32,7 +32,7 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
         const { user, token } = res.data
         localStorage.setItem('access_token', token.access_token)
         if (token.refresh_token) localStorage.setItem('refresh_token', token.refresh_token)
-        
+
         set((state) => ({
           auth: {
             ...state.auth,
@@ -53,7 +53,7 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
         const { user, token } = res.data
         localStorage.setItem('access_token', token.access_token)
         if (token.refresh_token) localStorage.setItem('refresh_token', token.refresh_token)
-        
+
         set((state) => ({
           auth: {
             ...state.auth,
@@ -65,6 +65,48 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
       } catch (err) {
         const apiErr = err as AxiosErrorLike
         const msg = apiErr.response?.data?.detail || apiErr.response?.data?.message || apiErr.message || 'Registration failed'
+        throw new Error(msg, { cause: err })
+      }
+    },
+    googleLogin: async (idToken: string) => {
+      try {
+        const res = await authApi.googleLogin(idToken)
+        const { user, token } = res.data
+        localStorage.setItem('access_token', token.access_token)
+        if (token.refresh_token) localStorage.setItem('refresh_token', token.refresh_token)
+
+        set((state) => ({
+          auth: {
+            ...state.auth,
+            isAuthenticated: true,
+            token: token.access_token,
+            user: mapApiUser(user)
+          }
+        }), false, 'auth/googleLogin')
+      } catch (err) {
+        const apiErr = err as AxiosErrorLike
+        const msg = apiErr.response?.data?.detail || apiErr.response?.data?.message || apiErr.message || 'Google login failed'
+        throw new Error(msg, { cause: err })
+      }
+    },
+    facebookLogin: async (accessToken: string) => {
+      try {
+        const res = await authApi.facebookLogin(accessToken)
+        const { user, token } = res.data
+        localStorage.setItem('access_token', token.access_token)
+        if (token.refresh_token) localStorage.setItem('refresh_token', token.refresh_token)
+
+        set((state) => ({
+          auth: {
+            ...state.auth,
+            isAuthenticated: true,
+            token: token.access_token,
+            user: mapApiUser(user)
+          }
+        }), false, 'auth/facebookLogin')
+      } catch (err) {
+        const apiErr = err as AxiosErrorLike
+        const msg = apiErr.response?.data?.detail || apiErr.response?.data?.message || apiErr.message || 'Facebook login failed'
         throw new Error(msg, { cause: err })
       }
     },
