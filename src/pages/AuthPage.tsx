@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Sparkles, ArrowRight, Mail, Lock, User, GraduationCap, BookOpen } from 'lucide-react'
 import { useGoogleLogin } from '@react-oauth/google'
@@ -10,6 +10,26 @@ import { SocialLoginButton } from '../components/auth/SocialLoginButton'
 import { cn } from '../utils/cn'
 
 type Variant = 'login' | 'register'
+
+// ── Facebook SDK types (module-level) ──────────────────────────────────────
+interface FBAuthResponse {
+  accessToken: string
+  userID: string
+  expiresIn: number
+  signedRequest: string
+}
+interface FBLoginResponse {
+  status: 'connected' | 'not_authorized' | 'unknown'
+  authResponse?: FBAuthResponse
+}
+interface FacebookSDK {
+  init(opts: { appId: string; cookie: boolean; xfbml: boolean; version: string }): void
+  login(callback: (response: FBLoginResponse) => void, opts?: { scope: string }): void
+}
+interface FacebookWindow extends Window {
+  FB?: FacebookSDK
+}
+const fbWindow = window as FacebookWindow
 
 const copy = {
   login: {
@@ -90,42 +110,49 @@ function AuthShell({ variant }: { variant: Variant }) {
   const [loading, setLoading] = useState(false)
   const [socialLoading, setSocialLoading] = useState<'google' | 'facebook' | null>(null)
   const [currentRole, setCurrentRole] = useState(roleFromUrl)
+  // Stores a Facebook access_token read from the URL hash (no setState inside effect)
+  const pendingFbTokenRef = useRef<string | null>(null)
 
   useEffect(() => {
     setSearchParams({ role: currentRole })
   }, [currentRole, setSearchParams])
 
-  const handleFacebookTokenLogin = async (accessToken: string) => {
-    setSocialLoading('facebook')
-    setErrors({})
-    try {
-      await facebookLogin(accessToken)
-      const user = useAppStore.getState().auth.user
-      const redirectPath =
-        user?.role === 'admin'
-          ? '/app/admin'
-          : user?.role === 'lecturer'
-          ? '/app/lecturer/dashboard'
-          : '/app/student/dashboard'
-      navigate(redirectPath)
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Facebook login failed'
-      setErrors({ form: msg })
-    } finally {
-      setSocialLoading(null)
-    }
-  }
+  const handleFacebookTokenLogin = useCallback(
+    async (accessToken: string) => {
+      setSocialLoading('facebook')
+      setErrors({})
+      try {
+        await facebookLogin(accessToken)
+        const user = useAppStore.getState().auth.user
+        const redirectPath =
+          user?.role === 'admin'
+            ? '/app/admin'
+            : user?.role === 'lecturer'
+            ? '/app/lecturer/dashboard'
+            : '/app/student/dashboard'
+        navigate(redirectPath)
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Facebook login failed'
+        setErrors({ form: msg })
+      } finally {
+        setSocialLoading(null)
+      }
+    },
+    [facebookLogin, navigate]
+  )
 
+  // Effect 1: Load Facebook SDK script & capture access_token from URL hash into a ref.
+  // No setState is called here — storing in a ref avoids cascading renders.
   useEffect(() => {
     const appId = import.meta.env.VITE_FACEBOOK_APP_ID
-    if (appId && typeof window !== 'undefined' && !(window as any).FB) {
+    if (appId && !fbWindow.FB) {
       const script = document.createElement('script')
       script.src = 'https://connect.facebook.net/en_US/sdk.js'
       script.async = true
       script.defer = true
       script.crossOrigin = 'anonymous'
       script.onload = () => {
-        ;(window as any).FB.init({
+        fbWindow.FB?.init({
           appId,
           cookie: true,
           xfbml: true,
@@ -137,13 +164,23 @@ function AuthShell({ variant }: { variant: Variant }) {
 
     if (window.location.hash.includes('access_token=')) {
       const params = new URLSearchParams(window.location.hash.substring(1))
-      const fbToken = params.get('access_token')
-      if (fbToken) {
+      const token = params.get('access_token')
+      if (token) {
         window.history.replaceState(null, '', window.location.pathname)
-        handleFacebookTokenLogin(fbToken)
+        pendingFbTokenRef.current = token
       }
     }
   }, [])
+
+  // Effect 2: Process the pending FB token captured above.
+  // Runs after handleFacebookTokenLogin is stable (after first render).
+  useEffect(() => {
+    const token = pendingFbTokenRef.current
+    if (token) {
+      pendingFbTokenRef.current = null
+      void handleFacebookTokenLogin(token)
+    }
+  }, [handleFacebookTokenLogin])
 
   const handleRoleChange = (role: string) => {
     setCurrentRole(role)
@@ -182,12 +219,12 @@ function AuthShell({ variant }: { variant: Variant }) {
 
   const handleFacebookClick = () => {
     const appId = import.meta.env.VITE_FACEBOOK_APP_ID
-    if (typeof window !== 'undefined' && (window as any).FB) {
+    if (fbWindow.FB) {
       setSocialLoading('facebook')
-      ;(window as any).FB.login(
-        (response: any) => {
+      fbWindow.FB.login(
+        (response) => {
           if (response.authResponse?.accessToken) {
-            handleFacebookTokenLogin(response.authResponse.accessToken)
+            void handleFacebookTokenLogin(response.authResponse.accessToken)
           } else {
             setSocialLoading(null)
           }
