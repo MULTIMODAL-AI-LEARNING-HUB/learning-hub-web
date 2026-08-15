@@ -2,6 +2,8 @@ import { RouterProvider } from 'react-router-dom'
 import { useEffect } from 'react'
 import { router } from './routes'
 import { useAppStore } from './stores/appStore'
+import { ErrorBoundary } from './components/common/ErrorBoundary'
+import { ToastContainer } from './components/ui/Toast'
 
 function App() {
   const loadUser = useAppStore((s) => s.auth.loadUser)
@@ -13,7 +15,13 @@ function App() {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  return <RouterProvider router={router} />
+  return (
+    <ErrorBoundary>
+      <RouterProvider router={router} />
+      <ToastContainer />
+    </ErrorBoundary>
+  )
 }
 
 export default App
+
