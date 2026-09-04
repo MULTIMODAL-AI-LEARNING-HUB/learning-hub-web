@@ -5,6 +5,11 @@ const LOCAL_API_URL = 'http://localhost:8000/api/v1'
 
 let API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? PRODUCTION_API_URL : LOCAL_API_URL)
 
+// Guard against stale env vars or cached builds pointing to obsolete Heroku app
+if (API_BASE.includes('777c1ae9c7d3')) {
+  API_BASE = PRODUCTION_API_URL
+}
+
 // Auto-append /api/v1 if the VITE_API_URL is an absolute domain but misses the prefix
 if (API_BASE.startsWith('http') && !API_BASE.includes('/api/v1')) {
   API_BASE = API_BASE.replace(/\/+$/, '') + '/api/v1'
