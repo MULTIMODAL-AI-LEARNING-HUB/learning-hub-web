@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const PRODUCTION_API_URL = 'https://learning-hub-api-777c1ae9c7d3.herokuapp.com/api/v1'
+const PRODUCTION_API_URL = 'https://learninghub-api-a89cebf8d45f.herokuapp.com/api/v1'
 const LOCAL_API_URL = 'http://localhost:8000/api/v1'
 
 let API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? PRODUCTION_API_URL : LOCAL_API_URL)
