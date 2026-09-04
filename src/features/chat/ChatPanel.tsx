@@ -30,6 +30,7 @@ export function ChatPanel() {
 
   useEffect(() => {
     if (initialQuery) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setInput(initialQuery)
     }
   }, [initialQuery])
