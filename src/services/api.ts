@@ -15,6 +15,8 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
+
+
 let isRefreshing = false
 let failedQueue: Array<{
   resolve: (token: string | null) => void
@@ -30,6 +32,13 @@ const processQueue = (error: unknown, token: string | null = null) => {
     }
   })
   failedQueue = []
+}
+
+type RateLimitListener = (msg: string) => void
+let rateLimitListener: RateLimitListener | null = null
+
+export const setRateLimitListener = (listener: RateLimitListener) => {
+  rateLimitListener = listener
 }
 
 api.interceptors.request.use((config) => {
@@ -82,8 +91,9 @@ api.interceptors.response.use(
           processQueue(err, null)
           localStorage.removeItem('access_token')
           localStorage.removeItem('refresh_token')
-          const { router } = await import('../routes')
-          router.navigate('/login')
+          if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+            window.location.href = '/login'
+          }
           return Promise.reject(err)
         } finally {
           isRefreshing = false
@@ -93,13 +103,11 @@ api.interceptors.response.use(
       isRefreshing = false
       return Promise.reject(error)
     }
+
     if (error.response?.status === 429) {
       const msg = error.response.data?.message || 'Too many requests. Please try again later.'
-      try {
-        const { useAppStore } = await import('../stores/appStore')
-        useAppStore.getState().toasts.add({ type: 'error', title: 'Rate Limited', message: msg })
-      } catch (err) {
-        console.warn('Failed to display rate limit toast:', err)
+      if (rateLimitListener) {
+        rateLimitListener(msg)
       }
     }
     return Promise.reject(error)
