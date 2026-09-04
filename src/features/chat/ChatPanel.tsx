@@ -19,13 +19,20 @@ export function ChatPanel() {
   const docs = useAppStore((s) => s.documents.items)
   const userInitials = useAppStore((s) => s.auth.user?.initials ?? '?')
 
-  const [input, setInput] = useState('')
+  const initialQuery = searchParams.get('initialQuery')
+  const [input, setInput] = useState(initialQuery || '')
   const [selectedDoc, setSelectedDoc] = useState<string>('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const courseId = searchParams.get('course_id') || undefined
   const activeSession = sessions.find((s) => s.id === activeSessionId)
   const messages = activeSession?.messages ?? []
+
+  useEffect(() => {
+    if (initialQuery) {
+      setInput(initialQuery)
+    }
+  }, [initialQuery])
 
   useEffect(() => {
     if (courseId && !activeSessionId) {
