@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import {
   Key,
   Plus,
@@ -119,8 +119,26 @@ export function AdminAiKeys() {
   const [showPlainKey, setShowPlainKey] = useState(false)
   const [savingKey, setSavingKey] = useState(false)
 
-  // Fetch keys
-  const fetchKeys = useCallback(async () => {
+  // Initial load without synchronous setState in effect
+  useEffect(() => {
+    let ignore = false
+    adminApi.listAiKeys()
+      .then((res) => {
+        if (!ignore) setAiKeys(res.data.items || [])
+      })
+      .catch(() => {
+        if (!ignore) toast({ type: 'error', title: 'Lỗi', message: 'Không thể tải danh sách AI API Keys' })
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false)
+      })
+    return () => {
+      ignore = true
+    }
+  }, [toast])
+
+  // Manual refresh action
+  const handleRefresh = async () => {
     setLoading(true)
     try {
       const res = await adminApi.listAiKeys()
@@ -130,11 +148,7 @@ export function AdminAiKeys() {
     } finally {
       setLoading(false)
     }
-  }, [toast])
-
-  useEffect(() => {
-    fetchKeys()
-  }, [fetchKeys])
+  }
 
   // Actions
   const handleToggleKey = async (id: string) => {
@@ -186,8 +200,9 @@ export function AdminAiKeys() {
       setNameInput('')
       setKeyInput('')
       setShowPlainKey(false)
-    } catch (err: any) {
-      const detail = err.response?.data?.detail || 'Thêm khóa thất bại'
+    } catch (err: unknown) {
+      const errObj = err as { response?: { data?: { detail?: string } } }
+      const detail = errObj.response?.data?.detail || 'Thêm khóa thất bại'
       toast({ type: 'error', title: 'Lỗi', message: detail })
     } finally {
       setSavingKey(false)
@@ -240,7 +255,7 @@ export function AdminAiKeys() {
           <Button
             variant="outline"
             size="sm"
-            onClick={fetchKeys}
+            onClick={handleRefresh}
             disabled={loading}
             className="gap-2"
           >

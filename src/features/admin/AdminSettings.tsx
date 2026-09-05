@@ -76,9 +76,27 @@ export function AdminSettings() {
   }, [toast])
 
   useEffect(() => {
-    fetchHealth()
-    fetchAiKeys()
-  }, [fetchHealth, fetchAiKeys])
+    let ignore = false
+    adminApi.health()
+      .then((res) => {
+        if (!ignore) setHealth(res.data)
+      })
+      .catch(() => {
+        if (!ignore) toast({ type: 'error', title: 'Failed to load health status' })
+      })
+
+    adminApi.listAiKeys()
+      .then((res) => {
+        if (!ignore) setAiKeys(res.data.items)
+      })
+      .catch(() => {
+        if (!ignore) toast({ type: 'error', title: 'Không thể tải danh sách AI API Keys' })
+      })
+
+    return () => {
+      ignore = true
+    }
+  }, [toast])
 
   const handleCreateKey = async (e: React.FormEvent) => {
     e.preventDefault()
