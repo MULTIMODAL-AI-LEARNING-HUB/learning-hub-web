@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { dashboardApi } from '../../services/api'
 import {
   Home,
   BookOpen,
@@ -48,6 +50,23 @@ export function StudentSidebar() {
   const location = useLocation()
   const user = useAppStore((s) => s.auth.user)!
   const logout = useAppStore((s) => s.auth.logout)
+  const [stats, setStats] = useState<{ streak_days?: number; daily_goal_percent?: number } | null>(null)
+
+  useEffect(() => {
+    let isMounted = true
+    dashboardApi.getMyDashboard()
+      .then((res) => {
+        if (isMounted && res.data?.stats) {
+          setStats(res.data.stats)
+        }
+      })
+      .catch(() => {
+        // Silently fallback if not available
+      })
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const renderNavButton = (item: NavItem) => {
     const active = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
@@ -144,35 +163,43 @@ export function StudentSidebar() {
         </div>
 
         {/* Daily Streak Card */}
-        <div className="mt-auto mx-1 rounded-2xl border border-border/70 bg-gradient-to-br from-amber-500/5 via-orange-500/5 to-surface-elevated p-3.5 space-y-2.5 shadow-xs">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400">
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/20">
-                <Flame className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
+        {(() => {
+          const streakDays = stats?.streak_days ?? 1
+          const goalPercent = stats?.daily_goal_percent ?? 50
+          return (
+            <div className="mt-auto mx-1 rounded-2xl border border-border/70 bg-gradient-to-br from-amber-500/5 via-orange-500/5 to-surface-elevated p-3.5 space-y-2.5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400">
+                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/20">
+                    <Flame className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
+                  </div>
+                  <span>{`Chuỗi ${streakDays} ngày`}</span>
+                </div>
+                <span className="text-2xs font-bold text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded-md">
+                  Mục tiêu ngày
+                </span>
               </div>
-              <span>Chuỗi 3 ngày</span>
+              
+              <div className="space-y-1">
+                <div className="flex justify-between text-2xs font-medium text-muted-foreground">
+                  <span>Tiến độ hoàn thành</span>
+                  <span className="font-bold text-foreground">{`${goalPercent}%`}</span>
+                </div>
+                <div className="h-2 w-full bg-muted/80 rounded-full overflow-hidden p-0.5 ring-1 ring-border/30">
+                  <div 
+                    className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-primary rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(100, Math.max(5, goalPercent))}%` }} 
+                  />
+                </div>
+              </div>
+              <p className="text-3xs text-muted-foreground text-center">
+                {goalPercent >= 100
+                  ? 'Tuyệt vời! Bạn đã hoàn thành mục tiêu hôm nay! 🎉'
+                  : 'Học thêm 1 bài giảng để hoàn thành mục tiêu hôm nay! ✨'}
+              </p>
             </div>
-            <span className="text-2xs font-bold text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded-md">
-              Mục tiêu ngày
-            </span>
-          </div>
-          
-          <div className="space-y-1">
-            <div className="flex justify-between text-2xs font-medium text-muted-foreground">
-              <span>Tiến độ hoàn thành</span>
-              <span className="font-bold text-foreground">75%</span>
-            </div>
-            <div className="h-2 w-full bg-muted/80 rounded-full overflow-hidden p-0.5 ring-1 ring-border/30">
-              <div 
-                className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-primary rounded-full transition-all duration-500"
-                style={{ width: '75%' }} 
-              />
-            </div>
-          </div>
-          <p className="text-3xs text-muted-foreground text-center">
-            Học thêm 1 bài giảng để hoàn thành mục tiêu hôm nay! ✨
-          </p>
-        </div>
+          )
+        })()}
       </div>
 
       {/* Footer Actions */}

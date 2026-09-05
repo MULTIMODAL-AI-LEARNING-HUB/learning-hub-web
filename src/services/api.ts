@@ -532,6 +532,8 @@ export interface DashboardStats {
   total_materials: number
   total_completed: number
   avg_progress: number
+  streak_days?: number
+  daily_goal_percent?: number
 }
 
 export interface DashboardActivity {
