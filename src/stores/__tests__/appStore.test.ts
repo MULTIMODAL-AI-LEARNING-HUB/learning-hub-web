@@ -18,6 +18,7 @@ vi.mock('../../services/api', () => ({
     me: vi.fn().mockResolvedValue({ data: { id: '1', email: 'test@test.com', full_name: 'Test', role: 'user' } }),
     forgotPassword: vi.fn().mockResolvedValue({ data: { message: 'Reset link sent' } }),
     resetPassword: vi.fn().mockResolvedValue({ data: { message: 'Password reset successfully' } }),
+    logout: vi.fn().mockResolvedValue({ data: { message: 'Successfully logged out' } }),
   },
   documentsApi: {
     list: vi.fn().mockResolvedValue({ data: { items: [], total: 0 } }),
@@ -54,7 +55,20 @@ vi.mock('../../services/api', () => ({
 describe('appStore', () => {
   beforeEach(() => {
     useAppStore.setState({
-      auth: { isAuthenticated: true, user: { id: '1', name: 'Test', role: 'Student', initials: 'T' }, token: 'mock', login: useAppStore.getState().auth.login, register: useAppStore.getState().auth.register, googleLogin: useAppStore.getState().auth.googleLogin, facebookLogin: useAppStore.getState().auth.facebookLogin, logout: useAppStore.getState().auth.logout, loadUser: useAppStore.getState().auth.loadUser, forgotPassword: useAppStore.getState().auth.forgotPassword, resetPassword: useAppStore.getState().auth.resetPassword },
+      auth: {
+        isAuthenticated: true,
+        isLoadingUser: false,
+        user: { id: '1', name: 'Test', role: 'Student', initials: 'T' },
+        token: 'mock',
+        login: useAppStore.getState().auth.login,
+        register: useAppStore.getState().auth.register,
+        googleLogin: useAppStore.getState().auth.googleLogin,
+        facebookLogin: useAppStore.getState().auth.facebookLogin,
+        logout: useAppStore.getState().auth.logout,
+        loadUser: useAppStore.getState().auth.loadUser,
+        forgotPassword: useAppStore.getState().auth.forgotPassword,
+        resetPassword: useAppStore.getState().auth.resetPassword
+      },
       documents: { items: [], selectedId: null, select: useAppStore.getState().documents.select, add: useAppStore.getState().documents.add, remove: useAppStore.getState().documents.remove, retry: useAppStore.getState().documents.retry, updateProgress: useAppStore.getState().documents.updateProgress, loadDocuments: useAppStore.getState().documents.loadDocuments, uploadDocument: useAppStore.getState().documents.uploadDocument },
       chat: { sessions: [], activeSessionId: null, selectSession: useAppStore.getState().chat.selectSession, sendMessage: useAppStore.getState().chat.sendMessage, addSession: useAppStore.getState().chat.addSession, deleteSession: useAppStore.getState().chat.deleteSession },
       notifications: { items: [], unreadCount: 0, fetch: useAppStore.getState().notifications.fetch, markRead: useAppStore.getState().notifications.markRead, markAllRead: useAppStore.getState().notifications.markAllRead, dismiss: useAppStore.getState().notifications.dismiss, clear: useAppStore.getState().notifications.clear },
@@ -67,13 +81,14 @@ describe('appStore', () => {
       expect(useAppStore.getState().auth.isAuthenticated).toBe(true)
     })
 
-    it('logs out', () => {
-      useAppStore.getState().auth.logout()
+    it('logs out', async () => {
+      await useAppStore.getState().auth.logout()
       expect(useAppStore.getState().auth.isAuthenticated).toBe(false)
+      expect(useAppStore.getState().auth.user).toBeNull()
     })
 
     it('logs in', async () => {
-      useAppStore.getState().auth.logout()
+      await useAppStore.getState().auth.logout()
       await useAppStore.getState().auth.login('test@test.com', 'password')
       expect(useAppStore.getState().auth.isAuthenticated).toBe(true)
     })

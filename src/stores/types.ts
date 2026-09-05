@@ -11,13 +11,14 @@ import type {
 export interface AuthSlice {
   auth: {
     isAuthenticated: boolean
+    isLoadingUser: boolean
     user: UserProfile | null
     token: string | null
-    login: (email: string, password: string) => Promise<void>
+    login: (email: string, password: string, rememberMe?: boolean) => Promise<void>
     register: (email: string, password: string, fullName?: string, role?: string) => Promise<void>
     googleLogin: (idToken: string) => Promise<void>
     facebookLogin: (accessToken: string) => Promise<void>
-    logout: () => void
+    logout: () => Promise<void>
     loadUser: () => Promise<void>
     forgotPassword: (email: string) => Promise<void>
     resetPassword: (token: string, password: string) => Promise<void>

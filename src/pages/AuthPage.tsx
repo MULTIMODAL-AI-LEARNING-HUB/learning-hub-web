@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { Sparkles, ArrowRight, Mail, Lock, User, GraduationCap, BookOpen } from 'lucide-react'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useAppStore } from '../stores/appStore'
@@ -94,24 +94,38 @@ function RoleToggle({
 function AuthShell({ variant }: { variant: Variant }) {
   const content = copy[variant]
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const login = useAppStore((s) => s.auth.login)
   const register = useAppStore((s) => s.auth.register)
   const googleLogin = useAppStore((s) => s.auth.googleLogin)
   const facebookLogin = useAppStore((s) => s.auth.facebookLogin)
 
+  const fromPath = (location.state as { from?: { pathname?: string } })?.from?.pathname
   const roleFromUrl = searchParams.get('role') || 'student'
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(true)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [socialLoading, setSocialLoading] = useState<'google' | 'facebook' | null>(null)
   const [currentRole, setCurrentRole] = useState(roleFromUrl)
   // Stores a Facebook access_token read from the URL hash (no setState inside effect)
   const pendingFbTokenRef = useRef<string | null>(null)
+
+  const getRedirectPath = useCallback((user: { role?: string } | null) => {
+    if (fromPath && !fromPath.includes('/login') && !fromPath.includes('/register') && !fromPath.includes('/welcome')) {
+      return fromPath
+    }
+    return user?.role === 'admin'
+      ? '/app/admin'
+      : user?.role === 'lecturer'
+      ? '/app/lecturer/dashboard'
+      : '/app/student/dashboard'
+  }, [fromPath])
 
   useEffect(() => {
     setSearchParams({ role: currentRole })
@@ -124,13 +138,7 @@ function AuthShell({ variant }: { variant: Variant }) {
       try {
         await facebookLogin(accessToken)
         const user = useAppStore.getState().auth.user
-        const redirectPath =
-          user?.role === 'admin'
-            ? '/app/admin'
-            : user?.role === 'lecturer'
-            ? '/app/lecturer/dashboard'
-            : '/app/student/dashboard'
-        navigate(redirectPath)
+        navigate(getRedirectPath(user))
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Facebook login failed'
         setErrors({ form: msg })
@@ -138,7 +146,7 @@ function AuthShell({ variant }: { variant: Variant }) {
         setSocialLoading(null)
       }
     },
-    [facebookLogin, navigate]
+    [facebookLogin, navigate, getRedirectPath]
   )
 
   // Effect 1: Load Facebook SDK script & capture access_token from URL hash into a ref.
@@ -198,13 +206,7 @@ function AuthShell({ variant }: { variant: Variant }) {
       try {
         await googleLogin(tokenResponse.access_token)
         const user = useAppStore.getState().auth.user
-        const redirectPath =
-          user?.role === 'admin'
-            ? '/app/admin'
-            : user?.role === 'lecturer'
-            ? '/app/lecturer/dashboard'
-            : '/app/student/dashboard'
-        navigate(redirectPath)
+        navigate(getRedirectPath(user))
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Google login failed'
         setErrors({ form: msg })
@@ -248,7 +250,7 @@ function AuthShell({ variant }: { variant: Variant }) {
     if (!email.trim()) errs.email = 'Email is required'
     else if (!/\S+@\S+\.\S+/.test(email)) errs.email = 'Invalid email address'
     if (!password) errs.password = 'Password is required'
-    else if (variant === 'register' && password.length < 12) errs.password = 'Minimum 12 characters'
+    else if (variant === 'register' && password.length < 8) errs.password = 'Minimum 8 characters'
     if (variant === 'register' && password !== confirmPassword) {
       errs.confirmPassword = 'Passwords do not match'
     }
@@ -264,25 +266,13 @@ function AuthShell({ variant }: { variant: Variant }) {
     setLoading(true)
     try {
       if (variant === 'login') {
-        await login(email, password)
+        await login(email, password, rememberMe)
         const user = useAppStore.getState().auth.user
-        const redirectPath =
-          user?.role === 'admin'
-            ? '/app/admin'
-            : user?.role === 'lecturer'
-            ? '/app/lecturer/dashboard'
-            : '/app/student/dashboard'
-        navigate(redirectPath)
+        navigate(getRedirectPath(user))
       } else {
         await register(email, password, name, roleFromUrl)
         const user = useAppStore.getState().auth.user
-        const redirectPath =
-          user?.role === 'admin'
-            ? '/app/admin'
-            : user?.role === 'lecturer'
-            ? '/app/lecturer/dashboard'
-            : '/app/student/dashboard'
-        navigate(redirectPath)
+        navigate(getRedirectPath(user))
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Something went wrong'
@@ -409,6 +399,8 @@ function AuthShell({ variant }: { variant: Variant }) {
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
                       className="h-4 w-4 rounded border-border bg-surface-elevated text-blue-500 focus:ring-blue-500/30 cursor-pointer"
                     />
                     <span className="text-xs text-muted-foreground select-none">Keep me signed in</span>
