@@ -69,4 +69,20 @@ test.describe('Production Deployed E2E Smoke Tests', () => {
     const url = page.url()
     expect(url.includes('/login') || url.includes('/welcome') || url.includes('/auth')).toBeTruthy()
   })
+
+  test('PROD-7: Forgot password page renders email input and submit action', async ({ page }) => {
+    await page.goto(`${PROD_WEB_URL}/forgot-password`, { waitUntil: 'networkidle' })
+    await expect(page.locator('input[type="email"]')).toBeVisible()
+    await expect(page.getByRole('button', { name: /gửi|send|reset/i }).first()).toBeVisible()
+  })
+
+  test('PROD-8: Unauthorized access to admin or student routes redirects to login', async ({ page }) => {
+    await page.goto(`${PROD_WEB_URL}/app/admin/dashboard`)
+    await page.waitForTimeout(2000)
+    expect(page.url().includes('/login') || page.url().includes('/welcome')).toBeTruthy()
+
+    await page.goto(`${PROD_WEB_URL}/app/student/dashboard`)
+    await page.waitForTimeout(2000)
+    expect(page.url().includes('/login') || page.url().includes('/welcome')).toBeTruthy()
+  })
 })
