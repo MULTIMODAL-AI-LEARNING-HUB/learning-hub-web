@@ -898,6 +898,17 @@ export const studyApi = {
     api.post('/study/essay/submit', data),
 }
 
+export interface AiApiKey {
+  id: string
+  provider: string
+  key_name: string
+  masked_key: string
+  is_active: boolean
+  usage_count: number
+  last_used_at: string | null
+  created_at: string | null
+}
+
 export const adminApi = {
   listUsers: (page = 1, pageSize = 20) =>
     api.get('/admin/users', { params: { page, page_size: pageSize } }),
@@ -913,6 +924,11 @@ export const adminApi = {
     api.delete(`/admin/courses/${courseId}`),
   analytics: () => api.get('/admin/analytics'),
   health: () => api.get('/admin/health'),
+  listAiKeys: () => api.get<{ items: AiApiKey[]; total: number }>('/admin/ai-keys'),
+  createAiKey: (data: { api_key: string; key_name: string; provider?: string }) =>
+    api.post<AiApiKey>('/admin/ai-keys', data),
+  deleteAiKey: (id: string) => api.delete(`/admin/ai-keys/${id}`),
+  toggleAiKey: (id: string) => api.patch<AiApiKey>(`/admin/ai-keys/${id}/toggle`, {}),
 }
 
 export const notificationsApi = {
