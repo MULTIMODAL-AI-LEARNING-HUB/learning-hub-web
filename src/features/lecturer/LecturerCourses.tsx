@@ -135,7 +135,7 @@ export function LecturerCourses() {
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Revenue</span>
                   <BarChart3 className="h-4 w-4 text-success" />
                 </div>
-                <p className="text-2xl font-bold mt-2 text-foreground tabular-nums">${stats.total_revenue.toLocaleString()}</p>
+                <p className="text-2xl font-bold mt-2 text-foreground tabular-nums">{new Intl.NumberFormat('vi-VN').format(stats.total_revenue)} đ</p>
               </Card>
             </div>
           )}
@@ -158,21 +158,33 @@ export function LecturerCourses() {
                     <tr key={course.id} className="hover:bg-muted/30 transition">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          {course.thumbnail_url ? (
-                            <img src={course.thumbnail_url} alt="" className="h-10 w-14 object-cover rounded" />
-                          ) : (
-                            <div className="h-10 w-14 bg-muted rounded flex items-center justify-center">
-                              <BookOpen className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                          )}
-                          <div>
-                            <p className="font-medium text-foreground">{course.title}</p>
+                          <div
+                            className="cursor-pointer shrink-0"
+                            onClick={() => openCourseWorkspace(course.id)}
+                            title="Open course workspace"
+                          >
+                            {course.thumbnail_url ? (
+                              <img src={course.thumbnail_url} alt="" className="h-10 w-14 object-cover rounded hover:opacity-90 transition" />
+                            ) : (
+                              <div className="h-10 w-14 bg-muted rounded flex items-center justify-center">
+                                <BookOpen className="h-5 w-5 text-muted-foreground" />
+                              </div>
+                            )}
+                          </div>
+                          <div
+                            className="cursor-pointer group"
+                            onClick={() => openCourseWorkspace(course.id)}
+                            title="Open course workspace"
+                          >
+                            <p className="font-medium text-foreground group-hover:text-primary transition">{course.title}</p>
                             <p className="text-xs text-muted-foreground line-clamp-1">{course.description}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-3">{getStatusBadge(course.status)}</td>
-                      <td className="px-4 py-3 text-sm">${course.price}</td>
+                      <td className="px-4 py-3 text-sm font-medium">
+                        {course.price === 0 ? 'Miễn phí' : `${new Intl.NumberFormat('vi-VN').format(course.price)} đ`}
+                      </td>
                       <td className="px-4 py-3 text-sm">{course.enrollment_count || 0}</td>
                       <td className="px-4 py-3">
                         {course.rating_avg ? (
@@ -240,8 +252,11 @@ export function LecturerCourses() {
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Price ($)</label>
-              <Input type="number" value={newCourse.price} onChange={(v) => setNewCourse({ ...newCourse, price: parseFloat(v) })} className="mt-1" min={0} step={0.01} />
+              <label className="text-sm font-medium">Giá khóa học (VNĐ)</label>
+              <Input type="number" value={newCourse.price} onChange={(v) => setNewCourse({ ...newCourse, price: parseFloat(v) || 0 })} className="mt-1" min={0} step={10000} placeholder="Ví dụ: 799000" />
+              <span className="text-xs text-muted-foreground mt-1 block">
+                {newCourse.price === 0 ? 'Khóa học miễn phí' : `${new Intl.NumberFormat('vi-VN').format(newCourse.price || 0)} đ`}
+              </span>
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-4">
@@ -271,8 +286,11 @@ export function LecturerCourses() {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Price ($)</label>
-                <Input type="number" value={editCourse.price} onChange={(v) => setEditCourse({ ...editCourse, price: parseFloat(v) })} className="mt-1.5" min={0} step={0.01} />
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Giá khóa học (VNĐ)</label>
+                <Input type="number" value={editCourse.price} onChange={(v) => setEditCourse({ ...editCourse, price: parseFloat(v) || 0 })} className="mt-1.5" min={0} step={10000} placeholder="Ví dụ: 799000" />
+                <span className="text-xs text-muted-foreground mt-1 block">
+                  {editCourse.price === 0 ? 'Khóa học miễn phí' : `${new Intl.NumberFormat('vi-VN').format(editCourse.price || 0)} đ`}
+                </span>
               </div>
             </div>
           </div>

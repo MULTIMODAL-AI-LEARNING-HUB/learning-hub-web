@@ -9,7 +9,6 @@ import {
   RefreshCw,
   Search,
   Send,
-  ShieldCheck,
   Smile,
   Sparkles,
   UserPlus,
@@ -73,8 +72,11 @@ export function StudentSocialChat() {
     setRoomsLoading(true)
     try {
       const res = await socialChatApi.listRooms()
-      setRooms(res.data.items)
-      setSelectedRoomId((current) => current || res.data.items[0]?.id || null)
+      const items = res.data.items
+      setRooms(items)
+      if (items.length > 0) {
+        setSelectedRoomId((current) => (current && items.some((r) => r.id === current)) ? current : items[0].id)
+      }
       setError(null)
     } catch {
       setError('Unable to load chats.')
@@ -344,7 +346,7 @@ export function StudentSocialChat() {
                   <textarea
                     value={draft}
                     onChange={(event) => setDraft(event.target.value)}
-                    placeholder={`Message ${selectedRoom.name}...`}
+                    placeholder={`Nhắn tin trong ${selectedRoom.name}...`}
                     rows={1}
                     maxLength={2000}
                     className="max-h-32 min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
@@ -367,11 +369,10 @@ export function StudentSocialChat() {
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                   <Sparkles className="h-8 w-8" />
                 </div>
-                <h2 className="mt-4 text-xl font-semibold text-foreground">Choose a conversation</h2>
-                <p className="mt-2 text-sm text-muted-foreground">Select a chat from the sidebar or create a group for classmates and study partners.</p>
+                <h2 className="mt-4 text-xl font-semibold text-foreground">Chọn cuộc trò chuyện</h2>
+                <p className="mt-2 text-sm text-muted-foreground">Chọn một nhóm chat từ danh sách bên trái hoặc tạo nhóm mới để cùng trao đổi học tập.</p>
                 <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
-                  <Button onClick={() => setCreateOpen(true)} icon={<Users className="h-4 w-4" />}>Create group</Button>
-                  <Button variant="outline" disabled icon={<ShieldCheck className="h-4 w-4" />}>Stored in API</Button>
+                  <Button onClick={() => setCreateOpen(true)} icon={<Users className="h-4 w-4" />}>Tạo nhóm mới</Button>
                 </div>
               </div>
             </div>

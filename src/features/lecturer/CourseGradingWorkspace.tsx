@@ -70,14 +70,16 @@ export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps
 
       const assignmentResults = await Promise.all(
         lessonsBySection.flatMap(({ section, lessons }) =>
-          lessons.map(async (lesson) => {
-            try {
-              const assignmentRes = await assignmentsApi.get(lesson.id)
-              return { section, lesson, assignment: assignmentRes.data }
-            } catch {
-              return null
-            }
-          })
+          lessons
+            .filter((lesson) => lesson.type === 'ASSIGNMENT')
+            .map(async (lesson) => {
+              try {
+                const assignmentRes = await assignmentsApi.get(lesson.id)
+                return { section, lesson, assignment: assignmentRes.data }
+              } catch {
+                return null
+              }
+            })
         )
       )
 

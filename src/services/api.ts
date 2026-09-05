@@ -598,7 +598,7 @@ export const coursesApi = {
   createReview: (courseId: string, data: { rating: number; comment?: string }) =>
     api.post<Review>(`/courses/${courseId}/reviews`, data),
   getMyReview: (courseId: string) =>
-    api.get<Review>(`/courses/${courseId}/reviews/my-review`),
+    api.get<Review | null>(`/courses/${courseId}/reviews/my-review`),
   updateMyReview: (courseId: string, data: { rating?: number; comment?: string }) =>
     api.put<Review>(`/courses/${courseId}/reviews/my-review`, data),
   replyReview: (courseId: string, reviewId: string, reply: string) =>
@@ -829,7 +829,7 @@ export const authApi = {
 export const documentsApi = {
   list: (page = 1, pageSize = 20) =>
     api.get<{ items: DocumentItem[]; total: number; page: number; page_size: number }>(
-      '/documents', { params: { page, page_size: pageSize } }
+      '/documents/', { params: { page, page_size: pageSize } }
     ),
   get: (id: string) => api.get<DocumentItem>(`/documents/${id}`),
   upload: (file: File, title?: string) => {
