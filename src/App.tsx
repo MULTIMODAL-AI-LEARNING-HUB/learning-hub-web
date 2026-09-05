@@ -8,16 +8,13 @@ import { ToastContainer } from './components/ui/Toast'
 import { setRateLimitListener } from './services/api'
 
 function App() {
-  const loadUser = useAppStore((s) => s.auth.loadUser)
-  const token = useAppStore((s) => s.auth.token)
+  const restoreSession = useAppStore((s) => s.auth.restoreSession)
 
   useEffect(() => {
     setRateLimitListener((msg) => {
       useAppStore.getState().toasts.add({ type: 'error', title: 'Rate Limited', message: msg })
     })
-    if (token) {
-      loadUser()
-    }
+    restoreSession()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (

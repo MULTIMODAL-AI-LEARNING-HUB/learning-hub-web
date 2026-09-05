@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { useAppStore } from '../appStore'
 
 vi.mock('../../services/api', () => ({
+  setAccessToken: vi.fn(),
+  clearAccessToken: vi.fn(),
   authApi: {
     login: vi.fn().mockResolvedValue({
       data: {
@@ -16,6 +18,7 @@ vi.mock('../../services/api', () => ({
       }
     }),
     me: vi.fn().mockResolvedValue({ data: { id: '1', email: 'test@test.com', full_name: 'Test', role: 'user' } }),
+    refresh: vi.fn().mockResolvedValue({ data: { access_token: 'mock-token', refresh_token: null } }),
     forgotPassword: vi.fn().mockResolvedValue({ data: { message: 'Reset link sent' } }),
     resetPassword: vi.fn().mockResolvedValue({ data: { message: 'Password reset successfully' } }),
     logout: vi.fn().mockResolvedValue({ data: { message: 'Successfully logged out' } }),
@@ -65,6 +68,7 @@ describe('appStore', () => {
         googleLogin: useAppStore.getState().auth.googleLogin,
         facebookLogin: useAppStore.getState().auth.facebookLogin,
         logout: useAppStore.getState().auth.logout,
+        restoreSession: useAppStore.getState().auth.restoreSession,
         loadUser: useAppStore.getState().auth.loadUser,
         forgotPassword: useAppStore.getState().auth.forgotPassword,
         resetPassword: useAppStore.getState().auth.resetPassword

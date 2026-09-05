@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand'
 import type { AppState, AuthSlice, AxiosErrorLike } from '../types'
-import { authApi, type AuthUser } from '../../services/api'
+import { authApi, clearAccessToken, setAccessToken, type AuthUser } from '../../services/api'
 
 // Helper to map API User structure to frontend UserProfile structure
 export const mapApiUser = (user: AuthUser) => ({
@@ -21,35 +21,19 @@ export const mapApiUser = (user: AuthUser) => ({
   } : undefined
 })
 
-const getInitialToken = () => {
-  if (typeof window === 'undefined') return null
-  return localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
-}
-
 export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never]], [], AuthSlice> = (set, get) => {
-  const initialToken = getInitialToken()
-
   return {
     auth: {
-      isAuthenticated: !!initialToken,
-      isLoadingUser: !!initialToken,
+      isAuthenticated: false,
+      isLoadingUser: true,
       user: null,
-      token: initialToken,
+      token: null,
       login: async (email, password, rememberMe = true) => {
         try {
           const res = await authApi.login({ email, password })
           const { user, token } = res.data
-          if (rememberMe) {
-            localStorage.setItem('access_token', token.access_token)
-            if (token.refresh_token) localStorage.setItem('refresh_token', token.refresh_token)
-            sessionStorage.removeItem('access_token')
-            sessionStorage.removeItem('refresh_token')
-          } else {
-            sessionStorage.setItem('access_token', token.access_token)
-            if (token.refresh_token) sessionStorage.setItem('refresh_token', token.refresh_token)
-            localStorage.removeItem('access_token')
-            localStorage.removeItem('refresh_token')
-          }
+          void rememberMe // Refresh-token persistence is controlled by the HttpOnly cookie.
+          setAccessToken(token.access_token)
 
           set((state) => ({
             auth: {
@@ -70,10 +54,7 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
         try {
           const res = await authApi.register({ email, password, full_name: fullName, role })
           const { user, token } = res.data
-          localStorage.setItem('access_token', token.access_token)
-          if (token.refresh_token) localStorage.setItem('refresh_token', token.refresh_token)
-          sessionStorage.removeItem('access_token')
-          sessionStorage.removeItem('refresh_token')
+          setAccessToken(token.access_token)
 
           set((state) => ({
             auth: {
@@ -94,10 +75,7 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
         try {
           const res = await authApi.googleLogin(idToken)
           const { user, token } = res.data
-          localStorage.setItem('access_token', token.access_token)
-          if (token.refresh_token) localStorage.setItem('refresh_token', token.refresh_token)
-          sessionStorage.removeItem('access_token')
-          sessionStorage.removeItem('refresh_token')
+          setAccessToken(token.access_token)
 
           set((state) => ({
             auth: {
@@ -118,10 +96,7 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
         try {
           const res = await authApi.facebookLogin(accessToken)
           const { user, token } = res.data
-          localStorage.setItem('access_token', token.access_token)
-          if (token.refresh_token) localStorage.setItem('refresh_token', token.refresh_token)
-          sessionStorage.removeItem('access_token')
-          sessionStorage.removeItem('refresh_token')
+          setAccessToken(token.access_token)
 
           set((state) => ({
             auth: {
@@ -139,18 +114,12 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
         }
       },
       logout: async () => {
-        const refreshToken = localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token')
         try {
-          if (refreshToken) {
-            await authApi.logout(refreshToken)
-          }
+          await authApi.logout()
         } catch {
           // Ignore network errors on logout
         } finally {
-          localStorage.removeItem('access_token')
-          localStorage.removeItem('refresh_token')
-          sessionStorage.removeItem('access_token')
-          sessionStorage.removeItem('refresh_token')
+          clearAccessToken()
           set((state) => ({
             auth: {
               ...state.auth,
@@ -160,6 +129,24 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
               user: null
             }
           }), false, 'auth/logout')
+        }
+      },
+      restoreSession: async () => {
+        try {
+          const res = await authApi.refresh()
+          setAccessToken(res.data.access_token)
+          await get().auth.loadUser()
+        } catch {
+          clearAccessToken()
+          set((state) => ({
+            auth: {
+              ...state.auth,
+              isAuthenticated: false,
+              isLoadingUser: false,
+              token: null,
+              user: null,
+            }
+          }), false, 'auth/restoreSession/empty')
         }
       },
       loadUser: async () => {

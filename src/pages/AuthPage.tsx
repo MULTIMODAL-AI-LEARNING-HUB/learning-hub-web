@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
-import { Sparkles, ArrowRight, Mail, Lock, User, GraduationCap, BookOpen } from 'lucide-react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Sparkles, ArrowRight, Mail, Lock, User, GraduationCap } from 'lucide-react'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useAppStore } from '../stores/appStore'
 import { Button } from '../components/ui/Button'
@@ -50,59 +50,19 @@ const copy = {
   }
 }
 
-function RoleToggle({
-  role,
-  onChange,
-}: {
-  role: string
-  onChange: (role: string) => void
-}) {
-  const isStudent = role === 'student'
-  return (
-    <div className="relative flex rounded-xl bg-surface-elevated/60 border border-border/30 p-1 shadow-sm">
-      <div
-        className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg transition-all duration-300 ease-out ${
-          isStudent
-            ? 'left-1 bg-primary shadow-md'
-            : 'left-[calc(50%+3px)] bg-accent shadow-md'
-        }`}
-      />
-      <button
-        type="button"
-        onClick={() => onChange('student')}
-        className={`relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200 ${
-          isStudent ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
-        }`}
-      >
-        <GraduationCap className="h-4 w-4" />
-        <span>Student</span>
-      </button>
-      <button
-        type="button"
-        onClick={() => onChange('lecturer')}
-        className={`relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200 ${
-          !isStudent ? 'text-accent-foreground' : 'text-muted-foreground hover:text-foreground'
-        }`}
-      >
-        <BookOpen className="h-4 w-4" />
-        <span>Lecturer</span>
-      </button>
-    </div>
-  )
-}
-
+// Kept for visual compatibility with older route snapshots; lecturer signup is disabled server-side.
 function AuthShell({ variant }: { variant: Variant }) {
   const content = copy[variant]
   const navigate = useNavigate()
   const location = useLocation()
-  const [searchParams, setSearchParams] = useSearchParams()
   const login = useAppStore((s) => s.auth.login)
   const register = useAppStore((s) => s.auth.register)
   const googleLogin = useAppStore((s) => s.auth.googleLogin)
   const facebookLogin = useAppStore((s) => s.auth.facebookLogin)
 
   const fromPath = (location.state as { from?: { pathname?: string } })?.from?.pathname
-  const roleFromUrl = searchParams.get('role') || 'student'
+  // Lecturer accounts are provisioned by an administrator; public signup is student-only.
+  const roleFromUrl = 'student'
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -112,9 +72,11 @@ function AuthShell({ variant }: { variant: Variant }) {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [socialLoading, setSocialLoading] = useState<'google' | 'facebook' | null>(null)
-  const [currentRole, setCurrentRole] = useState(roleFromUrl)
   // Stores a Facebook access_token read from the URL hash (no setState inside effect)
   const pendingFbTokenRef = useRef<string | null>(null)
+  const isStudent = true
+  const roleLabel = 'Student'
+  const roleIcon = <GraduationCap className="h-5 w-5" />
 
   const getRedirectPath = useCallback((user: { role?: string } | null) => {
     if (fromPath && !fromPath.includes('/login') && !fromPath.includes('/register') && !fromPath.includes('/welcome')) {
@@ -126,10 +88,6 @@ function AuthShell({ variant }: { variant: Variant }) {
       ? '/app/lecturer/dashboard'
       : '/app/student/dashboard'
   }, [fromPath])
-
-  useEffect(() => {
-    setSearchParams({ role: currentRole })
-  }, [currentRole, setSearchParams])
 
   const handleFacebookTokenLogin = useCallback(
     async (accessToken: string) => {
@@ -189,15 +147,6 @@ function AuthShell({ variant }: { variant: Variant }) {
       void handleFacebookTokenLogin(token)
     }
   }, [handleFacebookTokenLogin])
-
-  const handleRoleChange = (role: string) => {
-    setCurrentRole(role)
-    setErrors({})
-  }
-
-  const isStudent = currentRole === 'student'
-  const roleLabel = isStudent ? 'Student' : 'Lecturer'
-  const roleIcon = isStudent ? <GraduationCap className="h-5 w-5" /> : <BookOpen className="h-5 w-5" />
 
   const triggerGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -307,13 +256,6 @@ function AuthShell({ variant }: { variant: Variant }) {
               {content.subtitle}
             </p>
           </div>
-
-          {/* Role Toggle (for register) */}
-          {variant === 'register' && (
-            <div className="flex flex-col gap-3">
-              <RoleToggle role={currentRole} onChange={handleRoleChange} />
-            </div>
-          )}
 
           {/* Form Card */}
           <Card className="border-border bg-surface-elevated p-6 sm:p-8 shadow-lift relative">

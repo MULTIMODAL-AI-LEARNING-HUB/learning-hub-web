@@ -18,8 +18,19 @@ if (API_BASE.startsWith('http') && !API_BASE.includes('/api/v1')) {
 const api = axios.create({
   baseURL: API_BASE,
   headers: { 'Content-Type': 'application/json' },
+  withCredentials: true,
 })
 
+// Access tokens live only in memory. Refresh tokens are HttpOnly cookies set by the API.
+let accessToken: string | null = null
+
+export const setAccessToken = (token: string | null) => {
+  accessToken = token
+}
+
+export const clearAccessToken = () => {
+  accessToken = null
+}
 
 
 let isRefreshing = false
@@ -47,9 +58,8 @@ export const setRateLimitListener = (listener: RateLimitListener) => {
 }
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`
   }
   return config
 })
@@ -59,7 +69,7 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
     const requestUrl = originalRequest?.url || ''
-    const isAuthRequest = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register')
+    const isAuthRequest = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register') || requestUrl.includes('/auth/refresh')
 
     if (error.response?.status === 401 && isAuthRequest) {
       return Promise.reject(error)
@@ -82,27 +92,17 @@ api.interceptors.response.use(
       originalRequest._retry = true
       isRefreshing = true
 
-      const refreshToken = localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token')
-      if (refreshToken) {
+      if (typeof document !== 'undefined') {
         try {
-          const res = await axios.post(`${API_BASE}/auth/refresh`, { refresh_token: refreshToken })
-          const { access_token, refresh_token } = res.data
-          if (sessionStorage.getItem('access_token')) {
-            sessionStorage.setItem('access_token', access_token)
-            if (refresh_token) sessionStorage.setItem('refresh_token', refresh_token)
-          } else {
-            localStorage.setItem('access_token', access_token)
-            if (refresh_token) localStorage.setItem('refresh_token', refresh_token)
-          }
+          const res = await axios.post(`${API_BASE}/auth/refresh`, {}, { withCredentials: true })
+          const { access_token } = res.data
+          setAccessToken(access_token)
           originalRequest.headers.Authorization = `Bearer ${access_token}`
           processQueue(null, access_token)
           return api(originalRequest)
         } catch (err) {
           processQueue(err, null)
-          localStorage.removeItem('access_token')
-          localStorage.removeItem('refresh_token')
-          sessionStorage.removeItem('access_token')
-          sessionStorage.removeItem('refresh_token')
+          clearAccessToken()
           if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
             window.location.href = '/login'
           }
@@ -813,8 +813,8 @@ export const authApi = {
     api.post<AuthResponse>('/auth/google', { id_token: idToken }),
   facebookLogin: (accessToken: string) =>
     api.post<AuthResponse>('/auth/facebook', { access_token: accessToken }),
-  refresh: (refresh_token: string) =>
-    api.post<{ access_token: string; refresh_token: string }>('/auth/refresh', { refresh_token }),
+  refresh: () =>
+    api.post<{ access_token: string; refresh_token: string | null }>('/auth/refresh', {}),
   me: () => api.get<AuthUser>('/auth/me'),
   updateMe: (data: { full_name?: string; avatar_url?: string }) =>
     api.put<AuthUser>('/auth/me', data),
@@ -822,8 +822,8 @@ export const authApi = {
     api.post<{ message: string }>('/auth/forgot-password', { email }),
   resetPassword: (token: string, password: string) =>
     api.post<{ message: string }>('/auth/reset-password', { token, password }),
-  logout: (refreshToken?: string | null) =>
-    api.post<{ message: string }>('/auth/logout', refreshToken ? { refresh_token: refreshToken } : {}),
+  logout: () =>
+    api.post<{ message: string }>('/auth/logout', {}),
 }
 
 export const documentsApi = {

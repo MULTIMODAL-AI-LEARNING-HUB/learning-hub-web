@@ -19,6 +19,7 @@ export interface AuthSlice {
     googleLogin: (idToken: string) => Promise<void>
     facebookLogin: (accessToken: string) => Promise<void>
     logout: () => Promise<void>
+    restoreSession: () => Promise<void>
     loadUser: () => Promise<void>
     forgotPassword: (email: string) => Promise<void>
     resetPassword: (token: string, password: string) => Promise<void>
