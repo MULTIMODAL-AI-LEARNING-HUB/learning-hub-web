@@ -3,8 +3,7 @@ import {
   Key,
   Plus,
   Trash2,
-  Copy,
-  Check,
+  Lock,
   Eye,
   EyeOff,
   RefreshCw,
@@ -119,7 +118,6 @@ export function AdminAiKeys() {
   const [keyInput, setKeyInput] = useState('')
   const [showPlainKey, setShowPlainKey] = useState(false)
   const [savingKey, setSavingKey] = useState(false)
-  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   // Fetch keys
   const fetchKeys = useCallback(async () => {
@@ -194,13 +192,6 @@ export function AdminAiKeys() {
     } finally {
       setSavingKey(false)
     }
-  }
-
-  const handleCopy = (id: string, text: string) => {
-    navigator.clipboard.writeText(text)
-    setCopiedId(id)
-    toast({ type: 'info', title: 'Đã sao chép', message: 'Đã sao chép mã khóa vào bộ nhớ tạm' })
-    setTimeout(() => setCopiedId(null), 2000)
   }
 
   // Filtered keys
@@ -416,20 +407,11 @@ export function AdminAiKeys() {
                       </td>
 
                       {/* Masked Key */}
-                      <td className="px-4 py-3.5 whitespace-nowrap font-mono text-xs">
-                        <div className="inline-flex items-center gap-2 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1 rounded border border-slate-200/60 dark:border-slate-700">
-                          <span className="text-slate-700 dark:text-slate-300">{k.masked_key}</span>
-                          <button
-                            onClick={() => handleCopy(k.id, k.masked_key)}
-                            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-                            title="Sao chép mã ẩn"
-                          >
-                            {copiedId === k.id ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-500" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5" />
-                            )}
-                          </button>
+                      <td className="px-4 py-3.5 whitespace-nowrap font-mono text-xs select-none">
+                        <div className="inline-flex items-center gap-2 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1 rounded border border-slate-200/60 dark:border-slate-700 select-none cursor-default">
+                          <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="text-slate-400 dark:text-slate-500 tracking-widest font-bold select-none">••••••••••••••••</span>
+                          <span className="text-[10px] text-slate-400 bg-slate-200/60 dark:bg-slate-700/60 px-1.5 py-0.2 rounded select-none font-sans font-medium">Đã bảo vệ</span>
                         </div>
                       </td>
 

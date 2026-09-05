@@ -10,8 +10,7 @@ import {
   Key,
   Plus,
   Trash2,
-  Copy,
-  Check,
+  Lock,
   Eye,
   EyeOff,
   RefreshCw,
@@ -51,7 +50,6 @@ export function AdminSettings() {
   const [providerInput, setProviderInput] = useState('gemini')
   const [showPlainKey, setShowPlainKey] = useState(false)
   const [savingKey, setSavingKey] = useState(false)
-  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const fetchHealth = useCallback(async () => {
     setLoading(true)
@@ -138,13 +136,6 @@ export function AdminSettings() {
     } catch {
       toast({ type: 'error', title: 'Không thể xóa khóa' })
     }
-  }
-
-  const handleCopyMasked = (id: string, masked: string) => {
-    navigator.clipboard.writeText(masked)
-    setCopiedId(id)
-    toast({ type: 'info', title: 'Đã sao chép mã hiển thị' })
-    setTimeout(() => setCopiedId(null), 2000)
   }
 
   const services = [
@@ -241,17 +232,11 @@ export function AdminSettings() {
                         </span>
                       </td>
                       <td className="py-3 font-medium text-foreground">{k.key_name}</td>
-                      <td className="py-3 font-mono text-xs text-muted-foreground">
-                        <div className="inline-flex items-center gap-1.5 rounded bg-muted/60 px-2 py-1">
-                          <span>{k.masked_key}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleCopyMasked(k.id, k.masked_key)}
-                            className="text-muted-foreground hover:text-foreground transition-colors"
-                            title="Sao chép mã ẩn"
-                          >
-                            {copiedId === k.id ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
-                          </button>
+                      <td className="py-3 font-mono text-xs text-muted-foreground select-none">
+                        <div className="inline-flex items-center gap-1.5 rounded bg-muted/60 px-2.5 py-1 select-none cursor-default">
+                          <Lock className="h-3 w-3 text-muted-foreground shrink-0" />
+                          <span className="tracking-widest font-bold select-none text-muted-foreground">••••••••••••••••</span>
+                          <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.2 rounded font-sans font-medium select-none">Đã bảo vệ</span>
                         </div>
                       </td>
                       <td className="py-3 text-center text-xs text-muted-foreground">
