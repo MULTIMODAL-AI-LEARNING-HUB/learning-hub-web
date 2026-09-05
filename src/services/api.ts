@@ -605,6 +605,18 @@ export const coursesApi = {
     api.get<{ total_discussions: number; unanswered: number }>(`/courses/${courseId}/discussions/stats`),
   getEnrolledStudents: (courseId: string) =>
     api.get<{ items: Enrollment[]; total: number }>(`/courses/${courseId}/enrolled-students`),
+  getStudentProgressSummary: (courseId: string, studentId: string) =>
+    api.get<{
+      progress_percent: number
+      lessons: Array<{ id: string; title: string; type: string; completed: boolean }>
+      attempts: Array<{ id: string; quiz_id: string; title: string; score: number; max_score: number; passed: boolean; duration: string; date: string | null }>
+    }>(`/courses/${courseId}/students/${studentId}/progress-summary`),
+  sendStudentReminder: (courseId: string, studentId: string) =>
+    api.post<{ status: string; message: string }>(`/courses/${courseId}/students/${studentId}/remind`),
+  getQuizAnalytics: (courseId: string) =>
+    api.get<Array<{ question: string; wrongRate: number; attempts: number }>>(`/courses/${courseId}/quiz-analytics`),
+  aiAssist: (courseId: string, data: { topic: string; mode: 'outline' | 'summary' | 'transcript' }) =>
+    api.post<{ output: string[] }>(`/courses/${courseId}/ai-assist`, data),
 }
 
 // ============ NEW LECTURER API ENDPOINTS ============
@@ -756,6 +768,10 @@ export const discussionsApi = {
   upvote: (discussionId: string) => api.post<{ upvotes: number }>(`/discussions/${discussionId}/upvote`),
   pin: (discussionId: string) => api.post<Discussion>(`/discussions/${discussionId}/pin`, {}),
   markAsAnswer: (discussionId: string) => api.post<Discussion>(`/discussions/${discussionId}/mark-answer`, {}),
+  listByCourse: (courseId: string) =>
+    api.get<CourseDiscussionItem[]>(`/courses/${courseId}/discussions`),
+  markAnswer: (lessonId: string, postId: string) =>
+    api.post<Discussion>(`/lessons/${lessonId}/discussions/posts/${postId}/mark-answer`),
 }
 
 export const enrollmentsApi = {
@@ -912,8 +928,28 @@ export const wishlistApi = {
   check: (courseId: string) => api.get<{ is_wishlisted: boolean }>(`/wishlist/check/${courseId}`),
 }
 
+export interface CourseDiscussionItem {
+  id: string
+  lesson_id: string
+  lesson_title?: string
+  user_id: string
+  user_name?: string
+  user_avatar?: string
+  content: string
+  is_pinned: boolean
+  is_answer: boolean
+  upvotes: number
+  reply_count: number
+  created_at: string
+  updated_at: string
+}
+
 export const announcementsApi = {
   list: (courseId: string) => api.get<Announcement[]>(`/courses/${courseId}/announcements`),
+  create: (courseId: string, data: { title: string; content: string }) =>
+    api.post<Announcement>(`/courses/${courseId}/announcements`, data),
+  delete: (courseId: string, id: string) =>
+    api.delete(`/courses/${courseId}/announcements/${id}`),
 }
 
 export default api

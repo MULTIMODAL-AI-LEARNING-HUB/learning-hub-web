@@ -223,4 +223,59 @@ test.describe('Lecturer Content Management API', () => {
     const delRes = await lectApi.delete(`courses/${td.course.id}/sections/${secId}`)
     expect([204, 200]).toContain(delRes.status())
   })
+
+  test('L23: List course discussions', async () => {
+    const res = await lectApi.get(`courses/${td.course.id}/discussions`)
+    expect(res.status()).toBe(200)
+    const body = await res.json()
+    expect(Array.isArray(body)).toBeTruthy()
+  })
+
+  test('L24: Mark official answer in discussion', async () => {
+    const discRes = await stuApi.post(`lessons/${td.lesson.id}/discussions`, {
+      data: { content: 'How do I optimize retrieval?' }
+    })
+    if (!discRes.ok()) { test.skip(); return }
+    const discId = (await discRes.json()).id
+
+    const markRes = await lectApi.post(`lessons/${td.lesson.id}/discussions/posts/${discId}/mark-answer`)
+    expect(markRes.status()).toBe(200)
+    const body = await markRes.json()
+    expect(body.is_answer).toBe(true)
+  })
+
+  test('L25: Get student progress summary', async () => {
+    if (!td.student.id) { test.skip(); return }
+    const res = await lectApi.get(`courses/${td.course.id}/students/${td.student.id}/progress-summary`)
+    expect(res.status()).toBe(200)
+    const body = await res.json()
+    expect(body).toHaveProperty('progress_percent')
+    expect(Array.isArray(body.lessons)).toBeTruthy()
+    expect(Array.isArray(body.attempts)).toBeTruthy()
+  })
+
+  test('L26: Send student reminder notification', async () => {
+    if (!td.student.id) { test.skip(); return }
+    const res = await lectApi.post(`courses/${td.course.id}/students/${td.student.id}/remind`)
+    expect(res.status()).toBe(200)
+    const body = await res.json()
+    expect(body.status).toBe('ok')
+  })
+
+  test('L27: Get quiz performance analytics', async () => {
+    const res = await lectApi.get(`courses/${td.course.id}/quiz-analytics`)
+    expect(res.status()).toBe(200)
+    const body = await res.json()
+    expect(Array.isArray(body)).toBeTruthy()
+  })
+
+  test('L28: AI teaching assist', async () => {
+    const res = await lectApi.post(`courses/${td.course.id}/ai-assist`, {
+      data: { topic: 'Multimodal AI Architecture', mode: 'outline' }
+    })
+    expect(res.status()).toBe(200)
+    const body = await res.json()
+    expect(Array.isArray(body.output)).toBeTruthy()
+    expect(body.output.length).toBeGreaterThan(0)
+  })
 })

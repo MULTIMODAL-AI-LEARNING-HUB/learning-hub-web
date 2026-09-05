@@ -352,6 +352,7 @@ function AuthShell({ variant }: { variant: Variant }) {
 
               {variant === 'register' && (
                 <AuthInput
+                  name="full_name"
                   label="Full name"
                   placeholder="Nguyen Minh"
                   value={name}
@@ -362,6 +363,7 @@ function AuthShell({ variant }: { variant: Variant }) {
               )}
 
               <AuthInput
+                name="email"
                 label="Email address"
                 type="email"
                 placeholder="you@example.com"
@@ -372,6 +374,7 @@ function AuthShell({ variant }: { variant: Variant }) {
               />
 
               <AuthInput
+                name="password"
                 label="Password"
                 type="password"
                 placeholder="Minimum 8 characters"
@@ -383,6 +386,7 @@ function AuthShell({ variant }: { variant: Variant }) {
 
               {variant === 'register' && (
                 <AuthInput
+                  name="confirmPassword"
                   label="Confirm password"
                   type="password"
                   placeholder="Re-enter password"

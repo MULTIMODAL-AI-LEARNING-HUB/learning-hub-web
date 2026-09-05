@@ -4,7 +4,6 @@ import * as path from 'path'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const shouldStartWebServer = process.env.E2E_START_WEB_SERVER === 'true'
 const e2eApiUrl = process.env.VITE_API_URL ?? process.env.E2E_API_BASE ?? 'http://localhost:8000/api/v1'
 const e2eWebBase = process.env.E2E_WEB_BASE ?? 'http://localhost:5173'
 const e2eWebUrl = new URL(e2eWebBase)
@@ -31,12 +30,12 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
-  webServer: shouldStartWebServer ? {
+  webServer: {
     command: webServerCommand,
     url: e2eWebBase,
-    reuseExistingServer: false,
+    reuseExistingServer: true,
     timeout: 120000,
-  } : undefined,
+  },
   projects: [
     {
       name: 'chromium',

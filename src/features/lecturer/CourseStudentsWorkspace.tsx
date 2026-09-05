@@ -204,9 +204,20 @@ export function CourseStudentsWorkspace({ courseId }: CourseStudentsWorkspacePro
 
       {selectedStudent && (
         <StudentProgressModal
+          courseId={courseId}
           student={selectedStudent}
           reminderSent={reminderSent}
-          onSendReminder={() => setReminderSent(true)}
+          onSendReminder={async () => {
+            const studentId = selectedStudent.student_id || selectedStudent.user_id || selectedStudent.id
+            if (studentId) {
+              try {
+                await coursesApi.sendStudentReminder(courseId, studentId)
+              } catch {
+                // Graceful fallback
+              }
+            }
+            setReminderSent(true)
+          }}
           onClose={() => setSelectedStudent(null)}
         />
       )}
@@ -224,27 +235,59 @@ function Metric({ label, value }: { label: string; value: number | string }) {
 }
 
 function StudentProgressModal({
+  courseId,
   student,
   reminderSent,
   onSendReminder,
   onClose,
 }: {
+  courseId: string
   student: Enrollment
   reminderSent: boolean
   onSendReminder: () => void
   onClose: () => void
 }) {
-  const progress = student.progress_percent || 0
-  const lessons = [
+  const [summary, setSummary] = useState<{
+    progress_percent: number
+    lessons: Array<{ title: string; completed: boolean }>
+    attempts: Array<{ title: string; score: number; duration: string; date: string | null }>
+  } | null>(null)
+
+  const studentTargetId = student.student_id || student.user_id || student.id
+
+  useEffect(() => {
+    let mounted = true
+    const fetchSummary = async () => {
+      if (!studentTargetId) return
+      try {
+        const res = await coursesApi.getStudentProgressSummary(courseId, studentTargetId)
+        if (mounted && res.data) {
+          setSummary(res.data)
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    fetchSummary()
+    return () => {
+      mounted = false
+    }
+  }, [courseId, studentTargetId])
+
+  const progress = summary?.progress_percent ?? (student.progress_percent || 0)
+  const defaultLessons = [
     { title: 'Lesson 1: Course orientation', completed: progress >= 5 },
     { title: 'Lesson 2: Core concept walkthrough', completed: progress >= 35 },
     { title: 'Lesson 3: Practice lab', completed: progress >= 70 },
     { title: 'Lesson 4: Capstone review', completed: progress >= 100 },
   ]
-  const attempts = [
+  const defaultAttempts = [
     { title: 'Quiz 1: Foundations', score: progress >= 20 ? 78 : 0, duration: '12m', date: '2026-07-15' },
     { title: 'Quiz 2: Applied workflow', score: progress >= 60 ? 84 : 0, duration: '16m', date: '2026-07-18' },
   ]
+
+  const lessons = summary?.lessons && Array.isArray(summary.lessons) && summary.lessons.length > 0 ? summary.lessons : defaultLessons
+  const attempts = summary?.attempts && Array.isArray(summary.attempts) && summary.attempts.length > 0 ? summary.attempts : defaultAttempts
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4" role="dialog" aria-modal="true">

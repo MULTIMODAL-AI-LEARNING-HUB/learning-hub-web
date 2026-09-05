@@ -71,6 +71,15 @@ export async function createTestData(): Promise<TestData> {
     extraHTTPHeaders: { Authorization: `Bearer ${data.admin.token}` }
   })
 
+  const stuMe = await stuApi.get('auth/me')
+  if (stuMe.ok()) {
+    data.student.id = (await stuMe.json()).id
+  }
+  const lectMe = await lectApi.get('auth/me')
+  if (lectMe.ok()) {
+    data.lecturer.id = (await lectMe.json()).id
+  }
+
   // Create category
   const catRes = await adminApi.post('categories', {
     data: { name: `E2E Category ${ts}`, slug: `e2e-cat-${ts}`, description: 'E2E test category' }
