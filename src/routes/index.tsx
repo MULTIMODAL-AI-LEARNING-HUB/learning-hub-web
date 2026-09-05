@@ -23,6 +23,7 @@ import { AdminUsers } from '../features/admin/AdminUsers'
 import { AdminCourses } from '../features/admin/AdminCourses'
 import { AdminCategories } from '../features/admin/AdminCategories'
 import { AdminSettings } from '../features/admin/AdminSettings'
+import { AdminAiKeys } from '../features/admin/AdminAiKeys'
 import { AdminProfile } from '../features/admin/AdminProfile'
 import {
   PlaceholderPage,
@@ -108,6 +109,7 @@ export const router = createBrowserRouter([
       { path: 'users', element: <AdminUsers /> },
       { path: 'courses', element: <AdminCourses /> },
       { path: 'categories', element: <AdminCategories /> },
+      { path: 'ai-keys', element: <AdminAiKeys /> },
       { path: 'settings', element: <AdminSettings /> },
       { path: 'profile', element: <AdminProfile /> },
     ]

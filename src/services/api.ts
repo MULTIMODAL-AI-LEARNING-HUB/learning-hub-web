@@ -924,7 +924,8 @@ export const adminApi = {
     api.delete(`/admin/courses/${courseId}`),
   analytics: () => api.get('/admin/analytics'),
   health: () => api.get('/admin/health'),
-  listAiKeys: () => api.get<{ items: AiApiKey[]; total: number }>('/admin/ai-keys'),
+  listAiKeys: (provider?: string) =>
+    api.get<{ items: AiApiKey[]; total: number }>('/admin/ai-keys', { params: provider ? { provider } : undefined }),
   createAiKey: (data: { api_key: string; key_name: string; provider?: string }) =>
     api.post<AiApiKey>('/admin/ai-keys', data),
   deleteAiKey: (id: string) => api.delete(`/admin/ai-keys/${id}`),

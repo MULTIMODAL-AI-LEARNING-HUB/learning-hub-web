@@ -11,6 +11,7 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Sparkles,
+  Bot,
   User as UserIcon
 } from 'lucide-react'
 import { useAppStore } from '../stores/appStore'
@@ -26,6 +27,7 @@ const adminNavItems = [
   { id: 'users', label: 'Users', icon: Users, path: '/app/admin/users' },
   { id: 'courses', label: 'Courses', icon: BookOpen, path: '/app/admin/courses' },
   { id: 'categories', label: 'Categories', icon: Layers, path: '/app/admin/categories' },
+  { id: 'ai-keys', label: 'AI & API Keys', icon: Bot, path: '/app/admin/ai-keys' },
   { id: 'settings', label: 'Settings', icon: Settings, path: '/app/admin/settings' },
 ]
 

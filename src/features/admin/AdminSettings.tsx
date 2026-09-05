@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Database,
   Bot,
@@ -36,6 +37,7 @@ interface HealthData {
 }
 
 export function AdminSettings() {
+  const navigate = useNavigate()
   const toast = useToast()
   const [health, setHealth] = useState<HealthData | null>(null)
   const [loading, setLoading] = useState(false)
@@ -186,6 +188,10 @@ export function AdminSettings() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => navigate('/app/admin/ai-keys')} className="hidden sm:inline-flex">
+              <Bot className="mr-1.5 h-3.5 w-3.5" />
+              Mở Trang Quản Lý Chi Tiết
+            </Button>
             <Button variant="outline" size="sm" onClick={fetchAiKeys} loading={keysLoading}>
               <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
               Làm mới
@@ -377,9 +383,12 @@ export function AdminSettings() {
               onChange={(e) => setProviderInput(e.target.value)}
               className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
             >
-              <option value="gemini">Google Gemini (Khuyến nghị cho Flash-Lite)</option>
-              <option value="groq">Groq (Llama 3 Intent)</option>
-              <option value="openai">OpenAI</option>
+              <option value="gemini">Google Gemini (Flash-Lite / Pro)</option>
+              <option value="groq">Groq Cloud (Llama 3.3, Mixtral)</option>
+              <option value="openai">OpenAI (GPT-4o, GPT-4o-mini)</option>
+              <option value="anthropic">Anthropic (Claude 3.5 Sonnet / Haiku)</option>
+              <option value="deepseek">DeepSeek (DeepSeek-V3 / R1)</option>
+              <option value="other">Khác / Custom Provider</option>
             </select>
           </div>
 
