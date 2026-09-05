@@ -713,7 +713,7 @@ export const quizzesApi = {
 }
 
 export const assignmentsApi = {
-  get: (lessonId: string) => api.get<Assignment>(`/lessons/${lessonId}/assignment`),
+  get: (lessonId: string) => api.get<Assignment | null>(`/lessons/${lessonId}/assignment`),
   create: (lessonId: string, data: {
     title: string
     description?: string

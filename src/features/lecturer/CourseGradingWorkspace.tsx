@@ -75,6 +75,7 @@ export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps
             .map(async (lesson) => {
               try {
                 const assignmentRes = await assignmentsApi.get(lesson.id)
+                if (!assignmentRes.data) return null
                 return { section, lesson, assignment: assignmentRes.data }
               } catch {
                 return null
