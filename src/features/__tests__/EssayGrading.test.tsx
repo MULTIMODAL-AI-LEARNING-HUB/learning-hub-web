@@ -46,8 +46,8 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 describe('EssayGrading', () => {
   it('renders essay grading page', () => {
     render(<EssayGrading />, { wrapper })
-    expect(screen.getByText(/Essay Grading/)).toBeInTheDocument()
-    expect(screen.getByText('Grade Essay')).toBeInTheDocument()
+    expect(screen.getByText(/Chấm bài luận AI/)).toBeInTheDocument()
+    expect(screen.getByText('Chấm điểm bài luận')).toBeInTheDocument()
   })
 
   it('renders textarea', () => {
@@ -58,17 +58,17 @@ describe('EssayGrading', () => {
 
   it('shows word count', () => {
     render(<EssayGrading />, { wrapper })
-    expect(screen.getByText(/words/)).toBeInTheDocument()
+    expect(screen.getByText('0 từ')).toBeInTheDocument()
   })
 
   it('shows empty state before grading', () => {
     render(<EssayGrading />, { wrapper })
-    expect(screen.getByText(/Ready when you are/)).toBeInTheDocument()
+    expect(screen.getByText(/Sẵn sàng chấm điểm/)).toBeInTheDocument()
   })
 
   it('clears essay content', () => {
     render(<EssayGrading />, { wrapper })
-    fireEvent.click(screen.getByText('Clear'))
+    fireEvent.click(screen.getByText('Xóa làm lại'))
     const textarea = screen.getByRole('textbox')
     expect(textarea).toHaveValue('')
   })

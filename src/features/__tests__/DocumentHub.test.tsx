@@ -30,28 +30,28 @@ describe('DocumentHub', () => {
 
   it('renders document list heading', () => {
     render(<DocumentHub />, { wrapper })
-    expect(screen.getByRole('heading', { name: 'Documents' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Tài liệu của tôi' })).toBeInTheDocument()
   })
 
   it('renders upload button', () => {
     render(<DocumentHub />, { wrapper })
-    expect(screen.getByText('Upload')).toBeInTheDocument()
+    expect(screen.getByText('Tải lên')).toBeInTheDocument()
   })
 
   it('opens upload modal', () => {
     render(<DocumentHub />, { wrapper })
-    fireEvent.click(screen.getByText('Upload'))
+    fireEvent.click(screen.getByText('Tải lên'))
     expect(useAppStore.getState().ui.uploadModalOpen).toBe(true)
   })
 
   it('shows processing status', () => {
     render(<DocumentHub />, { wrapper })
-    expect(screen.getByText(/Processing/)).toBeInTheDocument()
+    expect(screen.getByText(/Đang xử lý/)).toBeInTheDocument()
   })
 
   it('shows ready status', () => {
     render(<DocumentHub />, { wrapper })
-    expect(screen.getByText(/Ready/)).toBeInTheDocument()
+    expect(screen.getByText(/Sẵn sàng/)).toBeInTheDocument()
   })
 
   it('selects a document on click', () => {

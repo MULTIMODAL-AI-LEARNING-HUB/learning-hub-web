@@ -59,14 +59,14 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 describe('QuizGenerator', () => {
   it('renders quiz generator page', () => {
     render(<QuizGenerator />, { wrapper })
-    expect(screen.getByText(/Quiz Generator/)).toBeInTheDocument()
-    expect(screen.getByText('Generate Quiz')).toBeInTheDocument()
+    expect(screen.getByText(/Tạo đề trắc nghiệm AI/)).toBeInTheDocument()
+    expect(screen.getByText('Bắt đầu tạo đề trắc nghiệm')).toBeInTheDocument()
   })
 
   it('renders configuration options', () => {
     render(<QuizGenerator />, { wrapper })
-    expect(screen.getByText('Select document')).toBeInTheDocument()
-    expect(screen.getByText('Number of questions')).toBeInTheDocument()
+    expect(screen.getByText('Chọn tài liệu học tập')).toBeInTheDocument()
+    expect(screen.getByText('Số lượng câu hỏi')).toBeInTheDocument()
   })
 
   it('shows document options', () => {

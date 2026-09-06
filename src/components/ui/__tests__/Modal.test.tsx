@@ -29,7 +29,7 @@ describe('Modal', () => {
         <p>Content</p>
       </Modal>
     )
-    const closeBtn = screen.getByRole('button', { name: /close/i })
+    const closeBtn = screen.getByRole('button', { name: /đóng/i })
     expect(closeBtn).toBeTruthy()
     fireEvent.click(closeBtn)
     expect(onClose).toHaveBeenCalledTimes(1)

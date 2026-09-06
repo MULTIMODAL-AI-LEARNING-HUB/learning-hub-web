@@ -32,7 +32,7 @@ describe('ChatPanel', () => {
 
   it('renders chat panel', () => {
     render(<ChatPanel />, { wrapper })
-    expect(screen.getByText('AI Chat')).toBeInTheDocument()
+    expect(screen.getByText('Trò chuyện AI')).toBeInTheDocument()
     expect(screen.getByText('Test Chat')).toBeInTheDocument()
   })
 
@@ -43,20 +43,20 @@ describe('ChatPanel', () => {
 
   it('renders input field', () => {
     render(<ChatPanel />, { wrapper })
-    expect(screen.getByPlaceholderText(/ask anything/i)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/hỏi bất cứ điều gì/i)).toBeInTheDocument()
   })
 
   it('sends a message', () => {
     render(<ChatPanel />, { wrapper })
-    const input = screen.getByPlaceholderText(/ask anything/i)
+    const input = screen.getByPlaceholderText(/hỏi bất cứ điều gì/i)
     fireEvent.change(input, { target: { value: 'What is ML?' } })
-    fireEvent.click(screen.getByRole('button', { name: /send message/i }))
+    fireEvent.click(screen.getByRole('button', { name: /gửi tin nhắn/i }))
     expect(useAppStore.getState().chat.sessions[0].messages.length).toBeGreaterThan(1)
   })
 
   it('sends message on Enter', () => {
     render(<ChatPanel />, { wrapper })
-    const input = screen.getByPlaceholderText(/ask anything/i)
+    const input = screen.getByPlaceholderText(/hỏi bất cứ điều gì/i)
     fireEvent.change(input, { target: { value: 'Hello AI' } })
     fireEvent.keyDown(input, { key: 'Enter' })
     expect(useAppStore.getState().chat.sessions[0].messages.length).toBeGreaterThan(1)
@@ -64,7 +64,7 @@ describe('ChatPanel', () => {
 
   it('does not send empty message', () => {
     render(<ChatPanel />, { wrapper })
-    const sendBtn = screen.getByRole('button', { name: /send message/i })
+    const sendBtn = screen.getByRole('button', { name: /gửi tin nhắn/i })
     expect(sendBtn).toBeDisabled()
   })
 })

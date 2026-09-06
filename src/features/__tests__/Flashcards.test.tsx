@@ -52,19 +52,19 @@ describe('Flashcards', () => {
 
   it('renders flashcards page', () => {
     render(<Flashcards />, { wrapper })
-    expect(screen.getByRole('heading', { name: 'Flashcards' })).toBeInTheDocument()
-    expect(screen.getByText(/spaced repetition learning/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Thẻ ghi nhớ Flashcards' })).toBeInTheDocument()
+    expect(screen.getByText(/Học lặp lại ngắt quãng/i)).toBeInTheDocument()
   })
 
   it('renders configuration form', () => {
     render(<Flashcards />, { wrapper })
-    expect(screen.getByText('Select document')).toBeInTheDocument()
-    expect(screen.getByText('Card Set Name')).toBeInTheDocument()
-    expect(screen.getByText('Number of cards')).toBeInTheDocument()
+    expect(screen.getByText('Chọn tài liệu')).toBeInTheDocument()
+    expect(screen.getByText('Tên bộ thẻ học')).toBeInTheDocument()
+    expect(screen.getByText('Số lượng thẻ')).toBeInTheDocument()
   })
 
   it('shows generate button', () => {
     render(<Flashcards />, { wrapper })
-    expect(screen.getByText('Generate Flashcards')).toBeInTheDocument()
+    expect(screen.getByText('Tạo thẻ ghi nhớ Flashcards')).toBeInTheDocument()
   })
 })
