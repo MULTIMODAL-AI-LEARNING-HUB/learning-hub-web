@@ -21,6 +21,31 @@ export const mapApiUser = (user: AuthUser) => ({
   } : undefined
 })
 
+// Helper for resilient localStorage access in browser and test environments
+const safeLocalStorage = {
+  get: (key: string): string | null => {
+    try {
+      return typeof window !== 'undefined' ? localStorage.getItem(key) : null
+    } catch {
+      return null
+    }
+  },
+  set: (key: string, value: string): void => {
+    try {
+      if (typeof window !== 'undefined') localStorage.setItem(key, value)
+    } catch {
+      // Ignore storage write errors
+    }
+  },
+  remove: (key: string): void => {
+    try {
+      if (typeof window !== 'undefined') localStorage.removeItem(key)
+    } catch {
+      // Ignore storage remove errors
+    }
+  }
+}
+
 export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never]], [], AuthSlice> = (set, get) => {
   return {
     auth: {
@@ -34,6 +59,8 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
           const { user, token } = res.data
           void rememberMe // Refresh-token persistence is controlled by the HttpOnly cookie.
           setAccessToken(token.access_token)
+          safeLocalStorage.set('token', token.access_token)
+          safeLocalStorage.set('access_token', token.access_token)
 
           set((state) => ({
             auth: {
@@ -55,6 +82,8 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
           const res = await authApi.register({ email, password, full_name: fullName, role })
           const { user, token } = res.data
           setAccessToken(token.access_token)
+          safeLocalStorage.set('token', token.access_token)
+          safeLocalStorage.set('access_token', token.access_token)
 
           set((state) => ({
             auth: {
@@ -120,6 +149,8 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
           // Ignore network errors on logout
         } finally {
           clearAccessToken()
+          safeLocalStorage.remove('token')
+          safeLocalStorage.remove('access_token')
           set((state) => ({
             auth: {
               ...state.auth,
@@ -135,9 +166,23 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
         try {
           const res = await authApi.refresh()
           setAccessToken(res.data.access_token)
+          safeLocalStorage.set('token', res.data.access_token)
+          safeLocalStorage.set('access_token', res.data.access_token)
           await get().auth.loadUser()
         } catch {
+          const fallbackToken = safeLocalStorage.get('access_token') || safeLocalStorage.get('token')
+          if (fallbackToken) {
+            setAccessToken(fallbackToken)
+            try {
+              await get().auth.loadUser()
+              return
+            } catch {
+              clearAccessToken()
+            }
+          }
           clearAccessToken()
+          safeLocalStorage.remove('token')
+          safeLocalStorage.remove('access_token')
           set((state) => ({
             auth: {
               ...state.auth,
