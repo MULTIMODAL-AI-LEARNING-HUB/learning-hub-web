@@ -2,7 +2,7 @@ import { test, expect, request } from '@playwright/test'
 import { createTestData, cleanupTestData } from '../helpers/fixtures'
 import type { TestData } from '../helpers/fixtures'
 
-const API_BASE = 'http://localhost:8000/api/v1/'
+const API_BASE = (process.env.E2E_API_BASE ?? 'http://localhost:8000/api/v1/').replace(/\/?$/, '/')
 const ADMIN_BASE = `${API_BASE}admin`
 
 test.describe('Admin API', () => {
@@ -55,7 +55,7 @@ test.describe('Admin API', () => {
   })
 
   test('AD04: List users returns mixed roles', async () => {
-    const res = await adminApi.get(`${ADMIN_BASE}/users?page=1&page_size=10`)
+    const res = await adminApi.get(`${ADMIN_BASE}/users?page=1&page_size=100`)
     expect(res.status()).toBe(200)
     const body = await res.json()
     expect(body.items.length).toBeGreaterThan(1)

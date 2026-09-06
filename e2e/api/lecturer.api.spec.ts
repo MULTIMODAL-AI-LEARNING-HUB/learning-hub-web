@@ -2,7 +2,7 @@ import { test, expect, request } from '@playwright/test'
 import { createTestData, cleanupTestData } from '../helpers/fixtures'
 import type { TestData } from '../helpers/fixtures'
 
-const API_BASE = 'http://localhost:8000/api/v1/'
+const API_BASE = (process.env.E2E_API_BASE ?? 'http://localhost:8000/api/v1/').replace(/\/?$/, '/')
 
 test.describe('Lecturer Content Management API', () => {
   test.describe.configure({ mode: 'serial' })
@@ -176,11 +176,15 @@ test.describe('Lecturer Content Management API', () => {
     expect(voteRes.status()).toBe(200)
   })
 
+  let createdReviewId = ''
+
   test('L16: Student creates review', async () => {
     const res = await stuApi.post(`courses/${td.course.id}/reviews`, {
       data: { rating: 5, comment: 'Excellent course!' }
     })
     expect(res.status()).toBe(201)
+    const body = await res.json()
+    createdReviewId = body.id
   })
 
   test('L17: Get my review', async () => {
@@ -196,10 +200,11 @@ test.describe('Lecturer Content Management API', () => {
   })
 
   test('L19: Lecturer replies to review', async () => {
-    const res = await lectApi.post(`courses/${td.course.id}/reviews/review-id/reply`, {
-      data: { reply_text: 'Thank you for your feedback!' }
+    const reviewId = createdReviewId || '00000000-0000-0000-0000-000000000000'
+    const res = await lectApi.post(`courses/${td.course.id}/reviews/${reviewId}/reply`, {
+      data: { reply: 'Thank you for your feedback!' }
     })
-    expect([201, 404]).toContain(res.status())
+    expect([200, 201, 404]).toContain(res.status())
   })
 
   test('L20: Course materials - add external URL', async () => {

@@ -1,76 +1,58 @@
 import { test, expect } from '@playwright/test'
+import { createTestData } from '../helpers/fixtures'
 
-const BASE_URL = 'http://localhost:5173'
-const API_BASE = 'http://localhost:8000/api/v1'
+const BASE_URL = process.env.E2E_WEB_BASE ?? 'https://learninghubs.tech'
 
 test.describe('Quiz UI', () => {
   test.describe.configure({ mode: 'serial' })
-  let courseId = ''
-  let studentToken = ''
+  let td: Awaited<ReturnType<typeof createTestData>>
 
   test.beforeAll(async () => {
-    const ts = Date.now()
-    const api = await (await import('@playwright/test')).request.newContext({ baseURL: API_BASE })
-
-    await api.post('/auth/register', {
-      data: { email: `quizui_lect_${ts}@test.com`, password: 'TestPass123!', full_name: 'QuizUI Lect', role: 'lecturer' }
-    }).catch(() => {})
-    const lectLogin = await api.post('/auth/login', {
-      data: { email: `quizui_lect_${ts}@test.com`, password: 'TestPass123!' }
-    })
-    const lecturerToken = lectLogin.ok() ? (await lectLogin.json()).access_token : ''
-    const lectApi = await (await import('@playwright/test')).request.newContext({
-      baseURL: API_BASE, extraHTTPHeaders: { Authorization: `Bearer ${lecturerToken}` }
-    })
-
-    await api.post('/auth/register', {
-      data: { email: `quizui_stu_${ts}@test.com`, password: 'TestPass123!', full_name: 'QuizUI Student', role: 'student' }
-    }).catch(() => {})
-    const stuLogin = await api.post('/auth/login', {
-      data: { email: `quizui_stu_${ts}@test.com`, password: 'TestPass123!' }
-    })
-    if (stuLogin.ok()) studentToken = (await stuLogin.json()).access_token
-
-    const courseRes = await lectApi.post('/courses', {
-      data: { title: `Quiz UI Course ${ts}`, description: 'Quiz UI Test', status: 'draft' }
-    })
-    if (courseRes.ok()) {
-      courseId = (await courseRes.json()).id
-      const secRes = await lectApi.post(`/courses/${courseId}/sections`, {
-        data: { title: 'Section 1', order_index: 1 }
-      })
-      if (secRes.ok()) {
-        const sectionId = (await secRes.json()).id
-        const lesRes = await lectApi.post(`/sections/${sectionId}/lessons`, {
-          data: { title: 'Lesson 1', content: 'Quiz content', order_index: 1, type: 'article' }
-        })
-        if (lesRes.ok()) {
-          const lessonId = (await lesRes.json()).id
-          await lectApi.post(`/lessons/${lessonId}/quiz`, {
-            data: { title: 'UI Test Quiz', passing_score: 50, duration_mins: 10, max_attempts: 3 }
-          })
-        }
-      }
-      await lectApi.post(`/courses/${courseId}/publish`)
-    }
-
-    const stuApi = await (await import('@playwright/test')).request.newContext({
-      baseURL: API_BASE, extraHTTPHeaders: { Authorization: `Bearer ${studentToken}` }
-    })
-    await stuApi.post(`/courses/${courseId}/enroll/payment-intent`, {
-      data: { payment_method: 'vnpay' }
-    }).catch(() => {})
+    td = await createTestData()
   })
 
-  test('UQ1: Student sees quiz page', async ({ browser }) => {
-    if (!courseId) { test.skip(); return }
+  async function loginAsStudent(page: any) {
+    if (!td?.student?.token) return false
+    await page.addInitScript((token: string) => {
+      localStorage.setItem('token', token)
+      localStorage.setItem('access_token', token)
+    }, td.student.token)
+    return true
+  }
+
+  test('UQ1: Student sees course detail with quiz', async ({ browser }) => {
+    if (!td?.course?.id) { test.skip(); return }
     const context = await browser.newContext()
     const page = await context.newPage()
-    await page.evaluate((t) => {
-      localStorage.setItem('token', t)
-      localStorage.setItem('access_token', t)
-    }, studentToken)
-    await page.goto(`${BASE_URL}/courses/${courseId}`)
+    const loggedIn = await loginAsStudent(page)
+    if (!loggedIn) { test.skip(); await context.close(); return }
+
+    await page.goto(`${BASE_URL}/app/student/courses/${td.course.id}`)
+    await page.waitForLoadState('networkidle')
+    await expect(page.locator('body')).toBeVisible()
+    await context.close()
+  })
+
+  test('UQ2: Student can access quiz taking page', async ({ browser }) => {
+    if (!td?.quiz?.id) { test.skip(); return }
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    const loggedIn = await loginAsStudent(page)
+    if (!loggedIn) { test.skip(); await context.close(); return }
+
+    await page.goto(`${BASE_URL}/quiz/${td.quiz.id}`)
+    await page.waitForLoadState('networkidle')
+    await expect(page.locator('body')).toBeVisible()
+    await context.close()
+  })
+
+  test('UQ3: Student can access quiz generator tool', async ({ browser }) => {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    const loggedIn = await loginAsStudent(page)
+    if (!loggedIn) { test.skip(); await context.close(); return }
+
+    await page.goto(`${BASE_URL}/app/student/quiz`)
     await page.waitForLoadState('networkidle')
     await expect(page.locator('body')).toBeVisible()
     await context.close()

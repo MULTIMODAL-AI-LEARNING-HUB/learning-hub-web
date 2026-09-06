@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 
-const BASE_URL = 'http://localhost:5173'
-const API_BASE = 'http://localhost:8000/api/v1'
+const BASE_URL = process.env.PROD_WEB_URL || process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:5173'
+const API_BASE = (process.env.E2E_API_BASE ?? 'http://localhost:8000/api/v1/').replace(/\/?$/, '/')
 
 test.describe('Auth UI Flows', () => {
   test.describe.configure({ mode: 'serial' })
@@ -23,22 +23,21 @@ test.describe('Auth UI Flows', () => {
     await expect(page.locator('button[type="submit"]').first()).toBeVisible()
   })
 
-  test('UA3: Login with valid credentials redirects to dashboard', async ({ page }) => {
+  test('UA3: Login with valid credentials redirects to dashboard', async ({ page, request }) => {
     const ts = Date.now()
     const email = `ui_login_${ts}@test.com`
 
     // Register first via API
-    const api = await (await import('@playwright/test')).request.newContext({ baseURL: API_BASE })
-    await api.post('/auth/register', {
+    const regRes = await request.post(`${API_BASE}auth/register`, {
       data: { email, password: 'TestPass123!', full_name: 'UI Login Test', role: 'student' }
-    }).catch(() => {})
+    })
+    expect([200, 201]).toContain(regRes.status())
 
-    await page.goto(`${BASE_URL}/login`)
-    await page.waitForLoadState('networkidle')
+    await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle' })
     await page.fill('input[type="email"]', email)
     await page.fill('input[type="password"]', 'TestPass123!')
     await page.click('button[type="submit"]')
-    await page.waitForTimeout(3000)
+    await page.waitForURL('**/app/student/dashboard', { timeout: 15000 })
     const currentUrl = page.url()
     expect(currentUrl).not.toContain('/login')
   })
@@ -46,7 +45,7 @@ test.describe('Auth UI Flows', () => {
   test('UA4: Login with wrong password shows error', async ({ page }) => {
     await page.goto(`${BASE_URL}/login`)
     await page.waitForLoadState('networkidle')
-    await page.fill('input[type="email"]', 'admin@learninghub.com')
+    await page.fill('input[type="email"]', 'admin@learninghubs.tech')
     await page.fill('input[type="password"]', 'wrongpassword')
     await page.click('button[type="submit"]')
     await page.waitForTimeout(2000)

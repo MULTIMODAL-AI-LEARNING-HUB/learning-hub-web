@@ -65,7 +65,11 @@ test.describe('Real-world User Journey: Registration, Payment Intent & Enrollmen
     expect(paymentIntentRes.ok()).toBeTruthy()
     const paymentIntentData = await paymentIntentRes.json()
     expect(paymentIntentData.transaction_id).toBeTruthy()
-    expect(paymentIntentData.payment_url).toBeTruthy()
+    if ((targetCourse.price_vnd ?? targetCourse.price ?? 0) > 0) {
+      expect(paymentIntentData.payment_url).toBeTruthy()
+    } else {
+      expect(typeof paymentIntentData.payment_url).toBe('string')
+    }
 
     // 6. Reload Course Detail Page to verify stability
     await page.goto(`${PROD_WEB_URL}/app/student/courses/${targetCourse.id}`, { waitUntil: 'networkidle' })

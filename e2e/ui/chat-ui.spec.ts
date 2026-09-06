@@ -1,56 +1,44 @@
 import { test, expect } from '@playwright/test'
 
-const BASE_URL = 'http://localhost:5173'
-const API_BASE = 'http://localhost:8000/api/v1'
+const BASE_URL = process.env.PROD_WEB_URL || process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:5173'
+const API_BASE = (process.env.E2E_API_BASE ?? 'http://localhost:8000/api/v1/').replace(/\/?$/, '/')
 
 test.describe('Chat UI', () => {
   test.describe.configure({ mode: 'serial' })
-  let studentToken = ''
+  let studentEmail = ''
+  const studentPassword = 'TestPass123!'
 
-  test.beforeAll(async () => {
+  test.beforeAll(async ({ request }) => {
     const ts = Date.now()
-    const api = await (await import('@playwright/test')).request.newContext({ baseURL: API_BASE })
-    await api.post('/auth/register', {
-      data: { email: `chatui_${ts}@test.com`, password: 'TestPass123!', full_name: 'Chat UI', role: 'student' }
+    studentEmail = `chatui_${ts}@test.com`
+    await request.post(`${API_BASE}auth/register`, {
+      data: { email: studentEmail, password: studentPassword, full_name: 'Chat UI Test', role: 'student' }
     }).catch(() => {})
-    const loginRes = await api.post('/auth/login', {
-      data: { email: `chatui_${ts}@test.com`, password: 'TestPass123!' }
-    })
-    if (loginRes.ok()) studentToken = (await loginRes.json()).access_token
   })
 
-  test('UC1: Chat page loads with input field', async ({ browser }) => {
-    if (!studentToken) { test.skip(); return }
-    const context = await browser.newContext()
-    const page = await context.newPage()
-    await page.evaluate((t) => {
-      localStorage.setItem('token', t)
-      localStorage.setItem('access_token', t)
-    }, studentToken)
-    await page.goto(`${BASE_URL}/chat`)
-    await page.waitForLoadState('networkidle')
+  async function loginStudent(page: any) {
+    await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle' })
+    await page.fill('input[type="email"]', studentEmail)
+    await page.fill('input[type="password"]', studentPassword)
+    await page.click('button[type="submit"]')
+    await page.waitForURL('**/app/student/dashboard', { timeout: 15000 })
+    await page.goto(`${BASE_URL}/app/student/chat`, { waitUntil: 'networkidle' })
+  }
+
+  test('UC1: Chat page loads with input field', async ({ page }) => {
+    await loginStudent(page)
     await expect(page.locator('body')).toBeVisible()
     const hasInput = await page.locator('textarea, input[type="text"], [contenteditable]').first().isVisible().catch(() => false)
     expect(hasInput).toBeTruthy()
-    await context.close()
   })
 
-  test('UC2: Student can type in chat input', async ({ browser }) => {
-    if (!studentToken) { test.skip(); return }
-    const context = await browser.newContext()
-    const page = await context.newPage()
-    await page.evaluate((t) => {
-      localStorage.setItem('token', t)
-      localStorage.setItem('access_token', t)
-    }, studentToken)
-    await page.goto(`${BASE_URL}/chat`)
-    await page.waitForLoadState('networkidle')
+  test('UC2: Student can type in chat input', async ({ page }) => {
+    await loginStudent(page)
     const input = page.locator('textarea, input[type="text"], [contenteditable]').first()
     if (await input.isVisible()) {
       await input.fill('Hello AI')
       const value = await input.inputValue().catch(async () => (await input.textContent()) || '')
       expect(value.length > 0 || value.includes('Hello')).toBeTruthy()
     }
-    await context.close()
   })
 })

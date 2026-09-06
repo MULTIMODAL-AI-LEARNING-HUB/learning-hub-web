@@ -142,7 +142,7 @@ test.describe('Friends Chat UI', () => {
 
     await expect(page.getByRole('heading', { name: 'UI Friends Group' })).toBeVisible()
     const message = 'UI hello from mocked E2E'
-    await page.getByPlaceholder(/Message UI Friends Group/i).fill(message)
+    await page.locator('textarea').fill(message)
     await page.getByRole('button', { name: /send message/i }).click()
     await expect(page.getByTestId('friends-chat-messages').getByText(message)).toBeVisible()
     await expect(page.getByTestId('friends-chat-composer')).toBeInViewport()

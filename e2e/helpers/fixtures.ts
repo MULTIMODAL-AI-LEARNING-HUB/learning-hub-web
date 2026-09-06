@@ -1,6 +1,6 @@
 import { request, expect } from '@playwright/test'
 
-const API_BASE = 'http://localhost:8000/api/v1/'
+const API_BASE = (process.env.E2E_API_BASE ?? 'http://localhost:8000/api/v1/').replace(/\/?$/, '/')
 
 export interface TestData {
   admin: { email: string; password: string; token: string }
@@ -19,8 +19,8 @@ export async function createTestData(): Promise<TestData> {
   const ts = Date.now()
   const data: TestData = {
     admin: {
-      email: process.env.E2E_ADMIN_EMAIL ?? 'admin@learninghub.com',
-      password: process.env.E2E_ADMIN_PASSWORD ?? 'AdminPass123!',
+      email: process.env.E2E_ADMIN_EMAIL ?? 'admin@learninghubs.tech',
+      password: process.env.E2E_ADMIN_PASSWORD ?? 'Password123!',
       token: '',
     },
     lecturer: { email: `e2e_lecturer_${ts}@test.com`, password: 'TestPass123!', id: '' },
@@ -41,9 +41,19 @@ export async function createTestData(): Promise<TestData> {
       const j = await loginR.json()
       return j.token?.access_token || j.access_token || ''
     }
-    await ctx.post('auth/register', {
-      data: { email: creds.email, password: creds.password, full_name: creds.full_name || creds.role || 'User', role: creds.role || 'student' }
-    }).catch(() => {})
+    if (creds.role === 'lecturer' && data.admin.token) {
+      const adminCtx = await request.newContext({
+        baseURL: API_BASE,
+        extraHTTPHeaders: { Authorization: `Bearer ${data.admin.token}` }
+      })
+      await adminCtx.post('admin/users', {
+        data: { email: creds.email, password: creds.password, full_name: creds.full_name || 'Lecturer', role: 'lecturer' }
+      }).catch(() => {})
+    } else {
+      await ctx.post('auth/register', {
+        data: { email: creds.email, password: creds.password, full_name: creds.full_name || creds.role || 'User', role: creds.role || 'student' }
+      }).catch(() => {})
+    }
     const loginR2 = await ctx.post('auth/login', { data: { email: creds.email, password: creds.password } })
     if (loginR2.ok()) {
       const j = await loginR2.json()

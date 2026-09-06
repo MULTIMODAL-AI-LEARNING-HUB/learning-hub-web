@@ -1,6 +1,6 @@
 import { request } from '@playwright/test'
 
-const API_BASE = 'http://localhost:8000/api/v1'
+const API_BASE = (process.env.E2E_API_BASE ?? 'http://localhost:8000/api/v1').replace(/\/$/, '')
 
 export interface PollOptions {
   intervalMs?: number

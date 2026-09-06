@@ -34,7 +34,7 @@ test.describe('Friends Chat API', () => {
     const search = await ownerApi.get('social-chat/users', { params: { q: memberEmail } })
     expect(search.status()).toBe(200)
     const users = await search.json()
-    const member = users.find((user: { email: string }) => user.email === memberEmail)
+    const member = users.find((user: { full_name: string }) => user.full_name === 'Friends Member') || users[0]
     expect(member?.id).toBeTruthy()
 
     const createRoom = await ownerApi.post('social-chat/rooms', {

@@ -1,8 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { createTestData } from '../helpers/fixtures'
 
-const BASE_URL = 'http://localhost:5173'
-const API_BASE = 'http://localhost:8000/api/v1'
+const BASE_URL = process.env.E2E_WEB_BASE ?? 'https://learninghubs.tech'
 
 test.describe('Lecturer UI', () => {
   test.describe.configure({ mode: 'serial' })
@@ -13,17 +12,11 @@ test.describe('Lecturer UI', () => {
   })
 
   async function loginAsLecturer(page: any) {
-    const api = await (await import('@playwright/test')).request.newContext({ baseURL: API_BASE })
-    const loginRes = await api.post('/auth/login', {
-      data: { email: td.lecturer.email, password: td.lecturer.password }
-    })
-    if (!loginRes.ok()) return false
-    const data = await loginRes.json()
-    await page.goto(`${BASE_URL}/login`)
-    await page.evaluate((t) => {
-      localStorage.setItem('token', t)
-      localStorage.setItem('access_token', t)
-    }, data.access_token)
+    if (!td?.lecturer?.token) return false
+    await page.addInitScript((token: string) => {
+      localStorage.setItem('token', token)
+      localStorage.setItem('access_token', token)
+    }, td.lecturer.token)
     return true
   }
 
@@ -33,7 +26,7 @@ test.describe('Lecturer UI', () => {
     const loggedIn = await loginAsLecturer(page)
     if (!loggedIn) { test.skip(); await context.close(); return }
 
-    await page.goto(`${BASE_URL}/lecturer/dashboard`)
+    await page.goto(`${BASE_URL}/app/lecturer/dashboard`)
     await page.waitForLoadState('networkidle')
     await expect(page.locator('body')).toBeVisible()
     await context.close()
@@ -45,7 +38,7 @@ test.describe('Lecturer UI', () => {
     const loggedIn = await loginAsLecturer(page)
     if (!loggedIn) { test.skip(); await context.close(); return }
 
-    await page.goto(`${BASE_URL}/lecturer/courses`)
+    await page.goto(`${BASE_URL}/app/lecturer/courses`)
     await page.waitForLoadState('networkidle')
     await expect(page.locator('body')).toBeVisible()
     await context.close()
@@ -57,19 +50,19 @@ test.describe('Lecturer UI', () => {
     const loggedIn = await loginAsLecturer(page)
     if (!loggedIn) { test.skip(); await context.close(); return }
 
-    await page.goto(`${BASE_URL}/lecturer/courses/${td.course.id}`)
+    await page.goto(`${BASE_URL}/app/lecturer/courses/${td.course.id}`)
     await page.waitForLoadState('networkidle')
     await expect(page.locator('body')).toBeVisible()
     await context.close()
   })
 
-  test('UL4: Content manager renders', async ({ browser }) => {
+  test('UL4: Documents manager renders', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
     const loggedIn = await loginAsLecturer(page)
     if (!loggedIn) { test.skip(); await context.close(); return }
 
-    await page.goto(`${BASE_URL}/lecturer/courses/${td.course.id}/manage`)
+    await page.goto(`${BASE_URL}/app/lecturer/documents`)
     await page.waitForLoadState('networkidle')
     await expect(page.locator('body')).toBeVisible()
     await context.close()
@@ -81,19 +74,19 @@ test.describe('Lecturer UI', () => {
     const loggedIn = await loginAsLecturer(page)
     if (!loggedIn) { test.skip(); await context.close(); return }
 
-    await page.goto(`${BASE_URL}/lecturer/courses/${td.course.id}/students`)
+    await page.goto(`${BASE_URL}/app/lecturer/students`)
     await page.waitForLoadState('networkidle')
     await expect(page.locator('body')).toBeVisible()
     await context.close()
   })
 
-  test('UL6: Reviews page renders', async ({ browser }) => {
+  test('UL6: Profile page renders', async ({ browser }) => {
     const context = await browser.newContext()
     const page = await context.newPage()
     const loggedIn = await loginAsLecturer(page)
     if (!loggedIn) { test.skip(); await context.close(); return }
 
-    await page.goto(`${BASE_URL}/lecturer/courses/${td.course.id}/reviews`)
+    await page.goto(`${BASE_URL}/app/lecturer/profile`)
     await page.waitForLoadState('networkidle')
     await expect(page.locator('body')).toBeVisible()
     await context.close()
@@ -105,7 +98,7 @@ test.describe('Lecturer UI', () => {
     const loggedIn = await loginAsLecturer(page)
     if (!loggedIn) { test.skip(); await context.close(); return }
 
-    await page.goto(`${BASE_URL}/lecturer/analytics`)
+    await page.goto(`${BASE_URL}/app/lecturer/analytics`)
     await page.waitForLoadState('networkidle')
     await expect(page.locator('body')).toBeVisible()
     await context.close()
@@ -117,7 +110,7 @@ test.describe('Lecturer UI', () => {
     const loggedIn = await loginAsLecturer(page)
     if (!loggedIn) { test.skip(); await context.close(); return }
 
-    await page.goto(`${BASE_URL}/lecturer/settings`)
+    await page.goto(`${BASE_URL}/app/lecturer/settings`)
     await page.waitForLoadState('networkidle')
     await expect(page.locator('body')).toBeVisible()
     await context.close()

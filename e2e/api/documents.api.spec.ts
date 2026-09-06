@@ -4,7 +4,7 @@ import type { TestData } from '../helpers/fixtures'
 import * as fs from 'fs'
 import * as path from 'path'
 
-const API_BASE = 'http://localhost:8000/api/v1/'
+const API_BASE = (process.env.E2E_API_BASE ?? 'http://localhost:8000/api/v1/').replace(/\/?$/, '/')
 
 test.describe('Documents, Notifications & Wishlist API', () => {
   test.describe.configure({ mode: 'serial' })

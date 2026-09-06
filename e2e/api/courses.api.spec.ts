@@ -2,7 +2,7 @@ import { test, expect, request } from '@playwright/test'
 import { createTestData, cleanupTestData } from '../helpers/fixtures'
 import type { TestData } from '../helpers/fixtures'
 
-const API_BASE = 'http://localhost:8000/api/v1/'
+const API_BASE = (process.env.E2E_API_BASE ?? 'http://localhost:8000/api/v1/').replace(/\/?$/, '/')
 
 test.describe('Courses & Categories API', () => {
   test.describe.configure({ mode: 'serial' })

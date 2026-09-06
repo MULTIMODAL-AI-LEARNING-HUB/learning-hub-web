@@ -2,7 +2,7 @@ import { test, expect, request } from '@playwright/test'
 import { createTestData, cleanupTestData } from '../helpers/fixtures'
 import type { TestData } from '../helpers/fixtures'
 
-const API_BASE = 'http://localhost:8000/api/v1/'
+const API_BASE = (process.env.E2E_API_BASE ?? 'http://localhost:8000/api/v1/').replace(/\/?$/, '/')
 
 test.describe('Payment & Webhook API', () => {
   test.describe.configure({ mode: 'serial' })
@@ -59,7 +59,8 @@ test.describe('Payment & Webhook API', () => {
   })
 
   test('P05: VNPay IPN webhook returns valid response', async () => {
-    const webhookApi = await request.newContext({ baseURL: 'http://localhost:8000' })
+    const webhookBase = (process.env.PROD_API_URL ?? process.env.E2E_API_BASE ?? 'http://localhost:8000').replace(/\/api\/v1\/?$/, '').replace(/\/$/, '')
+    const webhookApi = await request.newContext({ baseURL: webhookBase })
     const res = await webhookApi.get('webhooks/payment/vnpay/return', {
       params: {
         vnp_Amount: '100000',

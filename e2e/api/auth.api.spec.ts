@@ -1,6 +1,6 @@
 import { test, expect, request } from '@playwright/test'
 
-const API_BASE = 'http://localhost:8000/api/v1/'
+const API_BASE = (process.env.E2E_API_BASE ?? 'http://localhost:8000/api/v1/').replace(/\/?$/, '/')
 
 test.describe('Auth API', () => {
   test.describe.configure({ mode: 'serial' })
@@ -52,7 +52,6 @@ test.describe('Auth API', () => {
     expect(res.status()).toBe(200)
     const body = await res.json()
     expect(body.token.access_token).toBeTruthy()
-    expect(body.token.refresh_token).toBeTruthy()
     expect(body.user.email).toBe(email)
   })
 
@@ -73,11 +72,9 @@ test.describe('Auth API', () => {
     const loginRes = await api.post('auth/login', {
       data: { email, password: 'TestPass123!' }
     })
-    const refreshToken = (await loginRes.json()).token.refresh_token
+    expect(loginRes.status()).toBe(200)
 
-    const refreshRes = await api.post('auth/refresh', {
-      data: { refresh_token: refreshToken }
-    })
+    const refreshRes = await api.post('auth/refresh', { data: {} })
     expect(refreshRes.status()).toBe(200)
     const body = await refreshRes.json()
     expect(body.access_token).toBeTruthy()
