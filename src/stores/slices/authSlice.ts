@@ -204,6 +204,7 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
           set((state) => ({
             auth: {
               ...state.auth,
+              isAuthenticated: true,
               user: mapApiUser(user),
               isLoadingUser: false
             }
