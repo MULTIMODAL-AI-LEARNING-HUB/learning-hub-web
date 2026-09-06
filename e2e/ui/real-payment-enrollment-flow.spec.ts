@@ -14,10 +14,6 @@ test.describe('Real-world User Journey: Registration, Payment Intent & Enrollmen
     await page.goto(`${PROD_WEB_URL}/register`, { waitUntil: 'networkidle' })
     await expect(page.getByRole('heading', { name: /create your account/i })).toBeVisible()
 
-    // Ensure student role is selected
-    const studentRoleBtn = page.getByRole('button', { name: /student/i })
-    await studentRoleBtn.click()
-
     // Fill form
     await page.locator('input[name="full_name"], input[placeholder*="Minh"]').first().fill(studentName)
     await page.locator('input[type="email"]').fill(studentEmail)

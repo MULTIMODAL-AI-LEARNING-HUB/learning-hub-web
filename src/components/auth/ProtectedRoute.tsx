@@ -13,12 +13,7 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
   const user = useAppStore((s) => s.auth.user)
   const location = useLocation()
 
-  // Not authenticated - redirect to welcome page
-  if (!isAuthenticated) {
-    return <Navigate to="/welcome" state={{ from: location }} replace />
-  }
-
-  if (isLoadingUser || (allowedRoles && !user)) {
+  if (isLoadingUser) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
@@ -29,8 +24,13 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     )
   }
 
+  // Not authenticated - redirect to welcome page
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/welcome" state={{ from: location }} replace />
+  }
+
   // Check role-based access
-  if (allowedRoles && user?.role && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && user.role && !allowedRoles.includes(user.role)) {
     // Redirect to appropriate dashboard based on role
     const rolePath = user.role === 'lecturer' ? '/app/lecturer' : '/app/student'
     return <Navigate to={rolePath} replace />
@@ -44,11 +44,7 @@ export function RoleRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const isLoadingUser = useAppStore((s) => s.auth.isLoadingUser)
   const user = useAppStore((s) => s.auth.user)
 
-  if (!isAuthenticated) {
-    return <Navigate to="/welcome" replace />
-  }
-
-  if (isLoadingUser || !user) {
+  if (isLoadingUser) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
@@ -57,6 +53,10 @@ export function RoleRoute({ children, allowedRoles }: ProtectedRouteProps) {
         </div>
       </div>
     )
+  }
+
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/welcome" replace />
   }
 
   const userRole = user.role?.toLowerCase()

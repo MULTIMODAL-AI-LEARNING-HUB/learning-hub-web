@@ -45,17 +45,9 @@ test.describe('Production Deployed E2E Smoke Tests', () => {
     await expect(page.getByRole('alert')).toContainText(/Invalid credentials|sai|không chính xác/i)
   })
 
-  test('PROD-5: Deployed Frontend Register page renders with role toggle and inputs', async ({ page }) => {
+  test('PROD-5: Deployed Frontend Register page renders student registration form and inputs', async ({ page }) => {
     await page.goto(`${PROD_WEB_URL}/register`, { waitUntil: 'networkidle' })
     await expect(page.getByRole('heading', { name: /create your account/i })).toBeVisible()
-
-    const studentBtn = page.getByRole('button', { name: /student/i })
-    const lecturerBtn = page.getByRole('button', { name: /lecturer/i })
-    await expect(studentBtn).toBeVisible()
-    await expect(lecturerBtn).toBeVisible()
-
-    await lecturerBtn.click()
-    await expect(lecturerBtn).toBeVisible()
 
     await expect(page.locator('input[name="full_name"], input[placeholder*="Minh"]').first()).toBeVisible()
     await expect(page.locator('input[type="email"]')).toBeVisible()
