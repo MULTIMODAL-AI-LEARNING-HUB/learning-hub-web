@@ -618,9 +618,19 @@ function MaterialViewer({ item, onVideoEnded }: { item: CourseMaterial; onVideoE
         ) : item.material_type === 'image' && item.file_url ? (
           <img src={item.file_url} alt={item.title ?? undefined} className="max-h-full max-w-full object-contain" />
         ) : item.material_type === 'url' && item.external_url ? (
-          <iframe src={item.external_url} className="h-full w-full" title={item.title ?? undefined} />
+          <iframe
+            src={item.external_url}
+            className="h-full w-full"
+            title={item.title ?? undefined}
+            sandbox="allow-forms allow-modals allow-popups allow-presentation allow-scripts"
+          />
         ) : item.file_url ? (
-          <iframe src={item.file_url} className="h-full w-full" title={item.title ?? undefined} />
+          <iframe
+            src={item.file_url}
+            className="h-full w-full"
+            title={item.title ?? undefined}
+            sandbox="allow-forms allow-modals allow-popups allow-presentation allow-scripts"
+          />
         ) : (
           <EmptyState
             compact

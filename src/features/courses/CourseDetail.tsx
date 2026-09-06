@@ -10,6 +10,23 @@ import { Skeleton } from '../../components/ui/Skeleton'
 import { ReviewSection } from './ReviewSection'
 import { Announcements } from './Announcements'
 
+const TRUSTED_PAYMENT_HOSTS = new Set([
+  'sandbox.vnpayment.vn',
+  'pay.vnpay.vn',
+  'test-payment.momo.vn',
+  'payment.momo.vn',
+])
+
+function getTrustedPaymentUrl(value: string): string | null {
+  try {
+    const url = new URL(value)
+    if (url.protocol !== 'https:' || !TRUSTED_PAYMENT_HOSTS.has(url.hostname)) return null
+    return url.toString()
+  } catch {
+    return null
+  }
+}
+
 export function CourseDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -67,7 +84,11 @@ export function CourseDetail() {
     try {
       const res = await enrollmentsApi.enroll(id, paymentMethod)
       if (res.data.payment_url) {
-        window.location.href = res.data.payment_url
+        const paymentUrl = getTrustedPaymentUrl(res.data.payment_url)
+        if (!paymentUrl) {
+          throw new Error('Địa chỉ thanh toán không hợp lệ')
+        }
+        window.location.assign(paymentUrl)
       } else {
         navigate(`/app/student/courses/${id}/learn`)
       }
