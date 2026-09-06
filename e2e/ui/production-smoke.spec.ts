@@ -31,11 +31,11 @@ test.describe('Production Deployed E2E Smoke Tests', () => {
 
   test('PROD-4: Deployed Frontend Login page renders form elements and handles validation', async ({ page }) => {
     await page.goto(`${PROD_WEB_URL}/login`, { waitUntil: 'networkidle' })
-    await expect(page.getByRole('heading', { name: /welcome back/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /welcome back|chào mừng trở lại/i })).toBeVisible()
     await expect(page.locator('input[type="email"]')).toBeVisible()
     await expect(page.locator('input[type="password"]')).toBeVisible()
     await expect(page.locator('button[type="submit"]')).toBeVisible()
-    await expect(page.getByText(/keep me signed in/i)).toBeVisible()
+    await expect(page.getByText(/keep me signed in|duy trì đăng nhập/i)).toBeVisible()
 
     await page.locator('input[type="email"]').fill('invalid_smoke@example.com')
     await page.locator('input[type="password"]').fill('WrongPass123!')
@@ -47,7 +47,7 @@ test.describe('Production Deployed E2E Smoke Tests', () => {
 
   test('PROD-5: Deployed Frontend Register page renders student registration form and inputs', async ({ page }) => {
     await page.goto(`${PROD_WEB_URL}/register`, { waitUntil: 'networkidle' })
-    await expect(page.getByRole('heading', { name: /create your account/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /create your account|tạo tài khoản/i })).toBeVisible()
 
     await expect(page.locator('input[name="full_name"], input[placeholder*="Minh"]').first()).toBeVisible()
     await expect(page.locator('input[type="email"]')).toBeVisible()

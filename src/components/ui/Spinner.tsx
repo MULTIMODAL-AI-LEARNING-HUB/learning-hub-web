@@ -23,7 +23,7 @@ export function Spinner({ size = 'md', label, className = '', fullscreen = false
         className
       )}
       role="status"
-      aria-label={label || 'Loading'}
+      aria-label={label || 'Đang tải'}
     />
   )
 

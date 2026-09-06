@@ -52,7 +52,7 @@ export function AdminCategories() {
       const res = await categoriesApi.getTree()
       setTree(res.data as unknown as CategoryTree[])
     } catch {
-      toast({ type: 'error', title: 'Failed to load categories' })
+      toast({ type: 'error', title: 'Không thể tải danh mục' })
     } finally {
       setLoading(false)
     }
@@ -70,7 +70,7 @@ export function AdminCategories() {
 
   const handleCreate = async () => {
     if (!name.trim()) {
-      toast({ type: 'warning', title: 'Category name is required' })
+      toast({ type: 'warning', title: 'Vui lòng nhập tên danh mục' })
       return
     }
     const autoSlug = slug || generateSlug(name)
@@ -82,13 +82,13 @@ export function AdminCategories() {
         description: description.trim() || undefined,
         parent_id: parentId || undefined,
       })
-      toast({ type: 'success', title: 'Category created' })
+      toast({ type: 'success', title: 'Tạo danh mục thành công' })
       setShowCreateModal(false)
       setName(''); setSlug(''); setDescription(''); setParentId('')
       fetchTree()
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
-      toast({ type: 'error', title: err?.response?.data?.detail || 'Failed to create category' })
+      toast({ type: 'error', title: err?.response?.data?.detail || 'Không thể tạo danh mục' })
     } finally {
       setSaving(false)
     }
@@ -102,12 +102,12 @@ export function AdminCategories() {
         name: editName || undefined,
         description: editDescription || undefined,
       })
-      toast({ type: 'success', title: 'Category updated' })
+      toast({ type: 'success', title: 'Cập nhật danh mục thành công' })
       setEditingCategory(null)
       fetchTree()
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
-      toast({ type: 'error', title: err?.response?.data?.detail || 'Failed to update category' })
+      toast({ type: 'error', title: err?.response?.data?.detail || 'Không thể cập nhật danh mục' })
     } finally {
       setSaving(false)
     }
@@ -118,12 +118,12 @@ export function AdminCategories() {
     setSaving(true)
     try {
       await categoriesApi.delete(deletingCategory.id)
-      toast({ type: 'success', title: 'Category deleted' })
+      toast({ type: 'success', title: 'Xóa danh mục thành công' })
       setDeletingCategory(null)
       fetchTree()
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
-      toast({ type: 'error', title: err?.response?.data?.detail || 'Failed to delete category' })
+      toast({ type: 'error', title: err?.response?.data?.detail || 'Không thể xóa danh mục' })
     } finally {
       setSaving(false)
     }
@@ -149,15 +149,15 @@ export function AdminCategories() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 font-body">
       <div className="flex flex-col gap-1">
-        <h1 className="text-fluid-2xl font-bold text-foreground">Category Management</h1>
-        <p className="text-muted-foreground text-sm">Organize platform categories with a tree structure.</p>
+        <h1 className="text-fluid-2xl font-bold text-foreground">Quản lý danh mục</h1>
+        <p className="text-muted-foreground text-sm">Tổ chức danh mục khóa học trên nền tảng theo cấu trúc cây phân cấp.</p>
       </div>
 
       <div className="flex justify-end gap-2">
-        <Button variant="outline" size="sm" icon={<RefreshCw className="h-3.5 w-3.5" />} onClick={fetchTree} loading={loading}>Refresh</Button>
-        <Button icon={<Plus className="h-4 w-4" />} onClick={resetCreate}>New Category</Button>
+        <Button variant="outline" size="sm" icon={<RefreshCw className="h-3.5 w-3.5" />} onClick={fetchTree} loading={loading}>Làm mới</Button>
+        <Button icon={<Plus className="h-4 w-4" />} onClick={resetCreate}>Thêm danh mục</Button>
       </div>
 
       <Card>
@@ -169,7 +169,7 @@ export function AdminCategories() {
           ) : tree.length === 0 ? (
             <div className="flex flex-col items-center py-12 gap-2">
               <Layers className="h-8 w-8 text-muted-foreground" />
-              <p className="text-muted-foreground text-sm">No categories yet. Create your first one!</p>
+              <p className="text-muted-foreground text-sm">Chưa có danh mục nào. Hãy tạo danh mục đầu tiên!</p>
             </div>
           ) : (
             <div className="space-y-1">
@@ -189,34 +189,34 @@ export function AdminCategories() {
       </Card>
 
       {/* Create Modal */}
-      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="New Category" size="md">
+      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Thêm danh mục mới" size="md">
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-foreground block mb-1">Name *</label>
-            <Input value={name} onChange={setName} placeholder="e.g. Web Development" onBlur={() => !slug && setSlug(generateSlug(name))} />
+            <label className="text-sm font-medium text-foreground block mb-1">Tên danh mục *</label>
+            <Input value={name} onChange={setName} placeholder="vd: Lập trình Web" onBlur={() => !slug && setSlug(generateSlug(name))} />
           </div>
           <div>
-            <label className="text-sm font-medium text-foreground block mb-1">Slug</label>
-            <Input value={slug} onChange={setSlug} placeholder="auto-generated" />
+            <label className="text-sm font-medium text-foreground block mb-1">Đường dẫn (Slug)</label>
+            <Input value={slug} onChange={setSlug} placeholder="tự động tạo" />
           </div>
           <div>
-            <label className="text-sm font-medium text-foreground block mb-1">Description</label>
+            <label className="text-sm font-medium text-foreground block mb-1">Mô tả</label>
             <textarea
               className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
               rows={2}
               value={description}
               onChange={e => setDescription(e.target.value)}
-              placeholder="Optional description"
+              placeholder="Mô tả danh mục (tùy chọn)"
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-foreground block mb-1">Parent Category</label>
+            <label className="text-sm font-medium text-foreground block mb-1">Danh mục cha</label>
             <select
               className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
               value={parentId}
               onChange={e => setParentId(e.target.value)}
             >
-              <option value="">— None (Top-level) —</option>
+              <option value="">— Không có (Cấp cao nhất) —</option>
               {allCategories.map(c => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
@@ -224,25 +224,25 @@ export function AdminCategories() {
           </div>
         </div>
         <div className="flex justify-end gap-2 mt-6">
-          <Button variant="outline" onClick={() => setShowCreateModal(false)}>Cancel</Button>
-          <Button onClick={handleCreate} loading={saving} icon={<Plus className="h-4 w-4" />}>Create</Button>
+          <Button variant="outline" onClick={() => setShowCreateModal(false)}>Hủy</Button>
+          <Button onClick={handleCreate} loading={saving} icon={<Plus className="h-4 w-4" />}>Tạo mới</Button>
         </div>
       </Modal>
 
       {/* Edit Modal */}
-      <Modal open={!!editingCategory} onClose={() => setEditingCategory(null)} title="Edit Category" size="md">
+      <Modal open={!!editingCategory} onClose={() => setEditingCategory(null)} title="Chỉnh sửa danh mục" size="md">
         {editingCategory && (
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-foreground block mb-1">Name *</label>
-              <Input value={editName} onChange={setEditName} placeholder="Category name" />
+              <label className="text-sm font-medium text-foreground block mb-1">Tên danh mục *</label>
+              <Input value={editName} onChange={setEditName} placeholder="Tên danh mục" />
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground block mb-1">Slug</label>
+              <label className="text-sm font-medium text-foreground block mb-1">Đường dẫn (Slug)</label>
               <div className="px-3 py-2 rounded-lg border border-input bg-muted/30 text-sm text-muted-foreground">{editingCategory.slug}</div>
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground block mb-1">Description</label>
+              <label className="text-sm font-medium text-foreground block mb-1">Mô tả</label>
               <textarea
                 className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
                 rows={2}
@@ -253,23 +253,23 @@ export function AdminCategories() {
           </div>
         )}
         <div className="flex justify-end gap-2 mt-6">
-          <Button variant="outline" onClick={() => setEditingCategory(null)}>Cancel</Button>
-          <Button onClick={handleUpdate} loading={saving} icon={<Pencil className="h-4 w-4" />}>Save</Button>
+          <Button variant="outline" onClick={() => setEditingCategory(null)}>Hủy</Button>
+          <Button onClick={handleUpdate} loading={saving} icon={<Pencil className="h-4 w-4" />}>Lưu thay đổi</Button>
         </div>
       </Modal>
 
       {/* Delete Confirm */}
-      <Modal open={!!deletingCategory} onClose={() => setDeletingCategory(null)} title="Delete Category" size="sm">
+      <Modal open={!!deletingCategory} onClose={() => setDeletingCategory(null)} title="Xác nhận xóa danh mục" size="sm">
         {deletingCategory && (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Delete <span className="font-semibold text-foreground">"{deletingCategory.name}"</span>? All child categories will also be deleted.
+              Bạn có chắc chắn muốn xóa danh mục <span className="font-semibold text-foreground">"{deletingCategory.name}"</span>? Tất cả các danh mục con bên trong cũng sẽ bị xóa.
             </p>
           </div>
         )}
         <div className="flex justify-end gap-2 mt-6">
-          <Button variant="outline" onClick={() => setDeletingCategory(null)}>Cancel</Button>
-          <Button variant="danger" onClick={handleDelete} loading={saving} icon={<Trash2 className="h-4 w-4" />}>Delete</Button>
+          <Button variant="outline" onClick={() => setDeletingCategory(null)}>Hủy</Button>
+          <Button variant="danger" onClick={handleDelete} loading={saving} icon={<Trash2 className="h-4 w-4" />}>Xóa danh mục</Button>
         </div>
       </Modal>
     </div>
@@ -305,19 +305,21 @@ function CategoryRow({ category, level, onEdit, onDelete, onAddChild }: {
           <button
             onClick={() => onAddChild(category.id)}
             className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition"
-            title="Add child"
+            title="Thêm danh mục con"
           >
             <Plus className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={() => onEdit(category)}
             className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition"
+            title="Chỉnh sửa"
           >
             <Pencil className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={() => onDelete(category)}
             className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition"
+            title="Xóa"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>

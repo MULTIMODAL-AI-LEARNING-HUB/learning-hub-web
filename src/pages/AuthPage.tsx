@@ -33,19 +33,19 @@ const fbWindow = window as FacebookWindow
 
 const copy = {
   login: {
-    title: 'Welcome back',
-    subtitle: 'Sign in to continue your learning journey.',
-    cta: 'Sign in',
-    alt: "Don't have an account?",
-    linkText: 'Create one',
+    title: 'Chào mừng trở lại',
+    subtitle: 'Đăng nhập để tiếp tục hành trình học tập của bạn.',
+    cta: 'Đăng nhập',
+    alt: 'Chưa có tài khoản?',
+    linkText: 'Tạo tài khoản',
     linkTo: '/register',
   },
   register: {
-    title: 'Create your account',
-    subtitle: 'Join our AI-powered learning platform.',
-    cta: 'Create account',
-    alt: 'Already have an account?',
-    linkText: 'Sign in',
+    title: 'Tạo tài khoản mới',
+    subtitle: 'Tham gia nền tảng học tập thông minh cùng AI.',
+    cta: 'Tạo tài khoản',
+    alt: 'Đã có tài khoản?',
+    linkText: 'Đăng nhập',
     linkTo: '/login',
   }
 }
@@ -75,7 +75,7 @@ function AuthShell({ variant }: { variant: Variant }) {
   // Stores a Facebook access_token read from the URL hash (no setState inside effect)
   const pendingFbTokenRef = useRef<string | null>(null)
   const isStudent = true
-  const roleLabel = 'Student'
+  const roleLabel = 'Học viên'
   const roleIcon = <GraduationCap className="h-5 w-5" />
 
   const getRedirectPath = useCallback((user: { role?: string } | null) => {
@@ -98,7 +98,7 @@ function AuthShell({ variant }: { variant: Variant }) {
         const user = useAppStore.getState().auth.user
         navigate(getRedirectPath(user))
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : 'Facebook login failed'
+        const msg = err instanceof Error ? err.message : 'Đăng nhập Facebook thất bại'
         setErrors({ form: msg })
       } finally {
         setSocialLoading(null)
@@ -157,14 +157,14 @@ function AuthShell({ variant }: { variant: Variant }) {
         const user = useAppStore.getState().auth.user
         navigate(getRedirectPath(user))
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : 'Google login failed'
+        const msg = err instanceof Error ? err.message : 'Đăng nhập Google thất bại'
         setErrors({ form: msg })
       } finally {
         setSocialLoading(null)
       }
     },
     onError: () => {
-      setErrors({ form: 'Google login was cancelled or failed.' })
+      setErrors({ form: 'Đăng nhập Google đã bị hủy hoặc thất bại.' })
     }
   })
 
@@ -189,19 +189,19 @@ function AuthShell({ variant }: { variant: Variant }) {
       )}&response_type=token&scope=email,public_profile`
       window.location.href = fbUrl
     } else {
-      setErrors({ form: 'Facebook App ID is not configured yet in .env' })
+      setErrors({ form: 'Chưa cấu hình Facebook App ID trong .env' })
     }
   }
 
   const validate = () => {
     const errs: Record<string, string> = {}
-    if (variant === 'register' && !name.trim()) errs.name = 'Name is required'
-    if (!email.trim()) errs.email = 'Email is required'
-    else if (!/\S+@\S+\.\S+/.test(email)) errs.email = 'Invalid email address'
-    if (!password) errs.password = 'Password is required'
-    else if (variant === 'register' && password.length < 8) errs.password = 'Minimum 8 characters'
+    if (variant === 'register' && !name.trim()) errs.name = 'Vui lòng nhập họ và tên'
+    if (!email.trim()) errs.email = 'Vui lòng nhập địa chỉ email'
+    else if (!/\S+@\S+\.\S+/.test(email)) errs.email = 'Địa chỉ email không hợp lệ'
+    if (!password) errs.password = 'Vui lòng nhập mật khẩu'
+    else if (variant === 'register' && password.length < 8) errs.password = 'Mật khẩu tối thiểu 8 ký tự'
     if (variant === 'register' && password !== confirmPassword) {
-      errs.confirmPassword = 'Passwords do not match'
+      errs.confirmPassword = 'Mật khẩu xác nhận không khớp'
     }
     return errs
   }
@@ -224,7 +224,7 @@ function AuthShell({ variant }: { variant: Variant }) {
         navigate(getRedirectPath(user))
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Something went wrong'
+      const msg = err instanceof Error ? err.message : 'Đã có lỗi xảy ra, vui lòng thử lại'
       setErrors({ form: msg })
     } finally {
       setLoading(false)
@@ -243,7 +243,7 @@ function AuthShell({ variant }: { variant: Variant }) {
             </div>
             <div>
               <p className="text-sm font-display font-extrabold text-foreground">Learning Hub</p>
-              <p className="text-3xs uppercase font-bold tracking-wider text-muted-foreground">AI Study Workspace</p>
+              <p className="text-3xs uppercase font-bold tracking-wider text-muted-foreground">Không gian học tập AI</p>
             </div>
           </div>
 
@@ -281,7 +281,7 @@ function AuthShell({ variant }: { variant: Variant }) {
                 <div className="w-full border-t border-border/60" />
               </div>
               <div className="relative bg-surface-elevated px-3 text-3xs font-bold uppercase tracking-wider text-muted-foreground">
-                Or continue with email
+                Hoặc tiếp tục với email
               </div>
             </div>
 
@@ -295,8 +295,8 @@ function AuthShell({ variant }: { variant: Variant }) {
               {variant === 'register' && (
                 <AuthInput
                   name="full_name"
-                  label="Full name"
-                  placeholder="Nguyen Minh"
+                  label="Họ và tên"
+                  placeholder="Nguyễn Văn A"
                   value={name}
                   onChange={setName}
                   error={errors.name}
@@ -306,9 +306,9 @@ function AuthShell({ variant }: { variant: Variant }) {
 
               <AuthInput
                 name="email"
-                label="Email address"
+                label="Địa chỉ email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="ban@example.com"
                 value={email}
                 onChange={setEmail}
                 error={errors.email}
@@ -317,9 +317,9 @@ function AuthShell({ variant }: { variant: Variant }) {
 
               <AuthInput
                 name="password"
-                label="Password"
+                label="Mật khẩu"
                 type="password"
-                placeholder="Minimum 8 characters"
+                placeholder="Tối thiểu 8 ký tự"
                 value={password}
                 onChange={setPassword}
                 error={errors.password}
@@ -329,9 +329,9 @@ function AuthShell({ variant }: { variant: Variant }) {
               {variant === 'register' && (
                 <AuthInput
                   name="confirmPassword"
-                  label="Confirm password"
+                  label="Xác nhận mật khẩu"
                   type="password"
-                  placeholder="Re-enter password"
+                  placeholder="Nhập lại mật khẩu"
                   value={confirmPassword}
                   onChange={setConfirmPassword}
                   error={errors.confirmPassword}
@@ -349,14 +349,14 @@ function AuthShell({ variant }: { variant: Variant }) {
                       onChange={(e) => setRememberMe(e.target.checked)}
                       className="h-4 w-4 rounded border-border bg-surface-elevated text-blue-500 focus:ring-blue-500/30 cursor-pointer"
                     />
-                    <span className="text-xs text-muted-foreground select-none">Keep me signed in</span>
+                    <span className="text-xs text-muted-foreground select-none">Duy trì đăng nhập</span>
                   </label>
                   <button
                     type="button"
                     onClick={() => navigate('/forgot-password')}
                     className="text-xs font-bold text-blue-500 hover:text-blue-600 transition-colors"
                   >
-                    Forgot password?
+                    Quên mật khẩu?
                   </button>
                 </div>
               )}
@@ -364,10 +364,10 @@ function AuthShell({ variant }: { variant: Variant }) {
               {/* Register extras */}
               {variant === 'register' && (
                 <p className="text-3xs text-muted-foreground leading-relaxed">
-                  By creating an account, you agree to our{' '}
-                  <button type="button" className="font-bold text-blue-500 hover:underline">Terms of Service</button>
-                  {' '}and{' '}
-                  <button type="button" className="font-bold text-blue-500 hover:underline">Privacy Policy</button>.
+                  Bằng việc tạo tài khoản, bạn đồng ý với{' '}
+                  <button type="button" className="font-bold text-blue-500 hover:underline">Điều khoản dịch vụ</button>
+                  {' '}và{' '}
+                  <button type="button" className="font-bold text-blue-500 hover:underline">Chính sách bảo mật</button>.
                 </p>
               )}
 
@@ -380,7 +380,7 @@ function AuthShell({ variant }: { variant: Variant }) {
                 size="lg"
                 iconRight={!loading ? <ArrowRight className="h-4 w-4" /> : undefined}
               >
-                {loading ? 'Authenticating...' : content.cta}
+                {loading ? 'Đang xác thực...' : content.cta}
               </Button>
             </form>
 
@@ -409,8 +409,8 @@ function AuthShell({ variant }: { variant: Variant }) {
                   {roleIcon}
                 </div>
                 <div>
-                  <p className="font-bold text-foreground text-sm">{roleLabel} Portal</p>
-                  <p className="text-3xs text-muted-foreground uppercase tracking-wider font-semibold">Workspace Benefits</p>
+                  <p className="font-bold text-foreground text-sm">Cổng thông tin {roleLabel}</p>
+                  <p className="text-3xs text-muted-foreground uppercase tracking-wider font-semibold">Đặc quyền học tập</p>
                 </div>
               </div>
               <ul className="space-y-3.5 text-xs text-muted-foreground">
@@ -418,30 +418,30 @@ function AuthShell({ variant }: { variant: Variant }) {
                   <>
                     <li className="flex items-center gap-2.5">
                       <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                      <span>Full syllabus access & study materials catalog</span>
+                      <span>Truy cập đầy đủ giáo trình & tài liệu học tập</span>
                     </li>
                     <li className="flex items-center gap-2.5">
                       <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                      <span>AI prompt assistants & study guides</span>
+                      <span>Trợ lý AI hỗ trợ giải đáp & định hướng học tập</span>
                     </li>
                     <li className="flex items-center gap-2.5">
                       <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                      <span>Progress analytics & metrics trackers</span>
+                      <span>Thống kê tiến độ & theo dõi kết quả rèn luyện</span>
                     </li>
                   </>
                 ) : (
                   <>
                     <li className="flex items-center gap-2.5">
                       <div className="h-1.5 w-1.5 rounded-full bg-purple-500" />
-                      <span>Design course details & lesson accordion builders</span>
+                      <span>Thiết kế bài giảng & quản lý giáo trình linh hoạt</span>
                     </li>
                     <li className="flex items-center gap-2.5">
                       <div className="h-1.5 w-1.5 rounded-full bg-purple-500" />
-                      <span>Grade assignments & evaluate quizzes</span>
+                      <span>Chấm điểm bài tập & đánh giá trắc nghiệm tự động</span>
                     </li>
                     <li className="flex items-center gap-2.5">
                       <div className="h-1.5 w-1.5 rounded-full bg-purple-500" />
-                      <span>Observe student analytics & performance ratings</span>
+                      <span>Theo dõi dữ liệu học viên & đánh giá khóa học</span>
                     </li>
                   </>
                 )}
@@ -451,7 +451,7 @@ function AuthShell({ variant }: { variant: Variant }) {
             {/* Quote Card */}
             <Card className="p-6 border-border bg-surface-elevated">
               <p className="text-xs italic text-foreground/80 leading-relaxed">
-                "Education is the most powerful weapon which you can use to change the world."
+                "Giáo dục là vũ khí mạnh nhất mà bạn có thể dùng để thay đổi thế giới."
               </p>
               <p className="mt-3 text-3xs font-bold uppercase tracking-wider text-muted-foreground">— Nelson Mandela</p>
             </Card>

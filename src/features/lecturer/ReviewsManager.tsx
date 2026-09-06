@@ -39,28 +39,28 @@ export function ReviewsManager({ courseId }: ReviewsManagerProps) {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <Star className="h-5 w-5" />
-          Course Reviews ({total})
+          Đánh Giá Khóa Học ({total})
         </h2>
       </div>
 
       <div className="space-y-4">
         {loading ? (
-          <div className="text-center py-8 text-muted-foreground">Loading...</div>
+          <div className="text-center py-8 text-muted-foreground">Đang tải...</div>
         ) : reviews.length > 0 ? (
           reviews.map((review) => (
             <Card key={review.id} className="p-4">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
-                    {review.student_name?.charAt(0) || 'S'}
+                    {review.student_name?.charAt(0) || 'H'}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{review.student_name || 'Student'}</span>
+                      <span className="font-medium">{review.student_name || 'Học viên'}</span>
                       <div className="flex items-center">{renderStars(review.rating)}</div>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {new Date(review.created_at).toLocaleDateString()}
+                      {new Date(review.created_at).toLocaleDateString('vi-VN')}
                       {review.course_title && ` • ${review.course_title}`}
                     </p>
                     {review.comment && (
@@ -74,11 +74,11 @@ export function ReviewsManager({ courseId }: ReviewsManagerProps) {
                 <div className="mt-4 ml-13 pl-4 border-l-2 border-primary/30 bg-primary/5 p-3 rounded-r-lg">
                   <div className="flex items-center gap-2 text-sm font-medium text-primary">
                     <CheckCircle className="h-4 w-4" />
-                    Your Reply
+                    Phản hồi của bạn
                   </div>
                   <p className="text-sm mt-1">{review.lecturer_reply}</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {review.replied_at && new Date(review.replied_at).toLocaleDateString()}
+                    {review.replied_at && new Date(review.replied_at).toLocaleDateString('vi-VN')}
                   </p>
                 </div>
               ) : replyingTo === review.id ? (
@@ -86,13 +86,13 @@ export function ReviewsManager({ courseId }: ReviewsManagerProps) {
                   <Textarea
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
-                    placeholder="Write your reply..."
+                    placeholder="Nhập câu trả lời của bạn..."
                     rows={3}
                   />
                   <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => setReplyingTo(null)}>Cancel</Button>
+                    <Button variant="ghost" size="sm" onClick={() => setReplyingTo(null)}>Hủy</Button>
                     <Button size="sm" onClick={() => handleReply(review.id)} disabled={!replyText.trim()}>
-                      Post Reply
+                      Gửi phản hồi
                     </Button>
                   </div>
                 </div>
@@ -104,7 +104,7 @@ export function ReviewsManager({ courseId }: ReviewsManagerProps) {
                     icon={<MessageCircle className="h-4 w-4" />}
                     onClick={() => setReplyingTo(review.id)}
                   >
-                    Reply to Review
+                    Trả lời đánh giá
                   </Button>
                 </div>
               )}
@@ -113,8 +113,8 @@ export function ReviewsManager({ courseId }: ReviewsManagerProps) {
         ) : (
           <div className="text-center py-12 border-2 border-dashed border-border rounded-lg">
             <Star className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">No reviews yet</h3>
-            <p className="text-muted-foreground">Students haven't reviewed this course yet</p>
+            <h3 className="text-lg font-medium mb-2">Chưa có đánh giá nào</h3>
+            <p className="text-muted-foreground">Học viên chưa gửi đánh giá nào cho khóa học này</p>
           </div>
         )}
       </div>

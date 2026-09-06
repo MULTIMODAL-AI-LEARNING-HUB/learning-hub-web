@@ -33,7 +33,7 @@ export function UploadModal({ open, onClose }: { open: boolean; onClose: () => v
         setFiles((prev) =>
           prev.map((f) => (f.id === file.id ? { ...f, status: 'error' } : f))
         )
-        toast({ type: 'error', title: 'Upload failed', message: file.name })
+        toast({ type: 'error', title: 'Tải lên thất bại', message: file.name })
       }
     },
     [uploadDoc, toast]
@@ -66,19 +66,19 @@ export function UploadModal({ open, onClose }: { open: boolean; onClose: () => v
         setFiles([])
         onClose()
       }}
-      title="Upload Documents"
-      description="Drag and drop files or click to browse"
+      title="Tải lên tài liệu"
+      description="Kéo thả tệp hoặc bấm để chọn tệp từ thiết bị"
       size="md"
       footer={
         <>
           <Button variant="ghost" onClick={() => { setFiles([]); onClose() }}>
-            Cancel
+            Hủy
           </Button>
           <Button
             onClick={() => inputRef.current?.click()}
             icon={<Upload className="h-4 w-4" />}
           >
-            Browse Files
+            Chọn tệp từ máy
           </Button>
         </>
       }
@@ -103,10 +103,10 @@ export function UploadModal({ open, onClose }: { open: boolean; onClose: () => v
         </div>
         <div className="text-center">
           <p className="text-sm font-semibold text-foreground">
-            {dragging ? 'Drop files here' : 'Click to browse or drag & drop'}
+            {dragging ? 'Thả tệp vào đây' : 'Nhấn để chọn tệp hoặc kéo & thả vào đây'}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            PDF, MP4, MP3, WAV, DOC, DOCX · up to 100MB
+            PDF, MP4, MP3, WAV, DOC, DOCX · tối đa 100MB
           </p>
         </div>
       </div>

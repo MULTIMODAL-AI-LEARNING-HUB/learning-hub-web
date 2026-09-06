@@ -71,10 +71,10 @@ export function ChatPanel() {
           </div>
           <div className="min-w-0">
             <p className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
-              AI Chat
+              Trò chuyện AI
             </p>
             <p className="text-sm font-semibold text-foreground truncate">
-              {activeSession?.title || 'New chat'}
+              {activeSession?.title || 'Đoạn chat mới'}
             </p>
           </div>
         </div>
@@ -87,12 +87,12 @@ export function ChatPanel() {
               {selectedDocName ? (
                 <span className="max-w-32 truncate">{selectedDocName}</span>
               ) : (
-                'Context'
+                'Tài liệu tham chiếu'
               )}
             </Button>
           }
           items={[
-            { id: '__none', label: 'No context', icon: <X className="h-4 w-4" /> },
+            { id: '__none', label: 'Không kèm tài liệu', icon: <X className="h-4 w-4" /> },
             ...docs
               .filter((d) => d.status === 'ready')
               .map((d) => ({
@@ -112,8 +112,8 @@ export function ChatPanel() {
         {messages.length === 0 ? (
           <EmptyState
             icon={<MessageSquare />}
-            title="Start a conversation"
-            description="Ask questions about your uploaded documents and get contextual answers with citations."
+            title="Bắt đầu cuộc trò chuyện"
+            description="Đặt câu hỏi về các tài liệu đã tải lên của bạn để nhận câu trả lời chính xác kèm trích dẫn nguồn."
             className="h-full border-0 bg-transparent"
           />
         ) : (
@@ -172,7 +172,7 @@ export function ChatPanel() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKey}
-            placeholder="Ask anything about your documents..."
+            placeholder="Hỏi bất cứ điều gì về tài liệu học tập của bạn..."
             rows={1}
             className="flex-1 resize-none bg-transparent px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/70 outline-none max-h-32"
           />
@@ -180,7 +180,7 @@ export function ChatPanel() {
             onClick={handleSend}
             disabled={!input.trim()}
             size="icon"
-            aria-label="Send message"
+            aria-label="Gửi tin nhắn"
             className="h-8 w-8 shrink-0"
           >
             <Send className="h-4 w-4" />
@@ -188,7 +188,7 @@ export function ChatPanel() {
         </div>
         <div className="mt-1.5 flex items-center justify-between px-1 text-2xs text-muted-foreground">
           <span className="tabular-nums">{input.length} / 500</span>
-          <span className="hidden sm:inline">Enter to send · Shift+Enter for newline</span>
+          <span className="hidden sm:inline">Nhấn Enter để gửi · Shift+Enter để xuống dòng</span>
         </div>
       </div>
     </Card>

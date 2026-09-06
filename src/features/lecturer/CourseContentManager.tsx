@@ -53,7 +53,7 @@ export function CourseContentManager({ course }: CourseContentManagerProps) {
   const handleAddLesson = async (sectionId: string, type: 'VIDEO' | 'ARTICLE' | 'QUIZ' | 'ASSIGNMENT' = 'ARTICLE') => {
     try {
       const res = await lessonsApi.create(sectionId, {
-        title: 'New Lesson',
+        title: 'Bài học mới',
         type,
       })
       await fetchSections()
@@ -68,16 +68,16 @@ export function CourseContentManager({ course }: CourseContentManagerProps) {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <BookOpen className="h-5 w-5" />
-          Course Content
+          Nội Dung Khóa Học
         </h2>
         <Button onClick={() => setShowAddSection(true)} size="sm" icon={<Plus className="h-4 w-4" />}>
-          Add Section
+          Thêm chương học
         </Button>
       </div>
 
       <div className="space-y-3">
         {loading ? (
-          <div className="text-center py-8 text-muted-foreground">Loading...</div>
+          <div className="text-center py-8 text-muted-foreground">Đang tải...</div>
         ) : sections.length > 0 ? (
           sections.map((section) => (
             <SectionAccordion
@@ -94,28 +94,28 @@ export function CourseContentManager({ course }: CourseContentManagerProps) {
         ) : (
           <div className="text-center py-12 border-2 border-dashed border-border rounded-lg">
             <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">No sections yet</h3>
-            <p className="text-muted-foreground mb-4">Start by adding a section to organize your course content</p>
+            <h3 className="text-lg font-medium mb-2">Chưa có chương học nào</h3>
+            <p className="text-muted-foreground mb-4">Bắt đầu bằng việc thêm chương học để sắp xếp nội dung khóa học</p>
             <Button onClick={() => setShowAddSection(true)} icon={<Plus className="h-4 w-4" />}>
-              Add First Section
+              Thêm chương đầu tiên
             </Button>
           </div>
         )}
       </div>
 
-      <Modal open={showAddSection} onClose={() => setShowAddSection(false)} title="Add Section">
+      <Modal open={showAddSection} onClose={() => setShowAddSection(false)} title="Thêm Chương Học Mới">
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium">Section Title</label>
+            <label className="text-sm font-medium">Tên chương học</label>
             <Input
               value={newSectionTitle}
               onChange={setNewSectionTitle}
               className="mt-1"
-              placeholder="e.g., Introduction, Getting Started, etc."
+              placeholder="VD: Giới thiệu, Bắt đầu học, Kiến thức nền tảng..."
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Description (optional)</label>
+            <label className="text-sm font-medium">Mô tả ngắn (không bắt buộc)</label>
             <Textarea
               value={newSectionDescription}
               onChange={(e) => setNewSectionDescription(e.target.value)}
@@ -124,8 +124,8 @@ export function CourseContentManager({ course }: CourseContentManagerProps) {
             />
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => setShowAddSection(false)}>Cancel</Button>
-            <Button onClick={handleAddSection} disabled={!newSectionTitle.trim()}>Add Section</Button>
+            <Button variant="ghost" onClick={() => setShowAddSection(false)}>Hủy</Button>
+            <Button onClick={handleAddSection} disabled={!newSectionTitle.trim()}>Thêm chương</Button>
           </div>
         </div>
       </Modal>

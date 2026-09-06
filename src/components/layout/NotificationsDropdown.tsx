@@ -47,7 +47,7 @@ export function NotificationsDropdown({
         variant="ghost"
         size="icon"
         className="relative text-muted-foreground hover:text-foreground"
-        aria-label="Notifications"
+        aria-label="Thông báo"
         onClick={() => setOpen((p) => !p)}
       >
         <Bell className="h-4 w-4" />
@@ -63,17 +63,17 @@ export function NotificationsDropdown({
         >
           <div className="flex items-center justify-between px-2.5 py-2">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Notifications
+              Thông báo
             </p>
             <div className="flex items-center gap-2">
               {unreadCount > 0 && (
                 <button onClick={onMarkAllRead} className="text-xs font-medium text-primary hover:underline">
-                  Mark all read
+                  Đánh dấu đã đọc
                 </button>
               )}
               {notifications.length > 0 && (
                 <button onClick={onClear} className="text-xs font-medium text-muted-foreground hover:text-foreground">
-                  Clear all
+                  Xóa tất cả
                 </button>
               )}
             </div>
@@ -81,8 +81,8 @@ export function NotificationsDropdown({
           <div className="max-h-80 overflow-y-auto scrollbar-thin">
             {notifications.length === 0 ? (
               <div className="px-3 py-8 text-center">
-                <p className="text-sm text-muted-foreground">No notifications</p>
-                <p className="text-xs text-muted-foreground/70 mt-1">You're all caught up</p>
+                <p className="text-sm text-muted-foreground">Không có thông báo mới</p>
+                <p className="text-xs text-muted-foreground/70 mt-1">Bạn đã cập nhật tất cả thông báo</p>
               </div>
             ) : (
               <div className="grid gap-0.5 p-0.5">
@@ -102,7 +102,7 @@ export function NotificationsDropdown({
                     <button
                       onClick={(e) => { e.stopPropagation(); onDismiss(n.id) }}
                       className="shrink-0 -m-1 p-1 rounded text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-foreground transition"
-                      aria-label="Dismiss"
+                      aria-label="Đóng"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>

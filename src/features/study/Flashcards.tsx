@@ -26,7 +26,7 @@ export function Flashcards() {
   const readyDocs = docs.filter((d) => d.status === 'ready')
 
   const [selectedDoc, setSelectedDoc] = useState('')
-  const [setName, setSetName] = useState('New Card Set')
+  const [setName, setSetName] = useState('Bộ thẻ học mới')
   const [count, setCount] = useState(20)
   const [setId, setSetId] = useState<string | null>(null)
 
@@ -58,15 +58,15 @@ export function Flashcards() {
       setFlipped(false)
       setKnown([])
       setUnknown([])
-      toast({ type: 'success', title: 'Flashcards ready!', message: `Loaded ${items.length} cards` })
+      toast({ type: 'success', title: 'Bộ thẻ học đã sẵn sàng!', message: `Đã nạp ${items.length} thẻ ghi nhớ` })
     },
-    errorTitle: 'Failed to start flashcards generation',
-    timeoutTitle: 'Flashcards generation timed out'
+    errorTitle: 'Không thể khởi tạo bộ thẻ ghi nhớ',
+    timeoutTitle: 'Quá thời gian tạo bộ thẻ ghi nhớ'
   })
 
   const handleGenerate = async () => {
     if (!selectedDoc) {
-      toast({ type: 'warning', title: 'Please select a document first' })
+      toast({ type: 'warning', title: 'Vui lòng chọn tài liệu trước' })
       return
     }
     try {
@@ -80,7 +80,7 @@ export function Flashcards() {
       setProgress(0)
       start()
     } catch {
-      toast({ type: 'error', title: 'Failed to start flashcards generation' })
+      toast({ type: 'error', title: 'Không thể bắt đầu tạo thẻ flashcards' })
     }
   }
 
@@ -107,8 +107,8 @@ export function Flashcards() {
     } else {
       toast({
         type: 'info',
-        title: 'Session complete!',
-        message: `${known.length + 1}/${total} cards reviewed`
+        title: 'Đã hoàn thành phiên học!',
+        message: `Đã ôn tập ${known.length + 1}/${total} thẻ`
       })
     }
   }
@@ -118,7 +118,7 @@ export function Flashcards() {
     setCards(shuffled)
     setCurrentIndex(0)
     setFlipped(false)
-    toast({ type: 'success', title: 'Cards shuffled' })
+    toast({ type: 'success', title: 'Đã xáo trộn ngẫu nhiên thẻ' })
   }
 
   const handleReset = () => {
@@ -134,47 +134,47 @@ export function Flashcards() {
     return (
       <div className="mx-auto max-w-2xl">
         <PageHeader
-          subtitle="Study Tools"
-          title="Flashcards"
-          description="Spaced repetition learning with AI-generated cards from your documents."
+          subtitle="Công cụ học tập"
+          title="Thẻ ghi nhớ Flashcards"
+          description="Học lặp lại ngắt quãng thông minh với các thẻ ghi nhớ do AI tự động tạo từ tài liệu."
           icon={<Layers />}
         />
 
         {readyDocs.length === 0 ? (
           <EmptyState
             icon={<FileQuestion />}
-            title="No documents ready"
-            description="Upload and process a document first to generate flashcards from it."
+            title="Chưa có tài liệu sẵn sàng"
+            description="Vui lòng tải lên và xử lý tài liệu trước để tạo thẻ ghi nhớ."
           />
         ) : (
           <Card className="p-6">
             <div className="grid gap-4">
-              <FormField label="Select document" required>
+              <FormField label="Chọn tài liệu" required>
                 <Select
                   value={selectedDoc}
                   onChange={setSelectedDoc}
-                  placeholder="Choose a document..."
+                  placeholder="Chọn một tài liệu..."
                   options={readyDocs.map((d) => ({ value: d.id, label: d.name }))}
                 />
               </FormField>
 
-              <FormField label="Card Set Name" required>
+              <FormField label="Tên bộ thẻ học" required>
                 <Input
                   value={setName}
                   onChange={setSetName}
-                  placeholder="Set Name"
+                  placeholder="Nhập tên bộ thẻ học"
                 />
               </FormField>
 
-              <FormField label="Number of cards" required>
+              <FormField label="Số lượng thẻ" required>
                 <Select
                   value={String(count)}
                   onChange={(v) => setCount(Number(v))}
                   options={[
-                    { value: '10', label: '10 flashcards' },
-                    { value: '15', label: '15 flashcards' },
-                    { value: '20', label: '20 flashcards' },
-                    { value: '30', label: '30 flashcards' }
+                    { value: '10', label: '10 thẻ ghi nhớ' },
+                    { value: '15', label: '15 thẻ ghi nhớ' },
+                    { value: '20', label: '20 thẻ ghi nhớ' },
+                    { value: '30', label: '30 thẻ ghi nhớ' }
                   ]}
                 />
               </FormField>
@@ -187,7 +187,7 @@ export function Flashcards() {
               size="lg"
               icon={<Sparkles className="h-4 w-4" />}
             >
-              Generate Flashcards
+              Tạo thẻ ghi nhớ Flashcards
             </Button>
           </Card>
         )}
@@ -198,11 +198,11 @@ export function Flashcards() {
   if (loading) {
     return (
       <StudyLoadingState
-        title="Generating Flashcards"
-        description="Our AI is creating spaced repetition cards for you."
+        title="Đang tạo thẻ ghi nhớ"
+        description="Trợ lý AI đang trích xuất các ý chính và tạo thẻ học ngắt quãng cho bạn."
         progress={progress}
-        statusText="Creating cards"
-        durationText="Usually takes 30-90 seconds"
+        statusText="Đang tạo thẻ"
+        durationText="Thường mất khoảng 30-90 giây"
       />
     )
   }
@@ -210,8 +210,8 @@ export function Flashcards() {
   return (
     <div className="mx-auto max-w-2xl">
       <PageHeader
-        subtitle="Study Tools"
-        title="Flashcards"
+        subtitle="Công cụ học tập"
+        title="Thẻ ghi nhớ Flashcards"
         description={setName}
         icon={<Layers />}
         actions={
@@ -223,12 +223,12 @@ export function Flashcards() {
         <div className="flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-success" />
           <span className="font-medium text-foreground tabular-nums">{known.length}</span>
-          <span className="text-muted-foreground">known</span>
+          <span className="text-muted-foreground">Đã nhớ</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-destructive" />
           <span className="font-medium text-foreground tabular-nums">{unknown.length}</span>
-          <span className="text-muted-foreground">review</span>
+          <span className="text-muted-foreground">Cần ôn lại</span>
         </div>
       </div>
 
@@ -250,22 +250,22 @@ export function Flashcards() {
             className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-border bg-surface-elevated p-8 text-center shadow-lift"
             style={{ backfaceVisibility: 'hidden' }}
           >
-            <Badge variant="default" label="Question" className="mb-4" />
+            <Badge variant="default" label="Câu hỏi / Thuật ngữ" className="mb-4" />
             <p className="text-lg font-semibold text-foreground leading-relaxed max-w-md text-balance">
               {card?.front}
             </p>
-            <p className="mt-6 text-xs text-muted-foreground">Click to reveal answer</p>
+            <p className="mt-6 text-xs text-muted-foreground">Nhấn vào thẻ để lật xem đáp án</p>
           </div>
 
           <div
             className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border-2 border-primary/30 bg-primary/5 p-8 text-center shadow-lift"
             style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
           >
-            <Badge variant="primary" label="Answer" className="mb-4" />
+            <Badge variant="primary" label="Đáp án / Định nghĩa" className="mb-4" />
             <p className="text-base text-foreground leading-relaxed max-w-md text-balance">
               {card?.back}
             </p>
-            <p className="mt-6 text-xs text-muted-foreground">Click to flip back</p>
+            <p className="mt-6 text-xs text-muted-foreground">Nhấn vào thẻ để lật lại mặt trước</p>
           </div>
         </div>
       </div>
@@ -277,7 +277,7 @@ export function Flashcards() {
           size="lg"
           icon={<X className="h-4 w-4" />}
         >
-          Review
+          Chưa nhớ
         </Button>
         <Button
           onClick={handleShuffle}
@@ -285,7 +285,7 @@ export function Flashcards() {
           size="lg"
           icon={<Shuffle className="h-4 w-4" />}
         >
-          Shuffle
+          Xáo trộn
         </Button>
         <Button
           onClick={handleKnow}
@@ -293,17 +293,17 @@ export function Flashcards() {
           size="lg"
           icon={<Check className="h-4 w-4" />}
         >
-          Know it
+          Đã nhớ
         </Button>
       </div>
 
       <div className="mt-6 flex justify-center gap-2">
         <Button onClick={handleReset} variant="ghost" icon={<Plus className="h-3.5 w-3.5" />}>
-          Change Document
+          Đổi tài liệu khác
         </Button>
         {currentIndex === total - 1 && (
           <Button onClick={handleReset} variant="outline" icon={<RotateCcw className="h-3.5 w-3.5" />}>
-            Start Over
+            Học lại từ đầu
           </Button>
         )}
       </div>

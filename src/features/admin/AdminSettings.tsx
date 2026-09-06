@@ -57,7 +57,7 @@ export function AdminSettings() {
       const res = await adminApi.health()
       setHealth(res.data)
     } catch {
-      toast({ type: 'error', title: 'Failed to load health status' })
+      toast({ type: 'error', title: 'Không thể tải trạng thái dịch vụ hệ thống' })
     } finally {
       setLoading(false)
     }
@@ -82,7 +82,7 @@ export function AdminSettings() {
         if (!ignore) setHealth(res.data)
       })
       .catch(() => {
-        if (!ignore) toast({ type: 'error', title: 'Failed to load health status' })
+        if (!ignore) toast({ type: 'error', title: 'Không thể tải trạng thái dịch vụ hệ thống' })
       })
 
     adminApi.listAiKeys()
@@ -157,21 +157,21 @@ export function AdminSettings() {
   }
 
   const services = [
-    { name: 'PostgreSQL Database', description: 'Relational data storage', icon: Database, key: 'database' as const },
-    { name: 'AI LangGraph Service', description: 'LLM workflow engine', icon: Bot, key: 'ai_service' as const },
-    { name: 'Redis (Upstash)', description: 'Session & query caching', icon: Zap, key: 'redis' as const },
-    { name: 'Cloudflare R2 Storage', description: 'S3-compatible object storage', icon: HardDrive, key: 's3_storage' as const },
-    { name: 'Qdrant Vector DB', description: 'Vector embeddings database', icon: Database, key: 'qdrant' as const },
-    { name: 'Celery Worker', description: 'Background task processing', icon: Activity, key: 'celery' as const },
+    { name: 'Cơ sở dữ liệu PostgreSQL', description: 'Lưu trữ dữ liệu quan hệ', icon: Database, key: 'database' as const },
+    { name: 'Dịch vụ AI LangGraph', description: 'Công cụ điều phối luồng LLM', icon: Bot, key: 'ai_service' as const },
+    { name: 'Bộ nhớ đệm Redis (Upstash)', description: 'Bộ đệm phiên và truy vấn', icon: Zap, key: 'redis' as const },
+    { name: 'Kho lưu trữ Cloudflare R2', description: 'Lưu trữ đối tượng S3 tương thích', icon: HardDrive, key: 's3_storage' as const },
+    { name: 'Cơ sở dữ liệu Vector Qdrant', description: 'Lưu trữ vector nhúng tìm kiếm ngữ nghĩa', icon: Database, key: 'qdrant' as const },
+    { name: 'Worker xử lý ngầm Celery', description: 'Hàng đợi và tác vụ chạy ngầm', icon: Activity, key: 'celery' as const },
   ]
 
-  const overall = health?.status === 'healthy' ? 'All systems operational' : 'Some services degraded'
+  const overall = health?.status === 'healthy' ? 'Tất cả hệ thống hoạt động tốt' : 'Một số dịch vụ gặp sự cố'
   const activeKeysCount = aiKeys.filter((k) => k.is_active).length
 
   return (
     <div className="space-y-6 p-6 font-body">
       <div className="flex flex-col gap-1">
-        <h1 className="text-fluid-2xl font-bold text-foreground">Admin Settings</h1>
+        <h1 className="text-fluid-2xl font-bold text-foreground">Cài Đặt Quản Trị</h1>
         <p className="text-muted-foreground text-sm">Cấu hình nền tảng, quản lý API Key xoay vòng và giám sát hạ tầng.</p>
       </div>
 
@@ -187,7 +187,7 @@ export function AdminSettings() {
                 <h2 className="font-display text-base font-semibold text-foreground">Quản Lý Gemini & LLM API Keys</h2>
                 <Badge
                   variant={activeKeysCount > 0 ? 'success' : 'warning'}
-                  label={`${activeKeysCount}/${aiKeys.length} Active`}
+                  label={`${activeKeysCount}/${aiKeys.length} Hoạt động`}
                   dot
                 />
               </div>
@@ -258,12 +258,12 @@ export function AdminSettings() {
                         </div>
                       </td>
                       <td className="py-3 text-center text-xs text-muted-foreground">
-                        <span className="font-semibold text-foreground">{k.usage_count}</span> calls
+                        <span className="font-semibold text-foreground">{k.usage_count}</span> lượt gọi
                       </td>
                       <td className="py-3 text-center">
                         <Badge
                           variant={k.is_active ? 'success' : 'default'}
-                          label={k.is_active ? 'Active' : 'Disabled'}
+                          label={k.is_active ? 'Đang hoạt động' : 'Đã tắt'}
                           dot
                         />
                       </td>
@@ -282,7 +282,7 @@ export function AdminSettings() {
                             size="icon"
                             className="h-7 w-7 text-destructive hover:bg-destructive/10"
                             onClick={() => handleDeleteKey(k.id, k.key_name)}
-                            aria-label="Delete API Key"
+                            aria-label="Xóa API Key"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
@@ -302,7 +302,7 @@ export function AdminSettings() {
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-primary" />
-            <h2 className="font-display text-base font-semibold text-foreground">System Health</h2>
+            <h2 className="font-display text-base font-semibold text-foreground">Trạng Thái Hệ Thống</h2>
           </div>
           <div className="flex items-center gap-3">
             <Badge
@@ -311,13 +311,15 @@ export function AdminSettings() {
               dot
             />
             <Button variant="outline" size="sm" onClick={fetchHealth} loading={loading}>
-              Refresh
+              Làm mới
             </Button>
           </div>
         </div>
         <div className="grid gap-3 p-5 md:grid-cols-3">
           {services.map((svc) => {
             const status = health?.services[svc.key] ?? 'offline'
+            const statusLabel =
+              status === 'healthy' ? 'Hoạt động tốt' : status === 'unhealthy' ? 'Gặp sự cố' : 'Ngoại tuyến'
             return (
               <div key={svc.key} className="flex items-center gap-3 p-3 rounded-lg border border-border">
                 <div
@@ -340,7 +342,7 @@ export function AdminSettings() {
                       : 'text-muted-foreground'
                   }`}
                 >
-                  {status}
+                  {statusLabel}
                 </span>
               </div>
             )
@@ -351,15 +353,15 @@ export function AdminSettings() {
       {/* Platform Info */}
       <Card>
         <div className="px-5 py-4 border-b border-border">
-          <h2 className="font-display text-base font-semibold text-foreground">Platform Information</h2>
+          <h2 className="font-display text-base font-semibold text-foreground">Thông Tin Nền Tảng</h2>
         </div>
         <div className="p-5 space-y-3">
           {[
-            { label: 'Platform', value: 'MULTIMODAL AI LEARNING HUB' },
-            { label: 'Version', value: '1.0.0' },
-            { label: 'Frontend', value: 'React 19 + Vite + Tailwind CSS' },
-            { label: 'Backend', value: 'FastAPI + SQLAlchemy + PostgreSQL' },
-            { label: 'AI Engine', value: 'LangGraph + Gemini Flash-Lite / Pro' },
+            { label: 'Nền tảng', value: 'MULTIMODAL AI LEARNING HUB' },
+            { label: 'Phiên bản', value: '1.0.0' },
+            { label: 'Giao diện (Frontend)', value: 'React 19 + Vite + Tailwind CSS' },
+            { label: 'Máy chủ (Backend)', value: 'FastAPI + SQLAlchemy + PostgreSQL' },
+            { label: 'Động cơ AI (AI Engine)', value: 'LangGraph + Gemini Flash-Lite / Pro' },
           ].map((item) => (
             <div key={item.label} className="flex justify-between text-sm">
               <span className="text-muted-foreground">{item.label}</span>

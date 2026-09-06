@@ -48,7 +48,7 @@ export function AdminUsers() {
       setUsers(res.data.items)
       setTotalUsers(res.data.total)
     } catch {
-      toast({ type: 'error', title: 'Failed to load users' })
+      toast({ type: 'error', title: 'Không thể tải danh sách người dùng' })
     } finally {
       setLoading(false)
     }
@@ -69,19 +69,19 @@ export function AdminUsers() {
 
   const handleCreate = async () => {
     if (!newEmail || !newPassword) {
-      toast({ type: 'warning', title: 'Email and password are required' })
+      toast({ type: 'warning', title: 'Vui lòng nhập đầy đủ email và mật khẩu' })
       return
     }
     setSaving(true)
     try {
       await adminApi.createUser({ email: newEmail, password: newPassword, full_name: newFullName || undefined, role: newRole })
-      toast({ type: 'success', title: 'User created successfully' })
+      toast({ type: 'success', title: 'Tạo người dùng thành công' })
       setShowCreateModal(false)
       setNewEmail(''); setNewPassword(''); setNewFullName(''); setNewRole('student')
       fetchUsers(page)
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
-      toast({ type: 'error', title: err?.response?.data?.detail || 'Failed to create user' })
+      toast({ type: 'error', title: err?.response?.data?.detail || 'Không thể tạo người dùng' })
     } finally {
       setSaving(false)
     }
@@ -96,12 +96,12 @@ export function AdminUsers() {
         role: editRole || undefined,
         is_active: editIsActive,
       })
-      toast({ type: 'success', title: 'User updated successfully' })
+      toast({ type: 'success', title: 'Cập nhật người dùng thành công' })
       setEditingUser(null)
       fetchUsers(page)
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
-      toast({ type: 'error', title: err?.response?.data?.detail || 'Failed to update user' })
+      toast({ type: 'error', title: err?.response?.data?.detail || 'Không thể cập nhật người dùng' })
     } finally {
       setSaving(false)
     }
@@ -112,12 +112,12 @@ export function AdminUsers() {
     setSaving(true)
     try {
       await adminApi.deleteUser(deletingUser.id)
-      toast({ type: 'success', title: 'User deleted successfully' })
+      toast({ type: 'success', title: 'Xóa người dùng thành công' })
       setDeletingUser(null)
       fetchUsers(page)
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } }
-      toast({ type: 'error', title: err?.response?.data?.detail || 'Failed to delete user' })
+      toast({ type: 'error', title: err?.response?.data?.detail || 'Không thể xóa người dùng' })
     } finally {
       setSaving(false)
     }
@@ -131,24 +131,24 @@ export function AdminUsers() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 font-body">
       <div className="flex flex-col gap-1">
-        <h1 className="text-fluid-2xl font-bold text-foreground">User Management</h1>
-        <p className="text-muted-foreground text-sm">Create, edit, and manage user accounts across the platform.</p>
+        <h1 className="text-fluid-2xl font-bold text-foreground">Quản lý người dùng</h1>
+        <p className="text-muted-foreground text-sm">Tạo mới, chỉnh sửa và phân quyền tài khoản người dùng trên toàn hệ thống.</p>
       </div>
 
       {/* Actions bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 max-w-sm">
           <Input
-            placeholder="Search users..."
+            placeholder="Tìm kiếm người dùng..."
             value={searchQuery}
             onChange={setSearchQuery}
             prefixIcon={<Search className="h-4 w-4" />}
           />
         </div>
         <Button icon={<Plus className="h-4 w-4" />} onClick={() => setShowCreateModal(true)}>
-          Create User
+          Tạo người dùng
         </Button>
       </div>
 
@@ -158,11 +158,11 @@ export function AdminUsers() {
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/30 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
-                <th className="py-2.5 px-5">User</th>
-                <th className="py-2.5 px-5">Role</th>
-                <th className="py-2.5 px-5">Status</th>
-                <th className="py-2.5 px-5">Registered</th>
-                <th className="py-2.5 px-5 text-right">Actions</th>
+                <th className="py-2.5 px-5">Người dùng</th>
+                <th className="py-2.5 px-5">Vai trò</th>
+                <th className="py-2.5 px-5">Trạng thái</th>
+                <th className="py-2.5 px-5">Ngày đăng ký</th>
+                <th className="py-2.5 px-5 text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody>
@@ -177,7 +177,7 @@ export function AdminUsers() {
                   </tr>
                 ))
               ) : filteredUsers.length === 0 ? (
-                <tr><td colSpan={5} className="py-12 text-center text-muted-foreground">No users found</td></tr>
+                <tr><td colSpan={5} className="py-12 text-center text-muted-foreground">Không tìm thấy người dùng nào</td></tr>
               ) : (
                 filteredUsers.map((u) => (
                   <tr key={u.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition">
@@ -185,31 +185,34 @@ export function AdminUsers() {
                       <div className="flex items-center gap-2.5">
                         <Avatar fallback={(u.full_name || u.email).split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()} size="sm" />
                         <div className="min-w-0">
-                          <p className="font-medium text-foreground truncate">{u.full_name || 'No name'}</p>
+                          <p className="font-medium text-foreground truncate">{u.full_name || 'Chưa cung cấp tên'}</p>
                           <p className="text-xs text-muted-foreground truncate">{u.email}</p>
                         </div>
                       </div>
                     </td>
                     <td className="py-3 px-5">
-                      <Badge variant={u.role === 'admin' ? 'primary' : u.role === 'lecturer' ? 'info' : 'default'} label={u.role} />
+                      <Badge
+                        variant={u.role === 'admin' ? 'primary' : u.role === 'lecturer' ? 'info' : 'default'}
+                        label={u.role === 'admin' ? 'Quản trị viên' : u.role === 'lecturer' ? 'Giảng viên' : 'Học viên'}
+                      />
                     </td>
                     <td className="py-3 px-5">
                       <div className="flex items-center gap-1.5">
                         <span className={`h-2 w-2 rounded-full ${u.is_active ? 'bg-success animate-pulse-soft' : 'bg-muted-foreground'}`} />
                         <span className={`text-xs font-medium ${u.is_active ? 'text-success' : 'text-muted-foreground'}`}>
-                          {u.is_active ? 'Active' : 'Inactive'}
+                          {u.is_active ? 'Đang hoạt động' : 'Ngừng kích hoạt'}
                         </span>
                       </div>
                     </td>
                     <td className="py-3 px-5 text-xs text-muted-foreground tabular-nums">
-                      {u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'}
+                      {u.created_at ? new Date(u.created_at).toLocaleDateString('vi-VN') : 'N/A'}
                     </td>
                     <td className="py-3 px-5 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => openEdit(u)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition">
+                        <button onClick={() => openEdit(u)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition" title="Chỉnh sửa">
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
-                        <button onClick={() => setDeletingUser(u)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition">
+                        <button onClick={() => setDeletingUser(u)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition" title="Xóa">
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
@@ -223,88 +226,88 @@ export function AdminUsers() {
 
         {/* Pagination */}
         <div className="flex items-center justify-between border-t border-border px-5 py-3">
-          <p className="text-xs text-muted-foreground">Page <span className="font-semibold text-foreground">{page}</span> of <span className="font-semibold text-foreground">{totalPages}</span></p>
+          <p className="text-xs text-muted-foreground">Trang <span className="font-semibold text-foreground">{page}</span> trên <span className="font-semibold text-foreground">{totalPages}</span></p>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" icon={<ChevronLeft className="h-3.5 w-3.5" />} onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1 || loading}>Prev</Button>
-            <Button variant="outline" size="sm" iconRight={<ChevronRight className="h-3.5 w-3.5" />} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages || loading}>Next</Button>
+            <Button variant="outline" size="sm" icon={<ChevronLeft className="h-3.5 w-3.5" />} onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1 || loading}>Trước</Button>
+            <Button variant="outline" size="sm" iconRight={<ChevronRight className="h-3.5 w-3.5" />} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages || loading}>Sau</Button>
           </div>
         </div>
       </Card>
 
       {/* Create User Modal */}
-      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Create New User" size="md">
+      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Tạo người dùng mới" size="md">
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-foreground block mb-1">Email *</label>
-            <Input value={newEmail} onChange={setNewEmail} placeholder="user@example.com" type="email" />
+            <label className="text-sm font-medium text-foreground block mb-1">Địa chỉ Email *</label>
+            <Input value={newEmail} onChange={setNewEmail} placeholder="ban@example.com" type="email" />
           </div>
           <div>
-            <label className="text-sm font-medium text-foreground block mb-1">Password *</label>
-            <Input value={newPassword} onChange={setNewPassword} placeholder="Min 6 characters" type="password" />
+            <label className="text-sm font-medium text-foreground block mb-1">Mật khẩu *</label>
+            <Input value={newPassword} onChange={setNewPassword} placeholder="Tối thiểu 6 ký tự" type="password" />
           </div>
           <div>
-            <label className="text-sm font-medium text-foreground block mb-1">Full Name</label>
-            <Input value={newFullName} onChange={setNewFullName} placeholder="Optional" />
+            <label className="text-sm font-medium text-foreground block mb-1">Họ và tên</label>
+            <Input value={newFullName} onChange={setNewFullName} placeholder="Không bắt buộc" />
           </div>
           <div>
-            <label className="text-sm font-medium text-foreground block mb-1">Role</label>
+            <label className="text-sm font-medium text-foreground block mb-1">Vai trò</label>
             <select className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" value={newRole} onChange={(e) => setNewRole(e.target.value)}>
-              <option value="student">Student</option>
-              <option value="lecturer">Lecturer</option>
-              <option value="admin">Admin</option>
+              <option value="student">Học viên</option>
+              <option value="lecturer">Giảng viên</option>
+              <option value="admin">Quản trị viên</option>
             </select>
           </div>
         </div>
         <div className="flex justify-end gap-2 mt-6">
-          <Button variant="outline" onClick={() => setShowCreateModal(false)}>Cancel</Button>
-          <Button onClick={handleCreate} loading={saving} icon={<Plus className="h-4 w-4" />}>Create User</Button>
+          <Button variant="outline" onClick={() => setShowCreateModal(false)}>Hủy</Button>
+          <Button onClick={handleCreate} loading={saving} icon={<Plus className="h-4 w-4" />}>Tạo người dùng</Button>
         </div>
       </Modal>
 
       {/* Edit User Modal */}
-      <Modal open={!!editingUser} onClose={() => setEditingUser(null)} title="Edit User" size="md">
+      <Modal open={!!editingUser} onClose={() => setEditingUser(null)} title="Chỉnh sửa người dùng" size="md">
         {editingUser && (
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-foreground block mb-1">Email</label>
+              <label className="text-sm font-medium text-foreground block mb-1">Địa chỉ Email</label>
               <div className="px-3 py-2 rounded-lg border border-input bg-muted/30 text-sm text-muted-foreground">{editingUser.email}</div>
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground block mb-1">Full Name</label>
-              <Input value={editFullName} onChange={setEditFullName} placeholder="Full name" />
+              <label className="text-sm font-medium text-foreground block mb-1">Họ và tên</label>
+              <Input value={editFullName} onChange={setEditFullName} placeholder="Nhập họ và tên" />
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground block mb-1">Role</label>
+              <label className="text-sm font-medium text-foreground block mb-1">Vai trò</label>
               <select className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" value={editRole} onChange={(e) => setEditRole(e.target.value)}>
-                <option value="student">Student</option>
-                <option value="lecturer">Lecturer</option>
-                <option value="admin">Admin</option>
+                <option value="student">Học viên</option>
+                <option value="lecturer">Giảng viên</option>
+                <option value="admin">Quản trị viên</option>
               </select>
             </div>
             <div className="flex items-center gap-2">
               <input type="checkbox" id="isActive" checked={editIsActive} onChange={(e) => setEditIsActive(e.target.checked)} className="h-4 w-4 rounded border-input" />
-              <label htmlFor="isActive" className="text-sm font-medium text-foreground">Active (allow login)</label>
+              <label htmlFor="isActive" className="text-sm font-medium text-foreground">Kích hoạt (cho phép đăng nhập)</label>
             </div>
           </div>
         )}
         <div className="flex justify-end gap-2 mt-6">
-          <Button variant="outline" onClick={() => setEditingUser(null)}>Cancel</Button>
-          <Button onClick={handleUpdate} loading={saving} icon={<Shield className="h-4 w-4" />}>Save Changes</Button>
+          <Button variant="outline" onClick={() => setEditingUser(null)}>Hủy</Button>
+          <Button onClick={handleUpdate} loading={saving} icon={<Shield className="h-4 w-4" />}>Lưu thay đổi</Button>
         </div>
       </Modal>
 
       {/* Delete Confirm Modal */}
-      <Modal open={!!deletingUser} onClose={() => setDeletingUser(null)} title="Delete User" size="sm">
+      <Modal open={!!deletingUser} onClose={() => setDeletingUser(null)} title="Xác nhận xóa người dùng" size="sm">
         {deletingUser && (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Are you sure you want to delete <span className="font-semibold text-foreground">{deletingUser.full_name || deletingUser.email}</span>? This action cannot be undone.
+              Bạn có chắc chắn muốn xóa người dùng <span className="font-semibold text-foreground">{deletingUser.full_name || deletingUser.email}</span>? Thao tác này không thể hoàn tác.
             </p>
           </div>
         )}
         <div className="flex justify-end gap-2 mt-6">
-          <Button variant="outline" onClick={() => setDeletingUser(null)}>Cancel</Button>
-          <Button variant="danger" onClick={handleDelete} loading={saving} icon={<Trash2 className="h-4 w-4" />}>Delete User</Button>
+          <Button variant="outline" onClick={() => setDeletingUser(null)}>Hủy</Button>
+          <Button variant="danger" onClick={handleDelete} loading={saving} icon={<Trash2 className="h-4 w-4" />}>Xóa người dùng</Button>
         </div>
       </Modal>
     </div>

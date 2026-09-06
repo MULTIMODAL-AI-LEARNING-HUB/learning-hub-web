@@ -28,7 +28,7 @@ export function AdminProfile() {
         setUser(res.data)
         setFullName(res.data.full_name || '')
       } catch {
-        if (!cancelled) toast({ type: 'error', title: 'Failed to load profile' })
+        if (!cancelled) toast({ type: 'error', title: 'Không thể tải thông tin hồ sơ' })
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -41,28 +41,28 @@ export function AdminProfile() {
 
   const handleSave = async () => {
     if (!fullName.trim()) {
-      toast({ type: 'warning', title: 'Full name is required' })
+      toast({ type: 'warning', title: 'Vui lòng nhập họ và tên' })
       return
     }
 
     setSaving(true)
     try {
       const res = await authApi.updateMe({ full_name: fullName.trim() })
-      toast({ type: 'success', title: 'Profile updated successfully' })
+      toast({ type: 'success', title: 'Cập nhật hồ sơ thành công' })
       setUser(res.data)
       setFullName(res.data.full_name || '')
       // Sync change with main app layout store
       await loadStoreUser()
     } catch {
-      toast({ type: 'error', title: 'Failed to update profile' })
+      toast({ type: 'error', title: 'Không thể cập nhật hồ sơ' })
     } finally {
       setSaving(false)
     }
   }
 
   const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return 'N/A'
-    return new Date(dateStr).toLocaleDateString(undefined, {
+    if (!dateStr) return 'Không có'
+    return new Date(dateStr).toLocaleDateString('vi-VN', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -81,7 +81,16 @@ export function AdminProfile() {
     )
   }
 
-  const displayName = fullName.trim() || user?.full_name || user?.email || 'Administrator'
+  const roleLabel =
+    user?.role === 'admin'
+      ? 'Quản trị viên'
+      : user?.role === 'lecturer'
+      ? 'Giảng viên'
+      : user?.role === 'student'
+      ? 'Học viên'
+      : (user?.role || 'Quản trị viên')
+
+  const displayName = fullName.trim() || user?.full_name || user?.email || 'Quản trị viên'
   const initials = displayName
     .split(' ')
     .map((n) => n[0])
@@ -93,8 +102,8 @@ export function AdminProfile() {
     <div className="space-y-6 p-6 animate-fade-in font-body">
       <div className="relative overflow-hidden rounded-xl border border-border bg-surface-elevated p-6 shadow-soft">
         <PageHeader
-          title="Admin Profile"
-          description="Manage your system administrator account information."
+          title="Hồ Sơ Quản Trị Viên"
+          description="Quản lý thông tin tài khoản quản trị viên hệ thống."
           icon={<User className="text-indigo-600 dark:text-indigo-400" />}
         />
       </div>
@@ -108,35 +117,35 @@ export function AdminProfile() {
               <h2 className="text-xl font-bold text-foreground">{displayName}</h2>
               <p className="text-xs text-muted-foreground capitalize flex items-center gap-1.5 mt-0.5">
                 <span className="h-2 w-2 rounded-full bg-indigo-500" />
-                {user?.role} Mode
+                Chế độ {roleLabel}
               </p>
             </div>
           </div>
 
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-foreground">Full Name</label>
+              <label className="text-sm font-semibold text-foreground">Họ và tên</label>
               <Input
                 value={fullName}
                 onChange={(v) => setFullName(v)}
-                placeholder="Enter your full name"
+                placeholder="Nhập họ và tên của bạn"
                 className="max-w-md"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-foreground">Email Address</label>
+              <label className="text-sm font-semibold text-foreground">Địa chỉ Email</label>
               <div className="flex items-center gap-2 max-w-md rounded-lg border border-border bg-muted/20 px-3 py-2 text-sm text-muted-foreground select-none">
                 <Mail className="h-4 w-4 shrink-0 text-muted-foreground/60" />
                 <span>{user?.email}</span>
               </div>
-              <p className="text-2xs text-muted-foreground mt-0.5">Contact support to change your email address.</p>
+              <p className="text-2xs text-muted-foreground mt-0.5">Liên hệ bộ phận hỗ trợ nếu bạn cần thay đổi địa chỉ email.</p>
             </div>
           </div>
 
           <div className="pt-2">
             <Button onClick={handleSave} loading={saving} className="bg-primary hover:bg-primary/95 text-primary-foreground font-semibold">
-              Save Changes
+              Lưu thay đổi
             </Button>
           </div>
         </Card>
@@ -146,14 +155,14 @@ export function AdminProfile() {
           <Card className="border-border shadow-soft bg-surface-elevated p-6 space-y-4">
             <div className="flex items-center gap-2 border-b border-border pb-3">
               <ShieldCheck className="h-5 w-5 text-indigo-500" />
-              <h3 className="font-semibold text-foreground">Account Status</h3>
+              <h3 className="font-semibold text-foreground">Trạng Thái Tài Khoản</h3>
             </div>
 
             <div className="space-y-3.5">
               <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-muted/10 p-3">
                 <CalendarDays className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-2xs text-muted-foreground">Member since</p>
+                  <p className="text-2xs text-muted-foreground">Tham gia từ</p>
                   <p className="text-xs font-semibold text-foreground tabular-nums">{formatDate(user?.created_at || null)}</p>
                 </div>
               </div>
@@ -161,16 +170,16 @@ export function AdminProfile() {
               <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-muted/10 p-3">
                 <Award className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-2xs text-muted-foreground">Access Role</p>
-                  <p className="text-xs font-semibold text-foreground capitalize">{user?.role}</p>
+                  <p className="text-2xs text-muted-foreground">Vai trò quyền hạn</p>
+                  <p className="text-xs font-semibold text-foreground">{roleLabel}</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-muted/10 p-3">
                 <ShieldCheck className="h-4 w-4 text-success" />
                 <div>
-                  <p className="text-2xs text-muted-foreground">System Status</p>
-                  <p className="text-xs font-semibold text-success">Active & Verified</p>
+                  <p className="text-2xs text-muted-foreground">Trạng thái tài khoản</p>
+                  <p className="text-xs font-semibold text-success">Đang hoạt động & Đã xác thực</p>
                 </div>
               </div>
             </div>

@@ -57,7 +57,7 @@ export function MobileDrawer({
               <button
                 onClick={onClose}
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition"
-                aria-label="Close drawer"
+                aria-label="Đóng thanh điều hướng"
               >
                 <X className="h-4 w-4" />
               </button>

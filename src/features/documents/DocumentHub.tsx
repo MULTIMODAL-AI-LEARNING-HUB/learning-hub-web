@@ -65,13 +65,13 @@ export function DocumentHub() {
   return (
     <div className="flex h-full flex-col">
       <PageHeader
-        subtitle="Workspace"
-        title="Documents"
-        description={`${docs.length} document${docs.length === 1 ? '' : 's'} · ${readyDocs} ready to study`}
+        subtitle="Không gian học tập"
+        title="Tài liệu của tôi"
+        description={`${docs.length} tài liệu · ${readyDocs} đã sẵn sàng học tập`}
         icon={<FileText />}
         actions={
           <Button onClick={openUpload} icon={<Upload className="h-4 w-4" />}>
-            Upload
+            Tải lên
           </Button>
         }
       />
@@ -81,11 +81,11 @@ export function DocumentHub() {
           {docs.length === 0 ? (
             <EmptyState
               icon={<FileText />}
-              title="No documents yet"
-              description="Upload PDFs, videos, audio files, or URLs to get started with your AI study workspace."
+              title="Chưa có tài liệu nào"
+              description="Tải lên tệp PDF, video, audio hoặc liên kết để bắt đầu học tập cùng trợ lý AI."
               action={
                 <Button onClick={openUpload} icon={<Upload className="h-4 w-4" />}>
-                  Upload your first document
+                  Tải lên tài liệu đầu tiên
                 </Button>
               }
               className="flex-1"
@@ -99,7 +99,7 @@ export function DocumentHub() {
                   <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/60" />
                   <input
                     type="text"
-                    placeholder="Search documents..."
+                    placeholder="Tìm kiếm tài liệu..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full rounded-xl border border-input bg-surface pl-9 pr-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/70 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
@@ -110,15 +110,15 @@ export function DocumentHub() {
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <ArrowUpDown className="h-3.5 w-3.5" />
-                    <span>Sort by:</span>
+                    <span>Sắp xếp:</span>
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value as 'name' | 'size' | 'status')}
                       className="bg-transparent font-semibold text-foreground outline-none cursor-pointer hover:text-primary transition"
                     >
-                      <option value="name">Name</option>
-                      <option value="size">Size</option>
-                      <option value="status">Status</option>
+                      <option value="name">Tên tài liệu</option>
+                      <option value="size">Kích thước</option>
+                      <option value="status">Trạng thái</option>
                     </select>
                   </div>
 
@@ -131,7 +131,7 @@ export function DocumentHub() {
                           ? 'bg-surface shadow-soft text-foreground'
                           : 'text-muted-foreground hover:text-foreground'
                       )}
-                      title="List View"
+                      title="Xem danh sách"
                     >
                       <List className="h-3.5 w-3.5" />
                     </button>
@@ -143,7 +143,7 @@ export function DocumentHub() {
                           ? 'bg-surface shadow-soft text-foreground'
                           : 'text-muted-foreground hover:text-foreground'
                       )}
-                      title="Grid View"
+                      title="Xem dạng lưới"
                     >
                       <LayoutGrid className="h-3.5 w-3.5" />
                     </button>
@@ -154,7 +154,7 @@ export function DocumentHub() {
               {/* Document items list */}
               {filteredDocs.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center p-6 text-center text-xs text-muted-foreground">
-                  No documents found matching "{searchQuery}"
+                  Không tìm thấy tài liệu phù hợp với "{searchQuery}"
                 </div>
               ) : viewMode === 'list' ? (
                 <div className="flex-1 overflow-y-auto scrollbar-thin pr-1 space-y-2">
@@ -195,8 +195,8 @@ export function DocumentHub() {
           ) : (
             <EmptyState
               icon={<FileText />}
-              title="Select a document"
-              description="Pick a document from the list to view its content, ask questions, and generate study materials."
+              title="Chọn một tài liệu"
+              description="Chọn tài liệu từ danh sách để xem nội dung, hỏi đáp với AI và tạo học liệu ôn tập."
               className="h-full"
             />
           )}
@@ -210,13 +210,13 @@ export function DocumentHub() {
               <button
                 onClick={() => setShowMobileViewer(false)}
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg hover:bg-muted transition-colors"
-                aria-label="Go back"
+                aria-label="Quay lại"
               >
                 <ArrowLeft className="h-4 w-4" />
               </button>
               <div className="min-w-0 flex-1">
                 <p className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  DOCUMENT VIEWER
+                  XEM TÀI LIỆU
                 </p>
                 <p className="text-sm font-semibold text-foreground truncate">{selectedDoc.name}</p>
               </div>

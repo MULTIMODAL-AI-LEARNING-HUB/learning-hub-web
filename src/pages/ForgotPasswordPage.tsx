@@ -15,15 +15,15 @@ export function ForgotPasswordPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim()) { setError('Email is required'); return }
-    if (!/\S+@\S+\.\S+/.test(email)) { setError('Invalid email address'); return }
+    if (!email.trim()) { setError('Vui lòng nhập địa chỉ email'); return }
+    if (!/\S+@\S+\.\S+/.test(email)) { setError('Địa chỉ email không hợp lệ'); return }
     setError('')
     setLoading(true)
     try {
       await forgotPassword(email)
       setSent(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+      setError(err instanceof Error ? err.message : 'Đã có lỗi xảy ra, vui lòng thử lại')
     } finally {
       setLoading(false)
     }
@@ -39,16 +39,16 @@ export function ForgotPasswordPage() {
             </div>
             <div>
               <p className="text-sm font-display font-semibold text-foreground">Learning Hub</p>
-              <p className="text-2xs text-muted-foreground">AI Study Workspace</p>
+              <p className="text-2xs text-muted-foreground">Không gian học tập AI</p>
             </div>
           </div>
 
           <div className="space-y-2">
             <h1 className="font-display text-4xl font-bold tracking-tight text-foreground text-balance lg:text-5xl">
-              Reset your password
+              Đặt lại mật khẩu
             </h1>
             <p className="text-base text-muted-foreground max-w-md">
-              Enter your email address and we'll send you a link to reset your password.
+              Nhập địa chỉ email của bạn và chúng tôi sẽ gửi liên kết đặt lại mật khẩu.
             </p>
           </div>
 
@@ -58,17 +58,17 @@ export function ForgotPasswordPage() {
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-success/10 mb-4">
                   <CheckCircle2 className="h-8 w-8 text-success" />
                 </div>
-                <h2 className="font-display text-xl font-semibold text-foreground mb-2">Check your email</h2>
+                <h2 className="font-display text-xl font-semibold text-foreground mb-2">Kiểm tra hộp thư đến</h2>
                 <p className="text-sm text-muted-foreground mb-6 max-w-sm">
-                  If an account exists for <span className="font-medium text-foreground">{email}</span>, we've sent a password reset link. It expires in 30 minutes.
+                  Nếu tài khoản tồn tại với email <span className="font-medium text-foreground">{email}</span>, chúng tôi đã gửi liên kết đặt lại mật khẩu. Liên kết sẽ hết hạn sau 30 phút.
                 </p>
                 <div className="flex gap-3">
                   <Button variant="outline" onClick={() => { setSent(false); setEmail('') }}>
-                    Send again
+                    Gửi lại
                   </Button>
                   <Link to="/login">
                     <Button variant="gradient" iconRight={<ArrowLeft className="h-4 w-4" />}>
-                      Back to login
+                      Quay lại đăng nhập
                     </Button>
                   </Link>
                 </div>
@@ -76,9 +76,9 @@ export function ForgotPasswordPage() {
             ) : (
               <form onSubmit={handleSubmit} className="grid gap-5">
                 <AuthInput
-                  label="Email"
+                  label="Địa chỉ email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="ban@example.com"
                   value={email}
                   onChange={setEmail}
                   error={error}
@@ -93,13 +93,13 @@ export function ForgotPasswordPage() {
                   variant="gradient"
                   iconRight={!loading ? <Send className="h-4 w-4" /> : undefined}
                 >
-                  {loading ? 'Sending...' : 'Send reset link'}
+                  {loading ? 'Đang gửi...' : 'Gửi liên kết đặt lại'}
                 </Button>
 
                 <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                   <ArrowLeft className="h-3.5 w-3.5" />
                   <Link className="font-semibold text-primary transition hover:underline" to="/login">
-                    Back to login
+                    Quay lại đăng nhập
                   </Link>
                 </div>
               </form>
@@ -111,24 +111,24 @@ export function ForgotPasswordPage() {
           <div className="space-y-6">
             <Card className="relative overflow-hidden p-8 border-border/50 bg-gradient-to-br from-primary/5 via-surface-elevated to-accent/5 text-center">
               <Mail className="mx-auto h-16 w-16 text-primary/20 mb-4" />
-              <h3 className="font-display text-lg font-semibold text-foreground mb-2">Secure & Fast</h3>
+              <h3 className="font-display text-lg font-semibold text-foreground mb-2">Bảo mật & Nhanh chóng</h3>
               <p className="text-sm text-muted-foreground">
-                Your reset link is unique and expires in 30 minutes for your security.
+                Liên kết khôi phục là duy nhất và hết hạn sau 30 phút để bảo vệ tài khoản của bạn.
               </p>
             </Card>
 
             <div className="grid gap-2.5">
               {[
-                { label: 'Check your inbox', desc: 'Open the email from Learning Hub' },
-                { label: 'Click the link', desc: 'It will take you to the reset page' },
-                { label: 'Create new password', desc: 'Choose a strong, unique password' },
-              ].map((step) => (
+                { label: 'Kiểm tra hộp thư', desc: 'Mở email xác nhận từ Learning Hub' },
+                { label: 'Nhấp vào liên kết', desc: 'Chuyển đến trang đặt lại mật khẩu mới' },
+                { label: 'Tạo mật khẩu mới', desc: 'Chọn một mật khẩu mạnh và an toàn' },
+              ].map((step, idx) => (
                 <div
                   key={step.label}
                   className="flex items-start gap-3 rounded-xl border border-border bg-surface-elevated p-4"
                 >
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold text-sm">
-                    {1}
+                    {idx + 1}
                   </div>
                   <div>
                     <p className="text-sm font-medium text-foreground">{step.label}</p>

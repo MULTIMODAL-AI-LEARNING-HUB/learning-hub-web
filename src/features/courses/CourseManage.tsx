@@ -56,7 +56,7 @@ export function CourseManage() {
       navigate(`/app/courses/${res.data.id}/edit`)
     } catch (err) {
       const axiosErr = err as { response?: { data?: { detail?: string } } }
-      alert(axiosErr?.response?.data?.detail || 'Failed to create course')
+      alert(axiosErr?.response?.data?.detail || 'Tạo khóa học thất bại')
     } finally {
       setCreating(false)
     }

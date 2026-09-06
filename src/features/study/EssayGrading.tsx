@@ -30,11 +30,11 @@ export function EssayGrading() {
 
   const handleGrade = async () => {
     if (!essay.trim()) {
-      toast({ type: 'warning', title: 'Please write an essay first' })
+      toast({ type: 'warning', title: 'Vui lòng viết bài luận trước' })
       return
     }
     if (!selectedDoc) {
-      toast({ type: 'warning', title: 'Please select a reference document' })
+      toast({ type: 'warning', title: 'Vui lòng chọn tài liệu tham chiếu' })
       return
     }
     setLoading(true)
@@ -44,9 +44,9 @@ export function EssayGrading() {
         essay_text: essay,
       })
       setResult(res.data as GradingResult)
-      toast({ type: 'success', title: 'Grading complete', message: `Score: ${(res.data as GradingResult).score}/10` })
+      toast({ type: 'success', title: 'Đã hoàn tất chấm điểm', message: `Điểm số: ${(res.data as GradingResult).score}/10` })
     } catch {
-      toast({ type: 'error', title: 'Grading failed' })
+      toast({ type: 'error', title: 'Chấm điểm bài luận thất bại' })
     } finally {
       setLoading(false)
     }
@@ -62,9 +62,9 @@ export function EssayGrading() {
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader
-        subtitle="Study Tools"
-        title="Essay Grading"
-        description="Get AI-powered feedback on your essays, with comparison to source material."
+        subtitle="Công cụ học tập"
+        title="Chấm bài luận AI"
+        description="Nhận đánh giá và nhận xét từ AI cho bài luận của bạn, so sánh đối chiếu với tài liệu gốc."
         icon={<PenLine />}
       />
 
@@ -73,36 +73,36 @@ export function EssayGrading() {
           {readyDocs.length === 0 ? (
             <EmptyState
               icon={<FileQuestion />}
-              title="No documents ready"
-              description="Upload a document first to grade essays against it."
+              title="Chưa có tài liệu sẵn sàng"
+              description="Vui lòng tải lên tài liệu trước để làm cơ sở đối chiếu và chấm bài luận."
             />
           ) : (
             <div className="space-y-4">
-              <FormField label="Reference Document" required>
+              <FormField label="Tài liệu tham chiếu" required>
                 <Select
                   value={selectedDoc}
                   onChange={setSelectedDoc}
-                  placeholder="Select a document"
+                  placeholder="Chọn tài liệu đối chiếu..."
                   options={readyDocs.map((d) => ({ value: d.id, label: d.name }))}
                 />
               </FormField>
 
-              <FormField label="Your Essay" required>
+              <FormField label="Nội dung bài luận của bạn" required>
                 <Textarea
                   value={essay}
                   onChange={(e) => setEssay(e.target.value)}
-                  placeholder="Write or paste your essay here..."
+                  placeholder="Viết hoặc dán nội dung bài luận của bạn vào đây..."
                   rows={14}
                 />
               </FormField>
 
               <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground tabular-nums">
-                  {wordCount} {wordCount === 1 ? 'word' : 'words'}
+                  {wordCount} từ
                 </p>
                 <div className="flex gap-2">
                   <Button onClick={handleReset} variant="ghost" size="sm" icon={<RotateCcw className="h-3.5 w-3.5" />}>
-                    Clear
+                    Xóa làm lại
                   </Button>
                   <Button
                     onClick={handleGrade}
@@ -110,7 +110,7 @@ export function EssayGrading() {
                     size="sm"
                     icon={<Sparkles className="h-3.5 w-3.5" />}
                   >
-                    Grade Essay
+                    Chấm điểm bài luận
                   </Button>
                 </div>
               </div>
@@ -123,8 +123,8 @@ export function EssayGrading() {
             <Card className="p-12">
               <div className="flex flex-col items-center text-center">
                 <Spinner size="lg" />
-                <p className="mt-4 text-sm font-semibold text-foreground">Analyzing your essay</p>
-                <p className="mt-1 text-xs text-muted-foreground">Comparing with source material...</p>
+                <p className="mt-4 text-sm font-semibold text-foreground">Đang phân tích bài luận của bạn</p>
+                <p className="mt-1 text-xs text-muted-foreground">Đang đối chiếu nội dung với tài liệu tham chiếu...</p>
               </div>
             </Card>
           ) : result ? (
@@ -137,9 +137,9 @@ export function EssayGrading() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-foreground">Overall Score</p>
+                  <p className="text-sm font-semibold text-foreground">Điểm tổng quan</p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {result.score >= 8 ? 'Excellent work!' : result.score >= 6 ? 'Good, with room to improve' : 'Needs more depth'}
+                    {result.score >= 8 ? 'Bài viết rất xuất sắc!' : result.score >= 6 ? 'Tốt, còn một số điểm cần cải thiện' : 'Cần đào sâu nội dung hơn'}
                   </p>
                 </div>
                 <Award className="ml-auto h-5 w-5 text-accent" />
@@ -147,7 +147,7 @@ export function EssayGrading() {
 
               <div className="mt-4">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                  Feedback
+                  Nhận xét & Góp ý
                 </p>
                 <div className="rounded-lg border border-border bg-muted/30 p-3">
                   <p className="text-sm text-foreground/90 leading-relaxed">{result.feedback}</p>
@@ -157,7 +157,7 @@ export function EssayGrading() {
               {result.comparisons && result.comparisons.length > 0 && (
                 <div className="mt-4">
                   <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                    Comparison with Source
+                    Đối chiếu với nguồn tài liệu
                   </p>
                   <div className="space-y-2">
                     {result.comparisons.map((c, i) => {
@@ -180,7 +180,7 @@ export function EssayGrading() {
                               variant={simPct >= 80 ? 'success' : simPct >= 50 ? 'warning' : 'error'}
                               label={c.assessment}
                             />
-                            <span className="text-2xs text-muted-foreground tabular-nums">{simPct}% match</span>
+                            <span className="text-2xs text-muted-foreground tabular-nums">{simPct}% độ trùng khớp</span>
                           </div>
                         </div>
                       )
@@ -192,8 +192,8 @@ export function EssayGrading() {
           ) : (
             <EmptyState
               icon={<Sparkles />}
-              title="Ready when you are"
-              description="Write your essay on the left, then click Grade Essay to get AI feedback and source comparison."
+              title="Sẵn sàng chấm điểm"
+              description="Nhập hoặc dán bài luận ở khung bên trái, sau đó bấm Chấm điểm bài luận để AI phân tích và đối chiếu tài liệu."
               className="h-full"
             />
           )}

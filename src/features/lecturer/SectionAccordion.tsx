@@ -95,11 +95,11 @@ export function SectionAccordion({
       }))
 
       setExpandedLessons(prev => ({ ...prev, [activeUploadLessonId]: true }))
-      toast({ type: 'success', title: 'Document uploaded successfully' })
+      toast({ type: 'success', title: 'Tải tài liệu lên thành công' })
       fetchLessons()
     } catch (err) {
       console.error('Failed to upload document:', err)
-      toast({ type: 'error', title: 'Failed to upload document' })
+      toast({ type: 'error', title: 'Không thể tải tài liệu lên' })
     } finally {
       setUploadingDoc(false)
       setActiveUploadLessonId(null)
@@ -133,16 +133,16 @@ export function SectionAccordion({
             video_duration: duration
           })
           
-          toast({ type: 'success', title: 'Video uploaded and attached successfully' })
+          toast({ type: 'success', title: 'Tải video lên và đính kèm bài học thành công' })
           fetchLessons()
         } catch (err) {
           console.error('Failed to update lesson video url:', err)
-          toast({ type: 'error', title: 'Failed to update lesson video url' })
+          toast({ type: 'error', title: 'Không thể cập nhật liên kết video bài học' })
         }
       }
     } catch (err) {
       console.error('Failed to upload video:', err)
-      toast({ type: 'error', title: 'Failed to upload video' })
+      toast({ type: 'error', title: 'Không thể tải video lên' })
     } finally {
       setUploadingVideo(false)
       setActiveUploadLessonId(null)
@@ -151,7 +151,7 @@ export function SectionAccordion({
   }
 
   const handleAddVideoPrompt = async (lessonId: string) => {
-    const url = prompt('Enter a video URL (for example, YouTube or Vimeo), or leave this blank and select OK to upload a video from your device:')
+    const url = prompt('Nhập đường dẫn URL video (ví dụ: YouTube, Vimeo...), hoặc để trống và bấm OK để tải video từ máy tính của bạn:')
     if (url === null) return
 
     if (url.trim() !== "") {
@@ -159,11 +159,11 @@ export function SectionAccordion({
         await lessonsApi.update(section.id, lessonId, {
           video_url: url.trim()
         })
-        toast({ type: 'success', title: 'Video URL updated successfully' })
+        toast({ type: 'success', title: 'Cập nhật liên kết video thành công' })
         fetchLessons()
       } catch (err) {
         console.error('Failed to update video url:', err)
-        toast({ type: 'error', title: 'Failed to update video url' })
+        toast({ type: 'error', title: 'Không thể cập nhật liên kết video' })
       }
     } else {
       handleVideoUploadClick(lessonId)
@@ -203,7 +203,7 @@ export function SectionAccordion({
         setLessonAttachmentsMap(prev => ({ ...prev, [lessonId]: res.data }))
       } catch (err) {
         console.error('Failed to fetch attachments:', err)
-        toast({ type: 'error', title: 'Failed to load documents' })
+        toast({ type: 'error', title: 'Không thể tải danh sách tài liệu' })
       } finally {
         setLoadingAttachments(prev => ({ ...prev, [lessonId]: false }))
       }
@@ -212,7 +212,7 @@ export function SectionAccordion({
 
   const handleDeleteAttachment = async (e: React.MouseEvent, lessonId: string, attachmentId: string) => {
     e.stopPropagation() // Prevent opening the edit modal
-    if (!confirm('Are you sure you want to delete this document?')) return
+    if (!confirm('Bạn có chắc chắn muốn xóa tài liệu này?')) return
 
     try {
       await lessonsApi.deleteAttachment(section.id, lessonId, attachmentId)
@@ -226,41 +226,41 @@ export function SectionAccordion({
         }
       })
       
-      toast({ type: 'success', title: 'Document deleted successfully' })
+      toast({ type: 'success', title: 'Đã xóa tài liệu thành công' })
       
       // Re-fetch lessons to update the Docs count indicator badge
       fetchLessons()
     } catch (err) {
       console.error('Failed to delete attachment:', err)
-      toast({ type: 'error', title: 'Failed to delete document' })
+      toast({ type: 'error', title: 'Không thể xóa tài liệu' })
     }
   }
 
   const handleDeleteQuiz = async (e: React.MouseEvent, lessonId: string) => {
     e.stopPropagation()
-    if (!confirm('Are you sure you want to delete this quiz?')) return
+    if (!confirm('Bạn có chắc chắn muốn xóa bài trắc nghiệm này?')) return
 
     try {
       await quizzesApi.delete(lessonId)
-      toast({ type: 'success', title: 'Quiz deleted successfully' })
+      toast({ type: 'success', title: 'Đã xóa bài trắc nghiệm' })
       fetchLessons()
     } catch (err) {
       console.error('Failed to delete quiz:', err)
-      toast({ type: 'error', title: 'Failed to delete quiz' })
+      toast({ type: 'error', title: 'Không thể xóa bài trắc nghiệm' })
     }
   }
 
   const handleDeleteAssignmentItem = async (e: React.MouseEvent, lessonId: string) => {
     e.stopPropagation()
-    if (!confirm('Are you sure you want to delete this assignment?')) return
+    if (!confirm('Bạn có chắc chắn muốn xóa bài tập này?')) return
 
     try {
       await assignmentsApi.delete(lessonId)
-      toast({ type: 'success', title: 'Assignment deleted successfully' })
+      toast({ type: 'success', title: 'Đã xóa bài tập thành công' })
       fetchLessons()
     } catch (err) {
       console.error('Failed to delete assignment:', err)
-      toast({ type: 'error', title: 'Failed to delete assignment' })
+      toast({ type: 'error', title: 'Không thể xóa bài tập' })
     }
   }
 
@@ -288,7 +288,7 @@ export function SectionAccordion({
             <h3 className="font-semibold text-foreground">{section.title}</h3>
           )}
           <span className="text-xs text-muted-foreground ml-2">
-            {lessons?.length || section.lesson_count || 0} lessons
+            {lessons?.length || section.lesson_count || 0} bài học
           </span>
         </button>
 
@@ -296,10 +296,10 @@ export function SectionAccordion({
           {isEditing ? (
             <>
               <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)}>
-                Cancel
+                Hủy
               </Button>
               <Button size="sm" onClick={handleSave}>
-                Save
+                Lưu
               </Button>
             </>
           ) : (
@@ -311,7 +311,7 @@ export function SectionAccordion({
                 onClick={() => setShowTypeMenu(!showTypeMenu)}
                 className="hidden sm:inline-flex"
               >
-                Add Lesson
+                Thêm bài học
               </Button>
               <Button
                 size="icon"
@@ -329,25 +329,25 @@ export function SectionAccordion({
                       onClick={() => handleAddLessonLocal('VIDEO')}
                       className="w-full text-left px-4 py-2 text-sm hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors"
                     >
-                      <Video className="h-4 w-4 text-primary" /> Video Lesson
+                      <Video className="h-4 w-4 text-primary" /> Bài học Video
                     </button>
                     <button
                       onClick={() => handleAddLessonLocal('ARTICLE')}
                       className="w-full text-left px-4 py-2 text-sm hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors"
                     >
-                      <FileText className="h-4 w-4 text-success" /> Article Lesson
+                      <FileText className="h-4 w-4 text-success" /> Bài đọc / Lý thuyết
                     </button>
                     <button
                       onClick={() => handleAddLessonLocal('QUIZ')}
                       className="w-full text-left px-4 py-2 text-sm hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors"
                     >
-                      <HelpCircle className="h-4 w-4 text-accent" /> Add Quiz
+                      <HelpCircle className="h-4 w-4 text-accent" /> Bài trắc nghiệm (Quiz)
                     </button>
                     <button
                       onClick={() => handleAddLessonLocal('ASSIGNMENT')}
                       className="w-full text-left px-4 py-2 text-sm hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors"
                     >
-                      <ClipboardList className="h-4 w-4 text-warning" /> Add Assignment
+                      <ClipboardList className="h-4 w-4 text-warning" /> Bài tập tự luận
                     </button>
                   </div>
                 </>
@@ -388,7 +388,7 @@ export function SectionAccordion({
                       <button
                         onClick={(e) => toggleLessonExpand(e, lesson.id)}
                         className="hover:bg-muted p-0.5 rounded transition-colors"
-                        title="Toggle documents list"
+                        title="Xem danh sách tài liệu"
                       >
                         {expandedLessons[lesson.id] ? (
                           <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -415,34 +415,34 @@ export function SectionAccordion({
                         </span>
                       )}
                       {lesson.content && (
-                        <span className="flex items-center gap-1 text-[10px] text-success" title="Article">
-                          <FileText className="h-3 w-3" /> Article
+                        <span className="flex items-center gap-1 text-[10px] text-success" title="Bài đọc">
+                          <FileText className="h-3 w-3" /> Bài đọc
                         </span>
                       )}
                       {lesson.attachment_count > 0 && (
                         <button
                           onClick={(e) => toggleLessonExpand(e, lesson.id)}
                           className="flex items-center gap-1 text-[10px] text-info hover:underline transition-all font-semibold"
-                          title="Toggle documents list"
+                          title="Xem danh sách tài liệu"
                         >
-                          <FileText className="h-3 w-3" /> Docs ({lesson.attachment_count})
+                          <FileText className="h-3 w-3" /> Tài liệu ({lesson.attachment_count})
                         </button>
                       )}
                       {lesson.has_quiz && (
-                        <span className="flex items-center gap-1 text-[10px] text-accent" title="Quiz">
-                          <HelpCircle className="h-3 w-3" /> Quiz
+                        <span className="flex items-center gap-1 text-[10px] text-accent" title="Trắc nghiệm">
+                          <HelpCircle className="h-3 w-3" /> Trắc nghiệm
                         </span>
                       )}
                       {lesson.has_assignment && (
-                        <span className="flex items-center gap-1 text-[10px] text-warning" title="Assignment">
-                          <ClipboardList className="h-3 w-3" /> Assignment
+                        <span className="flex items-center gap-1 text-[10px] text-warning" title="Bài tập">
+                          <ClipboardList className="h-3 w-3" /> Bài tập
                         </span>
                       )}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
-                  {lesson.is_preview && <Badge variant="info" label="Preview" />}
+                  {lesson.is_preview && <Badge variant="info" label="Học thử" />}
                   
                   {/* Add Material Dropdown */}
                   <div className="relative">
@@ -453,17 +453,17 @@ export function SectionAccordion({
                         setShowMaterialMenu(prev => ({ ...prev, [lesson.id]: !prev[lesson.id] }))
                       }}
                       className="inline-flex items-center justify-center h-7 px-2.5 rounded-lg border border-primary/20 bg-card hover:bg-muted text-[11px] font-semibold text-primary gap-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                      title="Add content or documents to this lesson"
+                      title="Thêm học liệu hoặc bài tập vào bài học này"
                     >
                       {activeUploadLessonId === lesson.id && (uploadingDoc || uploadingVideo) ? (
                         <>
                           <span className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent shrink-0" />
-                          <span>Uploading...</span>
+                          <span>Đang tải lên...</span>
                         </>
                       ) : (
                         <>
                           <Plus className="h-3.5 w-3.5" />
-                          <span>Add Material</span>
+                          <span>Thêm học liệu</span>
                         </>
                       )}
                     </button>
@@ -471,7 +471,7 @@ export function SectionAccordion({
                     {showMaterialMenu[lesson.id] && (
                       <>
                         <div className="fixed inset-0 z-40" onClick={() => setShowMaterialMenu(prev => ({ ...prev, [lesson.id]: false }))} />
-                        <div className="absolute right-0 mt-1 w-44 bg-surface-elevated border border-border rounded-xl shadow-lift py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-150 text-left">
+                        <div className="absolute right-0 mt-1 w-48 bg-surface-elevated border border-border rounded-xl shadow-lift py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-150 text-left">
                           <button
                             onClick={() => {
                               setShowMaterialMenu(prev => ({ ...prev, [lesson.id]: false }))
@@ -479,7 +479,7 @@ export function SectionAccordion({
                             }}
                             className="w-full text-left px-3.5 py-1.5 text-xs hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors font-medium"
                           >
-                            <FileText className="h-3.5 w-3.5 text-rose-500" /> Upload Document
+                            <FileText className="h-3.5 w-3.5 text-rose-500" /> Tải lên tài liệu
                           </button>
                           
                           {!lesson.video_url && (
@@ -490,7 +490,7 @@ export function SectionAccordion({
                               }}
                               className="w-full text-left px-3.5 py-1.5 text-xs hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors font-medium"
                             >
-                              <Video className="h-3.5 w-3.5 text-primary" /> Add Video
+                              <Video className="h-3.5 w-3.5 text-primary" /> Thêm Video
                             </button>
                           )}
                           
@@ -502,7 +502,7 @@ export function SectionAccordion({
                               }}
                               className="w-full text-left px-3.5 py-1.5 text-xs hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors font-medium"
                             >
-                              <HelpCircle className="h-3.5 w-3.5 text-accent" /> Add Quiz
+                              <HelpCircle className="h-3.5 w-3.5 text-accent" /> Thêm bài trắc nghiệm
                             </button>
                           )}
                           
@@ -514,7 +514,7 @@ export function SectionAccordion({
                               }}
                               className="w-full text-left px-3.5 py-1.5 text-xs hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors font-medium"
                             >
-                              <ClipboardList className="h-3.5 w-3.5 text-warning" /> Add Assignment
+                              <ClipboardList className="h-3.5 w-3.5 text-warning" /> Thêm bài tập
                             </button>
                           )}
                         </div>
@@ -536,7 +536,7 @@ export function SectionAccordion({
                   {loadingAttachments[lesson.id] || (activeUploadLessonId === lesson.id && uploadingDoc) ? (
                     <div className="text-xs text-muted-foreground py-1.5 pl-2 animate-pulse flex items-center gap-2">
                       <span className="h-2 w-2 rounded-full bg-primary animate-ping" />
-                      {uploadingDoc ? 'Uploading document...' : 'Loading lesson contents...'}
+                      {uploadingDoc ? 'Đang tải tài liệu lên...' : 'Đang tải nội dung...'}
                     </div>
                   ) : lessonAttachmentsMap[lesson.id] && lessonAttachmentsMap[lesson.id].length > 0 ? (
                     <div className="space-y-2">
@@ -566,14 +566,14 @@ export function SectionAccordion({
                               target="_blank"
                               rel="noopener noreferrer"
                               className="p-1 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground transition-colors"
-                              title="Download document"
+                              title="Tải tài liệu"
                             >
                               <Download className="h-3.5 w-3.5" />
                             </a>
                             <button
                               onClick={(e) => handleDeleteAttachment(e, lesson.id, att.id)}
                               className="p-1 hover:bg-destructive/10 rounded-md text-muted-foreground hover:text-destructive transition-colors"
-                              title="Delete document"
+                              title="Xóa tài liệu"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
@@ -592,7 +592,7 @@ export function SectionAccordion({
                       <div className="flex items-center gap-2.5 min-w-0">
                         <HelpCircle className="h-4 w-4 text-accent shrink-0" />
                         <span className="truncate font-semibold text-foreground/80">
-                          Quiz: Multiple-choice assessment
+                          Trắc nghiệm: Bài kiểm tra trắc nghiệm
                         </span>
                       </div>
                       
@@ -600,14 +600,14 @@ export function SectionAccordion({
                         <button
                           onClick={() => onOpenQuiz(lesson.id)}
                           className="p-1 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground transition-colors"
-                          title="Edit Quiz"
+                          title="Chỉnh sửa trắc nghiệm"
                         >
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
                         <button
                           onClick={(e) => handleDeleteQuiz(e, lesson.id)}
                           className="p-1 hover:bg-destructive/10 rounded-md text-muted-foreground hover:text-destructive transition-colors"
-                          title="Delete Quiz"
+                          title="Xóa trắc nghiệm"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -624,7 +624,7 @@ export function SectionAccordion({
                       <div className="flex items-center gap-2.5 min-w-0">
                         <ClipboardList className="h-4 w-4 text-warning shrink-0" />
                         <span className="truncate font-semibold text-foreground/80">
-                          Assignment: Written exercise
+                          Bài tập: Bài tập tự luận & thực hành
                         </span>
                       </div>
                       
@@ -632,14 +632,14 @@ export function SectionAccordion({
                         <button
                           onClick={() => onOpenAssignment(lesson.id)}
                           className="p-1 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground transition-colors"
-                          title="Edit Assignment"
+                          title="Chỉnh sửa bài tập"
                         >
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
                         <button
                           onClick={(e) => handleDeleteAssignmentItem(e, lesson.id)}
                           className="p-1 hover:bg-destructive/10 rounded-md text-muted-foreground hover:text-destructive transition-colors"
-                          title="Delete Assignment"
+                          title="Xóa bài tập"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -654,7 +654,7 @@ export function SectionAccordion({
                    !lesson.has_assignment && (
                     <div className="relative text-xs text-muted-foreground py-2 pl-3 flex items-center gap-2">
                       <div className="absolute -left-[24px] top-1/2 w-6 h-px bg-border/40" />
-                      No content or documents in this lesson.
+                      Chưa có tài liệu hoặc bài tập nào trong bài học này.
                     </div>
                   )}
                 </div>
@@ -663,20 +663,20 @@ export function SectionAccordion({
           ))}
           {(!lessons || lessons.length === 0) && (
             <div className="px-4 py-6 text-center text-sm text-muted-foreground">
-              No lessons yet. Click "Add Lesson" to create one.
+              Chưa có bài học nào. Bấm "Thêm bài học" để tạo bài học đầu tiên.
             </div>
           )}
         </div>
       )}
 
-      <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Delete Section">
+      <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Xóa Chương Học">
         <div className="space-y-4">
           <p className="text-muted-foreground">
-            Are you sure you want to delete "{section.title}"? This will also delete all lessons in this section.
+            Bạn có chắc chắn muốn xóa chương "{section.title}"? Toàn bộ bài học trong chương này cũng sẽ bị xóa.
           </p>
           <div className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
-            <Button variant="danger" onClick={handleDelete}>Delete</Button>
+            <Button variant="ghost" onClick={() => setShowDeleteModal(false)}>Hủy</Button>
+            <Button variant="danger" onClick={handleDelete}>Xóa</Button>
           </div>
         </div>
       </Modal>

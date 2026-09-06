@@ -12,11 +12,11 @@ interface GenerationProgressProps {
 }
 
 const statusLabels = {
-  pending: 'Queued',
-  loading: 'Starting',
-  processing: 'Generating',
-  ready: 'Ready',
-  failed: 'Failed'
+  pending: 'Đang chờ',
+  loading: 'Khởi động',
+  processing: 'Đang xử lý',
+  ready: 'Sẵn sàng',
+  failed: 'Thất bại'
 }
 
 export function GenerationProgress({

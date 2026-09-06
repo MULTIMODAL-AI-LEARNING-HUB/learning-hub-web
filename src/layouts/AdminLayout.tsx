@@ -23,12 +23,12 @@ import { NotificationsDropdown } from '../components/layout/NotificationsDropdow
 import { Dropdown } from '../components/ui/Dropdown'
 
 const adminNavItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/app/admin' },
-  { id: 'users', label: 'Users', icon: Users, path: '/app/admin/users' },
-  { id: 'courses', label: 'Courses', icon: BookOpen, path: '/app/admin/courses' },
-  { id: 'categories', label: 'Categories', icon: Layers, path: '/app/admin/categories' },
-  { id: 'ai-keys', label: 'AI & API Keys', icon: Bot, path: '/app/admin/ai-keys' },
-  { id: 'settings', label: 'Settings', icon: Settings, path: '/app/admin/settings' },
+  { id: 'dashboard', label: 'Bảng điều khiển', icon: Home, path: '/app/admin' },
+  { id: 'users', label: 'Người dùng', icon: Users, path: '/app/admin/users' },
+  { id: 'courses', label: 'Khóa học', icon: BookOpen, path: '/app/admin/courses' },
+  { id: 'categories', label: 'Danh mục', icon: Layers, path: '/app/admin/categories' },
+  { id: 'ai-keys', label: 'Khóa API & AI', icon: Bot, path: '/app/admin/ai-keys' },
+  { id: 'settings', label: 'Cài đặt hệ thống', icon: Settings, path: '/app/admin/settings' },
 ]
 
 export function AdminLayout() {
@@ -65,7 +65,7 @@ export function AdminLayout() {
       ? currentPath === '/app/admin' 
       : currentPath.startsWith(item.path)
   )
-  const pageTitle = activeNavItem ? activeNavItem.label : 'Dashboard'
+  const pageTitle = activeNavItem ? activeNavItem.label : 'Bảng điều khiển'
 
   return (
     <div className="flex h-screen bg-background overflow-hidden font-body text-foreground animate-fade-in">
@@ -87,7 +87,7 @@ export function AdminLayout() {
           {!isCollapsed && (
             <div className="min-w-0 animate-fade-in text-left">
               <h2 className="text-sm font-bold text-foreground leading-tight truncate">Learning Hub</h2>
-              <span className="text-2xs text-muted-foreground">Admin Console</span>
+              <span className="text-2xs text-muted-foreground">Bảng quản trị</span>
             </div>
           )}
         </div>
@@ -110,7 +110,7 @@ export function AdminLayout() {
         {!isCollapsed ? (
           <div className="flex items-center gap-2 mx-3 my-3 px-3 py-2 rounded-lg bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 border border-indigo-500/20 animate-fade-in">
             <ShieldCheck className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
-            <span className="text-xs font-semibold">Admin Mode</span>
+            <span className="text-xs font-semibold">Chế độ quản trị</span>
           </div>
         ) : (
           <div className="flex justify-center my-3">
@@ -159,7 +159,7 @@ export function AdminLayout() {
         {/* Logout */}
         <div className="p-3 border-t border-border">
           {isCollapsed ? (
-            <Tooltip content="Logout" side="right">
+            <Tooltip content="Đăng xuất" side="right">
               <button
                 onClick={handleLogout}
                 className="flex items-center justify-center w-full gap-3 rounded-lg py-2.5 text-sm font-medium text-foreground/70 hover:bg-destructive/10 hover:text-destructive transition-all"
@@ -173,7 +173,7 @@ export function AdminLayout() {
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-foreground/70 hover:bg-destructive/10 hover:text-destructive transition-all"
             >
               <LogOut className="h-4 w-4 shrink-0" />
-              <span>Logout</span>
+              <span>Đăng xuất</span>
             </button>
           )}
         </div>
@@ -188,7 +188,7 @@ export function AdminLayout() {
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-muted-foreground hover:text-foreground hover:bg-muted transition shadow-soft focus:outline-none"
-              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              title={isCollapsed ? "Mở rộng thanh điều hướng" : "Thu gọn thanh điều hướng"}
             >
               {isCollapsed ? <ChevronRight className="h-4.5 w-4.5" /> : <ChevronLeft className="h-4.5 w-4.5" />}
             </button>
@@ -196,7 +196,7 @@ export function AdminLayout() {
             {/* Breadcrumbs */}
             <div className="flex items-center gap-2">
               <span className="text-2xs font-semibold px-2 py-0.5 rounded-full border border-indigo-500/20 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-                Admin
+                Quản trị viên
               </span>
               <span className="text-muted-foreground/30 text-xs">/</span>
               <span className="text-sm font-semibold text-foreground">
@@ -239,8 +239,8 @@ export function AdminLayout() {
                 </button>
               }
               items={[
-                { id: 'profile', label: 'Profile', icon: <UserIcon className="h-4 w-4" /> },
-                { id: 'logout', label: 'Log out', icon: <LogOut className="h-4 w-4" />, danger: true }
+                { id: 'profile', label: 'Hồ sơ cá nhân', icon: <UserIcon className="h-4 w-4" /> },
+                { id: 'logout', label: 'Đăng xuất', icon: <LogOut className="h-4 w-4" />, danger: true }
               ]}
               onSelect={(id) => {
                 if (id === 'profile') navigate(`/app/admin/profile`)

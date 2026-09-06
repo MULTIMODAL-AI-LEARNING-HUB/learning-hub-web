@@ -79,7 +79,7 @@ export function StudentSocialChat() {
       }
       setError(null)
     } catch {
-      setError('Unable to load chats.')
+      setError('Không thể tải danh sách cuộc trò chuyện.')
     } finally {
       setRoomsLoading(false)
     }
@@ -92,7 +92,7 @@ export function StudentSocialChat() {
       setMessages(res.data.items)
       setError(null)
     } catch {
-      if (!silent) setError('Unable to load messages.')
+      if (!silent) setError('Không thể tải tin nhắn.')
     } finally {
       if (!silent) setMessagesLoading(false)
     }
@@ -167,7 +167,7 @@ export function StudentSocialChat() {
       setCreateOpen(false)
       setError(null)
     } catch {
-      setError('Unable to create group.')
+      setError('Không thể tạo nhóm chat mới.')
     } finally {
       setCreating(false)
     }
@@ -192,7 +192,7 @@ export function StudentSocialChat() {
       setDraft('')
       setError(null)
     } catch {
-      setError('Message was not sent.')
+      setError('Không thể gửi tin nhắn.')
     } finally {
       setSending(false)
     }
@@ -211,16 +211,16 @@ export function StudentSocialChat() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="mb-2 flex flex-wrap items-center gap-2">
-            <Badge variant="primary" label="Student community" dot />
-            <Badge variant="success" label="Realtime polling" />
+            <Badge variant="primary" label="Cộng đồng học viên" dot />
+            <Badge variant="success" label="Cập nhật trực tiếp" />
           </div>
-          <h1 className="text-fluid-2xl font-semibold tracking-tight text-foreground">Friends Chat</h1>
+          <h1 className="text-fluid-2xl font-semibold tracking-tight text-foreground">Trò chuyện bạn bè</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Chat with classmates, create study groups, and keep course conversations separate from AI chat.
+            Trò chuyện cùng bạn học, lập nhóm học tập và giữ những cuộc thảo luận bài giảng tiện lợi, tách biệt với AI Chat.
           </p>
         </div>
         <Button icon={<MessageSquarePlus className="h-4 w-4" />} onClick={() => setCreateOpen(true)}>
-          Create group
+          Tạo nhóm chat
         </Button>
       </div>
 
@@ -238,19 +238,19 @@ export function StudentSocialChat() {
           <div className="space-y-3 border-b border-border p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-semibold text-foreground">Messages</h2>
-                <p className="text-xs text-muted-foreground">{rooms.length} conversations</p>
+                <h2 className="font-semibold text-foreground">Tin nhắn</h2>
+                <p className="text-xs text-muted-foreground">{rooms.length} cuộc trò chuyện</p>
               </div>
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" onClick={loadRooms} aria-label="Refresh chats">
+                <Button variant="ghost" size="icon" onClick={loadRooms} aria-label="Làm mới cuộc trò chuyện" title="Làm mới">
                   <RefreshCw className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => setCreateOpen(true)} aria-label="Create group">
+                <Button variant="ghost" size="icon" onClick={() => setCreateOpen(true)} aria-label="Tạo nhóm" title="Tạo nhóm">
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
             </div>
-            <Input value={query} onChange={setQuery} placeholder="Search people or groups..." prefixIcon={<Search />} />
+            <Input value={query} onChange={setQuery} placeholder="Tìm kiếm người hoặc nhóm..." prefixIcon={<Search />} />
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto p-3" data-testid="friends-chat-room-list">
@@ -264,9 +264,9 @@ export function StudentSocialChat() {
               <EmptyState
                 compact
                 icon={<Users />}
-                title={rooms.length === 0 ? 'No chats yet' : 'No matching chats'}
-                description={rooms.length === 0 ? 'Create a group to start a study conversation.' : 'Try a different search keyword.'}
-                action={rooms.length === 0 ? <Button size="sm" onClick={() => setCreateOpen(true)}>Create group</Button> : null}
+                title={rooms.length === 0 ? 'Chưa có cuộc trò chuyện nào' : 'Không tìm thấy nhóm phù hợp'}
+                description={rooms.length === 0 ? 'Tạo nhóm học tập để bắt đầu trao đổi bài cùng bạn bè.' : 'Thử tìm với từ khóa khác xem sao.'}
+                action={rooms.length === 0 ? <Button size="sm" onClick={() => setCreateOpen(true)}>Tạo nhóm mới</Button> : null}
               />
             ) : (
               <div className="space-y-1">
@@ -287,18 +287,18 @@ export function StudentSocialChat() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <h2 className="truncate font-semibold text-foreground">{selectedRoom.name}</h2>
-                      <Badge variant="primary" label="Group" />
+                      <Badge variant="primary" label="Nhóm" />
                     </div>
                     <p className="truncate text-xs text-muted-foreground">
-                      {selectedRoom.member_count} member{selectedRoom.member_count === 1 ? '' : 's'} · {selectedRoom.description || 'No description'}
+                      {selectedRoom.member_count} thành viên · {selectedRoom.description || 'Không có mô tả'}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="icon" aria-label="Invite members" title="Invite members" onClick={() => setCreateOpen(true)}>
+                  <Button variant="ghost" size="icon" aria-label="Mời thành viên" title="Mời thành viên" onClick={() => setCreateOpen(true)}>
                     <UserPlus className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" aria-label="More options" title="More options">
+                  <Button variant="ghost" size="icon" aria-label="Tùy chọn khác" title="Tùy chọn khác">
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </div>
@@ -312,19 +312,19 @@ export function StudentSocialChat() {
                   </div>
                 ) : messages.length === 0 ? (
                   <div className="flex h-full items-center justify-center">
-                    <EmptyState compact icon={<MessageCircle />} title="Start the conversation" description="Messages are saved and visible to members of this group." />
+                    <EmptyState compact icon={<MessageCircle />} title="Bắt đầu cuộc trò chuyện" description="Tin nhắn được lưu trữ và hiển thị cho các thành viên trong nhóm này." />
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {messages.map((message) => {
                       const mine = message.sender_id === currentUserId
-                      const name = message.sender_name || message.sender_role || 'Member'
+                      const name = message.sender_name || message.sender_role || 'Thành viên'
                       return (
                         <div key={message.id} className={cn('flex gap-3', mine && 'justify-end')}>
                           {!mine && <Avatar src={message.sender_avatar_url || undefined} fallback={getInitials(name)} size="sm" />}
                           <div className={cn('max-w-[75%]', mine && 'text-right')}>
                             <div className={cn('mb-1 flex items-center gap-2 text-xs text-muted-foreground', mine && 'justify-end')}>
-                              <span>{mine ? 'You' : name}</span>
+                              <span>{mine ? 'Bạn' : name}</span>
                               <span>{formatTime(message.created_at)}</span>
                             </div>
                             <div className={cn('rounded-2xl px-3 py-2 text-sm leading-relaxed', mine ? 'bg-primary text-primary-foreground' : 'border border-border bg-surface-elevated text-foreground')}>
@@ -340,7 +340,7 @@ export function StudentSocialChat() {
 
               <form onSubmit={sendMessage} className="border-t border-border p-4" data-testid="friends-chat-composer">
                 <div className="flex items-end gap-2 rounded-2xl border border-border bg-background p-2">
-                  <Button variant="ghost" size="icon" type="button" aria-label="Emoji">
+                  <Button variant="ghost" size="icon" type="button" aria-label="Biểu tượng cảm xúc">
                     <Smile className="h-4 w-4" />
                   </Button>
                   <textarea
@@ -357,7 +357,7 @@ export function StudentSocialChat() {
                       }
                     }}
                   />
-                  <Button type="submit" size="icon" disabled={!draft.trim() || sending} loading={sending} aria-label="Send message">
+                  <Button type="submit" size="icon" disabled={!draft.trim() || sending} loading={sending} aria-label="Gửi tin nhắn">
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
@@ -383,27 +383,27 @@ export function StudentSocialChat() {
       <Modal
         open={createOpen}
         onClose={() => setCreateOpen(false)}
-        title="Create study group"
-        description="Create a persistent group chat and invite classmates."
+        title="Tạo nhóm học tập"
+        description="Tạo nhóm trò chuyện và mời bạn cùng lớp tham gia trao đổi kiến thức."
         footer={(
           <>
-            <Button variant="ghost" onClick={() => setCreateOpen(false)}>Cancel</Button>
-            <Button onClick={createGroup} disabled={!groupName.trim() || creating} loading={creating} icon={<Hash className="h-4 w-4" />}>Create group</Button>
+            <Button variant="ghost" onClick={() => setCreateOpen(false)}>Hủy</Button>
+            <Button onClick={createGroup} disabled={!groupName.trim() || creating} loading={creating} icon={<Hash className="h-4 w-4" />}>Tạo nhóm</Button>
           </>
         )}
       >
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Group name</label>
-            <Input value={groupName} onChange={setGroupName} placeholder="Example: HSK 1 study group" />
+            <label className="text-sm font-medium text-foreground">Tên nhóm</label>
+            <Input value={groupName} onChange={setGroupName} placeholder="VD: Nhóm ôn thi HSK 1, Nhóm giải thuật..." />
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Description</label>
-            <textarea value={groupDescription} onChange={(event) => setGroupDescription(event.target.value)} placeholder="What is this group for?" rows={3} className="w-full resize-none rounded-md border border-input bg-surface-elevated px-3 py-2.5 text-sm text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground/70 focus:border-primary focus:ring-2 focus:ring-primary/20" />
+            <label className="text-sm font-medium text-foreground">Mô tả nhóm</label>
+            <textarea value={groupDescription} onChange={(event) => setGroupDescription(event.target.value)} placeholder="Mục tiêu hoặc chủ đề trao đổi của nhóm này..." rows={3} className="w-full resize-none rounded-md border border-input bg-surface-elevated px-3 py-2.5 text-sm text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground/70 focus:border-primary focus:ring-2 focus:ring-primary/20" />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Invite members</label>
-            <Input value={userQuery} onChange={setUserQuery} placeholder="Search by name or email..." prefixIcon={<Search />} />
+            <label className="text-sm font-medium text-foreground">Mời thành viên</label>
+            <Input value={userQuery} onChange={setUserQuery} placeholder="Tìm theo tên hoặc email..." prefixIcon={<Search />} />
             {selectedUsers.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {selectedUsers.map((user) => (
@@ -425,7 +425,7 @@ export function StudentSocialChat() {
                         <p className="truncate text-sm font-medium text-foreground">{displayUserName(user)}</p>
                         <p className="truncate text-xs text-muted-foreground">{user.email}</p>
                       </div>
-                      {selected && <Badge variant="primary" label="Added" />}
+                      {selected && <Badge variant="primary" label="Đã thêm" />}
                     </button>
                   )
                 })}
@@ -447,7 +447,7 @@ function ThreadButton({ room, active, onClick }: { room: SocialChatRoom; active:
           <p className="truncate text-sm font-semibold text-foreground">{room.name}</p>
           <span className="shrink-0 text-[11px] text-muted-foreground">{formatTime(room.updated_at)}</span>
         </div>
-        <p className="mt-1 truncate text-xs text-muted-foreground">{room.last_message || room.description || `${room.member_count} members`}</p>
+        <p className="mt-1 truncate text-xs text-muted-foreground">{room.last_message || room.description || `${room.member_count} thành viên`}</p>
       </div>
     </button>
   )

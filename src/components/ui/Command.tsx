@@ -86,7 +86,7 @@ export function CommandPalette({ items, open, onClose }: CommandPaletteProps) {
               setQuery(e.target.value)
               setActiveIndex(0)
             }}
-            placeholder="Search or jump to..."
+            placeholder="Tìm kiếm hoặc chuyển đến..."
             className="flex-1 h-12 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
           />
           <kbd className="hidden sm:inline-flex items-center rounded border border-border bg-muted px-1.5 py-0.5 text-2xs font-mono text-muted-foreground">
@@ -95,7 +95,7 @@ export function CommandPalette({ items, open, onClose }: CommandPaletteProps) {
           <button
             onClick={onClose}
             className="sm:hidden p-1 rounded text-muted-foreground hover:text-foreground"
-            aria-label="Close"
+            aria-label="Đóng"
           >
             <X className="h-4 w-4" />
           </button>
@@ -103,7 +103,7 @@ export function CommandPalette({ items, open, onClose }: CommandPaletteProps) {
         <div ref={listRef} className="max-h-[60vh] overflow-y-auto py-2 scrollbar-thin">
           {filtered.length === 0 ? (
             <div className="px-4 py-12 text-center">
-              <p className="text-sm text-muted-foreground">No results for "{query}"</p>
+              <p className="text-sm text-muted-foreground">Không tìm thấy kết quả cho &quot;{query}&quot;</p>
             </div>
           ) : (
             Object.entries(grouped).map(([group, groupItems]) => (

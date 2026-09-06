@@ -77,9 +77,9 @@ export function LecturerCourses() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'published': return <Badge variant="success" label="Published" />
-      case 'draft': return <Badge variant="warning" label="Draft" />
-      case 'archived': return <Badge variant="default" label="Archived" />
+      case 'published': return <Badge variant="success" label="Đã xuất bản" />
+      case 'draft': return <Badge variant="warning" label="Bản nháp" />
+      case 'archived': return <Badge variant="default" label="Đã lưu trữ" />
       default: return <Badge variant="default" label={status} />
     }
   }
@@ -93,11 +93,11 @@ export function LecturerCourses() {
       <>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-fluid-2xl font-bold text-foreground">My Courses</h1>
-              <p className="text-muted-foreground">Manage your courses and content</p>
+              <h1 className="text-fluid-2xl font-bold text-foreground">Khóa Học Của Tôi</h1>
+              <p className="text-muted-foreground">Quản lý các khóa học và nội dung giảng dạy của bạn</p>
             </div>
             <Button onClick={() => setShowCreateModal(true)} icon={<Plus className="h-4 w-4" />} variant="gradient">
-              Create Course
+              Tạo khóa học
             </Button>
           </div>
 
@@ -111,28 +111,28 @@ export function LecturerCourses() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <Card padding="responsive">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Courses</span>
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tổng khóa học</span>
                   <BookOpen className="h-4 w-4 text-primary" />
                 </div>
                 <p className="text-2xl font-bold mt-2 text-foreground tabular-nums">{stats.total_courses}</p>
               </Card>
               <Card padding="responsive">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Students</span>
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tổng học viên</span>
                   <Users className="h-4 w-4 text-accent" />
                 </div>
                 <p className="text-2xl font-bold mt-2 text-foreground tabular-nums">{stats.total_students}</p>
               </Card>
               <Card padding="responsive">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Avg Rating</span>
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Đánh giá TB</span>
                   <Star className="h-4 w-4 text-warning" />
                 </div>
                 <p className="text-2xl font-bold mt-2 text-foreground tabular-nums">{stats.avg_rating.toFixed(1)}</p>
               </Card>
               <Card padding="responsive">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Revenue</span>
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Doanh thu</span>
                   <BarChart3 className="h-4 w-4 text-success" />
                 </div>
                 <p className="text-2xl font-bold mt-2 text-foreground tabular-nums">{new Intl.NumberFormat('vi-VN').format(stats.total_revenue)} đ</p>
@@ -145,12 +145,12 @@ export function LecturerCourses() {
               <table className="w-full">
                 <thead className="border-b border-border bg-muted/30">
                   <tr>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Course</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Status</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Price</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Students</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Rating</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Actions</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Khóa học</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Trạng thái</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Giá học phí</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Học viên</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Đánh giá</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Hành động</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -161,7 +161,7 @@ export function LecturerCourses() {
                           <div
                             className="cursor-pointer shrink-0"
                             onClick={() => openCourseWorkspace(course.id)}
-                            title="Open course workspace"
+                            title="Mở không gian khóa học"
                           >
                             {course.thumbnail_url ? (
                               <img src={course.thumbnail_url} alt="" className="h-10 w-14 object-cover rounded hover:opacity-90 transition" />
@@ -174,7 +174,7 @@ export function LecturerCourses() {
                           <div
                             className="cursor-pointer group"
                             onClick={() => openCourseWorkspace(course.id)}
-                            title="Open course workspace"
+                            title="Mở không gian khóa học"
                           >
                             <p className="font-medium text-foreground group-hover:text-primary transition">{course.title}</p>
                             <p className="text-xs text-muted-foreground line-clamp-1">{course.description}</p>
@@ -194,21 +194,21 @@ export function LecturerCourses() {
                             <span className="text-xs text-muted-foreground">({course.rating_count})</span>
                           </div>
                         ) : (
-                          <span className="text-xs text-muted-foreground">No ratings</span>
+                          <span className="text-xs text-muted-foreground">Chưa có đánh giá</span>
                         )}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="sm" icon={<Eye className="h-4 w-4" />} onClick={() => openCourseWorkspace(course.id)} title="Open course workspace" />
-                          <Button variant="ghost" size="sm" icon={<Edit className="h-4 w-4" />} onClick={() => openEditModal(course)} title="Edit" />
+                          <Button variant="ghost" size="sm" icon={<Eye className="h-4 w-4" />} onClick={() => openCourseWorkspace(course.id)} title="Mở không gian khóa học" />
+                          <Button variant="ghost" size="sm" icon={<Edit className="h-4 w-4" />} onClick={() => openEditModal(course)} title="Chỉnh sửa" />
                           {course.status === 'draft' && (
-                            <Button variant="ghost" size="sm" icon={<Send className="h-4 w-4" />} onClick={() => handlePublish(course.id)} title="Publish" />
+                            <Button variant="ghost" size="sm" icon={<Send className="h-4 w-4" />} onClick={() => handlePublish(course.id)} title="Xuất bản" />
                           )}
                           {course.status === 'published' && (
-                            <Button variant="ghost" size="sm" icon={<Archive className="h-4 w-4" />} onClick={() => handleArchive(course.id)} title="Archive" />
+                            <Button variant="ghost" size="sm" icon={<Archive className="h-4 w-4" />} onClick={() => handleArchive(course.id)} title="Lưu trữ" />
                           )}
                           {course.status === 'archived' && (
-                            <Button variant="ghost" size="sm" icon={<ArchiveRestore className="h-4 w-4" />} onClick={() => handleUnarchive(course.id)} title="Restore" />
+                            <Button variant="ghost" size="sm" icon={<ArchiveRestore className="h-4 w-4" />} onClick={() => handleUnarchive(course.id)} title="Khôi phục" />
                           )}
                         </div>
                       </td>
@@ -220,34 +220,34 @@ export function LecturerCourses() {
             {courses.length === 0 && !loading && (
               <div className="text-center py-12">
                 <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No courses yet</h3>
-                <p className="text-muted-foreground mb-4">Create your first course to get started</p>
+                <h3 className="text-lg font-medium mb-2">Chưa có khóa học nào</h3>
+                <p className="text-muted-foreground mb-4">Tạo khóa học đầu tiên để bắt đầu hành trình giảng dạy</p>
                 <Button onClick={() => setShowCreateModal(true)} icon={<Plus className="h-4 w-4" />}>
-                  Create Course
+                  Tạo khóa học
                 </Button>
               </div>
             )}
           </Card>
       </>
 
-      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Create Course">
+      <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Tạo Khóa Học Mới">
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium">Course Title</label>
-            <Input value={newCourse.title} onChange={(v) => setNewCourse({ ...newCourse, title: v })} className="mt-1" placeholder="Enter course title" />
+            <label className="text-sm font-medium">Tên khóa học</label>
+            <Input value={newCourse.title} onChange={(v) => setNewCourse({ ...newCourse, title: v })} className="mt-1" placeholder="Nhập tên khóa học" />
           </div>
           <div>
-            <label className="text-sm font-medium">Description</label>
-            <Textarea value={newCourse.description} onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })} className="mt-1" rows={3} placeholder="Describe what students will learn" />
+            <label className="text-sm font-medium">Mô tả ngắn</label>
+            <Textarea value={newCourse.description} onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })} className="mt-1" rows={3} placeholder="Mô tả tóm tắt nội dung học viên sẽ học được" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium">Category</label>
+              <label className="text-sm font-medium">Danh mục</label>
               <Select
                 value={newCourse.category_id}
                 onChange={(v) => setNewCourse({ ...newCourse, category_id: v })}
                 options={categories.map((cat) => ({ value: cat.id, label: cat.name }))}
-                placeholder="Select category"
+                placeholder="Chọn danh mục"
                 className="mt-1"
               />
             </div>
@@ -260,24 +260,24 @@ export function LecturerCourses() {
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-4">
-            <Button variant="ghost" onClick={() => setShowCreateModal(false)}>Cancel</Button>
-            <Button onClick={handleCreate} disabled={!newCourse.title || !newCourse.category_id}>Create Course</Button>
+            <Button variant="ghost" onClick={() => setShowCreateModal(false)}>Hủy</Button>
+            <Button onClick={handleCreate} disabled={!newCourse.title || !newCourse.category_id}>Tạo khóa học</Button>
           </div>
         </div>
       </Modal>
 
-      <Modal open={showEditModal} onClose={() => setShowEditModal(false)} title="Edit Course" size="xl">
+      <Modal open={showEditModal} onClose={() => setShowEditModal(false)} title="Chỉnh Sửa Thông Tin Khóa Học" size="xl">
         <div className="space-y-6 py-2">
           {/* Section 1: Basic Information */}
           <div className="bg-muted/20 p-4 rounded-xl border border-border/50 space-y-4">
-            <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Basic Info</h3>
+            <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Thông Tin Cơ Bản</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Course Title</label>
-                <Input value={editCourse.title} onChange={(v) => setEditCourse({ ...editCourse, title: v })} className="mt-1.5" placeholder="Enter course title" />
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tên khóa học</label>
+                <Input value={editCourse.title} onChange={(v) => setEditCourse({ ...editCourse, title: v })} className="mt-1.5" placeholder="Nhập tên khóa học" />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Category</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Danh mục</label>
                 <Select
                   value={editCourse.category_id}
                   onChange={(v) => setEditCourse({ ...editCourse, category_id: v })}
@@ -297,55 +297,55 @@ export function LecturerCourses() {
 
           {/* Section 2: Metadata */}
           <div className="bg-muted/20 p-4 rounded-xl border border-border/50 space-y-4">
-            <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Classification & Tags</h3>
+            <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Phân Loại & Thẻ Tag</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Level</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Trình độ</label>
                 <Select
                   value={editCourse.level || ''}
                   onChange={(v) => setEditCourse({ ...editCourse, level: v })}
                   options={[
-                    { value: 'beginner', label: 'Beginner' },
-                    { value: 'intermediate', label: 'Intermediate' },
-                    { value: 'advanced', label: 'Advanced' },
+                    { value: 'beginner', label: 'Cơ bản (Beginner)' },
+                    { value: 'intermediate', label: 'Trung cấp (Intermediate)' },
+                    { value: 'advanced', label: 'Nâng cao (Advanced)' },
                   ]}
-                  placeholder="Select level"
+                  placeholder="Chọn trình độ"
                   className="mt-1.5"
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Language</label>
-                <Input value={editCourse.language} onChange={(v) => setEditCourse({ ...editCourse, language: v })} className="mt-1.5" placeholder="e.g., English, Vietnamese" />
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Ngôn ngữ</label>
+                <Input value={editCourse.language} onChange={(v) => setEditCourse({ ...editCourse, language: v })} className="mt-1.5" placeholder="VD: Tiếng Việt, Tiếng Anh" />
               </div>
               <div className="md:col-span-2">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tags</label>
-                <Input value={editCourse.tags} onChange={(v) => setEditCourse({ ...editCourse, tags: v })} className="mt-1.5" placeholder="Comma-separated tags (e.g. AI, Programming, English)" />
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Thẻ phân loại (Tags)</label>
+                <Input value={editCourse.tags} onChange={(v) => setEditCourse({ ...editCourse, tags: v })} className="mt-1.5" placeholder="Cách nhau bằng dấu phẩy (VD: AI, Lập trình, Tiếng Anh)" />
               </div>
             </div>
           </div>
 
           {/* Section 3: Rich Content */}
           <div className="bg-muted/20 p-4 rounded-xl border border-border/50 space-y-4">
-            <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Course Details & Syllabus</h3>
+            <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Chi Tiết Khóa Học & Mục Tiêu</h3>
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Description</label>
-                <Textarea value={editCourse.description} onChange={(e) => setEditCourse({ ...editCourse, description: e.target.value })} className="mt-1.5" rows={3} placeholder="Describe the course content..." />
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Mô tả chi tiết</label>
+                <Textarea value={editCourse.description} onChange={(e) => setEditCourse({ ...editCourse, description: e.target.value })} className="mt-1.5" rows={3} placeholder="Mô tả nội dung chi tiết của khóa học..." />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Requirements</label>
-                <Textarea value={editCourse.requirements} onChange={(e) => setEditCourse({ ...editCourse, requirements: e.target.value })} className="mt-1.5" rows={2} placeholder="What students need before taking this course..." />
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Yêu cầu đầu vào</label>
+                <Textarea value={editCourse.requirements} onChange={(e) => setEditCourse({ ...editCourse, requirements: e.target.value })} className="mt-1.5" rows={2} placeholder="Kiến thức hoặc công cụ học viên cần chuẩn bị trước..." />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Learning Outcomes</label>
-                <Textarea value={editCourse.learning_outcomes} onChange={(e) => setEditCourse({ ...editCourse, learning_outcomes: e.target.value })} className="mt-1.5" rows={3} placeholder="What students will be able to do after completing..." />
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Kết quả đạt được sau khóa học</label>
+                <Textarea value={editCourse.learning_outcomes} onChange={(e) => setEditCourse({ ...editCourse, learning_outcomes: e.target.value })} className="mt-1.5" rows={3} placeholder="Học viên sẽ làm được những gì sau khi hoàn thành khóa học..." />
               </div>
             </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-2 border-t border-border/60 sticky bottom-0 bg-surface-elevated py-2 -mx-6 px-6 z-10">
-            <Button variant="ghost" onClick={() => setShowEditModal(false)}>Cancel</Button>
-            <Button onClick={handleEdit} variant="gradient">Save Changes</Button>
+            <Button variant="ghost" onClick={() => setShowEditModal(false)}>Hủy</Button>
+            <Button onClick={handleEdit} variant="gradient">Lưu thay đổi</Button>
           </div>
         </div>
       </Modal>

@@ -20,8 +20,8 @@ interface StudentAssignmentItem {
 }
 
 function formatDate(value: string | null | undefined) {
-  if (!value) return 'No due date'
-  return new Date(value).toLocaleString()
+  if (!value) return 'Không có hạn nộp'
+  return new Date(value).toLocaleString('vi-VN')
 }
 
 function isOverdue(assignment: Assignment) {
@@ -68,7 +68,7 @@ export function StudentAssignmentsPanel({ courseId }: StudentAssignmentsPanelPro
         assignmentResults.filter((item): item is StudentAssignmentItem => Boolean(item && item.assignment.is_active))
       )
     } catch {
-      setError('Unable to load course assignments.')
+      setError('Không thể tải danh sách bài tập của khóa học.')
     } finally {
       setLoading(false)
     }
@@ -102,28 +102,28 @@ export function StudentAssignmentsPanel({ courseId }: StudentAssignmentsPanelPro
         <div>
           <div className="flex items-center gap-2">
             <ClipboardCheck className="h-5 w-5 text-primary" />
-            <h3 className="text-base font-semibold text-foreground">Assignments</h3>
+            <h3 className="text-base font-semibold text-foreground">Bài tập khóa học</h3>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Submit lesson assignments and review lecturer feedback from this course.
+            Nộp bài tập theo bài học và xem nhận xét, chấm điểm từ giảng viên.
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={loadAssignments} icon={<RefreshCw className="h-4 w-4" />}>
-          Refresh
+          Làm mới
         </Button>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
         <Card variant="outlined" className="p-3">
-          <p className="text-xs text-muted-foreground">Total</p>
+          <p className="text-xs text-muted-foreground">Tổng số</p>
           <p className="mt-1 text-2xl font-semibold text-foreground">{stats.total}</p>
         </Card>
         <Card variant="outlined" className="p-3">
-          <p className="text-xs text-muted-foreground">Open</p>
+          <p className="text-xs text-muted-foreground">Đang mở</p>
           <p className="mt-1 text-2xl font-semibold text-foreground">{stats.open}</p>
         </Card>
         <Card variant="outlined" className="p-3">
-          <p className="text-xs text-muted-foreground">Past due</p>
+          <p className="text-xs text-muted-foreground">Quá hạn</p>
           <p className="mt-1 text-2xl font-semibold text-foreground">{stats.overdue}</p>
         </Card>
       </div>
@@ -138,8 +138,8 @@ export function StudentAssignmentsPanel({ courseId }: StudentAssignmentsPanelPro
         <EmptyState
           compact
           icon={<ClipboardCheck />}
-          title="No assignments yet"
-          description="Assignments created by the lecturer will appear here."
+          title="Chưa có bài tập nào"
+          description="Các bài tập được giảng viên giao sẽ xuất hiện tại đây."
         />
       ) : (
         <div className="space-y-4">
@@ -148,13 +148,13 @@ export function StudentAssignmentsPanel({ courseId }: StudentAssignmentsPanelPro
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant={isOverdue(item.assignment) ? 'warning' : 'primary'} label={isOverdue(item.assignment) ? 'Past due' : 'Open'} />
+                    <Badge variant={isOverdue(item.assignment) ? 'warning' : 'primary'} label={isOverdue(item.assignment) ? 'Quá hạn' : 'Đang mở'} />
                     <span className="text-xs text-muted-foreground">{item.section.title}</span>
                   </div>
                   <h4 className="mt-2 text-base font-semibold text-foreground">{item.assignment.title}</h4>
                   <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
                     <FileText className="h-4 w-4" />
-                    Lesson: {item.lesson.title}
+                    Bài học: {item.lesson.title}
                   </p>
                 </div>
                 <div className="space-y-1 text-sm text-muted-foreground sm:text-right">
@@ -162,7 +162,7 @@ export function StudentAssignmentsPanel({ courseId }: StudentAssignmentsPanelPro
                     <Clock className="h-4 w-4" />
                     {formatDate(item.assignment.deadline)}
                   </p>
-                  <p>Max score: {item.assignment.max_score}</p>
+                  <p>Điểm tối đa: {item.assignment.max_score}</p>
                 </div>
               </div>
 

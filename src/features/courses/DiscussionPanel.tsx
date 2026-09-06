@@ -69,25 +69,25 @@ export function DiscussionPanel({ lessonId }: Props) {
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
         <MessageSquare className="h-4 w-4" />
-        Discussions
+        Thảo Luận
       </h3>
 
       <div className="space-y-2">
         <textarea
           value={newContent}
           onChange={(e) => setNewContent(e.target.value)}
-          placeholder="Start a discussion..."
+          placeholder="Bắt đầu một chủ đề thảo luận..."
           className="w-full min-h-[60px] rounded-lg border border-input bg-surface px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
         <div className="flex justify-end">
           <Button onClick={handlePost} disabled={submitting || !newContent.trim()} size="sm">
-            {submitting ? 'Posting...' : 'Post'}
+            {submitting ? 'Đang đăng...' : 'Đăng'}
           </Button>
         </div>
       </div>
 
       {discussions.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No discussions yet. Start one!</p>
+        <p className="text-sm text-muted-foreground">Chưa có thảo luận nào. Hãy là người đầu tiên đặt câu hỏi!</p>
       ) : (
         <div className="space-y-3">
           {discussions.map((discussion) => {
@@ -102,8 +102,8 @@ export function DiscussionPanel({ lessonId }: Props) {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-medium text-foreground">{discussion.user_name || 'Anonymous'}</span>
-                      {discussion.is_pinned && <span className="text-xs text-warning font-medium">Pinned</span>}
+                      <span className="text-sm font-medium text-foreground">{discussion.user_name || 'Học viên ẩn danh'}</span>
+                      {discussion.is_pinned && <span className="text-xs text-warning font-medium">Đã ghim</span>}
                       <span className="text-xs text-muted-foreground">{new Date(discussion.created_at).toLocaleDateString('vi-VN')}</span>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">{discussion.content}</p>
@@ -119,7 +119,7 @@ export function DiscussionPanel({ lessonId }: Props) {
                         onClick={() => setReplyTo(replyTo === discussion.id ? null : discussion.id)}
                         className="text-xs text-muted-foreground hover:text-primary transition"
                       >
-                        Reply
+                        Trả lời
                       </button>
                       {hasReplies && (
                         <button
@@ -127,7 +127,7 @@ export function DiscussionPanel({ lessonId }: Props) {
                           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition"
                         >
                           {repliesExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                          {discussion.replies.length} {discussion.replies.length === 1 ? 'reply' : 'replies'}
+                          {discussion.replies.length} phản hồi
                         </button>
                       )}
                     </div>
@@ -137,13 +137,13 @@ export function DiscussionPanel({ lessonId }: Props) {
                         <textarea
                           value={replyContent}
                           onChange={(e) => setReplyContent(e.target.value)}
-                          placeholder="Write a reply..."
+                          placeholder="Nhập câu trả lời..."
                           className="w-full min-h-[50px] rounded-lg border border-input bg-surface px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/20"
                         />
                         <div className="flex gap-2 justify-end">
-                          <Button variant="ghost" size="sm" onClick={() => { setReplyTo(null); setReplyContent('') }}>Cancel</Button>
+                          <Button variant="ghost" size="sm" onClick={() => { setReplyTo(null); setReplyContent('') }}>Hủy</Button>
                           <Button size="sm" onClick={() => handleReply(discussion.id)} disabled={submitting || !replyContent.trim()}>
-                            {submitting ? 'Replying...' : 'Reply'}
+                            {submitting ? 'Đang gửi...' : 'Gửi trả lời'}
                           </Button>
                         </div>
                       </div>
@@ -158,7 +158,7 @@ export function DiscussionPanel({ lessonId }: Props) {
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
-                                <span className="text-xs font-medium text-foreground">{reply.user_name || 'Anonymous'}</span>
+                                <span className="text-xs font-medium text-foreground">{reply.user_name || 'Học viên ẩn danh'}</span>
                                 <span className="text-2xs text-muted-foreground">{new Date(reply.created_at).toLocaleDateString('vi-VN')}</span>
                               </div>
                               <p className="text-xs text-muted-foreground">{reply.content}</p>

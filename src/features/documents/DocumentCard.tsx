@@ -66,7 +66,7 @@ export function DocumentCard({
               trigger={
                 <button
                   className="p-1 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
-                  aria-label="Document actions"
+                  aria-label="Thao tác tài liệu"
                 >
                   <MoreVertical className="h-4 w-4" />
                 </button>
@@ -77,7 +77,7 @@ export function DocumentCard({
                   ? [
                       {
                         id: 'retry',
-                        label: 'Retry',
+                        label: 'Thử lại',
                         icon: <RefreshCw />,
                         shortcut: 'R'
                       }
@@ -87,7 +87,7 @@ export function DocumentCard({
                   ? [
                       {
                         id: 'remove',
-                        label: 'Delete',
+                        label: 'Xóa',
                         icon: <Trash2 />,
                         danger: true
                       }
@@ -110,21 +110,21 @@ export function DocumentCard({
               <Progress value={doc.progress ?? 0} size="sm" />
               <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-pulse-soft" />
-                Processing · {doc.progress}%
+                Đang xử lý · {doc.progress}%
               </p>
             </div>
           )}
           {doc.status === 'ready' && (
             <div className="flex items-center gap-2">
-              <Badge variant="success" label="Ready" dot />
+              <Badge variant="success" label="Sẵn sàng" dot />
               {doc.pageCount !== undefined && (
-                <span className="text-xs text-muted-foreground">{doc.pageCount} pages</span>
+                <span className="text-xs text-muted-foreground">{doc.pageCount} trang</span>
               )}
             </div>
           )}
           {doc.status === 'failed' && (
             <div className="flex items-center justify-between">
-              <Badge variant="error" label="Failed" dot />
+              <Badge variant="error" label="Thất bại" dot />
               {onRetry && (
                 <button
                   onClick={(e) => {
@@ -133,7 +133,7 @@ export function DocumentCard({
                   }}
                   className="text-xs font-medium text-primary hover:underline"
                 >
-                  Retry
+                  Thử lại
                 </button>
               )}
             </div>

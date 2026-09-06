@@ -41,7 +41,7 @@ export function Announcements({ courseId }: Props) {
     <div className="space-y-3">
       <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
         <Megaphone className="h-4 w-4 text-accent" />
-        Announcements
+        Thông Báo
       </h3>
       {items.map((item) => (
         <Card key={item.id} className="p-4 border-l-4 border-l-accent">

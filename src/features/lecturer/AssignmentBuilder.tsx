@@ -87,7 +87,7 @@ export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuild
   }
 
   const handleDelete = async () => {
-    if (confirm('Are you sure you want to delete this assignment?')) {
+    if (confirm('Bạn có chắc chắn muốn xóa bài tập này không?')) {
       await deleteAssignment()
       onClose()
     }
@@ -114,9 +114,9 @@ export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuild
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-3">
             <ClipboardList className="h-5 w-5 text-warning" />
-            <h2 className="text-lg font-semibold text-foreground">Assignment Builder</h2>
+            <h2 className="text-lg font-semibold text-foreground">Xây Dựng Bài Tập Tự Luận</h2>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Đóng">
             <X className="h-5 w-5" />
           </Button>
         </div>
@@ -125,42 +125,42 @@ export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuild
           {!assignment && !showCreateForm && (
             <div className="text-center py-8">
               <ClipboardList className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">No Assignment Yet</h3>
-              <p className="text-muted-foreground mb-4">Create an assignment for students to complete</p>
+              <h3 className="text-lg font-medium mb-2">Chưa có bài tập nào</h3>
+              <p className="text-muted-foreground mb-4">Tạo bài tập tự luận và giao bài cho học viên thực hành</p>
               <Button onClick={() => setShowCreateForm(true)} icon={<Plus className="h-4 w-4" />}>
-                Create Assignment
+                Tạo bài tập
               </Button>
             </div>
           )}
 
           {showCreateForm && (
             <Card className="p-4 space-y-4">
-              <h3 className="font-medium">Create Assignment</h3>
+              <h3 className="font-medium">Tạo Bài Tập Mới</h3>
               <div>
-                <label className="text-sm font-medium">Title</label>
-                <Input value={title} onChange={setTitle} className="mt-1" placeholder="Assignment title" />
+                <label className="text-sm font-medium">Tiêu đề bài tập</label>
+                <Input value={title} onChange={setTitle} className="mt-1" placeholder="Nhập tiêu đề bài tập..." />
               </div>
               <div>
-                <label className="text-sm font-medium">Description</label>
+                <label className="text-sm font-medium">Mô tả ngắn</label>
                 <Textarea value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" rows={2} />
               </div>
               <div>
-                <label className="text-sm font-medium">Instructions</label>
-                <Textarea value={instructions} onChange={(e) => setInstructions(e.target.value)} className="mt-1" rows={4} placeholder="Detailed instructions for students..." />
+                <label className="text-sm font-medium">Hướng dẫn làm bài</label>
+                <Textarea value={instructions} onChange={(e) => setInstructions(e.target.value)} className="mt-1" rows={4} placeholder="Hướng dẫn chi tiết yêu cầu bài tập cho học viên..." />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium">Deadline</label>
+                  <label className="text-sm font-medium">Hạn chót nộp bài</label>
                   <Input type="datetime-local" value={deadline} onChange={setDeadline} className="mt-1" />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Max Score</label>
+                  <label className="text-sm font-medium">Điểm tối đa</label>
                   <Input type="number" value={maxScore} onChange={(v) => setMaxScore(parseInt(v))} className="mt-1" min={1} />
                 </div>
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="ghost" onClick={() => setShowCreateForm(false)}>Cancel</Button>
-                <Button onClick={handleCreate} disabled={!title}>Create Assignment</Button>
+                <Button variant="ghost" onClick={() => setShowCreateForm(false)}>Hủy</Button>
+                <Button onClick={handleCreate} disabled={!title}>Tạo bài tập</Button>
               </div>
             </Card>
           )}
@@ -176,43 +176,43 @@ export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuild
                       className="text-lg font-semibold max-w-md"
                       onBlur={handleUpdate}
                     />
-                    <Badge variant={assignment.is_active ? 'success' : 'default'} label={assignment.is_active ? 'Active' : 'Inactive'} />
+                    <Badge variant={assignment.is_active ? 'success' : 'default'} label={assignment.is_active ? 'Đang mở' : 'Đã đóng'} />
                   </div>
-                  <Button variant="danger" size="sm" onClick={handleDelete}>Delete</Button>
+                  <Button variant="danger" size="sm" onClick={handleDelete}>Xóa bài tập</Button>
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-muted-foreground">Max Score: </span>
+                    <span className="text-muted-foreground">Điểm tối đa: </span>
                     <span className="font-medium">{assignment.max_score}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Deadline: </span>
-                    <span className="font-medium">{assignment.deadline ? new Date(assignment.deadline).toLocaleString() : 'No deadline'}</span>
+                    <span className="text-muted-foreground">Hạn chót: </span>
+                    <span className="font-medium">{assignment.deadline ? new Date(assignment.deadline).toLocaleString('vi-VN') : 'Không có hạn'}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Resubmit: </span>
-                    <span className="font-medium">{assignment.allow_resubmit ? `Yes (${assignment.max_resubmits} max)` : 'No'}</span>
+                    <span className="text-muted-foreground">Nộp lại: </span>
+                    <span className="font-medium">{assignment.allow_resubmit ? `Có (tối đa ${assignment.max_resubmits} lần)` : 'Không'}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Submissions: </span>
+                    <span className="text-muted-foreground">Số bài nộp: </span>
                     <span className="font-medium">{assignment.submission_count || 0}</span>
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Description</label>
+                  <label className="text-sm font-medium">Mô tả ngắn</label>
                   <Textarea value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" rows={2} onBlur={handleUpdate} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Instructions</label>
+                  <label className="text-sm font-medium">Hướng dẫn làm bài</label>
                   <Textarea value={instructions} onChange={(e) => setInstructions(e.target.value)} className="mt-1" rows={4} onBlur={handleUpdate} />
                 </div>
               </Card>
 
               <Card className="p-4">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-medium">Student Submissions ({total})</h3>
+                  <h3 className="font-medium">Bài nộp của học viên ({total})</h3>
                   <Button variant="outline" size="sm" onClick={() => setShowSubmissions(!showSubmissions)}>
-                    {showSubmissions ? 'Hide' : 'View'} Submissions
+                    {showSubmissions ? 'Ẩn' : 'Xem'} bài nộp
                   </Button>
                 </div>
 
@@ -222,20 +222,20 @@ export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuild
                       <div key={sub.id} className="border border-border rounded-lg p-3">
                         <div className="flex items-start justify-between">
                           <div>
-                            <p className="font-medium">{sub.student_name || 'Unknown Student'}</p>
+                            <p className="font-medium">{sub.student_name || 'Học viên ẩn danh'}</p>
                             <p className="text-sm text-muted-foreground">
-                              Submitted {new Date(sub.submitted_at).toLocaleString()}
-                              {sub.is_late && <span className="text-destructive ml-2">(Late)</span>}
+                              Đã nộp: {new Date(sub.submitted_at).toLocaleString('vi-VN')}
+                              {sub.is_late && <span className="text-destructive ml-2">(Nộp muộn)</span>}
                             </p>
                           </div>
                           <div className="flex items-center gap-2">
                             {sub.score !== null ? (
                               <Badge variant={sub.score >= 70 ? 'success' : sub.score >= 50 ? 'warning' : 'error'} label={`${sub.score}/${assignment.max_score}`} />
                             ) : (
-                              <Badge variant="default" label="Not graded" />
+                              <Badge variant="default" label="Chưa chấm" />
                             )}
                             <Button size="sm" variant="outline" onClick={() => openGradingModal(sub)}>
-                              {sub.score !== null ? 'Re-grade' : 'Grade'}
+                              {sub.score !== null ? 'Chấm lại' : 'Chấm điểm'}
                             </Button>
                           </div>
                         </div>
@@ -252,12 +252,12 @@ export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuild
                           </div>
                         )}
                         {sub.feedback && (
-                          <p className="mt-2 text-sm text-muted-foreground italic">Feedback: {sub.feedback}</p>
+                          <p className="mt-2 text-sm text-muted-foreground italic">Nhận xét: {sub.feedback}</p>
                         )}
                       </div>
                     ))}
                     {submissions.length === 0 && (
-                      <p className="text-center py-4 text-muted-foreground">No submissions yet</p>
+                      <p className="text-center py-4 text-muted-foreground">Chưa có bài nộp nào</p>
                     )}
                   </div>
                 )}
@@ -265,19 +265,19 @@ export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuild
             </>
           )}
 
-          <Modal open={!!gradingSubmission} onClose={() => setGradingSubmission(null)} title="Grade Submission">
+          <Modal open={!!gradingSubmission} onClose={() => setGradingSubmission(null)} title="Chấm Điểm Bài Nộp">
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium">Score (out of {assignment?.max_score})</label>
+                <label className="text-sm font-medium">Điểm số (trên thang {assignment?.max_score})</label>
                 <Input type="number" value={gradeScore} onChange={(v) => setGradeScore(parseInt(v))} className="mt-1" min={0} max={assignment?.max_score} />
               </div>
               <div>
-                <label className="text-sm font-medium">Feedback</label>
-                <Textarea value={gradeFeedback} onChange={(e) => setGradeFeedback(e.target.value)} className="mt-1" rows={4} placeholder="Provide feedback for the student..." />
+                <label className="text-sm font-medium">Nhận xét & Góp ý</label>
+                <Textarea value={gradeFeedback} onChange={(e) => setGradeFeedback(e.target.value)} className="mt-1" rows={4} placeholder="Nhập nhận xét, hướng dẫn chi tiết cho học viên..." />
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="ghost" onClick={() => setGradingSubmission(null)}>Cancel</Button>
-                <Button onClick={handleGrade}>Submit Grade</Button>
+                <Button variant="ghost" onClick={() => setGradingSubmission(null)}>Hủy</Button>
+                <Button onClick={handleGrade}>Lưu điểm số</Button>
               </div>
             </div>
           </Modal>

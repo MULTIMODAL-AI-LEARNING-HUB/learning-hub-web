@@ -67,10 +67,10 @@ export function AssignmentSubmissionView({ lessonId, assignment }: AssignmentSub
         })
       )
       setUploadedFiles((current) => [...current, ...uploaded])
-      toast({ type: 'success', title: 'Files uploaded successfully' })
+      toast({ type: 'success', title: 'Tải tệp đính kèm lên thành công' })
     } catch (err) {
       console.error(err)
-      toast({ type: 'error', title: 'Failed to upload files' })
+      toast({ type: 'error', title: 'Tải tệp đính kèm thất bại' })
     } finally {
       setUploading(false)
       event.target.value = ''
@@ -93,9 +93,9 @@ export function AssignmentSubmissionView({ lessonId, assignment }: AssignmentSub
       setSubmissionText('')
       setUploadedFiles([])
       setShowForm(false)
-      toast({ type: 'success', title: 'Assignment submitted successfully' })
+      toast({ type: 'success', title: 'Nộp bài tập thành công' })
     } catch {
-      toast({ type: 'error', title: 'Failed to submit assignment' })
+      toast({ type: 'error', title: 'Nộp bài tập thất bại' })
     } finally {
       setSubmitting(false)
     }
@@ -118,15 +118,15 @@ export function AssignmentSubmissionView({ lessonId, assignment }: AssignmentSub
             {assignment.description && <p className="mt-1 text-sm text-muted-foreground">{assignment.description}</p>}
             {assignment.instructions && <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{assignment.instructions}</p>}
             <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-              <span>Max score: {assignment.max_score}</span>
+              <span>Điểm tối đa: {assignment.max_score}</span>
               {assignment.deadline && (
                 <span className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
-                  Due: {new Date(assignment.deadline).toLocaleDateString()}
+                  Hạn nộp: {new Date(assignment.deadline).toLocaleDateString('vi-VN')}
                 </span>
               )}
               <span>
-                Resubmits: {assignment.allow_resubmit ? `${submissions.length}/${assignment.max_resubmits}` : 'Not allowed'}
+                Nộp lại: {assignment.allow_resubmit ? `${submissions.length}/${assignment.max_resubmits}` : 'Không cho phép'}
               </span>
             </div>
           </div>
@@ -135,7 +135,7 @@ export function AssignmentSubmissionView({ lessonId, assignment }: AssignmentSub
 
       {submissions.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-sm font-semibold text-foreground">Your submissions</h4>
+          <h4 className="text-sm font-semibold text-foreground">Bài tập bạn đã nộp</h4>
           {submissions.map((submission) => (
             <Card key={submission.id} className="p-3">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -160,7 +160,7 @@ export function AssignmentSubmissionView({ lessonId, assignment }: AssignmentSub
                             className="ml-2 flex items-center gap-1 font-semibold text-primary hover:underline"
                           >
                             <Download className="h-3 w-3" />
-                            Download
+                            Tải xuống
                           </a>
                         </div>
                       ))}
@@ -168,8 +168,8 @@ export function AssignmentSubmissionView({ lessonId, assignment }: AssignmentSub
                   )}
 
                   <p className="mt-1.5 text-xs text-muted-foreground/70">
-                    Submitted {new Date(submission.submitted_at).toLocaleDateString()}
-                    {submission.is_late && <span className="ml-2 text-warning">(Late)</span>}
+                    Đã nộp vào {new Date(submission.submitted_at).toLocaleDateString('vi-VN')}
+                    {submission.is_late && <span className="ml-2 text-warning">(Nộp muộn)</span>}
                   </p>
                 </div>
 
@@ -186,7 +186,7 @@ export function AssignmentSubmissionView({ lessonId, assignment }: AssignmentSub
                       </span>
                     </div>
                   ) : (
-                    <span className="text-xs text-muted-foreground">Not graded</span>
+                    <span className="text-xs text-muted-foreground">Chưa chấm điểm</span>
                   )}
                   {submission.feedback && <p className="mt-1 text-xs italic text-muted-foreground">{submission.feedback}</p>}
                 </div>
@@ -201,12 +201,12 @@ export function AssignmentSubmissionView({ lessonId, assignment }: AssignmentSub
           <textarea
             value={submissionText}
             onChange={(event) => setSubmissionText(event.target.value)}
-            placeholder="Write your submission text..."
+            placeholder="Nhập nội dung bài làm của bạn..."
             className="min-h-[100px] w-full resize-y rounded-lg border border-input bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
 
           <div className="space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Submission attachments</label>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tệp đính kèm bài làm</label>
 
             {uploadedFiles.length > 0 && (
               <div className="grid max-w-md grid-cols-1 gap-2">
@@ -221,7 +221,7 @@ export function AssignmentSubmissionView({ lessonId, assignment }: AssignmentSub
                       size="icon"
                       className="h-6 w-6 shrink-0 text-destructive hover:bg-destructive/10"
                       onClick={() => setUploadedFiles((current) => current.filter((_, fileIndex) => fileIndex !== index))}
-                      aria-label={`Remove ${file.file_name}`}
+                      aria-label={`Xóa ${file.file_name}`}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
@@ -233,32 +233,32 @@ export function AssignmentSubmissionView({ lessonId, assignment }: AssignmentSub
             <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted/60">
               <input type="file" multiple className="hidden" onChange={handleFileUpload} disabled={uploading} />
               <Upload className="h-3.5 w-3.5" />
-              {uploading ? 'Uploading...' : 'Choose attachment files'}
+              {uploading ? 'Đang tải lên...' : 'Chọn tệp đính kèm'}
             </label>
           </div>
 
           <div className="flex justify-end gap-2 border-t border-border/50 pt-2">
-            <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}>Cancel</Button>
+            <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}>Hủy</Button>
             <Button
               size="sm"
               onClick={handleSubmit}
               disabled={submitting || uploading || (!submissionText.trim() && uploadedFiles.length === 0)}
               loading={submitting}
             >
-              Submit
+              Nộp bài
             </Button>
           </div>
         </Card>
       ) : (
         canSubmit && (
           <Button onClick={() => setShowForm(true)} variant="outline" size="sm">
-            {submissions.length === 0 ? 'Submit assignment' : 'Resubmit'}
+            {submissions.length === 0 ? 'Nộp bài tập' : 'Nộp lại'}
           </Button>
         )
       )}
 
       {deadlinePassed && !assignment.allow_resubmit && (
-        <p className="text-xs text-destructive">The deadline has passed. New submissions are closed.</p>
+        <p className="text-xs text-destructive">Đã quá hạn nộp bài. Hệ thống đã đóng lượt nộp mới.</p>
       )}
     </div>
   )

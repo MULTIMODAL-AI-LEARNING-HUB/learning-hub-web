@@ -40,13 +40,13 @@ export function EditCourseDetailsModal({ course, open, onClose, onSaved }: EditC
 
   const save = async () => {
     if (!title.trim()) {
-      toasts.add({ type: 'error', title: 'Title is required' })
+      toasts.add({ type: 'error', title: 'Vui lòng nhập tên khóa học' })
       return
     }
 
     const parsedPrice = Number(price)
     if (Number.isNaN(parsedPrice) || parsedPrice < 0) {
-      toasts.add({ type: 'error', title: 'Invalid price' })
+      toasts.add({ type: 'error', title: 'Giá học phí không hợp lệ' })
       return
     }
 
@@ -63,10 +63,10 @@ export function EditCourseDetailsModal({ course, open, onClose, onSaved }: EditC
         tags: tags.trim() || null,
       })
       onSaved(res.data)
-      toasts.add({ type: 'success', title: 'Course details updated' })
+      toasts.add({ type: 'success', title: 'Cập nhật thông tin khóa học thành công' })
       onClose()
     } catch {
-      toasts.add({ type: 'error', title: 'Unable to update course' })
+      toasts.add({ type: 'error', title: 'Không thể cập nhật khóa học' })
     } finally {
       setSaving(false)
     }
@@ -76,50 +76,50 @@ export function EditCourseDetailsModal({ course, open, onClose, onSaved }: EditC
     <Modal
       open={open}
       onClose={onClose}
-      title="Edit course details"
-      description="Update the course information students see before and after enrolling."
+      title="Chỉnh sửa thông tin khóa học"
+      description="Cập nhật thông tin khóa học hiển thị cho học viên trước và sau khi đăng ký."
       size="3xl"
       footer={(
         <>
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button onClick={save} loading={saving}>Save changes</Button>
+          <Button variant="ghost" onClick={onClose}>Hủy</Button>
+          <Button onClick={save} loading={saving}>Lưu thay đổi</Button>
         </>
       )}
     >
       <div className="grid gap-5">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <label className="text-sm font-medium text-foreground">Title</label>
+            <label className="text-sm font-medium text-foreground">Tên khóa học</label>
             <Input value={title} onChange={setTitle} className="mt-2" />
           </div>
           <div>
-            <label className="text-sm font-medium text-foreground">Price</label>
+            <label className="text-sm font-medium text-foreground">Giá học phí (VNĐ)</label>
             <Input type="number" value={price} onChange={setPrice} className="mt-2" min={0} />
           </div>
           <div>
-            <label className="text-sm font-medium text-foreground">Level</label>
-            <Input value={level} onChange={setLevel} className="mt-2" placeholder="Beginner, intermediate..." />
+            <label className="text-sm font-medium text-foreground">Trình độ</label>
+            <Input value={level} onChange={setLevel} className="mt-2" placeholder="Cơ bản, trung cấp, nâng cao..." />
           </div>
           <div>
-            <label className="text-sm font-medium text-foreground">Language</label>
-            <Input value={language} onChange={setLanguage} className="mt-2" placeholder="English" />
+            <label className="text-sm font-medium text-foreground">Ngôn ngữ</label>
+            <Input value={language} onChange={setLanguage} className="mt-2" placeholder="Tiếng Việt, Tiếng Anh..." />
           </div>
           <div>
-            <label className="text-sm font-medium text-foreground">Tags</label>
-            <Input value={tags} onChange={setTags} className="mt-2" placeholder="Comma-separated tags" />
+            <label className="text-sm font-medium text-foreground">Thẻ phân loại (Tags)</label>
+            <Input value={tags} onChange={setTags} className="mt-2" placeholder="Cách nhau bằng dấu phẩy" />
           </div>
         </div>
 
         <div>
-          <label className="text-sm font-medium text-foreground">Description</label>
+          <label className="text-sm font-medium text-foreground">Mô tả khóa học</label>
           <Textarea value={description} onChange={(event) => setDescription(event.target.value)} className="mt-2 min-h-28" />
         </div>
         <div>
-          <label className="text-sm font-medium text-foreground">Requirements</label>
+          <label className="text-sm font-medium text-foreground">Yêu cầu đầu vào</label>
           <Textarea value={requirements} onChange={(event) => setRequirements(event.target.value)} className="mt-2" />
         </div>
         <div>
-          <label className="text-sm font-medium text-foreground">Learning outcomes</label>
+          <label className="text-sm font-medium text-foreground">Mục tiêu đạt được</label>
           <Textarea value={learningOutcomes} onChange={(event) => setLearningOutcomes(event.target.value)} className="mt-2" />
         </div>
       </div>

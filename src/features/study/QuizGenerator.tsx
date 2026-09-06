@@ -51,7 +51,7 @@ export function QuizGenerator() {
           return { status: 'ready', data: mapped }
         }
         if (data.status === 'failed') {
-          return { status: 'failed', error: 'The AI model failed to parse the document.' }
+          return { status: 'failed', error: 'Mô hình AI không thể phân tích tài liệu này.' }
         }
         return { status: 'processing' }
       } catch {
@@ -64,18 +64,18 @@ export function QuizGenerator() {
       setCurrentQ(0)
       setAnswers({})
       setSubmitted(false)
-      toast({ type: 'success', title: 'Quiz generated', message: `${qs.length} questions ready` })
+      toast({ type: 'success', title: 'Đã tạo đề trắc nghiệm', message: `Sẵn sàng với ${qs.length} câu hỏi` })
     },
     onError: () => {
-      toast({ type: 'error', title: 'Failed to generate quiz' })
+      toast({ type: 'error', title: 'Không thể tạo đề trắc nghiệm' })
     },
-    errorTitle: 'Failed to generate quiz',
-    timeoutTitle: 'Quiz generation timed out'
+    errorTitle: 'Không thể tạo đề trắc nghiệm',
+    timeoutTitle: 'Quá thời gian tạo đề trắc nghiệm'
   })
 
   const handleGenerate = async () => {
     if (!selectedDoc) {
-      toast({ type: 'warning', title: 'Please select a document first' })
+      toast({ type: 'warning', title: 'Vui lòng chọn một tài liệu trước' })
       return
     }
     try {
@@ -88,7 +88,7 @@ export function QuizGenerator() {
       setProgress(0)
       start()
     } catch {
-      toast({ type: 'error', title: 'Failed to start quiz generation' })
+      toast({ type: 'error', title: 'Không thể khởi chạy tiến trình tạo đề' })
     }
   }
 
@@ -97,8 +97,8 @@ export function QuizGenerator() {
     const correct = questions.filter((q) => answers[q.id] === q.correctIndex).length
     toast({
       type: 'info',
-      title: `Score: ${correct}/${questions.length}`,
-      message: `${Math.round((correct / questions.length) * 100)}%`
+      title: `Kết quả: ${correct}/${questions.length}`,
+      message: `Độ chính xác: ${Math.round((correct / questions.length) * 100)}%`
     })
   }
 
@@ -114,39 +114,39 @@ export function QuizGenerator() {
     return (
       <div className="mx-auto max-w-2xl">
         <PageHeader
-          subtitle="Study Tools"
-          title="Quiz Generator"
-          description="Test your knowledge with AI-generated questions based on your documents."
+          subtitle="Công cụ học tập"
+          title="Tạo đề trắc nghiệm AI"
+          description="Kiểm tra kiến thức với các câu hỏi do AI tạo ra từ chính tài liệu học của bạn."
           icon={<BookOpen />}
         />
 
         {readyDocs.length === 0 ? (
           <EmptyState
             icon={<FileQuestion />}
-            title="No documents ready"
-            description="Upload and process a document first to generate a quiz from it."
+            title="Chưa có tài liệu sẵn sàng"
+            description="Vui lòng tải lên và xử lý tài liệu trước khi tạo đề trắc nghiệm từ tài liệu đó."
           />
         ) : (
           <Card className="p-4 sm:p-6">
             <div className="grid gap-4">
-              <FormField label="Select document" required>
+              <FormField label="Chọn tài liệu học tập" required>
                 <Select
                   value={selectedDoc}
                   onChange={setSelectedDoc}
-                  placeholder="Choose a document..."
+                  placeholder="Chọn một tài liệu..."
                   options={readyDocs.map((d) => ({ value: d.id, label: d.name }))}
                 />
               </FormField>
 
-              <FormField label="Number of questions" required>
+              <FormField label="Số lượng câu hỏi" required>
                 <Select
                   value={String(numQuestions)}
                   onChange={(v) => setNumQuestions(Number(v))}
                   options={[
-                    { value: '3', label: '3 questions' },
-                    { value: '5', label: '5 questions' },
-                    { value: '10', label: '10 questions' },
-                    { value: '15', label: '15 questions' }
+                    { value: '3', label: '3 câu hỏi' },
+                    { value: '5', label: '5 câu hỏi' },
+                    { value: '10', label: '10 câu hỏi' },
+                    { value: '15', label: '15 câu hỏi' }
                   ]}
                 />
               </FormField>
@@ -159,7 +159,7 @@ export function QuizGenerator() {
               size="lg"
               icon={<Sparkles className="h-4 w-4" />}
             >
-              Generate Quiz
+              Bắt đầu tạo đề trắc nghiệm
             </Button>
           </Card>
         )}
@@ -170,11 +170,11 @@ export function QuizGenerator() {
   if (loading) {
     return (
       <StudyLoadingState
-        title="Generating Quiz"
-        description="Our AI is crafting personalized questions from your document."
+        title="Đang tạo đề trắc nghiệm"
+        description="Trợ lý AI đang phân tích tài liệu và biên soạn các câu hỏi trắc nghiệm phù hợp."
         progress={progress}
-        statusText="Generating questions"
-        durationText="This usually takes 20-60 seconds"
+        statusText="Đang biên soạn câu hỏi"
+        durationText="Quá trình này thường mất khoảng 20-60 giây"
       />
     )
   }
@@ -186,8 +186,8 @@ export function QuizGenerator() {
   return (
     <div className="mx-auto max-w-2xl">
       <PageHeader
-        subtitle="Study Tools"
-        title="Quiz in progress"
+        subtitle="Công cụ học tập"
+        title="Đang làm bài trắc nghiệm"
         icon={<BookOpen />}
         actions={
           <Badge variant="primary" label={`${currentQ + 1} / ${questions.length}`} />
@@ -196,7 +196,7 @@ export function QuizGenerator() {
 
       <Card className="p-4 sm:p-6">
         <div className="flex items-center justify-between text-sm">
-          <span className="font-medium text-muted-foreground">Progress</span>
+          <span className="font-medium text-muted-foreground">Tiến độ</span>
           <span className="font-semibold text-foreground tabular-nums">
             {Math.round(((currentQ + 1) / questions.length) * 100)}%
           </span>
@@ -262,9 +262,9 @@ export function QuizGenerator() {
             </div>
             <div className="flex-1">
               <p className="text-sm font-semibold text-foreground">
-                {correctCount} / {questions.length} correct
+                {correctCount} / {questions.length} câu đúng
               </p>
-              <p className="text-xs text-muted-foreground">{percent}% accuracy</p>
+              <p className="text-xs text-muted-foreground">Độ chính xác: {percent}%</p>
             </div>
           </div>
         )}
@@ -276,22 +276,22 @@ export function QuizGenerator() {
             disabled={currentQ === 0}
             icon={<ChevronLeft className="h-4 w-4" />}
           >
-            Previous
+            Câu trước
           </Button>
           {currentQ < questions.length - 1 ? (
             <Button
               onClick={() => setCurrentQ((p) => p + 1)}
               iconRight={<ChevronRight className="h-4 w-4" />}
             >
-              Next
+              Câu tiếp
             </Button>
           ) : !submitted ? (
             <Button onClick={handleSubmit} variant="primary" icon={<CheckCircle2 className="h-4 w-4" />}>
-              Submit Quiz
+              Nộp bài trắc nghiệm
             </Button>
           ) : (
             <Button onClick={handleReset} variant="outline" icon={<RotateCcw className="h-4 w-4" />}>
-              Try Again
+              Làm lại đề này
             </Button>
           )}
         </div>

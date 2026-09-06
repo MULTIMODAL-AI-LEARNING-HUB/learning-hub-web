@@ -32,8 +32,8 @@ interface LecturerStats {
 }
 
 function formatDate(value: string | null) {
-  if (!value) return 'Not available'
-  return new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+  if (!value) return 'Không có ngày'
+  return new Date(value).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 function formatCurrency(value: number) {
@@ -65,7 +65,7 @@ export function LecturerProfile() {
         setFullName(profileRes.data.full_name ?? '')
         if (statsRes) setStats(statsRes.data)
       } catch {
-        if (!cancelled) toast({ type: 'error', title: 'Failed to load profile' })
+        if (!cancelled) toast({ type: 'error', title: 'Không thể tải thông tin hồ sơ' })
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -78,7 +78,7 @@ export function LecturerProfile() {
     }
   }, [toast])
 
-  const displayName = fullName.trim() || user?.full_name || 'Lecturer'
+  const displayName = fullName.trim() || user?.full_name || 'Giảng viên'
   const initials = useMemo(() => {
     return displayName
       .split(' ')
@@ -90,7 +90,7 @@ export function LecturerProfile() {
 
   const handleSave = async () => {
     if (!fullName.trim()) {
-      toast({ type: 'warning', title: 'Name is required' })
+      toast({ type: 'warning', title: 'Vui lòng nhập họ và tên' })
       return
     }
 
@@ -100,9 +100,9 @@ export function LecturerProfile() {
       setUser(res.data)
       setFullName(res.data.full_name ?? '')
       setEditing(false)
-      toast({ type: 'success', title: 'Profile updated' })
+      toast({ type: 'success', title: 'Hồ sơ đã được cập nhật' })
     } catch {
-      toast({ type: 'error', title: 'Failed to update profile' })
+      toast({ type: 'error', title: 'Cập nhật hồ sơ thất bại' })
     } finally {
       setSaving(false)
     }
@@ -123,8 +123,8 @@ export function LecturerProfile() {
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
-        title="Lecturer Profile"
-        description="Manage your public teaching identity and account information."
+        title="Hồ Sơ Giảng Viên"
+        description="Quản lý danh tính giảng dạy công khai và thông tin tài khoản của bạn."
         icon={<User />}
       />
 
@@ -135,8 +135,8 @@ export function LecturerProfile() {
               <Avatar src={user?.avatar_url ?? undefined} fallback={initials} size="xl" status="online" className="ring-4 ring-surface-elevated" />
               <div>
                 <div className="mb-2 flex flex-wrap items-center gap-2">
-                  <Badge variant="primary" label="Lecturer" dot />
-                  <Badge variant="success" label="Active account" dot />
+                  <Badge variant="primary" label="Giảng viên" dot />
+                  <Badge variant="success" label="Tài khoản hoạt động" dot />
                 </div>
                 <h2 className="text-2xl font-semibold tracking-tight text-foreground">{displayName}</h2>
                 <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
@@ -149,15 +149,15 @@ export function LecturerProfile() {
             <div className="flex gap-2">
               {!editing ? (
                 <Button variant="outline" icon={<Edit2 className="h-4 w-4" />} onClick={() => setEditing(true)}>
-                  Edit profile
+                  Chỉnh sửa hồ sơ
                 </Button>
               ) : (
                 <>
                   <Button variant="ghost" icon={<X className="h-4 w-4" />} onClick={() => { setEditing(false); setFullName(user?.full_name ?? '') }}>
-                    Cancel
+                    Hủy
                   </Button>
                   <Button icon={<Check className="h-4 w-4" />} onClick={handleSave} loading={saving}>
-                    Save
+                    Lưu
                   </Button>
                 </>
               )}
@@ -166,10 +166,10 @@ export function LecturerProfile() {
         </div>
 
         <div className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
-          <MetricCard icon={<BookOpen />} label="Courses" value={String(stats?.total_courses ?? 0)} />
-          <MetricCard icon={<Users />} label="Students" value={String(stats?.total_students ?? 0)} />
-          <MetricCard icon={<Star />} label="Average rating" value={(stats?.avg_rating ?? 0).toFixed(1)} />
-          <MetricCard icon={<TrendingUp />} label="Revenue" value={formatCurrency(stats?.total_revenue ?? 0)} />
+          <MetricCard icon={<BookOpen />} label="Khóa học" value={String(stats?.total_courses ?? 0)} />
+          <MetricCard icon={<Users />} label="Học viên" value={String(stats?.total_students ?? 0)} />
+          <MetricCard icon={<Star />} label="Đánh giá TB" value={(stats?.avg_rating ?? 0).toFixed(1)} />
+          <MetricCard icon={<TrendingUp />} label="Doanh thu" value={formatCurrency(stats?.total_revenue ?? 0)} />
         </div>
       </Card>
 
@@ -177,23 +177,23 @@ export function LecturerProfile() {
         <div className="space-y-6">
           <Card padding="responsive" className="space-y-5">
             <div>
-              <h3 className="text-base font-semibold text-foreground">Profile details</h3>
-              <p className="mt-1 text-sm text-muted-foreground">This information is shown across your lecturer workspace.</p>
+              <h3 className="text-base font-semibold text-foreground">Chi tiết hồ sơ</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Thông tin này được hiển thị trong không gian làm việc của giảng viên.</p>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Full name</label>
+                <label className="text-sm font-medium text-foreground">Họ và tên</label>
                 {editing ? (
-                  <Input value={fullName} onChange={setFullName} placeholder="Enter your full name" />
+                  <Input value={fullName} onChange={setFullName} placeholder="Nhập họ và tên của bạn" />
                 ) : (
                   <div className="rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm text-foreground">
-                    {user?.full_name || 'Not set'}
+                    {user?.full_name || 'Chưa thiết lập'}
                   </div>
                 )}
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Email address</label>
+                <label className="text-sm font-medium text-foreground">Địa chỉ email</label>
                 <div className="rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
                   {user?.email}
                 </div>
@@ -204,10 +204,10 @@ export function LecturerProfile() {
           <Card padding="responsive" className="space-y-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h3 className="text-base font-semibold text-foreground">Course performance</h3>
-                <p className="mt-1 text-sm text-muted-foreground">Top courses by enrollment from your current catalog.</p>
+                <h3 className="text-base font-semibold text-foreground">Hiệu quả khóa học</h3>
+                <p className="mt-1 text-sm text-muted-foreground">Các khóa học có nhiều học viên nhất trong danh mục của bạn.</p>
               </div>
-              <Badge variant="outline" label={`${stats?.course_stats?.length ?? 0} courses`} />
+              <Badge variant="outline" label={`${stats?.course_stats?.length ?? 0} khóa học`} />
             </div>
 
             {stats?.course_stats?.length ? (
@@ -216,7 +216,7 @@ export function LecturerProfile() {
                   <div key={course.course_id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-foreground">{course.title}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">{course.enrollment_count} enrolled students</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{course.enrollment_count} học viên ghi danh</p>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
@@ -231,8 +231,8 @@ export function LecturerProfile() {
             ) : (
               <div className="rounded-xl border border-dashed border-border p-6 text-center">
                 <BookOpen className="mx-auto h-8 w-8 text-muted-foreground" />
-                <p className="mt-3 text-sm font-medium text-foreground">No course performance yet</p>
-                <p className="mt-1 text-xs text-muted-foreground">Published courses and enrollments will appear here.</p>
+                <p className="mt-3 text-sm font-medium text-foreground">Chưa có dữ liệu hiệu quả khóa học</p>
+                <p className="mt-1 text-xs text-muted-foreground">Khóa học đã xuất bản và số lượt ghi danh sẽ hiển thị tại đây.</p>
               </div>
             )}
           </Card>
@@ -242,19 +242,19 @@ export function LecturerProfile() {
           <Card padding="responsive" className="space-y-4">
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-success" />
-              <h3 className="font-semibold text-foreground">Account</h3>
+              <h3 className="font-semibold text-foreground">Tài khoản</h3>
             </div>
-            <InfoRow icon={<CalendarDays />} label="Member since" value={formatDate(user?.created_at ?? null)} />
-            <InfoRow icon={<Award />} label="Role" value="Lecturer" />
-            <InfoRow icon={<ShieldCheck />} label="Status" value="Active" />
+            <InfoRow icon={<CalendarDays />} label="Thành viên từ" value={formatDate(user?.created_at ?? null)} />
+            <InfoRow icon={<Award />} label="Vai trò" value="Giảng viên" />
+            <InfoRow icon={<ShieldCheck />} label="Trạng thái" value="Hoạt động" />
           </Card>
 
           <Card padding="responsive" className="space-y-3">
-            <h3 className="font-semibold text-foreground">Teaching profile tips</h3>
+            <h3 className="font-semibold text-foreground">Mẹo hồ sơ giảng dạy</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>Keep your display name consistent with course author information.</li>
-              <li>Use course announcements and chat to keep students engaged.</li>
-              <li>Review submissions regularly from the To Grade workspace.</li>
+              <li>Duy trì tên hiển thị đồng nhất với thông tin tác giả khóa học.</li>
+              <li>Sử dụng thông báo khóa học và trò chuyện để tương tác cùng học viên.</li>
+              <li>Kiểm tra và chấm bài tập định kỳ trong không gian Chấm bài.</li>
             </ul>
           </Card>
         </div>

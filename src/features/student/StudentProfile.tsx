@@ -33,10 +33,10 @@ export function StudentProfile() {
     setMessage(null)
     try {
       await authApi.updateMe({ full_name: fullName.trim() })
-      setMessage({ type: 'success', text: 'Profile updated' })
+      setMessage({ type: 'success', text: 'Hồ sơ đã được cập nhật thành công' })
       await loadUser()
     } catch {
-      setMessage({ type: 'error', text: 'Failed to update profile' })
+      setMessage({ type: 'error', text: 'Không thể cập nhật hồ sơ' })
     } finally {
       setSaving(false)
     }
@@ -58,32 +58,34 @@ export function StudentProfile() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-fluid-2xl font-bold text-foreground">Profile</h1>
-        <p className="text-muted-foreground mt-1">Manage your account settings</p>
+        <h1 className="text-fluid-2xl font-bold text-foreground">Hồ sơ cá nhân</h1>
+        <p className="text-muted-foreground mt-1">Quản lý thông tin cá nhân và tài nguyên sử dụng</p>
       </div>
 
       <Card className="p-6 max-w-2xl">
         <div className="flex items-center gap-4 mb-6">
           <Avatar fallback={user?.initials || '?'} size="lg" />
           <div>
-            <h2 className="text-xl font-semibold text-foreground">{user?.name || 'User'}</h2>
-            <p className="text-sm text-muted-foreground capitalize">{user?.role}</p>
+            <h2 className="text-xl font-semibold text-foreground">{user?.name || 'Người dùng'}</h2>
+            <p className="text-sm text-muted-foreground">
+              {user?.role === 'admin' ? 'Quản trị viên' : user?.role === 'lecturer' ? 'Giảng viên' : 'Học viên'}
+            </p>
           </div>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Full Name</label>
-            <Input value={fullName} onChange={(v) => setFullName(v)} placeholder="Your name" />
+            <label className="block text-sm font-medium text-foreground mb-1">Họ và tên</label>
+            <Input value={fullName} onChange={(v) => setFullName(v)} placeholder="Nhập họ và tên của bạn" />
           </div>
 
           {user?.quota && (
             <div className="border-t border-border pt-4 mt-4">
-              <h3 className="text-sm font-semibold text-foreground mb-3">Usage</h3>
+              <h3 className="text-sm font-semibold text-foreground mb-3">Tài nguyên & Hạn mức</h3>
               <div className="space-y-3">
                 <div>
                   <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                    <span>Storage</span>
+                    <span>Dung lượng lưu trữ</span>
                     <span>{Math.round(user.quota.storageUsed)}MB / {user.quota.storageTotal}MB</span>
                   </div>
                   <div className="h-1.5 w-full rounded-full bg-muted">
@@ -92,7 +94,7 @@ export function StudentProfile() {
                 </div>
                 <div>
                   <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                    <span>AI Tokens</span>
+                    <span>Hạn mức Token AI</span>
                     <span>{user.quota.tokensUsed} / {user.quota.tokensTotal}</span>
                   </div>
                   <div className="h-1.5 w-full rounded-full bg-muted">
@@ -106,7 +108,7 @@ export function StudentProfile() {
 
         <div className="mt-6 flex items-center gap-3">
           <Button onClick={handleSave} disabled={saving}>
-            {saving ? 'Saving...' : 'Save Changes'}
+            {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
           </Button>
           {message && (
             <span className={`text-sm ${message.type === 'success' ? 'text-success' : 'text-destructive'}`}>

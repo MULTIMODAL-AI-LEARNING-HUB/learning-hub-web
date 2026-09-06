@@ -171,8 +171,8 @@ export function QuizTaking() {
           <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mx-auto mb-4">
             <BookOpen className="h-8 w-8 text-indigo-600" />
           </div>
-          <h1 className="text-2xl font-bold mb-2">Quiz từ khóa học</h1>
-          <p className="text-gray-600">Tạo quiz từ nội dung bài học để kiểm tra kiến thức</p>
+          <h1 className="text-2xl font-bold mb-2">Bài trắc nghiệm từ khóa học</h1>
+          <p className="text-gray-600">Tạo bài trắc nghiệm từ nội dung bài học để kiểm tra kiến thức</p>
         </div>
 
         <Card className="p-6">
@@ -180,7 +180,7 @@ export function QuizTaking() {
           <p className="text-gray-600 mb-6">{course.description}</p>
 
           <div className="space-y-3 mb-6">
-            <h4 className="font-medium">Chọn nguồn quiz:</h4>
+            <h4 className="font-medium">Chọn nguồn bài trắc nghiệm:</h4>
             <Button
               variant="outline"
               className="w-full justify-start"
@@ -205,7 +205,7 @@ export function QuizTaking() {
             onClick={() => handleGenerateQuiz()}
             icon={<BookOpen className="h-4 w-4" />}
           >
-            Tạo quiz ngẫu nhiên
+            Tạo bài trắc nghiệm ngẫu nhiên
           </Button>
         </Card>
       </div>
@@ -216,8 +216,8 @@ export function QuizTaking() {
     return (
       <div className="max-w-2xl mx-auto text-center py-12">
         <div className="animate-spin w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto mb-4" />
-        <h2 className="text-xl font-semibold mb-2">Đang tạo quiz...</h2>
-        <p className="text-gray-600">AI đang tạo câu hỏi từ nội dung khóa học</p>
+        <h2 className="text-xl font-semibold mb-2">Đang tạo bài trắc nghiệm...</h2>
+        <p className="text-gray-600">AI đang phân tích tài liệu và tạo câu hỏi kiểm tra</p>
       </div>
     )
   }
@@ -232,7 +232,7 @@ export function QuizTaking() {
           <Link to={`/app/courses/${id}/learn`} className="text-sm text-indigo-600 hover:underline flex items-center gap-1 mb-1">
             ← Quay lại học tập
           </Link>
-          <h1 className="text-xl font-bold">Quiz: {course.title}</h1>
+          <h1 className="text-xl font-bold">Bài trắc nghiệm: {course.title}</h1>
         </div>
         <Badge variant="primary" label={`${currentQ + 1} / ${questions.length}`} />
       </div>

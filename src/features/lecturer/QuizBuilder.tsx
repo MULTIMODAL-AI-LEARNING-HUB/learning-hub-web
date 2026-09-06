@@ -16,10 +16,10 @@ interface QuizBuilderProps {
 }
 
 const QUESTION_TYPES = [
-  { value: 'SINGLE_CHOICE', label: 'Single Choice' },
-  { value: 'MULTIPLE_CHOICE', label: 'Multiple Choice' },
-  { value: 'TRUE_FALSE', label: 'True/False' },
-  { value: 'FILL_BLANK', label: 'Fill in the Blank' },
+  { value: 'SINGLE_CHOICE', label: 'Một đáp án đúng (Single Choice)' },
+  { value: 'MULTIPLE_CHOICE', label: 'Nhiều đáp án đúng (Multiple Choice)' },
+  { value: 'TRUE_FALSE', label: 'Đúng / Sai (True/False)' },
+  { value: 'FILL_BLANK', label: 'Điền vào chỗ trống' },
 ]
 
 export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
@@ -120,7 +120,7 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
   }
 
   const handleDeleteQuiz = async () => {
-    if (confirm('Are you sure you want to delete this quiz? This will also delete all questions.')) {
+    if (confirm('Bạn có chắc chắn muốn xóa bài trắc nghiệm này? Toàn bộ câu hỏi cũng sẽ bị xóa.')) {
       await deleteQuiz()
       onClose()
     }
@@ -147,8 +147,8 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
     <div className="fixed inset-0 bg-foreground/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
       <div className="bg-surface-elevated border border-border rounded-2xl shadow-lift w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-slide-in-from-bottom">
         <div className="flex items-center justify-between px-4 py-3 sm:p-4 border-b border-border">
-          <h2 className="text-lg font-semibold text-foreground">Quiz Builder</h2>
-          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">
+          <h2 className="text-lg font-semibold text-foreground">Xây Dựng Bài Trắc Nghiệm (Quiz)</h2>
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Đóng">
             <X className="h-5 w-5" />
           </Button>
         </div>
@@ -157,14 +157,14 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
           {!quiz && !showQuizForm && (
             <div className="text-center py-8">
               <HelpCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">No Quiz Yet</h3>
-              <p className="text-muted-foreground mb-4">Create a quiz manually or generate one instantly using AI from uploaded lesson materials</p>
+              <h3 className="text-lg font-medium mb-2">Chưa có bài trắc nghiệm nào</h3>
+              <p className="text-muted-foreground mb-4">Tạo câu hỏi thủ công hoặc dùng AI tự động tạo trắc nghiệm từ tài liệu bài học</p>
               <div className="flex justify-center gap-3">
                 <Button onClick={() => setShowQuizForm(true)} icon={<Plus className="h-4 w-4" />}>
-                  Create Quiz
+                  Tạo bài trắc nghiệm
                 </Button>
                 <Button onClick={() => setShowAiModal(true)} variant="outline" icon={<Sparkles className="h-4 w-4 text-primary" />}>
-                  Generate with AI
+                  Tạo tự động bằng AI
                 </Button>
               </div>
             </div>
@@ -172,32 +172,32 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
 
           {showQuizForm && (
             <Card className="p-4 space-y-4">
-              <h3 className="font-medium">Create Quiz</h3>
+              <h3 className="font-medium">Tạo Bài Trắc Nghiệm</h3>
               <div>
-                <label className="text-sm font-medium">Title</label>
-                <Input value={quizTitle} onChange={setQuizTitle} className="mt-1" placeholder="Quiz title" />
+                <label className="text-sm font-medium">Tiêu đề bài trắc nghiệm</label>
+                <Input value={quizTitle} onChange={setQuizTitle} className="mt-1" placeholder="Nhập tiêu đề trắc nghiệm..." />
               </div>
               <div>
-                <label className="text-sm font-medium">Description</label>
+                <label className="text-sm font-medium">Mô tả ngắn</label>
                 <Textarea value={quizDescription} onChange={(e) => setQuizDescription(e.target.value)} className="mt-1" rows={2} />
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-sm font-medium">Passing Score (%)</label>
+                  <label className="text-sm font-medium">Điểm đạt (%)</label>
                   <Input type="number" value={passingScore} onChange={(v) => setPassingScore(parseInt(v))} className="mt-1" min={0} max={100} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Duration (mins)</label>
+                  <label className="text-sm font-medium">Thời gian (phút)</label>
                   <Input type="number" value={durationMins || ''} onChange={(v) => setDurationMins(parseInt(v) || undefined)} className="mt-1" />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Max Attempts</label>
+                  <label className="text-sm font-medium">Số lần thử tối đa</label>
                   <Input type="number" value={maxAttempts} onChange={(v) => setMaxAttempts(parseInt(v))} className="mt-1" min={1} />
                 </div>
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="ghost" onClick={() => setShowQuizForm(false)}>Cancel</Button>
-                <Button onClick={handleCreateQuiz} disabled={!quizTitle}>Create Quiz</Button>
+                <Button variant="ghost" onClick={() => setShowQuizForm(false)}>Hủy</Button>
+                <Button onClick={handleCreateQuiz} disabled={!quizTitle}>Tạo bài trắc nghiệm</Button>
               </div>
             </Card>
           )}
@@ -213,38 +213,38 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
                       className="text-lg font-semibold max-w-md"
                       onBlur={handleUpdateQuiz}
                     />
-                    <Badge variant={quiz.is_active ? 'success' : 'default'} label={quiz.is_active ? 'Active' : 'Inactive'} />
+                    <Badge variant={quiz.is_active ? 'success' : 'default'} label={quiz.is_active ? 'Đang bật' : 'Đã tắt'} />
                   </div>
-                  <Button variant="danger" size="sm" onClick={handleDeleteQuiz}>Delete Quiz</Button>
+                  <Button variant="danger" size="sm" onClick={handleDeleteQuiz}>Xóa trắc nghiệm</Button>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
                   <div>
-                    <span className="text-muted-foreground">Passing Score: </span>
+                    <span className="text-muted-foreground">Điểm đạt: </span>
                     <span className="font-medium">{quiz.passing_score}%</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Duration: </span>
-                    <span className="font-medium">{quiz.duration_mins ? `${quiz.duration_mins} mins` : 'Unlimited'}</span>
+                    <span className="text-muted-foreground">Thời gian: </span>
+                    <span className="font-medium">{quiz.duration_mins ? `${quiz.duration_mins} phút` : 'Không giới hạn'}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Max Attempts: </span>
+                    <span className="text-muted-foreground">Số lần thử: </span>
                     <span className="font-medium">{quiz.max_attempts}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Questions: </span>
+                    <span className="text-muted-foreground">Số câu hỏi: </span>
                     <span className="font-medium">{questions.length}</span>
                   </div>
                 </div>
               </Card>
 
               <div className="flex items-center justify-between">
-                <h3 className="font-medium">Questions ({questions.length})</h3>
+                <h3 className="font-medium">Danh sách câu hỏi ({questions.length})</h3>
                 <div className="flex gap-2">
                   <Button onClick={() => setShowAiModal(true)} size="sm" variant="outline" icon={<Sparkles className="h-4 w-4 text-primary" />}>
-                    Generate with AI
+                    Tạo tự động bằng AI
                   </Button>
                   <Button onClick={() => setShowQuestionForm(true)} size="sm" icon={<Plus className="h-4 w-4" />}>
-                    Add Question
+                    Thêm câu hỏi
                   </Button>
                 </div>
               </div>
@@ -256,9 +256,9 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
                       <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab mt-1" />
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-sm font-medium">Q{idx + 1}</span>
+                          <span className="text-sm font-medium">Câu {idx + 1}</span>
                           <Badge variant="outline" label={q.type.replace('_', ' ')} />
-                          <span className="text-xs text-muted-foreground">{q.points} points</span>
+                          <span className="text-xs text-muted-foreground">{q.points} điểm</span>
                         </div>
                         <p className="text-foreground">{q.question_text}</p>
                         {q.answers && q.answers.length > 0 && (
@@ -285,7 +285,7 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
                 ))}
                 {questions.length === 0 && (
                   <div className="text-center py-6 text-muted-foreground">
-                    No questions yet. Click "Add Question" to create one.
+                    Chưa có câu hỏi nào. Bấm "Thêm câu hỏi" để bắt đầu soạn.
                   </div>
                 )}
               </div>
@@ -293,16 +293,16 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
           )}
 
           {showQuestionForm && (
-            <Modal open={showQuestionForm} onClose={() => setShowQuestionForm(false)} title="Add Question">
+            <Modal open={showQuestionForm} onClose={() => setShowQuestionForm(false)} title="Thêm Câu Hỏi Mới">
               {/* Question form content */}
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium">Question</label>
-                  <Textarea value={newQuestionText} onChange={(e) => setNewQuestionText(e.target.value)} className="mt-1" rows={3} />
+                  <label className="text-sm font-medium">Nội dung câu hỏi</label>
+                  <Textarea value={newQuestionText} onChange={(e) => setNewQuestionText(e.target.value)} className="mt-1" rows={3} placeholder="Nhập câu hỏi..." />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium">Type</label>
+                    <label className="text-sm font-medium">Loại câu hỏi</label>
                     <Select
                       value={newQuestionType}
                       onChange={(v) => setNewQuestionType(v as 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_BLANK')}
@@ -311,16 +311,16 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Points</label>
+                    <label className="text-sm font-medium">Điểm số</label>
                     <Input type="number" value={newQuestionPoints} onChange={(v) => setNewQuestionPoints(parseInt(v))} className="mt-1" min={1} />
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Explanation (optional)</label>
-                  <Input value={newQuestionExplanation} onChange={setNewQuestionExplanation} className="mt-1" />
+                  <label className="text-sm font-medium">Giải thích đáp án (không bắt buộc)</label>
+                  <Input value={newQuestionExplanation} onChange={setNewQuestionExplanation} className="mt-1" placeholder="Giải thích lý do đáp án đúng..." />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Answer Options</label>
+                  <label className="text-sm font-medium">Các lựa chọn đáp án</label>
                   <div className="space-y-2 mt-1">
                     {newAnswers.map((ans, idx) => (
                       <div key={idx} className="flex items-center gap-2">
@@ -337,7 +337,7 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
                             updated[idx].answer_text = v
                             setNewAnswers(updated)
                           }}
-                          placeholder={`Option ${idx + 1}`}
+                          placeholder={`Lựa chọn ${idx + 1}`}
                           className="flex-1"
                         />
                         {newAnswers.length > 2 && (
@@ -347,57 +347,57 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
                     ))}
                     {newQuestionType !== 'TRUE_FALSE' && newQuestionType !== 'FILL_BLANK' && (
                       <Button variant="ghost" size="sm" onClick={addAnswerOption} icon={<Plus className="h-4 w-4" />}>
-                        Add Option
+                        Thêm lựa chọn
                       </Button>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Click the checkmark to mark correct answer(s)</p>
+                  <p className="text-xs text-muted-foreground mt-1">Bấm vào ô vuông để đánh dấu đáp án đúng</p>
                 </div>
                 <div className="flex justify-end gap-2 pt-4">
-                  <Button variant="ghost" onClick={() => setShowQuestionForm(false)}>Cancel</Button>
-                  <Button onClick={handleAddQuestion} disabled={!newQuestionText || newAnswers.length < 2}>Add Question</Button>
+                  <Button variant="ghost" onClick={() => setShowQuestionForm(false)}>Hủy</Button>
+                  <Button onClick={handleAddQuestion} disabled={!newQuestionText || newAnswers.length < 2}>Thêm câu hỏi</Button>
                 </div>
               </div>
             </Modal>
           )}
 
           {showAiModal && (
-            <Modal open={showAiModal} onClose={() => setShowAiModal(false)} title="Generate Quiz with AI">
+            <Modal open={showAiModal} onClose={() => setShowAiModal(false)} title="Tạo Bài Trắc Nghiệm Bằng AI">
               <div className="space-y-4">
                 <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 flex gap-3 items-start">
                   <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <div className="text-sm">
-                    <p className="font-semibold text-primary">AI Quiz Generator</p>
+                    <p className="font-semibold text-primary">Trí Tuệ Nhân Tạo AI Soạn Trắc Nghiệm</p>
                     <p className="text-muted-foreground mt-0.5">
-                      This will analyze the lesson content and any attached PDF/text documents in this lesson to generate high-quality multiple choice questions.
+                      Hệ thống AI sẽ tự động phân tích nội dung bài học cùng các tài liệu đính kèm (PDF, Word...) để biên soạn bộ câu hỏi trắc nghiệm chất lượng cao.
                     </p>
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium">Number of Questions</label>
+                  <label className="text-sm font-medium">Số lượng câu hỏi</label>
                   <Select
                     value={String(aiQuestionCount)}
                     onChange={(val) => setAiQuestionCount(Number(val))}
                     options={[
-                      { value: '3', label: '3 Questions' },
-                      { value: '5', label: '5 Questions' },
-                      { value: '10', label: '10 Questions' },
-                      { value: '15', label: '15 Questions' },
+                      { value: '3', label: '3 Câu hỏi' },
+                      { value: '5', label: '5 Câu hỏi' },
+                      { value: '10', label: '10 Câu hỏi' },
+                      { value: '15', label: '15 Câu hỏi' },
                     ]}
                     className="mt-1"
                   />
                 </div>
 
                 <div className="flex justify-end gap-2 pt-4 border-t border-border">
-                  <Button variant="ghost" onClick={() => setShowAiModal(false)}>Cancel</Button>
+                  <Button variant="ghost" onClick={() => setShowAiModal(false)}>Hủy</Button>
                   <Button
                     onClick={async () => {
                       setShowAiModal(false)
                       await generateQuizAI(aiQuestionCount)
                     }}
                   >
-                    Generate Quiz
+                    Bắt đầu tạo câu hỏi
                   </Button>
                 </div>
               </div>
@@ -407,8 +407,8 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
           {loading && (
             <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] flex flex-col items-center justify-center z-50">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
-              <p className="font-medium text-foreground">AI is generating your quiz...</p>
-              <p className="text-sm text-muted-foreground mt-1">Analyzing lesson documents and content</p>
+              <p className="font-medium text-foreground">AI đang biên soạn câu hỏi trắc nghiệm...</p>
+              <p className="text-sm text-muted-foreground mt-1">Đang đọc và phân tích nội dung học liệu của bài giảng</p>
             </div>
           )}
         </div>

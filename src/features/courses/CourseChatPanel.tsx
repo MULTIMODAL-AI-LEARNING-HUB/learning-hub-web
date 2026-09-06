@@ -21,7 +21,7 @@ function formatMessageTime(value: string) {
 }
 
 function senderName(message: CourseChatMessage) {
-  return message.sender_name || message.sender_role || 'Course member'
+  return message.sender_name || message.sender_role || 'Thành viên khóa học'
 }
 
 function senderInitial(message: CourseChatMessage) {
@@ -44,7 +44,7 @@ export function CourseChatPanel({ courseId, compact = false }: CourseChatPanelPr
       setMessages(res.data.items)
       setError(null)
     } catch {
-      setError('Unable to load course chat.')
+      setError('Không thể tải tin nhắn trò chuyện.')
     } finally {
       if (!silent) setLoading(false)
     }
@@ -68,7 +68,6 @@ export function CourseChatPanel({ courseId, compact = false }: CourseChatPanelPr
     event.preventDefault()
     const content = draft.trim()
     if (!content) return
-
     setSending(true)
     try {
       const res = await courseChatApi.sendMessage(courseId, content)
@@ -76,7 +75,7 @@ export function CourseChatPanel({ courseId, compact = false }: CourseChatPanelPr
       setDraft('')
       setError(null)
     } catch {
-      setError('Message was not sent. Please try again.')
+      setError('Không thể gửi tin nhắn. Vui lòng thử lại.')
     } finally {
       setSending(false)
     }
@@ -89,16 +88,16 @@ export function CourseChatPanel({ courseId, compact = false }: CourseChatPanelPr
           <div className="flex items-center gap-2">
             <MessageCircle className="h-5 w-5 text-primary" />
             <div>
-              <h2 className="text-base font-semibold text-foreground">Course Chat</h2>
-              <p className="text-xs text-muted-foreground">Messages are visible to course members.</p>
+              <h2 className="text-base font-semibold text-foreground">Trò Chuyện Khóa Học</h2>
+              <p className="text-xs text-muted-foreground">Tin nhắn hiển thị cho tất cả thành viên trong khóa học.</p>
             </div>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => loadMessages()}
-            aria-label="Refresh chat"
-            title="Refresh chat"
+            aria-label="Làm mới tin nhắn"
+            title="Làm mới tin nhắn"
           >
             <RefreshCcw className="h-4 w-4" />
           </Button>
@@ -106,12 +105,12 @@ export function CourseChatPanel({ courseId, compact = false }: CourseChatPanelPr
 
         <div className="flex-1 overflow-y-auto px-4 py-4">
           {loading ? (
-            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">Loading chat...</div>
+            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">Đang tải tin nhắn...</div>
           ) : messages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center">
               <MessageCircle className="mb-3 h-10 w-10 text-muted-foreground" />
-              <p className="text-sm font-medium text-foreground">No messages yet</p>
-              <p className="mt-1 text-xs text-muted-foreground">Start the course conversation here.</p>
+              <p className="text-sm font-medium text-foreground">Chưa có tin nhắn nào</p>
+              <p className="mt-1 text-xs text-muted-foreground">Bắt đầu cuộc trò chuyện trong khóa học tại đây.</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -124,7 +123,7 @@ export function CourseChatPanel({ courseId, compact = false }: CourseChatPanelPr
                   )}
                   <div className={cn('max-w-[78%]', message.sender_id === currentUserId && 'text-right')}>
                     <div className={cn('mb-1 flex items-center gap-2 text-xs text-muted-foreground', message.sender_id === currentUserId && 'justify-end')}>
-                      <span>{message.sender_id === currentUserId ? 'You' : senderName(message)}</span>
+                      <span>{message.sender_id === currentUserId ? 'Bạn' : senderName(message)}</span>
                       <span>{formatMessageTime(message.created_at)}</span>
                     </div>
                     <div
@@ -153,7 +152,7 @@ export function CourseChatPanel({ courseId, compact = false }: CourseChatPanelPr
           <textarea
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
-            placeholder="Write a message..."
+            placeholder="Nhập tin nhắn..."
             className="min-h-10 flex-1 resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
             rows={2}
             maxLength={2000}
@@ -169,8 +168,8 @@ export function CourseChatPanel({ courseId, compact = false }: CourseChatPanelPr
             size="icon"
             disabled={!canSend}
             loading={sending}
-            aria-label="Send message"
-            title="Send message"
+            aria-label="Gửi tin nhắn"
+            title="Gửi tin nhắn"
           >
             <Send className="h-4 w-4" />
           </Button>

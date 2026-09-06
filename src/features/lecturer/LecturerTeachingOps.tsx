@@ -54,10 +54,10 @@ const defaultQuestions: CourseDiscussionItem[] = [
   {
     id: 'qa-1',
     lesson_id: 'lesson-1',
-    lesson_title: 'Lesson 2: Prompt decomposition',
-    content: 'When should I split a prompt into multiple steps?',
+    lesson_title: 'Bài 2: Phân tách câu lệnh Prompt',
+    content: 'Khi nào nên chia một prompt thành nhiều bước xử lý?',
     user_id: 'u-1',
-    user_name: 'Minh Tran',
+    user_name: 'Minh Trần',
     reply_count: 3,
     is_pinned: true,
     is_answer: true,
@@ -68,10 +68,10 @@ const defaultQuestions: CourseDiscussionItem[] = [
   {
     id: 'qa-2',
     lesson_id: 'lesson-2',
-    lesson_title: 'Lesson 4: Evaluation rubric',
-    content: 'How do I measure hallucination risk in practice?',
+    lesson_title: 'Bài 4: Bộ tiêu chí đánh giá',
+    content: 'Làm thế nào để đo lường rủi ro ảo giác (hallucination) trong thực tế?',
     user_id: 'u-2',
-    user_name: 'Linh Pham',
+    user_name: 'Linh Phạm',
     reply_count: 1,
     is_pinned: false,
     is_answer: false,
@@ -82,9 +82,9 @@ const defaultQuestions: CourseDiscussionItem[] = [
 ]
 
 const defaultQuizInsights = [
-  { question: 'Identify the best retrieval strategy for long PDFs', wrongRate: 68, attempts: 42 },
-  { question: 'Choose the right grounding citation', wrongRate: 54, attempts: 39 },
-  { question: 'Select the correct evaluation metric', wrongRate: 41, attempts: 44 },
+  { question: 'Xác định chiến lược truy xuất tối ưu cho tài liệu PDF dài', wrongRate: 68, attempts: 42 },
+  { question: 'Lựa chọn nguồn trích dẫn đối sánh chính xác', wrongRate: 54, attempts: 39 },
+  { question: 'Chọn chỉ số đánh giá mô hình thích hợp', wrongRate: 41, attempts: 44 },
 ]
 
 export function LecturerTeachingOps({ courseId, courseTitle }: LecturerTeachingOpsProps) {
@@ -145,9 +145,9 @@ export function LecturerTeachingOps({ courseId, courseTitle }: LecturerTeachingO
   const canPublish = announcementTitle.trim().length > 0 && announcementBody.trim().length > 0
 
   const assistantIdeas = useMemo(() => [
-    `Module 1: Foundations of ${outlineTopic || courseTitle}`,
-    'Module 2: Guided examples with short practice checks',
-    'Module 3: Capstone task, rubric, and reflection prompt',
+    `Chương 1: Nền tảng về ${outlineTopic || courseTitle}`,
+    'Chương 2: Hướng dẫn thực hành và câu hỏi củng cố',
+    'Chương 3: Đồ án tổng kết, tiêu chí chấm điểm và câu hỏi suy ngẫm',
   ], [courseTitle, outlineTopic])
 
   const handlePublish = async () => {
@@ -190,9 +190,9 @@ export function LecturerTeachingOps({ courseId, courseTitle }: LecturerTeachingO
     if (mode === 'outline') {
       setAssistantOutput(assistantIdeas)
     } else if (mode === 'summary') {
-      setAssistantOutput(['Concise lesson summary created for the selected material.'])
+      setAssistantOutput(['Tóm tắt bài học ngắn gọn đã được tạo cho học liệu đã chọn.'])
     } else {
-      setAssistantOutput(['Transcript draft generated from uploaded video metadata.'])
+      setAssistantOutput(['Bản thảo phụ đề / lời thoại đã được tạo từ siêu dữ liệu video.'])
     }
   }
 
@@ -222,7 +222,7 @@ export function LecturerTeachingOps({ courseId, courseTitle }: LecturerTeachingO
           s.progress_percent || 0,
           s.payment_status,
           s.status,
-          s.enrolled_at ? new Date(s.enrolled_at).toLocaleDateString() : '',
+          s.enrolled_at ? new Date(s.enrolled_at).toLocaleDateString('vi-VN') : '',
         ])
         downloadCsv(`tien-do-hoc-vien-${courseId}.csv`, headers, rows)
       } else if (type === 'gradebook') {
@@ -251,7 +251,7 @@ export function LecturerTeachingOps({ courseId, courseTitle }: LecturerTeachingO
       }
     } catch {
       // Download fallback report
-      downloadCsv(`report-${type}-${courseId}.csv`, ['Course', 'Status'], [[courseTitle, 'Export complete']])
+      downloadCsv(`bao-cao-${type}-${courseId}.csv`, ['Khóa học', 'Trạng thái'], [[courseTitle, 'Hoàn thành xuất dữ liệu']])
     } finally {
       setExporting(null)
     }
@@ -265,27 +265,27 @@ export function LecturerTeachingOps({ courseId, courseTitle }: LecturerTeachingO
             <div>
               <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
                 <Bell className="h-5 w-5 text-primary" />
-                Course Announcements
+                Thông Báo Khóa Học
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Broadcast course updates to enrolled students and mirror them into notifications.
+                Gửi thông báo cập nhật khóa học tới tất cả học viên đã ghi danh.
               </p>
             </div>
-            <Badge variant="primary" label={`Course ${courseId}`} />
+            <Badge variant="primary" label={`Khóa học ${courseId}`} />
           </div>
           <div className="mt-5 grid gap-3">
-            <Input value={announcementTitle} onChange={setAnnouncementTitle} placeholder="Announcement title" aria-label="Announcement title" />
+            <Input value={announcementTitle} onChange={setAnnouncementTitle} placeholder="Tiêu đề thông báo" aria-label="Tiêu đề thông báo" />
             <Textarea
               value={announcementBody}
               onChange={(event) => setAnnouncementBody(event.target.value)}
-              placeholder="Write the update students need to see..."
+              placeholder="Nhập nội dung thông báo gửi đến học viên..."
               rows={4}
-              aria-label="Announcement body"
+              aria-label="Nội dung thông báo"
             />
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <label className="flex items-center gap-2 text-sm text-muted-foreground">
                 <input type="checkbox" defaultChecked className="h-4 w-4 rounded border-border" />
-                Send notification and email
+                Gửi thông báo và email
               </label>
               <Button
                 onClick={handlePublish}
@@ -293,17 +293,17 @@ export function LecturerTeachingOps({ courseId, courseTitle }: LecturerTeachingO
                 loading={publishing}
                 icon={<Send className="h-4 w-4" />}
               >
-                Publish announcement
+                Đăng thông báo
               </Button>
             </div>
             {announcementSent && (
               <div className="rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-sm text-success">
-                Announcement queued for enrolled students.
+                Thông báo đã được đưa vào hàng đợi gửi đến học viên.
               </div>
             )}
             {announcements.length > 0 && (
               <div className="mt-3 space-y-2 border-t border-border pt-3">
-                <p className="text-xs font-medium text-muted-foreground uppercase">Recent Announcements</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase">Thông Báo Gần Đây</p>
                 {announcements.slice(0, 3).map((a) => (
                   <div key={a.id} className="rounded-md border border-border/70 bg-background/50 p-2.5">
                     <p className="text-sm font-semibold text-foreground">{a.title}</p>
@@ -318,15 +318,15 @@ export function LecturerTeachingOps({ courseId, courseTitle }: LecturerTeachingO
         <Card padding="responsive">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
             <Sparkles className="h-5 w-5 text-accent" />
-            AI Teaching Assistant
+            Trợ Lý Giảng Dạy AI
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">Generate a lesson outline, summary, or material brief from a topic.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Tạo đề cương bài học, tóm tắt nội dung hoặc tóm lược học liệu từ chủ đề.</p>
           <div className="mt-4 space-y-3">
-            <Input value={outlineTopic} onChange={setOutlineTopic} placeholder="Course topic" aria-label="AI outline topic" />
+            <Input value={outlineTopic} onChange={setOutlineTopic} placeholder="Chủ đề khóa học..." aria-label="Chủ đề đề cương AI" />
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-              <Button variant="outline" loading={aiLoading} onClick={() => handleAiAssist('outline')}>Outline</Button>
-              <Button variant="outline" loading={aiLoading} onClick={() => handleAiAssist('summary')}>Summary</Button>
-              <Button variant="outline" loading={aiLoading} onClick={() => handleAiAssist('transcript')}>Transcript</Button>
+              <Button variant="outline" loading={aiLoading} onClick={() => handleAiAssist('outline')}>Đề cương</Button>
+              <Button variant="outline" loading={aiLoading} onClick={() => handleAiAssist('summary')}>Tóm tắt</Button>
+              <Button variant="outline" loading={aiLoading} onClick={() => handleAiAssist('transcript')}>Lời thoại</Button>
             </div>
             {assistantOutput.length > 0 && (
               <div className="rounded-lg bg-muted/45 p-3 text-sm text-foreground">
@@ -341,18 +341,18 @@ export function LecturerTeachingOps({ courseId, courseTitle }: LecturerTeachingO
         <Card padding="responsive">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
             <HelpCircle className="h-5 w-5 text-blue-500" />
-            Lesson Q&A Forum
+            Diễn Đàn Hỏi Đáp Bài Học
           </h2>
           <div className="mt-4 space-y-3">
             {questions.map((item) => (
               <div key={item.id} className="rounded-lg border border-border p-3">
                 <div className="flex flex-wrap items-center gap-2">
                   {item.is_pinned && <Pin className="h-4 w-4 text-primary" />}
-                  <Badge variant={item.is_answer ? 'success' : 'warning'} label={item.is_answer ? 'Answered' : 'Needs reply'} />
-                  <span className="text-xs text-muted-foreground">{item.lesson_title || 'General lesson'}</span>
+                  <Badge variant={item.is_answer ? 'success' : 'warning'} label={item.is_answer ? 'Đã trả lời' : 'Chờ giải đáp'} />
+                  <span className="text-xs text-muted-foreground">{item.lesson_title || 'Bài học chung'}</span>
                 </div>
                 <p className="mt-2 font-medium text-foreground">{item.content}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{item.user_name || 'Học viên'} · {item.reply_count} replies</p>
+                <p className="mt-1 text-xs text-muted-foreground">{item.user_name || 'Học viên'} · {item.reply_count} phản hồi</p>
                 <Button
                   className="mt-3"
                   size="sm"
@@ -360,7 +360,7 @@ export function LecturerTeachingOps({ courseId, courseTitle }: LecturerTeachingO
                   onClick={() => handleToggleAnswer(item)}
                   icon={<CheckCircle2 className="h-4 w-4" />}
                 >
-                  Mark official answer
+                  Đánh dấu câu trả lời chính thức
                 </Button>
               </div>
             ))}
@@ -370,7 +370,7 @@ export function LecturerTeachingOps({ courseId, courseTitle }: LecturerTeachingO
         <Card padding="responsive">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
             <FileSpreadsheet className="h-5 w-5 text-emerald-500" />
-            Export Data
+            Xuất Dữ Liệu
           </h2>
           <div className="mt-4 space-y-3">
             <button
@@ -379,8 +379,8 @@ export function LecturerTeachingOps({ courseId, courseTitle }: LecturerTeachingO
               className="flex w-full items-center justify-between gap-3 rounded-lg border border-border p-3 text-left transition hover:bg-muted/40"
             >
               <span>
-                <span className="block text-sm font-medium text-foreground">Student progress CSV</span>
-                <span className="block text-xs text-muted-foreground">Enrollment list, lesson completion, slow-progress flag</span>
+                <span className="block text-sm font-medium text-foreground">Tiến độ học viên (CSV)</span>
+                <span className="block text-xs text-muted-foreground">Danh sách ghi danh, tỷ lệ hoàn thành bài học, đánh dấu học viên chậm</span>
               </span>
               <Download className="h-4 w-4 text-primary" />
             </button>
@@ -391,8 +391,8 @@ export function LecturerTeachingOps({ courseId, courseTitle }: LecturerTeachingO
               className="flex w-full items-center justify-between gap-3 rounded-lg border border-border p-3 text-left transition hover:bg-muted/40"
             >
               <span>
-                <span className="block text-sm font-medium text-foreground">Gradebook XLSX</span>
-                <span className="block text-xs text-muted-foreground">Quiz attempts, assignment scores, lecturer feedback</span>
+                <span className="block text-sm font-medium text-foreground">Bảng điểm chi tiết (CSV)</span>
+                <span className="block text-xs text-muted-foreground">Lịch sử trắc nghiệm, điểm bài tập và nhận xét của giảng viên</span>
               </span>
               <Download className="h-4 w-4 text-primary" />
             </button>
@@ -403,8 +403,8 @@ export function LecturerTeachingOps({ courseId, courseTitle }: LecturerTeachingO
               className="flex w-full items-center justify-between gap-3 rounded-lg border border-border p-3 text-left transition hover:bg-muted/40"
             >
               <span>
-                <span className="block text-sm font-medium text-foreground">Revenue report CSV</span>
-                <span className="block text-xs text-muted-foreground">Monthly revenue, refunds, paid enrollments</span>
+                <span className="block text-sm font-medium text-foreground">Báo cáo doanh thu (CSV)</span>
+                <span className="block text-xs text-muted-foreground">Doanh thu theo tháng, hoàn tiền, lượt ghi danh có phí</span>
               </span>
               <Download className="h-4 w-4 text-primary" />
             </button>
@@ -414,17 +414,17 @@ export function LecturerTeachingOps({ courseId, courseTitle }: LecturerTeachingO
         <Card padding="responsive">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
             <BarChart3 className="h-5 w-5 text-amber-500" />
-            Quiz Performance Analytics
+            Phân Tích Kết Quả Trắc Nghiệm
           </h2>
           <div className="mt-4 space-y-4">
             {quizInsights.map((item) => (
               <div key={item.question}>
                 <div className="mb-1 flex items-center justify-between gap-3 text-sm">
                   <span className="font-medium text-foreground">{item.question}</span>
-                  <span className="text-muted-foreground">{item.wrongRate}% wrong</span>
+                  <span className="text-muted-foreground">{item.wrongRate}% trả lời sai</span>
                 </div>
                 <Progress value={item.wrongRate} />
-                <p className="mt-1 text-xs text-muted-foreground">{item.attempts} attempts reviewed</p>
+                <p className="mt-1 text-xs text-muted-foreground">{item.attempts} lượt làm bài đã đánh giá</p>
               </div>
             ))}
           </div>
@@ -435,11 +435,11 @@ export function LecturerTeachingOps({ courseId, courseTitle }: LecturerTeachingO
         <div>
           <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
             <Mail className="h-5 w-5 text-primary" />
-            Direct Message Workflow
+            Quy Trình Nhắc Nhở Trực Tiếp
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">Slow-progress students below 10% can be reminded from the Students tab.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Học viên có tiến độ dưới 10% có thể được gửi email nhắc nhở từ tab Học viên.</p>
         </div>
-        <Badge variant="warning" label="Progress threshold: < 10%" />
+        <Badge variant="warning" label="Ngưỡng tiến độ chậm: < 10%" />
       </Card>
     </div>
   )

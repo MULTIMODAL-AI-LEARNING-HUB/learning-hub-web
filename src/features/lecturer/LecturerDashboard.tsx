@@ -19,10 +19,10 @@ import { useLecturerCourses } from '../../hooks/useLecturerCourses'
 import { cn } from '../../utils/cn'
 
 const statusLabels: Record<string, string> = {
-  draft: 'Draft',
-  published: 'Published',
-  archived: 'Archived',
-  pending: 'Pending review',
+  draft: 'Bản nháp',
+  published: 'Đã xuất bản',
+  archived: 'Đã lưu trữ',
+  pending: 'Chờ duyệt',
 }
 
 export function LecturerDashboard() {
@@ -41,32 +41,32 @@ export function LecturerDashboard() {
   const recentCourses = courses.slice(0, 4)
 
   const statCards = [
-    { label: 'Active courses', value: publishedCourses.length, icon: BookOpen, tone: 'violet' },
-    { label: 'Total students', value: stats?.total_students ?? 0, icon: Users, tone: 'blue' },
-    { label: 'Average rating', value: stats?.avg_rating ? stats.avg_rating.toFixed(1) : '—', icon: Star, tone: 'amber' },
-    { label: 'Total revenue', value: formatCurrency(stats?.total_revenue ?? 0), icon: TrendingUp, tone: 'emerald' },
+    { label: 'Khóa học đang mở', value: publishedCourses.length, icon: BookOpen, tone: 'violet' },
+    { label: 'Tổng số học viên', value: stats?.total_students ?? 0, icon: Users, tone: 'blue' },
+    { label: 'Đánh giá trung bình', value: stats?.avg_rating ? stats.avg_rating.toFixed(1) : '—', icon: Star, tone: 'amber' },
+    { label: 'Tổng doanh thu', value: formatCurrency(stats?.total_revenue ?? 0), icon: TrendingUp, tone: 'emerald' },
   ]
 
   const workItems = [
     {
-      title: 'Complete draft courses',
+      title: 'Hoàn thiện khóa học nháp',
       description: draftCourses.length
-        ? `${draftCourses.length} course${draftCourses.length === 1 ? '' : 's'} need content before publishing.`
-        : 'No draft courses need attention.',
+        ? `${draftCourses.length} khóa học cần bổ sung nội dung trước khi xuất bản.`
+        : 'Không có khóa học nháp cần xử lý.',
       count: draftCourses.length,
       icon: BookOpen,
       action: () => navigate('/app/lecturer/courses'),
     },
     {
-      title: 'Monitor student activity',
-      description: `${stats?.total_students ?? 0} students are enrolled in your courses.`,
+      title: 'Theo dõi hoạt động học viên',
+      description: `${stats?.total_students ?? 0} học viên đã tham gia vào các khóa học của bạn.`,
       count: stats?.total_students ?? 0,
       icon: Users,
       action: () => navigate('/app/lecturer/students'),
     },
     {
-      title: 'Review course performance',
-      description: 'Review engagement, revenue, and feedback for each course.',
+      title: 'Đánh giá hiệu quả khóa học',
+      description: 'Xem mức độ tương tác, doanh thu và phản hồi cho từng khóa học.',
       count: courseStats.length,
       icon: BarChart3,
       action: () => navigate('/app/lecturer/analytics'),
@@ -76,22 +76,22 @@ export function LecturerDashboard() {
   return (
     <div className="space-y-7 animate-fade-in pb-8 font-body">
       <PageHeader
-        subtitle="Teaching workspace"
-        title={`Welcome back, ${user?.name?.split(' ')[0] ?? 'Lecturer'}`}
-        description="Review what needs attention and continue building your course content."
+        subtitle="Không gian giảng dạy"
+        title={`Chào mừng trở lại, ${user?.name?.split(' ')[0] ?? 'Giảng viên'}`}
+        description="Xem các tác vụ cần chú ý và tiếp tục xây dựng nội dung khóa học."
         actions={(
           <Button
             onClick={() => navigate('/app/lecturer/courses')}
             icon={<Plus className="h-4 w-4" />}
             className="min-h-11"
           >
-            Create course
+            Tạo khóa học
           </Button>
         )}
       />
 
       <section aria-labelledby="overview-title">
-        <h2 id="overview-title" className="sr-only">Overview</h2>
+        <h2 id="overview-title" className="sr-only">Tổng quan</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {statCards.map((stat) => {
             const Icon = stat.icon
@@ -123,8 +123,8 @@ export function LecturerDashboard() {
       <section aria-labelledby="work-title">
         <div className="mb-4 flex items-end justify-between gap-4">
           <div>
-            <h2 id="work-title" className="section-title text-foreground">Needs attention</h2>
-            <p className="mt-1 supporting-text text-muted-foreground">Tasks that help you keep your courses running smoothly.</p>
+            <h2 id="work-title" className="section-title text-foreground">Cần chú ý</h2>
+            <p className="mt-1 supporting-text text-muted-foreground">Các công việc giúp khóa học của bạn vận hành trơn tru.</p>
           </div>
         </div>
         <div className="grid gap-4 lg:grid-cols-3">
@@ -148,7 +148,7 @@ export function LecturerDashboard() {
                 <h3 className="mt-4 text-base font-semibold text-foreground">{item.title}</h3>
                 <p className="mt-1 supporting-text text-muted-foreground">{item.description}</p>
                 <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-                  View details
+                  Xem chi tiết
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                 </span>
               </button>
@@ -161,17 +161,17 @@ export function LecturerDashboard() {
         <div className="min-w-0">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <h2 id="courses-title" className="section-title text-foreground">Recent courses</h2>
-              <p className="mt-1 supporting-text text-muted-foreground">Continue editing or review performance at a glance.</p>
+              <h2 id="courses-title" className="section-title text-foreground">Khóa học gần đây</h2>
+              <p className="mt-1 supporting-text text-muted-foreground">Tiếp tục chỉnh sửa hoặc theo dõi hiệu quả nhanh chóng.</p>
             </div>
             <Button variant="ghost" size="sm" onClick={() => navigate('/app/lecturer/courses')} iconRight={<ArrowRight className="h-4 w-4" />}>
-              View all
+              Xem tất cả
             </Button>
           </div>
 
           <Card className="overflow-hidden border-border bg-surface-elevated shadow-soft">
             {loading ? (
-              <div className="p-10 text-center supporting-text text-muted-foreground">Loading courses…</div>
+              <div className="p-10 text-center supporting-text text-muted-foreground">Đang tải danh sách khóa học…</div>
             ) : recentCourses.length ? (
               <div className="divide-y divide-border">
                 {recentCourses.map((course) => {
@@ -193,11 +193,11 @@ export function LecturerDashboard() {
                           </span>
                         </div>
                         <p className="mt-1 supporting-text text-muted-foreground">
-                          {metrics?.enrollment_count ?? 0} students · {metrics?.rating_avg ? `${metrics.rating_avg.toFixed(1)} rating` : 'No ratings yet'}
+                          {metrics?.enrollment_count ?? 0} học viên · {metrics?.rating_avg ? `${metrics.rating_avg.toFixed(1)} sao` : 'Chưa có đánh giá'}
                         </p>
                       </div>
                       <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-                        Continue editing <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                        Tiếp tục chỉnh sửa <ArrowRight className="h-4 w-4" aria-hidden="true" />
                       </span>
                     </button>
                   )
@@ -208,10 +208,10 @@ export function LecturerDashboard() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-500/10 text-violet-600">
                   <BookOpen className="h-6 w-6" aria-hidden="true" />
                 </div>
-                <h3 className="mt-4 text-base font-semibold text-foreground">Create your first course</h3>
-                <p className="mt-1 max-w-sm supporting-text text-muted-foreground">Build the course structure, add lessons, and publish when you are ready.</p>
+                <h3 className="mt-4 text-base font-semibold text-foreground">Tạo khóa học đầu tiên của bạn</h3>
+                <p className="mt-1 max-w-sm supporting-text text-muted-foreground">Xây dựng cấu trúc khóa học, thêm bài giảng và xuất bản khi đã sẵn sàng.</p>
                 <Button className="mt-4" onClick={() => navigate('/app/lecturer/courses')} icon={<Plus className="h-4 w-4" />}>
-                  Create course
+                  Tạo khóa học
                 </Button>
               </div>
             )}
@@ -220,17 +220,17 @@ export function LecturerDashboard() {
 
         <aside aria-labelledby="progress-title">
           <div className="mb-4">
-            <h2 id="progress-title" className="section-title text-foreground">Teaching status</h2>
-            <p className="mt-1 supporting-text text-muted-foreground">A quick summary of your workspace.</p>
+            <h2 id="progress-title" className="section-title text-foreground">Tình trạng giảng dạy</h2>
+            <p className="mt-1 supporting-text text-muted-foreground">Tóm tắt nhanh tình trạng không gian giảng dạy.</p>
           </div>
           <Card className="border-border bg-surface-elevated shadow-soft" padding="responsive">
             <div className="space-y-5">
-              <SummaryRow icon={CheckCircle2} label="Published" value={publishedCourses.length} />
-              <SummaryRow icon={ClipboardCheck} label="In progress" value={draftCourses.length} />
-              <SummaryRow icon={Users} label="Students reached" value={stats?.total_students ?? 0} />
+              <SummaryRow icon={CheckCircle2} label="Đã xuất bản" value={publishedCourses.length} />
+              <SummaryRow icon={ClipboardCheck} label="Đang soạn thảo" value={draftCourses.length} />
+              <SummaryRow icon={Users} label="Học viên đã tiếp cận" value={stats?.total_students ?? 0} />
             </div>
             <Button variant="outline" className="mt-6 w-full min-h-11" onClick={() => navigate('/app/lecturer/analytics')} icon={<BarChart3 className="h-4 w-4" />}>
-              Open analytics report
+              Mở báo cáo thống kê
             </Button>
           </Card>
         </aside>
@@ -252,7 +252,7 @@ function SummaryRow({ icon: Icon, label, value }: { icon: typeof BookOpen; label
 }
 
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
     currency: 'VND',
     maximumFractionDigits: 0,

@@ -61,28 +61,28 @@ export function LecturerCourseDetail() {
   if (loading || !course) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Loading...</div>
+        <div className="text-muted-foreground">Đang tải...</div>
       </div>
     )
   }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'published': return <Badge variant="success" label="Published" />
-      case 'draft': return <Badge variant="warning" label="Draft" />
-      case 'archived': return <Badge variant="default" label="Archived" />
+      case 'published': return <Badge variant="success" label="Đã xuất bản" />
+      case 'draft': return <Badge variant="warning" label="Bản nháp" />
+      case 'archived': return <Badge variant="default" label="Đã lưu trữ" />
       default: return <Badge variant="default" label={status} />
     }
   }
 
   const tabs = [
-    { id: 'content' as Tab, label: 'Content' },
-    { id: 'teaching' as Tab, label: 'Teaching Ops' },
-    { id: 'chat' as Tab, label: 'Chat' },
-    { id: 'grading' as Tab, label: 'To Grade' },
-    { id: 'reviews' as Tab, label: 'Reviews' },
-    { id: 'students' as Tab, label: 'Students' },
-    { id: 'analytics' as Tab, label: 'Analytics' },
+    { id: 'content' as Tab, label: 'Nội dung' },
+    { id: 'teaching' as Tab, label: 'Vận hành giảng dạy' },
+    { id: 'chat' as Tab, label: 'Trao đổi thảo luận' },
+    { id: 'grading' as Tab, label: 'Chấm bài' },
+    { id: 'reviews' as Tab, label: 'Đánh giá & Nhận xét' },
+    { id: 'students' as Tab, label: 'Học viên' },
+    { id: 'analytics' as Tab, label: 'Thống kê' },
   ]
 
   return (
@@ -90,7 +90,7 @@ export function LecturerCourseDetail() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <button onClick={() => navigate('/app/lecturer/courses')} className="text-sm text-muted-foreground hover:text-foreground mb-2 flex items-center gap-1">
-            <ArrowLeft className="h-4 w-4" /> Back to Courses
+            <ArrowLeft className="h-4 w-4" /> Quay lại danh sách khóa học
           </button>
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-fluid-2xl font-bold text-foreground">{course.title}</h1>
@@ -99,7 +99,7 @@ export function LecturerCourseDetail() {
           <p className="text-muted-foreground mt-1">{course.description}</p>
         </div>
         <Button variant="outline" icon={<Edit className="h-4 w-4" />} onClick={() => setEditingDetails(true)} fullWidthMobile>
-          Edit Details
+          Chỉnh sửa thông tin
         </Button>
       </div>
 
@@ -132,15 +132,15 @@ export function LecturerCourseDetail() {
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-accent" />
-              Course Analytics
+              Thống Kê Khóa Học
             </h2>
             <Card padding="responsive" className="border-accent/20 bg-accent/5">
               <div className="flex items-start gap-3">
                 <Megaphone className="mt-0.5 h-5 w-5 text-accent" />
                 <div>
-                  <p className="font-medium text-foreground">Teaching insights are now grouped in Teaching Ops.</p>
+                  <p className="font-medium text-foreground">Các công cụ hỗ trợ và phân tích hiện được tích hợp tại mục Vận hành giảng dạy.</p>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Use it for announcements, lesson Q&A, AI lesson planning, exports, and quiz weak-point analysis.
+                    Sử dụng để đăng thông báo, hỏi đáp bài học, soạn giáo án AI, xuất dữ liệu và phân tích các câu hỏi trắc nghiệm học viên hay làm sai.
                   </p>
                 </div>
               </div>
@@ -150,37 +150,41 @@ export function LecturerCourseDetail() {
                 <Card padding="responsive" className="text-center">
                   <BookOpen className="h-8 w-8 text-primary mx-auto mb-3" />
                   <p className="text-3xl font-bold text-foreground tabular-nums">{analytics.enrollment_count}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Total Enrollments</p>
+                  <p className="text-xs text-muted-foreground mt-1">Tổng lượt ghi danh</p>
                 </Card>
                 <Card padding="responsive" className="text-center">
                   <Star className="h-8 w-8 text-warning mx-auto mb-3" />
                   <p className="text-3xl font-bold text-foreground tabular-nums">
                     {analytics.rating_avg > 0 ? analytics.rating_avg.toFixed(1) : '—'}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">Average Rating</p>
+                  <p className="text-xs text-muted-foreground mt-1">Đánh giá trung bình</p>
                 </Card>
                 <Card padding="responsive" className="text-center">
                   <DollarSign className="h-8 w-8 text-success mx-auto mb-3" />
-                  <p className="text-3xl font-bold text-foreground tabular-nums">${analytics.revenue.toLocaleString()}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Total Revenue</p>
+                  <p className="text-3xl font-bold text-foreground tabular-nums">
+                    {course.price === 0 ? '0 đ' : `${new Intl.NumberFormat('vi-VN').format(analytics.revenue)} đ`}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Tổng doanh thu</p>
                 </Card>
                 <Card padding="responsive">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Course Info</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Thông Tin Khóa Học</p>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Price</span>
-                      <span className="font-medium text-foreground">${course.price}</span>
+                      <span className="text-muted-foreground">Học phí</span>
+                      <span className="font-medium text-foreground">
+                        {course.price === 0 ? 'Miễn phí' : `${new Intl.NumberFormat('vi-VN').format(course.price)} đ`}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Category</span>
+                      <span className="text-muted-foreground">Danh mục</span>
                       <span className="font-medium text-foreground">{course.category_id || '—'}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Level</span>
+                      <span className="text-muted-foreground">Trình độ</span>
                       <span className="font-medium text-foreground capitalize">{course.level || '—'}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Language</span>
+                      <span className="text-muted-foreground">Ngôn ngữ</span>
                       <span className="font-medium text-foreground">{course.language || '—'}</span>
                     </div>
                   </div>
@@ -189,8 +193,8 @@ export function LecturerCourseDetail() {
             ) : (
               <Card className="p-8 text-center">
                 <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">Analytics not available</h3>
-                <p className="text-muted-foreground">Course analytics will be available once your course has enrollments.</p>
+                <h3 className="text-lg font-medium mb-2">Chưa có dữ liệu thống kê</h3>
+                <p className="text-muted-foreground">Thống kê khóa học sẽ hiển thị khi có học viên đăng ký tham gia khóa học này.</p>
               </Card>
             )}
           </div>

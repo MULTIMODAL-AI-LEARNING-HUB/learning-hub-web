@@ -76,25 +76,25 @@ export function Header() {
       bg: 'bg-indigo-500/10 dark:bg-indigo-500/20',
       text: 'text-indigo-600 dark:text-indigo-400',
       border: 'border-indigo-500/20',
-      label: 'Admin'
+      label: 'Quản trị viên'
     },
     lecturer: {
       bg: 'bg-violet-500/10 dark:bg-violet-500/20',
       text: 'text-violet-600 dark:text-violet-400',
       border: 'border-violet-500/20',
-      label: 'Lecturer'
+      label: 'Giảng viên'
     },
     student: {
       bg: 'bg-blue-500/10 dark:bg-blue-500/20',
       text: 'text-blue-600 dark:text-blue-400',
       border: 'border-blue-500/20',
-      label: 'Student'
+      label: 'Học viên'
     }
   }[role as 'admin' | 'lecturer' | 'student'] || {
     bg: 'bg-blue-500/10',
     text: 'text-blue-600',
     border: 'border-blue-500/20',
-    label: 'Student'
+    label: 'Học viên'
   }
 
   return (
@@ -106,7 +106,7 @@ export function Header() {
             size="icon"
             onClick={toggleSidebar}
             className="lg:hidden shrink-0"
-            aria-label="Toggle sidebar"
+            aria-label="Mở đóng thanh bên"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="3" y1="6" x2="21" y2="6" />
@@ -138,10 +138,10 @@ export function Header() {
               'hover:border-primary/30 hover:bg-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20',
               'lg:w-64'
             )}
-            aria-label="Open search"
+            aria-label="Mở tìm kiếm nhanh"
           >
             <Search className="h-4 w-4 shrink-0" />
-            <span className="flex-1 text-left truncate">Search or jump to...</span>
+            <span className="flex-1 text-left truncate">Tìm kiếm nhanh...</span>
             <kbd className="hidden items-center gap-0.5 rounded border border-border bg-muted px-1.5 py-0.5 text-2xs font-mono sm:inline-flex">
               <span>⌘</span>K
             </kbd>
@@ -153,7 +153,7 @@ export function Header() {
             <Tooltip
               content={
                 <div className="space-y-1 text-left">
-                  <p className="font-semibold">Storage</p>
+                  <p className="font-semibold">Dung lượng lưu trữ</p>
                   <p className="text-2xs opacity-80">{storageUsedLabel} / {storageTotalLabel}</p>
                 </div>
               }
@@ -168,8 +168,8 @@ export function Header() {
             <Tooltip
               content={
                 <div className="text-left">
-                  <p className="font-semibold">AI Tokens</p>
-                  <p className="text-2xs opacity-80">{tokensUsedLabel} / {tokensTotalLabel} used</p>
+                  <p className="font-semibold">Token AI</p>
+                  <p className="text-2xs opacity-80">Đã dùng {tokensUsedLabel} / {tokensTotalLabel}</p>
                 </div>
               }
             >
@@ -198,7 +198,7 @@ export function Header() {
             trigger={
               <button
                 className="flex items-center gap-2 rounded-md p-1 pr-2 hover:bg-muted transition"
-                aria-label="User menu"
+                aria-label="Menu tài khoản"
               >
                 <Avatar fallback={user.initials} size="sm" />
                 <span className="hidden md:block text-sm font-medium text-foreground">
@@ -208,9 +208,9 @@ export function Header() {
               </button>
             }
             items={[
-              { id: 'profile', label: 'Profile', icon: <UserIcon /> },
-              ...(user?.role === 'admin' ? [{ id: 'admin', label: 'Admin Panel', icon: <SettingsIcon /> }] : []),
-              { id: 'logout', label: 'Log out', icon: <LogOut />, danger: true }
+              { id: 'profile', label: 'Hồ sơ cá nhân', icon: <UserIcon /> },
+              ...(user?.role === 'admin' ? [{ id: 'admin', label: 'Bảng quản trị', icon: <SettingsIcon /> }] : []),
+              { id: 'logout', label: 'Đăng xuất', icon: <LogOut />, danger: true }
             ]}
             onSelect={(id) => {
               if (id === 'profile') navigate(`/app/${role}/profile`)

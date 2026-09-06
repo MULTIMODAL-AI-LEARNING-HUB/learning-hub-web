@@ -96,10 +96,10 @@ export function ReviewSection({ courseId }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-foreground">Reviews & Ratings</h3>
+        <h3 className="text-lg font-semibold text-foreground">Đánh giá & Nhận xét</h3>
         {!showForm && (
           <Button variant="outline" size="sm" onClick={() => { setShowForm(true); setFormRating(myReview?.rating || 5); setFormComment(myReview?.comment || '') }}>
-            {myReview ? 'Edit Review' : 'Write Review'}
+            {myReview ? 'Chỉnh sửa đánh giá' : 'Viết đánh giá'}
           </Button>
         )}
       </div>
@@ -110,20 +110,20 @@ export function ReviewSection({ courseId }: Props) {
           <textarea
             value={formComment}
             onChange={(e) => setFormComment(e.target.value)}
-            placeholder="Share your thoughts about this course..."
+            placeholder="Chia sẻ cảm nghĩ và nhận xét của bạn về khóa học này..."
             className="w-full min-h-[80px] rounded-lg border border-input bg-surface px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
           <div className="flex gap-2">
             <Button onClick={handleSubmit} disabled={submitting} size="sm">
-              {submitting ? 'Submitting...' : myReview ? 'Update' : 'Submit'}
+              {submitting ? 'Đang gửi...' : myReview ? 'Cập nhật' : 'Gửi đánh giá'}
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}>Cancel</Button>
+            <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}>Hủy</Button>
           </div>
         </Card>
       )}
 
       {reviews.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No reviews yet. Be the first to review!</p>
+        <p className="text-sm text-muted-foreground">Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá!</p>
       ) : (
         <div className="space-y-3">
           {reviews.map((review) => (
@@ -134,14 +134,14 @@ export function ReviewSection({ courseId }: Props) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-medium text-foreground">{review.student_name || 'Anonymous'}</span>
+                    <span className="text-sm font-medium text-foreground">{review.student_name || 'Ẩn danh'}</span>
                     <StarRating rating={review.rating} />
                     <span className="text-xs text-muted-foreground">{new Date(review.created_at).toLocaleDateString('vi-VN')}</span>
                   </div>
                   {review.comment && <p className="text-sm text-muted-foreground mt-1">{review.comment}</p>}
                   {review.lecturer_reply && (
                     <div className="mt-2 pl-3 border-l-2 border-primary/30">
-                      <p className="text-xs font-medium text-primary">Lecturer reply</p>
+                      <p className="text-xs font-medium text-primary">Giảng viên phản hồi</p>
                       <p className="text-sm text-muted-foreground">{review.lecturer_reply}</p>
                     </div>
                   )}

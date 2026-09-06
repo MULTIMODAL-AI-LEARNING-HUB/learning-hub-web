@@ -73,7 +73,7 @@ export function CourseDetail() {
       }
     } catch (err) {
       const axiosErr = err as { response?: { data?: { detail?: string } } }
-      const msg = axiosErr?.response?.data?.detail || 'Failed to enroll'
+      const msg = axiosErr?.response?.data?.detail || 'Đăng ký thất bại'
       alert(msg)
     } finally {
       setEnrolling(false)
@@ -213,7 +213,7 @@ export function CourseDetail() {
                   <button
                     onClick={toggleWishlist}
                     className="p-2 rounded-lg hover:bg-muted transition"
-                    aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                    aria-label={isWishlisted ? 'Xóa khỏi danh sách yêu thích' : 'Thêm vào danh sách yêu thích'}
                   >
                     <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`} />
                   </button>
@@ -243,12 +243,12 @@ export function CourseDetail() {
                 <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
                   <Link to={`/app/student/courses/${course.id}/learn?tab=discussion`} className="block">
                     <Button variant="outline" className="w-full" icon={<MessageSquare className="h-4 w-4" />}>
-                      Course Discussion
+                      Thảo luận khóa học
                     </Button>
                   </Link>
                   <Link to={`/app/student/courses/${course.id}/learn?tab=assignments`} className="block">
                     <Button variant="outline" className="w-full" icon={<ClipboardCheck className="h-4 w-4" />}>
-                      Assignments
+                      Bài tập
                     </Button>
                   </Link>
                 </div>

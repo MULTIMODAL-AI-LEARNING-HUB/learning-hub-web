@@ -43,29 +43,29 @@ export function LecturerStudents() {
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
-        title="Students"
-        description={`${totalStudents} total students enrolled across your courses`}
+        title="Học Viên"
+        description={`${totalStudents} học viên đã ghi danh trên các khóa học của bạn`}
         icon={<Users />}
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card padding="responsive">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Students</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tổng Học Viên</span>
             <Users className="h-4 w-4 text-primary" />
           </div>
           <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">{totalStudents}</p>
         </Card>
         <Card padding="responsive">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Courses</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Khóa Học</span>
             <BookOpen className="h-4 w-4 text-accent" />
           </div>
           <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">{stats?.total_courses ?? 0}</p>
         </Card>
         <Card padding="responsive">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Avg Rating</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Đánh Giá TB</span>
             <TrendingUp className="h-4 w-4 text-warning" />
           </div>
           <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">
@@ -74,7 +74,7 @@ export function LecturerStudents() {
         </Card>
         <Card padding="responsive">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Revenue</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Doanh Thu</span>
             <TrendingUp className="h-4 w-4 text-success" />
           </div>
           <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">
@@ -86,7 +86,7 @@ export function LecturerStudents() {
       <div className="grid lg:grid-cols-2 gap-6">
         <Card className="overflow-hidden">
           <div className="px-4 py-3 border-b border-border">
-            <h3 className="font-semibold text-foreground">Top Courses by Enrollment</h3>
+            <h3 className="font-semibold text-foreground">Khóa Học Nhiều Học Viên Nhất</h3>
           </div>
           <div className="divide-y divide-border">
             {topCourses.length > 0 ? topCourses.map((c, i) => (
@@ -102,7 +102,7 @@ export function LecturerStudents() {
                   <p className="text-sm font-medium text-foreground truncate">{c.title}</p>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  <Badge variant="primary" label={`${c.enrollment_count} students`} />
+                  <Badge variant="primary" label={`${c.enrollment_count} học viên`} />
                   {c.rating_avg > 0 && (
                     <span className="text-xs text-muted-foreground tabular-nums">★ {c.rating_avg.toFixed(1)}</span>
                   )}
@@ -110,7 +110,7 @@ export function LecturerStudents() {
               </div>
             )) : (
               <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-                No enrollment data yet
+                Chưa có dữ liệu ghi danh
               </div>
             )}
           </div>
@@ -118,7 +118,7 @@ export function LecturerStudents() {
 
         <Card className="overflow-hidden">
           <div className="px-4 py-3 border-b border-border">
-            <h3 className="font-semibold text-foreground">Course Performance</h3>
+            <h3 className="font-semibold text-foreground">Hiệu Quả Khóa Học</h3>
           </div>
           <div className="divide-y divide-border">
             {courseStats.length > 0 ? courseStats.map((c) => (
@@ -147,7 +147,7 @@ export function LecturerStudents() {
               </div>
             )) : (
               <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-                No course data available
+                Chưa có dữ liệu khóa học
               </div>
             )}
           </div>
@@ -156,16 +156,16 @@ export function LecturerStudents() {
 
       <Card>
         <div className="px-4 py-3 border-b border-border">
-          <h3 className="font-semibold text-foreground">All Courses</h3>
+          <h3 className="font-semibold text-foreground">Tất Cả Khóa Học</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="border-b border-border bg-muted/30">
               <tr>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Course</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Students</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Revenue</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Rating</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Khóa học</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Học viên</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Doanh thu</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Đánh giá</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -191,7 +191,7 @@ export function LecturerStudents() {
               )) : (
                 <tr>
                   <td colSpan={4} className="px-4 py-8 text-center text-sm text-muted-foreground">
-                    No courses yet. Create your first course to see student data.
+                    Chưa có khóa học nào. Hãy tạo khóa học đầu tiên để theo dõi dữ liệu học viên.
                   </td>
                 </tr>
               )}
@@ -203,7 +203,7 @@ export function LecturerStudents() {
       <Modal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={`Enrolled Students - ${selectedCourseTitle}`}
+        title={`Học viên ghi danh - ${selectedCourseTitle}`}
         size="lg"
       >
         <div className="space-y-4 py-2">
@@ -222,24 +222,24 @@ export function LecturerStudents() {
           ) : enrolledStudents.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-2" />
-              <p>No students enrolled in this course yet.</p>
+              <p>Chưa có học viên nào ghi danh khóa học này.</p>
             </div>
           ) : (
             <div className="overflow-x-auto max-h-[50vh] overflow-y-auto pr-1">
               <table className="w-full">
                 <thead className="border-b border-border bg-muted/30 sticky top-0 bg-background z-10">
                   <tr>
-                    <th className="text-left px-3 py-2 text-xs font-semibold text-muted-foreground uppercase">Student</th>
-                    <th className="text-left px-3 py-2 text-xs font-semibold text-muted-foreground uppercase">Joined Date</th>
-                    <th className="text-left px-3 py-2 text-xs font-semibold text-muted-foreground uppercase">Payment</th>
-                    <th className="text-left px-3 py-2 text-xs font-semibold text-muted-foreground uppercase">Status</th>
+                    <th className="text-left px-3 py-2 text-xs font-semibold text-muted-foreground uppercase">Học viên</th>
+                    <th className="text-left px-3 py-2 text-xs font-semibold text-muted-foreground uppercase">Ngày tham gia</th>
+                    <th className="text-left px-3 py-2 text-xs font-semibold text-muted-foreground uppercase">Thanh toán</th>
+                    <th className="text-left px-3 py-2 text-xs font-semibold text-muted-foreground uppercase">Trạng thái</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {enrolledStudents.map((enrollment) => {
                     const studentInitials = enrollment.student_name
                       ? enrollment.student_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-                      : 'U'
+                      : 'H'
                     return (
                       <tr key={enrollment.id} className="hover:bg-muted/10 transition">
                         <td className="px-3 py-3">
@@ -252,8 +252,8 @@ export function LecturerStudents() {
                               )}
                             </div>
                             <div className="min-w-0">
-                              <p className="text-sm font-medium text-foreground truncate">{enrollment.student_name || 'Anonymous'}</p>
-                              <p className="text-xs text-muted-foreground truncate">{enrollment.student_email || 'No email'}</p>
+                              <p className="text-sm font-medium text-foreground truncate">{enrollment.student_name || 'Học viên ẩn danh'}</p>
+                              <p className="text-xs text-muted-foreground truncate">{enrollment.student_email || 'Chưa có email'}</p>
                             </div>
                           </div>
                         </td>
@@ -263,13 +263,13 @@ export function LecturerStudents() {
                         <td className="px-3 py-3">
                           <div className="text-xs">
                             <p className="font-semibold text-foreground">${enrollment.payment_amount_vnd?.toLocaleString() || 0}</p>
-                            <span className="text-[10px] text-muted-foreground capitalize">{enrollment.payment_method || 'Free'}</span>
+                            <span className="text-[10px] text-muted-foreground capitalize">{enrollment.payment_method || 'Miễn phí'}</span>
                           </div>
                         </td>
                         <td className="px-3 py-3">
                           <Badge
                             variant={enrollment.status === 'completed' ? 'success' : 'primary'}
-                            label={enrollment.status}
+                            label={enrollment.status === 'completed' ? 'Hoàn thành' : enrollment.status === 'active' ? 'Đang học' : enrollment.status}
                           />
                         </td>
                       </tr>

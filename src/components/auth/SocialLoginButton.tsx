@@ -86,7 +86,7 @@ export function SocialLoginButton({ provider, onClick, loading, disabled }: Soci
       ) : (
         <Icon />
       )}
-      <span>{loading ? 'Connecting...' : `Continue with ${label}`}</span>
+      <span>{loading ? 'Đang kết nối...' : `Tiếp tục với ${label}`}</span>
     </button>
   )
 }

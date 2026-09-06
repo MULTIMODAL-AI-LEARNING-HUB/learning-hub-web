@@ -63,7 +63,7 @@ export function AdminDashboard() {
       const res = await adminApi.analytics()
       setAnalytics(res.data)
     } catch {
-      toast({ type: 'error', title: 'Failed to load analytics' })
+      toast({ type: 'error', title: 'Không thể tải dữ liệu thống kê' })
     } finally {
       setLoadingAnalytics(false)
     }
@@ -76,7 +76,7 @@ export function AdminDashboard() {
       const res = await adminApi.health()
       setHealth(res.data)
     } catch {
-      toast({ type: 'error', title: 'Failed to load system health' })
+      toast({ type: 'error', title: 'Không thể tải trạng thái hệ thống' })
     } finally {
       setLoadingHealth(false)
     }
@@ -91,7 +91,7 @@ export function AdminDashboard() {
         setUsers(res.data.items)
         setTotalUsers(res.data.total)
       } catch {
-        toast({ type: 'error', title: 'Failed to load users list' })
+        toast({ type: 'error', title: 'Không thể tải danh sách người dùng' })
       } finally {
         setLoadingUsers(false)
       }
@@ -125,9 +125,9 @@ export function AdminDashboard() {
     <div className="space-y-6 font-body">
       <div className="relative overflow-hidden rounded-xl border border-border bg-surface-elevated p-6 shadow-soft">
         <PageHeader
-          subtitle="System Controls"
-          title="Admin Dashboard"
-          description="Monitor performance, services health, and manage user directory in real-time."
+          subtitle="Hệ thống quản trị"
+          title="Bảng điều khiển quản trị"
+          description="Giám sát hiệu năng, kiểm tra sức khỏe dịch vụ và quản lý người dùng theo thời gian thực."
           icon={<Settings className="text-indigo-600 dark:text-indigo-400" />}
           actions={
             <Button
@@ -141,7 +141,7 @@ export function AdminDashboard() {
               className="border-border hover:bg-muted"
               icon={<RefreshCw className="h-3.5 w-3.5" />}
             >
-              Refresh Data
+              Làm mới dữ liệu
             </Button>
           }
         />
@@ -150,7 +150,7 @@ export function AdminDashboard() {
       {/* Analytics Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          label="Total Users"
+          label="Tổng người dùng"
           value={analytics?.total_users ?? 0}
           icon={<Users className="text-indigo-600 dark:text-indigo-400" />}
           variant="primary"
@@ -158,7 +158,7 @@ export function AdminDashboard() {
           className="border-border bg-surface-elevated"
         />
         <StatCard
-          label="Total Documents"
+          label="Tổng tài liệu"
           value={analytics?.total_documents ?? 0}
           icon={<FileText className="text-indigo-600 dark:text-indigo-400" />}
           variant="primary"
@@ -166,7 +166,7 @@ export function AdminDashboard() {
           className="border-border bg-surface-elevated"
         />
         <StatCard
-          label="Ready Documents"
+          label="Tài liệu sẵn sàng"
           value={analytics?.documents_ready ?? 0}
           icon={<CheckCircle2 className="text-emerald-500" />}
           variant="success"
@@ -174,7 +174,7 @@ export function AdminDashboard() {
           className="border-border bg-surface-elevated"
         />
         <StatCard
-          label="Processing"
+          label="Đang xử lý"
           value={analytics?.documents_processing ?? 0}
           icon={<Clock className="text-amber-500" />}
           variant="warning"
@@ -188,13 +188,13 @@ export function AdminDashboard() {
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div>
             <h2 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">
-              Core System Services
+              Dịch vụ hệ thống cốt lõi
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Current status:{' '}
+              Trạng thái hiện tại:{' '}
               <Badge
                 variant={health?.status === 'healthy' ? 'success' : 'error'}
-                label={health?.status || 'checking...'}
+                label={health?.status === 'healthy' ? 'Hoạt động tốt' : (health?.status || 'Đang kiểm tra...')}
                 dot
               />
             </p>
@@ -207,49 +207,49 @@ export function AdminDashboard() {
             className="border-border hover:bg-muted text-foreground"
             icon={<RefreshCw className="h-3.5 w-3.5" />}
           >
-            Check Health
+            Kiểm tra sức khỏe
           </Button>
         </div>
 
         <div className="grid gap-4 p-5 sm:grid-cols-2 md:grid-cols-3">
           <ServiceCard
-            name="PostgreSQL Database"
-            description="Relational data storage"
+            name="Cơ sở dữ liệu PostgreSQL"
+            description="Lưu trữ dữ liệu quan hệ"
             icon={<Database className="text-blue-500" />}
             status={health?.services.database || 'offline'}
             className="bg-surface-elevated hover:shadow-indigo-500/5 border border-indigo-500/5"
           />
           <ServiceCard
-            name="AI LangGraph Service"
-            description="LLM workflow engine"
+            name="Dịch vụ AI LangGraph"
+            description="Engine luồng xử lý LLM"
             icon={<Bot className="text-indigo-500" />}
             status={health?.services.ai_service || 'offline'}
             className="bg-surface-elevated hover:shadow-indigo-500/5 border border-indigo-500/5 glow-admin"
           />
           <ServiceCard
             name="Redis (Upstash)"
-            description="Session & query caching"
+            description="Bộ nhớ đệm phiên & truy vấn"
             icon={<Zap className="text-amber-500" />}
             status={health?.services.redis || 'offline'}
             className="bg-surface-elevated hover:shadow-indigo-500/5 border border-indigo-500/5"
           />
           <ServiceCard
             name="Cloudflare R2 Storage"
-            description="S3-compatible object storage"
+            description="Lưu trữ đối tượng tương thích S3"
             icon={<HardDrive className="text-sky-500" />}
             status={health?.services.s3_storage || 'offline'}
             className="bg-surface-elevated hover:shadow-indigo-500/5 border border-indigo-500/5"
           />
           <ServiceCard
             name="Qdrant Vector DB"
-            description="Vector embeddings database"
+            description="Cơ sở dữ liệu vector embeddings"
             icon={<Cpu className="text-violet-500" />}
             status={health?.services.qdrant || 'offline'}
             className="bg-surface-elevated hover:shadow-indigo-500/5 border border-indigo-500/5"
           />
           <ServiceCard
             name="Celery Worker"
-            description="Background task processing"
+            description="Xử lý tác vụ bất đồng bộ"
             icon={<Activity className="text-rose-500" />}
             status={health?.services.celery || 'offline'}
             className="bg-surface-elevated hover:shadow-indigo-500/5 border border-indigo-500/5"
@@ -261,14 +261,14 @@ export function AdminDashboard() {
       <Card className="border-border shadow-soft bg-surface-elevated">
         <div className="flex flex-col gap-3 border-b border-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">User Directory</h2>
+            <h2 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">Danh bạ người dùng</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {totalUsers} registered {totalUsers === 1 ? 'user' : 'users'}
+              {totalUsers} người dùng đã đăng ký
             </p>
           </div>
           <div className="flex items-center gap-2">
             <Input
-              placeholder="Search users..."
+              placeholder="Tìm kiếm người dùng..."
               value={searchQuery}
               onChange={setSearchQuery}
               prefixIcon={<Search className="h-4 w-4 text-muted-foreground" />}
@@ -281,7 +281,7 @@ export function AdminDashboard() {
               loading={loadingUsers}
               icon={<RefreshCw className="h-3.5 w-3.5" />}
             >
-              Refresh
+              Làm mới
             </Button>
           </div>
         </div>
@@ -290,10 +290,10 @@ export function AdminDashboard() {
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/40 text-3xs font-semibold uppercase tracking-wider text-muted-foreground">
-                <th className="py-3 px-5 font-semibold">User details</th>
-                <th className="py-3 px-5 font-semibold">System Role</th>
-                <th className="py-3 px-5 font-semibold">Activity Status</th>
-                <th className="py-3 px-5 font-semibold">Creation Date</th>
+                <th className="py-3 px-5 font-semibold">Thông tin người dùng</th>
+                <th className="py-3 px-5 font-semibold">Vai trò hệ thống</th>
+                <th className="py-3 px-5 font-semibold">Trạng thái</th>
+                <th className="py-3 px-5 font-semibold">Ngày đăng ký</th>
               </tr>
             </thead>
             <tbody>
@@ -319,8 +319,8 @@ export function AdminDashboard() {
                   <td colSpan={4} className="py-12">
                     <EmptyState
                       icon={<Users className="text-muted-foreground/60 h-8 w-8" />}
-                      title={searchQuery ? 'No matching users' : 'No users found'}
-                      description={searchQuery ? 'Try a different search term' : 'No users have registered yet.'}
+                      title={searchQuery ? 'Không tìm thấy người dùng phù hợp' : 'Chưa có người dùng nào'}
+                      description={searchQuery ? 'Hãy thử tìm kiếm với từ khóa khác' : 'Chưa có người dùng nào đăng ký trong hệ thống.'}
                       compact
                       className="border-0 bg-transparent"
                     />
@@ -338,7 +338,7 @@ export function AdminDashboard() {
                         />
                         <div className="min-w-0">
                           <p className="font-semibold text-foreground truncate">
-                            {u.full_name || 'No name provided'}
+                            {u.full_name || 'Chưa cung cấp họ tên'}
                           </p>
                           <p className="text-2xs text-muted-foreground truncate">{u.email}</p>
                         </div>
@@ -347,7 +347,7 @@ export function AdminDashboard() {
                     <td className="py-3 px-5">
                       <Badge
                         variant={u.role === 'admin' ? 'primary' : u.role === 'lecturer' ? 'warning' : 'default'}
-                        label={u.role}
+                        label={u.role === 'admin' ? 'Quản trị viên' : u.role === 'lecturer' ? 'Giảng viên' : 'Học viên'}
                         className={cn(
                           u.role === 'admin' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20' :
                           u.role === 'lecturer' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20' :
@@ -371,12 +371,12 @@ export function AdminDashboard() {
                               : 'text-xs font-medium text-muted-foreground'
                           }
                         >
-                          {u.is_active ? 'Active' : 'Inactive'}
+                          {u.is_active ? 'Đang hoạt động' : 'Ngừng kích hoạt'}
                         </span>
                       </div>
                     </td>
                     <td className="py-3 px-5 text-xs text-muted-foreground tabular-nums">
-                      {u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'}
+                      {u.created_at ? new Date(u.created_at).toLocaleDateString('vi-VN') : 'N/A'}
                     </td>
                   </tr>
                 ))
@@ -387,7 +387,7 @@ export function AdminDashboard() {
 
         <div className="flex items-center justify-between border-t border-border px-5 py-3">
           <p className="text-xs text-muted-foreground">
-            Page <span className="font-semibold text-foreground">{page}</span> of{' '}
+            Trang <span className="font-semibold text-foreground">{page}</span> trên{' '}
             <span className="font-semibold text-foreground">{totalPages}</span>
           </p>
           <div className="flex gap-2">
@@ -398,7 +398,7 @@ export function AdminDashboard() {
               size="sm"
               icon={<ChevronLeft className="h-3.5 w-3.5" />}
             >
-              Previous
+              Trước
             </Button>
             <Button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
@@ -407,7 +407,7 @@ export function AdminDashboard() {
               size="sm"
               iconRight={<ChevronRight className="h-3.5 w-3.5" />}
             >
-              Next
+              Tiếp
             </Button>
           </div>
         </div>

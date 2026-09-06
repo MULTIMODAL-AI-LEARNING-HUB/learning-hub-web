@@ -240,7 +240,7 @@ export function AdminAiKeys() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Badge variant="outline" label="Admin / AI Orchestration" className="text-xs font-mono" />
+            <Badge variant="outline" label="Quản trị / Điều phối AI" className="text-xs font-mono" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
             <Cpu className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
@@ -440,7 +440,7 @@ export function AdminAiKeys() {
                       {/* Usage Count */}
                       <td className="px-4 py-3.5 text-center whitespace-nowrap font-mono text-xs font-medium text-slate-700 dark:text-slate-300">
                         <span className="inline-block px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800">
-                          {k.usage_count} calls
+                          {k.usage_count} lượt gọi
                         </span>
                       </td>
 
@@ -449,12 +449,12 @@ export function AdminAiKeys() {
                         {k.is_active ? (
                           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            Active
+                            Đang hoạt động
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700">
                             <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                            Inactive
+                            Tạm dừng
                           </span>
                         )}
                       </td>

@@ -15,13 +15,13 @@ export function StudyLoadingState({
   title,
   description,
   progress,
-  statusText = 'Processing',
-  durationText = 'This usually takes 20-60 seconds'
+  statusText = 'Đang xử lý',
+  durationText = 'Quá trình này thường mất khoảng 20-60 giây'
 }: StudyLoadingStateProps) {
   return (
     <div className="mx-auto max-w-2xl">
       <PageHeader
-        subtitle="Study Tools"
+        subtitle="Công cụ học tập"
         title={title}
         description={description}
         icon={<Sparkles className="text-primary animate-pulse" />}

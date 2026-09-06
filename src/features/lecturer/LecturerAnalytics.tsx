@@ -27,9 +27,9 @@ export function LecturerAnalytics() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Analytics" description="Track performance and engagement" icon={<BarChart3 />} />
+        <PageHeader title="Phân Tích & Thống Kê" description="Theo dõi hiệu quả và mức độ tương tác của các khóa học" icon={<BarChart3 />} />
         <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Loading analytics...</div>
+          <div className="text-muted-foreground">Đang tải dữ liệu phân tích...</div>
         </div>
       </div>
     )
@@ -49,36 +49,36 @@ export function LecturerAnalytics() {
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
-        title="Analytics"
-        description="Track performance and engagement across your courses"
+        title="Phân Tích & Thống Kê"
+        description="Theo dõi hiệu quả và mức độ tương tác của các khóa học"
         icon={<BarChart3 />}
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card padding="responsive">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Revenue</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tổng Doanh Thu</span>
             <DollarSign className="h-4 w-4 text-success" />
           </div>
           <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">${totalRevenue.toLocaleString()}</p>
         </Card>
         <Card padding="responsive">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Students</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tổng Học Viên</span>
             <Users className="h-4 w-4 text-primary" />
           </div>
           <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">{totalEnrollments}</p>
         </Card>
         <Card padding="responsive">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Courses</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Khóa Học</span>
             <BookOpen className="h-4 w-4 text-accent" />
           </div>
           <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">{stats?.total_courses ?? 0}</p>
         </Card>
         <Card padding="responsive">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Avg Rating</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Đánh Giá TB</span>
             <Star className="h-4 w-4 text-warning" />
           </div>
           <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">
@@ -90,8 +90,8 @@ export function LecturerAnalytics() {
       {recentEnrollments.length > 0 && (
         <Card>
           <div className="px-4 py-3 border-b border-border">
-            <h3 className="font-semibold text-foreground">Recent Enrollments Trend</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Daily new enrollments over time</p>
+            <h3 className="font-semibold text-foreground">Xu Hướng Ghi Danh Gần Đây</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Số lượt ghi danh mới theo ngày</p>
           </div>
           <div className="p-4">
             <div className="flex items-end gap-1 h-32">
@@ -103,19 +103,19 @@ export function LecturerAnalytics() {
                       <div
                         className="w-full rounded-t bg-primary/80 hover:bg-primary transition-all min-h-1"
                         style={{ height: `${Math.max(heightPct, 4)}%` }}
-                        title={`${e.count} enrollments on ${e.date}`}
+                        title={`${e.count} lượt ghi danh vào ${e.date}`}
                       />
                     </div>
                   <span className="metadata-text text-muted-foreground truncate w-full text-center">
-                      {new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      {new Date(e.date).toLocaleDateString('vi-VN', { month: 'numeric', day: 'numeric' })}
                     </span>
                   </div>
                 )
               })}
             </div>
             <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-              <span>Oldest</span>
-              <span>Most recent</span>
+              <span>Cũ nhất</span>
+              <span>Mới nhất</span>
             </div>
           </div>
         </Card>
@@ -124,7 +124,7 @@ export function LecturerAnalytics() {
       <div className="grid md:grid-cols-3 gap-6">
         <Card className="overflow-hidden">
           <div className="px-4 py-3 border-b border-border">
-            <h3 className="font-semibold text-foreground">Top by Revenue</h3>
+            <h3 className="font-semibold text-foreground">Doanh Thu Cao Nhất</h3>
           </div>
           <div className="divide-y divide-border">
             {sortedByRevenue.slice(0, 5).map((c, i) => (
@@ -139,14 +139,14 @@ export function LecturerAnalytics() {
               </div>
             ))}
             {sortedByRevenue.length === 0 && (
-              <div className="px-4 py-6 text-center text-xs text-muted-foreground">No data</div>
+              <div className="px-4 py-6 text-center text-xs text-muted-foreground">Không có dữ liệu</div>
             )}
           </div>
         </Card>
 
         <Card className="overflow-hidden">
           <div className="px-4 py-3 border-b border-border">
-            <h3 className="font-semibold text-foreground">Top by Students</h3>
+            <h3 className="font-semibold text-foreground">Nhiều Học Viên Nhất</h3>
           </div>
           <div className="divide-y divide-border">
             {sortedByEnrollment.slice(0, 5).map((c, i) => (
@@ -161,14 +161,14 @@ export function LecturerAnalytics() {
               </div>
             ))}
             {sortedByEnrollment.length === 0 && (
-              <div className="px-4 py-6 text-center text-xs text-muted-foreground">No data</div>
+              <div className="px-4 py-6 text-center text-xs text-muted-foreground">Không có dữ liệu</div>
             )}
           </div>
         </Card>
 
         <Card className="overflow-hidden">
           <div className="px-4 py-3 border-b border-border">
-            <h3 className="font-semibold text-foreground">Top by Rating</h3>
+            <h3 className="font-semibold text-foreground">Đánh Giá Cao Nhất</h3>
           </div>
           <div className="divide-y divide-border">
             {sortedByRating.slice(0, 5).map((c, i) => (
@@ -183,7 +183,7 @@ export function LecturerAnalytics() {
               </div>
             ))}
             {sortedByRating.length === 0 && (
-              <div className="px-4 py-6 text-center text-xs text-muted-foreground">No ratings yet</div>
+              <div className="px-4 py-6 text-center text-xs text-muted-foreground">Chưa có đánh giá</div>
             )}
           </div>
         </Card>
@@ -192,8 +192,8 @@ export function LecturerAnalytics() {
       {courseStats.length === 0 && (
         <Card className="p-12 text-center">
           <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-medium mb-2">Analytics not available yet</h3>
-          <p className="text-muted-foreground">Start publishing courses and getting enrollments to see analytics data.</p>
+          <h3 className="text-lg font-medium mb-2">Chưa có dữ liệu phân tích</h3>
+          <p className="text-muted-foreground">Hãy xuất bản khóa học và thu hút học viên để xem thống kê chi tiết.</p>
         </Card>
       )}
     </div>

@@ -58,11 +58,17 @@ function itemKey(item: LearningItem) {
 function formatDuration(seconds: number | null | undefined) {
   if (!seconds) return null
   const mins = Math.max(1, Math.round(seconds / 60))
-  return `${mins} min`
+  return `${mins} phút`
 }
 
 function materialTypeLabel(type: string) {
-  if (!type) return 'Resource'
+  if (!type) return 'Học liệu'
+  const t = type.toLowerCase()
+  if (t === 'video') return 'Video bài giảng'
+  if (t === 'pdf') return 'Tài liệu PDF'
+  if (t === 'docx') return 'Văn bản Word'
+  if (t === 'image') return 'Hình ảnh'
+  if (t === 'url') return 'Liên kết ngoài'
   return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()
 }
 
@@ -143,7 +149,7 @@ export function CourseLearning() {
       kind: 'material' as const,
       id: material.id,
       sectionId: 'materials' as const,
-      title: material.title || material.file_name || 'Untitled material',
+      title: material.title || material.file_name || 'Học liệu chưa đặt tên',
       description: material.file_name,
       material,
     }))
@@ -151,8 +157,8 @@ export function CourseLearning() {
     if (materialItems.length > 0) {
       sectionGroups.push({
         id: 'materials',
-        title: sectionGroups.length > 0 ? 'Additional Materials' : 'Course Materials',
-        description: 'Downloadable or embedded resources provided by the lecturer.',
+        title: sectionGroups.length > 0 ? 'Học liệu bổ sung' : 'Học liệu khóa học',
+        description: 'Tài nguyên tải xuống hoặc nhúng trực tiếp do giảng viên cung cấp.',
         items: materialItems,
       })
     }
@@ -255,11 +261,11 @@ export function CourseLearning() {
     return (
       <EmptyState
         icon={<BookOpen />}
-        title="You are not enrolled in this course"
-        description="Enroll in the course before opening the learning workspace."
+        title="Bạn chưa ghi danh vào khóa học này"
+        description="Vui lòng đăng ký khóa học trước khi mở không gian học tập."
         action={(
           <Link to={`/app/student/courses/${id}`}>
-            <Button variant="outline">Back to course details</Button>
+            <Button variant="outline">Quay lại thông tin khóa học</Button>
           </Link>
         )}
       />
@@ -272,11 +278,11 @@ export function CourseLearning() {
         <div>
           <Link to={`/app/student/courses/${id}`}>
             <Button variant="ghost" size="sm" icon={<ArrowLeft className="h-4 w-4" />}>
-              Back to course
+              Quay lại khóa học
             </Button>
           </Link>
           <h1 className="mt-2 text-fluid-xl font-semibold text-foreground">{course.title}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Focused learning workspace with lessons, resources, AI help, and course discussion.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Không gian học tập tập trung với bài giảng, học liệu, trợ lý AI và thảo luận.</p>
         </div>
         <Button
           variant="outline"
@@ -285,7 +291,7 @@ export function CourseLearning() {
           onClick={() => setSidebarOpen((value) => !value)}
           icon={sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
         >
-          {sidebarOpen ? 'Hide curriculum' : 'Show curriculum'}
+          {sidebarOpen ? 'Ẩn giáo trình' : 'Hiện giáo trình'}
         </Button>
       </div>
 
@@ -294,14 +300,14 @@ export function CourseLearning() {
           <Card padding="none" className="overflow-hidden lg:sticky lg:top-4">
             <div className="border-b border-border p-4">
               <div className="mb-2 flex items-center justify-between text-sm">
-                <span className="font-medium text-foreground">Course progress</span>
+                <span className="font-medium text-foreground">Tiến độ khóa học</span>
                 <span className="font-semibold text-foreground tabular-nums">{overallProgress}%</span>
               </div>
               <Progress value={overallProgress} />
               <p className="mt-2 text-xs text-muted-foreground">
                 {totalMaterials > 0
-                  ? `${completedMaterials}/${totalMaterials} tracked materials completed`
-                  : 'Lesson progress tracking is not available for this course yet.'}
+                  ? `${completedMaterials}/${totalMaterials} học liệu đã hoàn thành`
+                  : 'Tính năng theo dõi tiến độ bài giảng đang được cập nhật cho khóa học này.'}
               </p>
             </div>
 
@@ -310,8 +316,8 @@ export function CourseLearning() {
                 <EmptyState
                   compact
                   icon={<ListChecks />}
-                  title="No curriculum yet"
-                  description="The lecturer has not added lessons or materials."
+                  title="Chưa có giáo trình"
+                  description="Giảng viên chưa thêm bài học hoặc tài liệu nào."
                 />
               ) : (
                 learningSections.map((section) => (
@@ -360,10 +366,10 @@ export function CourseLearning() {
 
                       {currentItem.kind === 'material' && (
                         progress.get(currentItem.id)?.completed || (progress.get(currentItem.id)?.completion_percent || 0) >= 100 ? (
-                          <Badge variant="success" label="Completed" />
+                          <Badge variant="success" label="Đã hoàn thành" />
                         ) : (
                           <Button onClick={markCurrentComplete} loading={updating} icon={<CheckCircle2 className="h-4 w-4" />}>
-                            Mark complete
+                            Đánh dấu hoàn thành
                           </Button>
                         )
                       )}
@@ -380,14 +386,14 @@ export function CourseLearning() {
                       <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex gap-2">
                           <Button variant="outline" disabled={!previousItem} onClick={() => goToItem(previousItem)}>
-                            Previous
+                            Bài trước
                           </Button>
                           <Button variant="outline" disabled={!nextItem} onClick={() => goToItem(nextItem)}>
-                            Next
+                            Bài tiếp theo
                           </Button>
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {currentIndex + 1} of {flatItems.length} learning items
+                          {currentIndex + 1} trên {flatItems.length} nội dung học
                         </div>
                       </div>
                   </div>
@@ -421,8 +427,8 @@ export function CourseLearning() {
           ) : (
             <EmptyState
               icon={<BookOpen />}
-              title="Choose a lesson to start"
-              description="Select a lesson or material from the curriculum."
+              title="Chọn bài học để bắt đầu"
+              description="Chọn một bài học hoặc học liệu từ giáo trình bên cạnh."
             />
           )}
         </main>
@@ -479,12 +485,12 @@ function CurriculumButton({
 
 function WorkspaceTabs({ activeTab, onChange }: { activeTab: WorkspaceTab; onChange: (tab: WorkspaceTab) => void }) {
   const tabs: Array<{ id: WorkspaceTab; label: string; icon: ReactNode }> = [
-    { id: 'learn', label: 'Learn', icon: <BookOpen /> },
-    { id: 'discussion', label: 'Discussion', icon: <MessageSquare /> },
-    { id: 'assignments', label: 'Assignments', icon: <ClipboardCheck /> },
-    { id: 'resources', label: 'Resources', icon: <FileText /> },
-    { id: 'ai', label: 'AI Tutor', icon: <Sparkles /> },
-    { id: 'notes', label: 'Notes', icon: <StickyNote /> },
+    { id: 'learn', label: 'Bài học', icon: <BookOpen /> },
+    { id: 'discussion', label: 'Thảo luận', icon: <MessageSquare /> },
+    { id: 'assignments', label: 'Bài tập', icon: <ClipboardCheck /> },
+    { id: 'resources', label: 'Tài nguyên', icon: <FileText /> },
+    { id: 'ai', label: 'Gia sư AI', icon: <Sparkles /> },
+    { id: 'notes', label: 'Ghi chú', icon: <StickyNote /> },
   ]
 
   return (
@@ -520,16 +526,16 @@ function ResourcesPanel({ item, lesson }: { item: LearningItem; lesson: Lesson |
     const resourceUrl = item.material.external_url || item.material.file_url
     return (
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-foreground">Current material</h3>
+        <h3 className="text-sm font-semibold text-foreground">Học liệu hiện tại</h3>
         <div className="rounded-lg border border-border p-4">
           <p className="font-medium text-foreground">{item.title}</p>
           <p className="mt-1 text-sm text-muted-foreground">{materialTypeLabel(item.material.material_type)}</p>
           {resourceUrl ? (
             <a href={resourceUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex">
-              <Button variant="outline" size="sm">Open resource</Button>
+              <Button variant="outline" size="sm">Mở học liệu</Button>
             </a>
           ) : (
-            <p className="mt-3 text-sm text-muted-foreground">No downloadable resource is attached.</p>
+            <p className="mt-3 text-sm text-muted-foreground">Không có tài nguyên đính kèm nào để tải xuống.</p>
           )}
         </div>
       </div>
@@ -541,15 +547,15 @@ function ResourcesPanel({ item, lesson }: { item: LearningItem; lesson: Lesson |
       <EmptyState
         compact
         icon={<FileText />}
-        title="No resources for this lesson"
-        description="Lesson attachments and downloadable resources will appear here."
+        title="Không có tài nguyên cho bài học này"
+        description="Tệp đính kèm và tài nguyên tải về của bài học sẽ xuất hiện tại đây."
       />
     )
   }
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-foreground">Lesson resources</h3>
+      <h3 className="text-sm font-semibold text-foreground">Tài nguyên bài học</h3>
       <div className="grid gap-2">
         {attachments.map((attachment) => (
           <a
@@ -560,7 +566,7 @@ function ResourcesPanel({ item, lesson }: { item: LearningItem; lesson: Lesson |
             className="flex items-center justify-between rounded-lg border border-border p-3 text-sm transition hover:bg-muted/60"
           >
             <span className="font-medium text-foreground">{attachment.file_name}</span>
-            <span className="text-xs text-muted-foreground">Open</span>
+            <span className="text-xs text-muted-foreground">Mở</span>
           </a>
         ))}
       </div>
@@ -573,18 +579,18 @@ function AiTutorPanel({ courseId }: { courseId: string | undefined }) {
     <div className="grid gap-3 sm:grid-cols-2">
       <Card padding="responsive" variant="outlined">
         <Sparkles className="h-5 w-5 text-primary" />
-        <h3 className="mt-3 font-semibold text-foreground">Ask about this course</h3>
-        <p className="mt-1 text-sm text-muted-foreground">Open the AI tutor with this course context and ask for explanations, summaries, or practice ideas.</p>
+        <h3 className="mt-3 font-semibold text-foreground">Hỏi đáp về khóa học</h3>
+        <p className="mt-1 text-sm text-muted-foreground">Mở gia sư AI với ngữ cảnh khóa học để yêu cầu giải thích, tóm tắt hoặc gợi ý bài tập.</p>
         <Link to={`/app/student/chat?course_id=${courseId}`} className="mt-4 inline-flex">
-          <Button size="sm">Open AI Tutor</Button>
+          <Button size="sm">Mở Gia sư AI</Button>
         </Link>
       </Card>
       <Card padding="responsive" variant="outlined">
         <ListChecks className="h-5 w-5 text-primary" />
-        <h3 className="mt-3 font-semibold text-foreground">Generate practice quiz</h3>
-        <p className="mt-1 text-sm text-muted-foreground">Create a quiz from course context to check understanding after a lesson.</p>
+        <h3 className="mt-3 font-semibold text-foreground">Tạo bài trắc nghiệm ôn tập</h3>
+        <p className="mt-1 text-sm text-muted-foreground">Tạo bài kiểm tra trắc nghiệm từ nội dung khóa học để củng cố kiến thức sau bài học.</p>
         <Link to={`/app/student/quiz?course_id=${courseId}`} className="mt-4 inline-flex">
-          <Button size="sm" variant="outline">Generate Quiz</Button>
+          <Button size="sm" variant="outline">Tạo bài trắc nghiệm</Button>
         </Link>
       </Card>
     </div>
@@ -596,9 +602,9 @@ function NotesPanel() {
     <EmptyState
       compact
       icon={<StickyNote />}
-      title="Lesson notes are not connected yet"
-      description="The note-taking UI is planned, but it needs a notes API before saving real student notes."
-      action={<Button variant="outline" disabled>Coming soon</Button>}
+      title="Tính năng ghi chú bài học đang hoàn thiện"
+      description="Giao diện ghi chú đang được chuẩn bị và sẽ sớm hỗ trợ lưu ghi chú cá nhân của bạn."
+      action={<Button variant="outline" disabled>Sắp ra mắt</Button>}
     />
   )
 }
@@ -619,15 +625,15 @@ function MaterialViewer({ item, onVideoEnded }: { item: CourseMaterial; onVideoE
           <EmptyState
             compact
             icon={<FileText />}
-            title="Preview unavailable"
-            description="Open the attached resource in a new tab if a link is provided."
+            title="Không thể xem trước"
+            description="Mở tài nguyên đính kèm trong tab mới nếu có liên kết."
           />
         )}
       </div>
       {(item.external_url || item.file_url) && (
         <div className="border-t border-border p-4">
           <a href={item.external_url || item.file_url || '#'} target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" size="sm">Open resource</Button>
+            <Button variant="outline" size="sm">Mở học liệu</Button>
           </a>
         </div>
       )}
@@ -659,19 +665,19 @@ function LessonViewer({ lesson }: { lesson: Lesson }) {
         ) : (
           <div className="rounded-lg border border-dashed border-border bg-muted/25 p-4">
             <p className="text-sm text-muted-foreground">
-              {lesson.description || 'This lesson currently contains overview information only. Check resources or ask the course chat for more context.'}
+              {lesson.description || 'Bài học này hiện chỉ có thông tin tổng quan. Hãy kiểm tra mục tài nguyên hoặc hỏi trong khung trò chuyện khóa học.'}
             </p>
           </div>
         )}
       </div>
 
       {lesson.video_duration && (
-        <p className="text-xs text-muted-foreground">Estimated video duration: {formatDuration(lesson.video_duration)}</p>
+        <p className="text-xs text-muted-foreground">Thời lượng video ước tính: {formatDuration(lesson.video_duration)}</p>
       )}
 
       {attachments.length > 0 && (
         <div>
-          <h3 className="mb-2 text-sm font-semibold text-foreground">Resources</h3>
+          <h3 className="mb-2 text-sm font-semibold text-foreground">Tài nguyên đính kèm</h3>
           <div className="space-y-2">
             {attachments.map((attachment) => (
               <a
@@ -682,7 +688,7 @@ function LessonViewer({ lesson }: { lesson: Lesson }) {
                 className="flex items-center justify-between rounded-lg border border-border p-3 text-sm transition hover:bg-muted/60"
               >
                 <span className="font-medium text-foreground">{attachment.file_name}</span>
-                <span className="text-xs text-muted-foreground">Open</span>
+                <span className="text-xs text-muted-foreground">Mở</span>
               </a>
             ))}
           </div>
@@ -690,7 +696,7 @@ function LessonViewer({ lesson }: { lesson: Lesson }) {
       )}
 
       <div className="rounded-lg bg-info/10 p-4 text-sm text-info">
-        Lesson completion tracking is coming next. Materials with progress support can already be marked complete.
+        Hệ thống tự động theo dõi tiến độ bài học đang được cập nhật. Bạn đã có thể đánh dấu hoàn thành cho các học liệu có hỗ trợ tiến độ.
       </div>
     </Card>
   )

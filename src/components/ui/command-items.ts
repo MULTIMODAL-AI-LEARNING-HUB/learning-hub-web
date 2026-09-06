@@ -19,44 +19,44 @@ export function useDefaultCommandItems(): CommandItem[] {
   const items: CommandItem[] = [
     {
       id: 'nav-documents',
-      label: 'Documents',
-      description: 'Upload and manage your knowledge sources',
+      label: 'Tài liệu',
+      description: 'Tải lên và quản lý kho tri thức của bạn',
       icon: FileText,
-      group: 'Navigation',
+      group: 'Điều hướng',
       shortcut: 'G D',
       action: () => navigate('/app/documents')
     },
     {
       id: 'nav-chat',
-      label: 'AI Chat',
-      description: 'Ask questions about your documents',
+      label: 'Trò chuyện AI',
+      description: 'Hỏi đáp thông minh về tài liệu học tập',
       icon: MessageSquare,
-      group: 'Navigation',
+      group: 'Điều hướng',
       shortcut: 'G C',
       action: () => navigate('/app/student/chat')
     },
     {
       id: 'nav-quiz',
-      label: 'Quiz Generator',
-      description: 'Generate practice questions',
+      label: 'Tạo đề trắc nghiệm AI',
+      description: 'Tạo câu hỏi trắc nghiệm ôn luyện',
       icon: BookOpen,
-      group: 'Study Tools',
+      group: 'Công cụ học tập',
       action: () => navigate('/app/quiz')
     },
     {
       id: 'nav-flashcards',
-      label: 'Flashcards',
-      description: 'Spaced repetition learning',
+      label: 'Thẻ ghi nhớ Flashcards',
+      description: 'Ghi nhớ ngắt quãng thông minh',
       icon: Layers,
-      group: 'Study Tools',
+      group: 'Công cụ học tập',
       action: () => navigate('/app/flashcards')
     },
     {
       id: 'nav-essay',
-      label: 'Essay Grading',
-      description: 'Get AI feedback on your writing',
+      label: 'Chấm bài luận AI',
+      description: 'Nhận đánh giá và gợi ý cải thiện bài viết',
       icon: PenLine,
-      group: 'Study Tools',
+      group: 'Công cụ học tập',
       action: () => navigate('/app/essay')
     }
   ]
@@ -64,10 +64,10 @@ export function useDefaultCommandItems(): CommandItem[] {
   if (user?.role === 'admin') {
     items.push({
       id: 'nav-admin',
-      label: 'Admin Panel',
-      description: 'Manage users and system health',
+      label: 'Bảng quản trị',
+      description: 'Quản lý người dùng và trạng thái hệ thống',
       icon: Settings,
-      group: 'Navigation',
+      group: 'Điều hướng',
       action: () => navigate('/app/admin')
     })
   }

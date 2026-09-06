@@ -15,16 +15,16 @@ type CourseFilter = 'all' | 'not-started' | 'in-progress' | 'completed'
 type CourseSort = 'recent' | 'progress-desc' | 'progress-asc' | 'title'
 
 function formatDate(dateStr: string | null) {
-  if (!dateStr) return 'No date'
-  return new Date(dateStr).toLocaleDateString()
+  if (!dateStr) return 'Không có ngày'
+  return new Date(dateStr).toLocaleDateString('vi-VN')
 }
 
 function getCourseTitle(enrollment: Enrollment) {
-  return enrollment.course?.title || enrollment.course_title || 'Untitled course'
+  return enrollment.course?.title || enrollment.course_title || 'Khóa học chưa đặt tên'
 }
 
 function getCourseDescription(enrollment: Enrollment) {
-  return enrollment.course?.description || 'Continue learning with structured course materials and guided activities.'
+  return enrollment.course?.description || 'Tiếp tục lộ trình học tập với tài liệu bài giảng và bài tập thực hành.'
 }
 
 function getCourseProgress(enrollment: Enrollment) {
@@ -115,24 +115,24 @@ export function MyCourses() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-sm font-medium text-primary">Learning workspace</p>
-          <h1 className="mt-1 text-fluid-2xl font-bold text-foreground">My Courses</h1>
+          <p className="text-sm font-medium text-primary">Không gian học tập</p>
+          <h1 className="mt-1 text-fluid-2xl font-bold text-foreground">Khóa Học Của Tôi</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Track your enrolled courses, continue where you left off, and review completed learning.
+            Theo dõi các khóa học bạn đã ghi danh, tiếp tục học tập và xem lại lộ trình đã hoàn thành.
           </p>
         </div>
         <Link to="/app/student/browse">
           <Button iconRight={<ArrowRight className="h-4 w-4" />} fullWidthMobile>
-            Browse Courses
+            Khám phá khóa học
           </Button>
         </Link>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric icon={<BookOpen />} label="Enrolled" value={counts.all} />
-        <Metric icon={<PlayCircle />} label="In progress" value={counts.inProgress} />
-        <Metric icon={<CheckCircle2 />} label="Completed" value={counts.completed} />
-        <Metric icon={<GraduationCap />} label="Average progress" value={`${counts.avgProgress}%`} />
+        <Metric icon={<BookOpen />} label="Đã ghi danh" value={counts.all} />
+        <Metric icon={<PlayCircle />} label="Đang học" value={counts.inProgress} />
+        <Metric icon={<CheckCircle2 />} label="Đã hoàn thành" value={counts.completed} />
+        <Metric icon={<GraduationCap />} label="Tiến độ trung bình" value={`${counts.avgProgress}%`} />
       </div>
 
       {!loading && continueEnrollment && (
@@ -147,22 +147,22 @@ export function MyCourses() {
               <Input
                 value={query}
                 onChange={setQuery}
-                placeholder="Search your courses..."
+                placeholder="Tìm kiếm khóa học của bạn..."
                 prefixIcon={<Search className="h-4 w-4" />}
-                aria-label="Search enrolled courses"
+                aria-label="Tìm kiếm khóa học đã ghi danh"
                 className="sm:w-80"
               />
-              <label className="sr-only" htmlFor="course-sort">Sort courses</label>
+              <label className="sr-only" htmlFor="course-sort">Sắp xếp khóa học</label>
               <select
                 id="course-sort"
                 value={sortBy}
                 onChange={(event) => setSortBy(event.target.value as CourseSort)}
                 className="h-10 rounded-md border border-input bg-surface-elevated px-3 text-sm text-foreground shadow-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               >
-                <option value="recent">Recently enrolled</option>
-                <option value="progress-desc">Progress: high to low</option>
-                <option value="progress-asc">Progress: low to high</option>
-                <option value="title">Course title</option>
+                <option value="recent">Mới ghi danh gần đây</option>
+                <option value="progress-desc">Tiến độ: Cao đến thấp</option>
+                <option value="progress-asc">Tiến độ: Thấp đến cao</option>
+                <option value="title">Tên khóa học</option>
               </select>
             </div>
           </div>
@@ -186,17 +186,17 @@ export function MyCourses() {
         ) : filteredEnrollments.length === 0 ? (
           <EmptyState
             icon={<BookOpen />}
-            title={query ? 'No matching courses' : 'No courses found'}
+            title={query ? 'Không tìm thấy khóa học phù hợp' : 'Chưa có khóa học nào'}
             description={
               query
-                ? 'Try a different search term or switch filters.'
+                ? 'Thử tìm kiếm với từ khóa khác hoặc chuyển bộ lọc.'
                 : activeTab === 'all'
-                  ? 'Browse the catalog and enroll in a course to start learning.'
-                  : 'Courses matching this status will appear here.'
+                  ? 'Khám phá danh mục và ghi danh vào một khóa học để bắt đầu học tập.'
+                  : 'Các khóa học thuộc trạng thái này sẽ xuất hiện tại đây.'
             }
             action={(
               <Link to="/app/student/browse">
-                <Button>Browse Courses</Button>
+                <Button>Khám phá khóa học</Button>
               </Link>
             )}
             className="m-4"
@@ -237,10 +237,10 @@ function FilterPills({
   onChange: (filter: CourseFilter) => void
 }) {
   const filters: Array<{ id: CourseFilter; label: string; count: number }> = [
-    { id: 'all', label: 'All', count: counts.all },
-    { id: 'not-started', label: 'Not started', count: counts.notStarted },
-    { id: 'in-progress', label: 'In progress', count: counts.inProgress },
-    { id: 'completed', label: 'Completed', count: counts.completed },
+    { id: 'all', label: 'Tất cả', count: counts.all },
+    { id: 'not-started', label: 'Chưa bắt đầu', count: counts.notStarted },
+    { id: 'in-progress', label: 'Đang học', count: counts.inProgress },
+    { id: 'completed', label: 'Đã hoàn thành', count: counts.completed },
   ]
 
   return (
@@ -293,12 +293,12 @@ function ContinueLearningHero({ enrollment }: { enrollment: Enrollment }) {
             )}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Continue learning</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Tiếp tục bài học</p>
             <h2 className="mt-1 line-clamp-2 text-lg font-semibold text-foreground">{title}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Pick up from your current course and keep your momentum.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Tiếp tục bài học gần nhất để duy trì nhịp độ học tập của bạn.</p>
             <div className="mt-3 max-w-md">
               <div className="mb-1 flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Progress</span>
+                <span className="text-muted-foreground">Tiến độ</span>
                 <span className="font-medium text-foreground">{progress}%</span>
               </div>
               <Progress value={progress} />
@@ -307,7 +307,7 @@ function ContinueLearningHero({ enrollment }: { enrollment: Enrollment }) {
         </div>
         <Link to={`/app/student/courses/${enrollment.course_id}/learn`} className="shrink-0">
           <Button iconRight={<ArrowRight className="h-4 w-4" />} fullWidthMobile>
-            {progress === 0 ? 'Start learning' : 'Continue'}
+            {progress === 0 ? 'Bắt đầu học' : 'Tiếp tục'}
           </Button>
         </Link>
       </div>
@@ -348,14 +348,14 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
             </div>
             <Badge
               variant={state === 'completed' ? 'success' : state === 'in-progress' ? 'primary' : 'default'}
-              label={state === 'not-started' ? 'Not started' : state === 'in-progress' ? 'In progress' : 'Completed'}
+              label={state === 'not-started' ? 'Chưa bắt đầu' : state === 'in-progress' ? 'Đang học' : 'Đã hoàn thành'}
               className="shrink-0"
             />
           </div>
 
           <div className="mt-4">
             <div className="mb-1 flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Progress</span>
+              <span className="text-muted-foreground">Tiến độ</span>
               <span className="font-medium text-foreground">{progress}%</span>
             </div>
             <Progress value={progress} />
@@ -364,15 +364,15 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
           <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Clock className="h-3.5 w-3.5" />
-              Enrolled {formatDate(enrollment.enrolled_at)}
+              Ghi danh ngày {formatDate(enrollment.enrolled_at)}
             </div>
             <div className="flex gap-2">
               <Link to={`/app/student/courses/${enrollment.course_id}`}>
-                <Button variant="outline" size="sm">Details</Button>
+                <Button variant="outline" size="sm">Chi tiết</Button>
               </Link>
               {state !== 'completed' && (
                 <Link to={`/app/student/courses/${enrollment.course_id}/learn`}>
-                  <Button size="sm">{progress === 0 ? 'Start' : 'Continue'}</Button>
+                  <Button size="sm">{progress === 0 ? 'Bắt đầu' : 'Tiếp tục'}</Button>
                 </Link>
               )}
             </div>

@@ -27,20 +27,20 @@ interface CourseGradingWorkspaceProps {
 }
 
 const filters: Array<{ id: Filter; label: string }> = [
-  { id: 'all', label: 'All' },
-  { id: 'ungraded', label: 'Ungraded' },
-  { id: 'graded', label: 'Graded' },
-  { id: 'late', label: 'Late' },
+  { id: 'all', label: 'Tất cả' },
+  { id: 'ungraded', label: 'Chưa chấm' },
+  { id: 'graded', label: 'Đã chấm' },
+  { id: 'late', label: 'Nộp muộn' },
 ]
 
 function formatDate(value: string | null) {
-  if (!value) return 'No date'
-  return new Date(value).toLocaleString()
+  if (!value) return 'Không có ngày'
+  return new Date(value).toLocaleString('vi-VN')
 }
 
 function submissionStatus(submission: AssignmentSubmission) {
-  if (submission.score === null) return 'Ungraded'
-  return 'Graded'
+  if (submission.score === null) return 'Chưa chấm'
+  return 'Đã chấm'
 }
 
 export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps) {
@@ -94,7 +94,7 @@ export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps
 
       setItems(submissionResults.flat())
     } catch {
-      setError('Unable to load course submissions.')
+      setError('Không thể tải danh sách bài tập đã nộp.')
     } finally {
       setLoading(false)
     }
@@ -137,7 +137,7 @@ export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps
     if (!selected) return
     const parsedScore = Number(score)
     if (Number.isNaN(parsedScore) || parsedScore < 0 || parsedScore > selected.assignment.max_score) {
-      toasts.add({ type: 'error', title: 'Invalid score', message: `Score must be between 0 and ${selected.assignment.max_score}.` })
+      toasts.add({ type: 'error', title: 'Điểm số không hợp lệ', message: `Điểm phải nằm trong khoảng từ 0 đến ${selected.assignment.max_score}.` })
       return
     }
 
@@ -153,9 +153,9 @@ export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps
         )
       )
       setSelected(null)
-      toasts.add({ type: 'success', title: 'Submission graded' })
+      toasts.add({ type: 'success', title: 'Đã lưu điểm bài nộp' })
     } catch {
-      toasts.add({ type: 'error', title: 'Unable to save grade' })
+      toasts.add({ type: 'error', title: 'Không thể lưu điểm' })
     } finally {
       setSaving(false)
     }
@@ -167,20 +167,20 @@ export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps
         <div>
           <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
             <ClipboardCheck className="h-5 w-5 text-primary" />
-            To Grade
+            Chấm Bài Học Viên
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">Review assignment submissions for this course.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Xem xét và chấm điểm các bài tập học viên đã nộp trong khóa học này.</p>
         </div>
         <Button variant="outline" size="sm" onClick={loadItems} loading={loading} icon={<RefreshCw className="h-4 w-4" />}>
-          Refresh
+          Làm mới
         </Button>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard label="Total submissions" value={stats.total} icon={<FileText className="h-4 w-4" />} />
-        <SummaryCard label="Ungraded" value={stats.ungraded} icon={<ClipboardCheck className="h-4 w-4" />} />
-        <SummaryCard label="Graded" value={stats.graded} icon={<CheckCircle2 className="h-4 w-4" />} />
-        <SummaryCard label="Late" value={stats.late} icon={<Clock className="h-4 w-4" />} />
+        <SummaryCard label="Tổng bài nộp" value={stats.total} icon={<FileText className="h-4 w-4" />} />
+        <SummaryCard label="Chưa chấm" value={stats.ungraded} icon={<ClipboardCheck className="h-4 w-4" />} />
+        <SummaryCard label="Đã chấm" value={stats.graded} icon={<CheckCircle2 className="h-4 w-4" />} />
+        <SummaryCard label="Nộp muộn" value={stats.late} icon={<Clock className="h-4 w-4" />} />
       </div>
 
       <Card padding="none" className="overflow-hidden">
@@ -203,7 +203,7 @@ export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps
           <Input
             value={query}
             onChange={setQuery}
-            placeholder="Search student or assignment..."
+            placeholder="Tìm học viên hoặc tên bài tập..."
             prefixIcon={<Search className="h-4 w-4" />}
             className="lg:w-72"
           />
@@ -218,16 +218,16 @@ export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps
         ) : error ? (
           <EmptyState
             icon={<ClipboardCheck />}
-            title="Could not load submissions"
+            title="Không thể tải danh sách bài nộp"
             description={error}
-            action={<Button variant="outline" onClick={loadItems}>Try again</Button>}
+            action={<Button variant="outline" onClick={loadItems}>Thử lại</Button>}
             className="m-4"
           />
         ) : filteredItems.length === 0 ? (
           <EmptyState
             icon={<ClipboardCheck />}
-            title="No submissions found"
-            description="There are no submissions matching the current filters."
+            title="Không tìm thấy bài nộp nào"
+            description="Không có bài nộp nào phù hợp với bộ lọc hiện tại."
             compact
             className="m-4"
           />
@@ -236,11 +236,11 @@ export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps
             <table className="w-full text-left text-sm">
               <thead className="bg-muted/40 text-xs text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-3 font-medium">Student</th>
-                  <th className="px-4 py-3 font-medium">Assignment</th>
-                  <th className="px-4 py-3 font-medium">Submitted</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 text-right font-medium">Action</th>
+                  <th className="px-4 py-3 font-medium">Học viên</th>
+                  <th className="px-4 py-3 font-medium">Bài tập</th>
+                  <th className="px-4 py-3 font-medium">Thời gian nộp</th>
+                  <th className="px-4 py-3 font-medium">Trạng thái</th>
+                  <th className="px-4 py-3 text-right font-medium">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -251,7 +251,7 @@ export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground">
                           <UserRound className="h-4 w-4" />
                         </div>
-                        <span className="font-medium text-foreground">{item.submission.student_name || 'Unknown student'}</span>
+                        <span className="font-medium text-foreground">{item.submission.student_name || 'Học viên ẩn danh'}</span>
                       </div>
                     </td>
                     <td className="px-4 py-3">
@@ -260,7 +260,7 @@ export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {formatDate(item.submission.submitted_at)}
-                      {item.submission.is_late && <Badge variant="warning" label="Late" className="ml-2" />}
+                      {item.submission.is_late && <Badge variant="warning" label="Nộp muộn" className="ml-2" />}
                     </td>
                     <td className="px-4 py-3">
                       <Badge
@@ -270,7 +270,7 @@ export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Button variant="outline" size="sm" onClick={() => openSubmission(item)}>
-                        {item.submission.score === null ? 'Grade' : 'Review'}
+                        {item.submission.score === null ? 'Chấm điểm' : 'Xem lại'}
                       </Button>
                     </td>
                   </tr>
@@ -284,13 +284,13 @@ export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps
       <Modal
         open={Boolean(selected)}
         onClose={() => setSelected(null)}
-        title={selected ? selected.assignment.title : 'Grade submission'}
+        title={selected ? selected.assignment.title : 'Chấm điểm bài nộp'}
         description={selected ? `${selected.section.title} / ${selected.lesson.title}` : undefined}
         size="3xl"
         footer={(
           <>
-            <Button variant="ghost" onClick={() => setSelected(null)}>Cancel</Button>
-            <Button onClick={saveGrade} loading={saving}>Save grade</Button>
+            <Button variant="ghost" onClick={() => setSelected(null)}>Hủy</Button>
+            <Button onClick={saveGrade} loading={saving}>Lưu điểm</Button>
           </>
         )}
       >
@@ -298,9 +298,9 @@ export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
             <div className="space-y-4">
               <Card padding="responsive">
-                <p className="text-xs font-medium text-muted-foreground">Submission</p>
+                <p className="text-xs font-medium text-muted-foreground">Nội dung nộp</p>
                 <div className="mt-3 rounded-lg bg-muted/35 p-3 text-sm text-foreground">
-                  {selected.submission.submission_text || 'No written response.'}
+                  {selected.submission.submission_text || 'Không có câu trả lời dạng văn bản.'}
                 </div>
                 {selected.submission.attachments?.length ? (
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -320,12 +320,12 @@ export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps
                 ) : null}
               </Card>
               <div>
-                <label className="text-sm font-medium text-foreground">Feedback</label>
+                <label className="text-sm font-medium text-foreground">Nhận xét & phản hồi</label>
                 <Textarea
                   value={feedback}
                   onChange={(event) => setFeedback(event.target.value)}
                   className="mt-2 min-h-32"
-                  placeholder="Write clear feedback for the student..."
+                  placeholder="Nhập nhận xét chi tiết cho học viên..."
                 />
               </div>
             </div>
@@ -333,19 +333,19 @@ export function CourseGradingWorkspace({ courseId }: CourseGradingWorkspaceProps
             <Card padding="responsive" className="h-fit">
               <div className="space-y-4">
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground">Student</p>
-                  <p className="mt-1 font-semibold text-foreground">{selected.submission.student_name || 'Unknown student'}</p>
+                  <p className="text-xs font-medium text-muted-foreground">Học viên</p>
+                  <p className="mt-1 font-semibold text-foreground">{selected.submission.student_name || 'Học viên ẩn danh'}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground">Submitted</p>
+                  <p className="text-xs font-medium text-muted-foreground">Thời gian nộp</p>
                   <p className="mt-1 text-sm text-foreground">{formatDate(selected.submission.submitted_at)}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground">Max score</p>
+                  <p className="text-xs font-medium text-muted-foreground">Điểm tối đa</p>
                   <p className="mt-1 text-sm text-foreground">{selected.assignment.max_score}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-foreground">Score</label>
+                  <label className="text-sm font-medium text-foreground">Điểm số</label>
                   <Input
                     type="number"
                     value={score}

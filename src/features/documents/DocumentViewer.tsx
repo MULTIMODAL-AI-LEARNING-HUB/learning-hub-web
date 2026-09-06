@@ -9,11 +9,11 @@ import { EmptyState } from '../../components/ui/EmptyState'
 import { fileIconEmoji } from '../../utils/fileIcon'
 
 const smartNotes = [
-  'Machine learning is a subset of artificial intelligence.',
-  'Deep learning uses multi-layer neural networks.',
-  'Backpropagation optimizes weights via gradient descent.',
-  'Supervised learning requires labeled training data.',
-  'Overfitting occurs when a model memorizes noise.'
+  'Học máy (Machine Learning) là một nhánh quan trọng của trí tuệ nhân tạo.',
+  'Học sâu (Deep Learning) sử dụng các mạng nơ-ron nhân tạo đa tầng.',
+  'Lan truyền ngược (Backpropagation) tối ưu hóa trọng số qua giải thuật hạ độ dốc.',
+  'Học có giám sát (Supervised Learning) đòi hỏi tập dữ liệu huấn luyện đã được dán nhãn.',
+  'Hiện tượng quá khớp (Overfitting) xuất hiện khi mô hình học vẹt dữ liệu nhiễu.'
 ]
 
 export function DocumentViewer({ doc }: { doc: DocumentItem }) {
@@ -30,7 +30,7 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
           </div>
           <div className="min-w-0">
             <p className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {doc.type.toUpperCase()} Viewer
+              Xem tệp {doc.type.toUpperCase()}
             </p>
             <p className="text-xs font-semibold text-foreground truncate sm:text-sm">{doc.name}</p>
           </div>
@@ -45,7 +45,8 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage <= 1}
                 className="h-6 w-6 sm:h-7 sm:w-7"
-                aria-label="Previous page"
+                aria-label="Trang trước"
+                title="Trang trước"
               >
                 <ChevronLeft className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               </Button>
@@ -58,7 +59,8 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage >= totalPages}
                 className="h-6 w-6 sm:h-7 sm:w-7"
-                aria-label="Next page"
+                aria-label="Trang sau"
+                title="Trang sau"
               >
                 <ChevronRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               </Button>
@@ -71,7 +73,8 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
               size="icon"
               onClick={() => setZoom((z) => Math.max(50, z - 10))}
               className="h-6 w-6 sm:h-7 sm:w-7"
-              aria-label="Zoom out"
+              aria-label="Thu nhỏ"
+              title="Thu nhỏ"
             >
               <ZoomOut className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
             </Button>
@@ -83,13 +86,14 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
               size="icon"
               onClick={() => setZoom((z) => Math.min(200, z + 10))}
               className="h-6 w-6 sm:h-7 sm:w-7"
-              aria-label="Zoom in"
+              aria-label="Phóng to"
+              title="Phóng to"
             >
               <ZoomIn className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
             </Button>
           </div>
 
-          <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" aria-label="Fullscreen">
+          <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" aria-label="Toàn màn hình" title="Toàn màn hình">
             <Maximize2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </Button>
         </div>
@@ -100,8 +104,8 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
           <div className="flex h-full items-center justify-center">
             <div className="text-center">
               <Spinner size="lg" />
-              <p className="mt-3 text-sm font-medium text-foreground">Processing document</p>
-              <p className="mt-1 text-xs text-muted-foreground">This usually takes 1-2 minutes</p>
+              <p className="mt-3 text-sm font-medium text-foreground">Đang xử lý tài liệu</p>
+              <p className="mt-1 text-xs text-muted-foreground">Quá trình này thường mất 1-2 phút</p>
             </div>
           </div>
         )}
@@ -109,8 +113,8 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
         {doc.status === 'failed' && (
           <EmptyState
             icon={<AlertTriangle />}
-            title="Failed to load document"
-            description="We couldn't process this file. Try uploading it again or contact support."
+            title="Không thể tải tài liệu"
+            description="Hệ thống chưa thể xử lý tệp này. Vui lòng thử tải lên lại hoặc liên hệ hỗ trợ."
           />
         )}
 
@@ -121,25 +125,24 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
               style={{ transform: `scale(${zoom / 100})` }}
             >
               <div className="space-y-4">
-                <Badge variant="primary" label={`Chapter ${currentPage}`} />
+                <Badge variant="primary" label={`Chương ${currentPage}`} />
                 <h3 className="font-display text-2xl font-bold text-foreground text-balance">
-                  Introduction to {doc.name.replace(/\.\w+$/, '')}
+                  Giới thiệu tổng quan: {doc.name.replace(/\.\w+$/, '')}
                 </h3>
                 <p className="text-sm leading-relaxed text-foreground/80">
-                  This chapter provides an overview of the fundamental concepts and principles.
-                  We will explore the key ideas, methodologies, and applications that form the
-                  foundation of this topic.
+                  Phần này trình bày tổng quan về các khái niệm cơ bản và nguyên lý cốt lõi.
+                  Chúng ta sẽ cùng tìm hiểu các ý tưởng chính, phương pháp luận và ứng dụng thực tiễn
+                  tạo nên nền tảng của chủ đề này.
                 </p>
                 <p className="text-sm leading-relaxed text-foreground/80">
-                  Machine learning is a branch of artificial intelligence that focuses on building
-                  systems that learn from and make decisions based on data. Rather than being
-                  explicitly programmed to perform a task, these systems use algorithms to identify
-                  patterns in data and improve their performance over time.
+                  Học máy là một phân nhánh của trí tuệ nhân tạo, tập trung vào việc xây dựng
+                  các hệ thống có khả năng tự học hỏi và đưa ra quyết định dựa trên dữ liệu. Thay vì
+                  được lập trình chi tiết từng bước, hệ thống sẽ tự tìm kiếm quy luật và cải thiện
+                  độ chính xác theo thời gian.
                 </p>
                 <p className="text-sm leading-relaxed text-foreground/80">
-                  The field has grown tremendously in recent years, with applications ranging from
-                  natural language processing and computer vision to recommendation systems and
-                  autonomous vehicles.
+                  Lĩnh vực này đã phát triển vượt bậc trong những năm gần đây, với nhiều ứng dụng
+                  sâu rộng từ xử lý ngôn ngữ tự nhiên, thị giác máy tính đến hệ thống gợi ý và xe tự hành.
                 </p>
               </div>
             </div>
@@ -147,7 +150,7 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
             <div className="mt-6 max-w-3xl mx-auto rounded-xl border border-border bg-muted/30 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="h-4 w-4 text-accent" />
-                <p className="text-sm font-semibold text-foreground">Smart Notes</p>
+                <p className="text-sm font-semibold text-foreground">Ghi chú thông minh AI</p>
                 <Badge variant="primary" label="AI" className="ml-auto" />
               </div>
               <ul className="space-y-2">

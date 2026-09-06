@@ -20,15 +20,15 @@ export default function WelcomePage() {
             </div>
             <div className="text-left">
               <h1 className="text-xl font-extrabold text-foreground leading-tight tracking-tight">Learning Hub</h1>
-              <p className="text-3xs font-semibold uppercase tracking-wider text-muted-foreground">AI Study Workspace</p>
+              <p className="text-3xs font-semibold uppercase tracking-wider text-muted-foreground">Không gian Học tập Đa phương thức AI</p>
             </div>
           </div>
           <h2 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-tight">
-            Welcome to Your<br />
-            <span className="gradient-text-animated">AI-Powered</span> Learning Hub
+            Chào mừng bạn đến với<br />
+            Không gian Học tập <span className="gradient-text-animated">Đột phá cùng AI</span>
           </h2>
           <p className="text-base text-muted-foreground max-w-xl mx-auto">
-            Experience next-generation collaborative learning. Choose your role below to access dedicated tools.
+            Trải nghiệm nền tảng học tập tương tác thế hệ mới. Chọn vai trò của bạn bên dưới để trải nghiệm ngay.
           </p>
         </div>
 
@@ -46,14 +46,14 @@ export default function WelcomePage() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-foreground mb-1.5 flex items-center gap-1.5">
-                  I am a Student
+                  Tôi là Học viên
                 </h3>
                 <p className="text-muted-foreground text-xs leading-relaxed">
-                  Generate instant quizzes, study with interactive flashcards, and prompt our smart AI Tutor.
+                  Tạo bài trắc nghiệm tức thì, ôn tập với thẻ ghi nhớ thông minh và nhận trợ giúp từ Trợ lý AI Tutor.
                 </p>
               </div>
               <div className="flex items-center gap-2 text-blue-500 font-bold text-xs">
-                Access Student Suite
+                Vào Không gian Học viên
                 <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
@@ -70,13 +70,13 @@ export default function WelcomePage() {
                 <BookOpen className="h-7 w-7" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-foreground mb-1.5">I am a Lecturer</h3>
+                <h3 className="text-lg font-bold text-foreground mb-1.5">Tôi là Giảng viên</h3>
                 <p className="text-muted-foreground text-xs leading-relaxed">
-                  Design smart courses, catalog documents in libraries, and access student analytics.
+                  Thiết kế giáo trình thông minh, quản lý thư viện tài liệu, chấm bài tập và theo dõi tiến độ học viên.
                 </p>
               </div>
               <div className="flex items-center gap-2 text-purple-500 font-bold text-xs">
-                Access Teacher Suite
+                Vào Không gian Giảng dạy
                 <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
@@ -86,12 +86,12 @@ export default function WelcomePage() {
         {/* Login Link */}
         <div className="text-center">
           <p className="text-sm text-muted-foreground">
-            Already have an active account?{' '}
+            Bạn đã có tài khoản trên hệ thống?{' '}
             <button
               onClick={() => navigate('/login')}
               className="font-bold text-blue-500 hover:text-blue-600 hover:underline transition-colors"
             >
-              Sign in here
+              Đăng nhập ngay
             </button>
           </p>
         </div>
@@ -103,8 +103,8 @@ export default function WelcomePage() {
               <BookOpen className="h-4.5 w-4.5" />
             </div>
             <div>
-              <p className="font-semibold text-foreground text-xs">Smart Courses</p>
-              <p className="text-3xs text-muted-foreground">Personalized curriculum plans</p>
+              <p className="font-semibold text-foreground text-xs">Khóa học Thông minh</p>
+              <p className="text-3xs text-muted-foreground">Lộ trình học tập cá nhân hóa</p>
             </div>
           </div>
           <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-surface-elevated/40 p-4 backdrop-blur-sm">
@@ -112,8 +112,8 @@ export default function WelcomePage() {
               <Users className="h-4.5 w-4.5" />
             </div>
             <div>
-              <p className="font-semibold text-foreground text-xs">AI Chatbots</p>
-              <p className="text-3xs text-muted-foreground">24/7 contextual answers</p>
+              <p className="font-semibold text-foreground text-xs">Trợ lý Chatbot AI</p>
+              <p className="text-3xs text-muted-foreground">Giải đáp thắc mắc học tập 24/7</p>
             </div>
           </div>
           <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-surface-elevated/40 p-4 backdrop-blur-sm">
@@ -121,8 +121,8 @@ export default function WelcomePage() {
               <Sparkles className="h-4.5 w-4.5" />
             </div>
             <div>
-              <p className="font-semibold text-foreground text-xs">Smart Grading</p>
-              <p className="text-3xs text-muted-foreground">AI-assisted response review</p>
+              <p className="font-semibold text-foreground text-xs">Chấm điểm Tự động</p>
+              <p className="text-3xs text-muted-foreground">Đánh giá và phản hồi bài luận bằng AI</p>
             </div>
           </div>
         </div>
