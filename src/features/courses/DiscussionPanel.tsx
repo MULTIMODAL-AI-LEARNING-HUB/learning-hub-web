@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDiscussions } from '../../hooks/useDiscussions'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -20,7 +20,7 @@ export function DiscussionPanel({ lessonId }: Props) {
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
 
-  useState(() => { fetchDiscussions() })
+  useEffect(() => { fetchDiscussions() }, [lessonId])
 
   const handlePost = async () => {
     if (!newContent.trim()) return

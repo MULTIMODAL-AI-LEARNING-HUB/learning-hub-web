@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { BookOpen, CheckCircle2, XCircle, Trophy, ArrowLeft, ArrowRight } from 'lucide-react'
 import { coursesApi, enrollmentsApi, studyApi, type Course, type Enrollment } from '../services/api'
@@ -37,8 +37,6 @@ export function QuizTaking() {
   const [score, setScore] = useState({ correct: 0, total: 0, percentage: 0 })
   const [jobId, setJobId] = useState<string | null>(null)
 
-  const mountedRef = useRef(false)
-
   const loadData = useCallback(async () => {
     if (!id) return
     setLoading(true)
@@ -60,10 +58,7 @@ export function QuizTaking() {
   }, [id])
 
   useEffect(() => {
-    if (!mountedRef.current) {
-      mountedRef.current = true
-      loadData()
-    }
+    loadData()
   }, [loadData])
 
   const handleGenerateQuiz = async (fromMaterialId?: string) => {
@@ -157,7 +152,7 @@ export function QuizTaking() {
     return (
       <div className="text-center py-12">
         <h2 className="text-xl font-semibold mb-2">Bạn chưa đăng ký khóa học này</h2>
-        <Link to={`/app/courses/${id}`}>
+        <Link to={`/app/student/courses/${id}`}>
           <Button> Quay lại khóa học</Button>
         </Link>
       </div>
@@ -229,7 +224,7 @@ export function QuizTaking() {
     <div className="max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <Link to={`/app/courses/${id}/learn`} className="text-sm text-indigo-600 hover:underline flex items-center gap-1 mb-1">
+          <Link to={`/app/student/courses/${id}/learn`} className="text-sm text-indigo-600 hover:underline flex items-center gap-1 mb-1">
             ← Quay lại học tập
           </Link>
           <h1 className="text-xl font-bold">Bài trắc nghiệm: {course.title}</h1>

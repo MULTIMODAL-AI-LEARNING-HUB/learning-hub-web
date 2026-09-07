@@ -28,6 +28,8 @@ export const setAccessToken = (token: string | null) => {
   accessToken = token
 }
 
+export const getAccessToken = () => accessToken
+
 export const clearAccessToken = () => {
   accessToken = null
 }
@@ -855,6 +857,77 @@ export const chatApi = {
   deleteSession: (id: string) => api.delete(`/chat/sessions/${id}`),
   ask: (data: { session_id: string; query: string; course_id?: string; lesson_id?: string; document_ids?: string[] }) =>
     api.post<ChatAskResponse>('/chat/ask', data),
+  askStream: (
+    data: { session_id: string; query: string; course_id?: string; lesson_id?: string; document_ids?: string[] },
+    onToken: (text: string) => void,
+    onMeta?: (meta: { intent?: string; citations?: Citation[] }) => void,
+    signal?: AbortSignal,
+  ): Promise<{ answer: string; citations: Citation[] }> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const base = (api.defaults.baseURL || '').replace(/\/+$/, '')
+        const url = `${base}/chat/ask/stream`
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+        if (accessToken) {
+          headers.Authorization = `Bearer ${accessToken}`
+        }
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers,
+          credentials: 'include',
+          body: JSON.stringify(data),
+          signal,
+        })
+        if (!resp.ok || !resp.body) {
+          throw new Error(`Stream request failed: ${resp.status}`)
+        }
+        const reader = resp.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ''
+        let fullAnswer = ''
+        let citations: Citation[] = []
+        const pump = async (): Promise<void> => {
+          const { done, value } = await reader.read()
+          if (done) {
+            resolve({ answer: fullAnswer, citations })
+            return
+          }
+          buffer += decoder.decode(value, { stream: true })
+          const events = buffer.split('\n\n')
+          buffer = events.pop() || ''
+          for (const evt of events) {
+            const line = evt.trim()
+            if (!line.startsWith('data: ')) continue
+            try {
+              const payload = JSON.parse(line.slice(6)) as
+                | { type: 'token'; text: string }
+                | { type: 'meta'; intent?: string; citations?: Citation[] }
+                | { type: 'done'; answer: string }
+                | { type: 'error'; message: string }
+              if (payload.type === 'token') {
+                fullAnswer += payload.text
+                onToken(payload.text)
+              } else if (payload.type === 'meta') {
+                citations = payload.citations || []
+                onMeta?.({ intent: payload.intent, citations })
+              } else if (payload.type === 'done') {
+                fullAnswer = payload.answer || fullAnswer
+              } else if (payload.type === 'error') {
+                throw new Error(payload.message || 'Stream error')
+              }
+            } catch (e) {
+              if (e instanceof Error && e.message !== 'Stream error' && !(e instanceof SyntaxError)) throw e
+              if (e instanceof Error && !e.message.includes('JSON')) throw e
+            }
+          }
+          return pump()
+        }
+        await pump()
+      } catch (err) {
+        reject(err)
+      }
+    })
+  },
   listMessages: (sessionId: string, page = 1, pageSize = 50) =>
     api.get<{ items: ChatMessage[]; total: number }>(`/chat/sessions/${sessionId}/messages`, {
       params: { page, page_size: pageSize },
@@ -897,7 +970,8 @@ export const studyApi = {
     api.post('/study/flashcards/generate', data),
   getFlashcard: (id: string) => api.get(`/study/flashcards/${id}`),
   submitEssay: (data: { document_id: string; essay_text: string }) =>
-    api.post('/study/essay/submit', data),
+    api.post<{ job_id: string; status: string }>('/study/essay/submit', data),
+  getEssayJob: (jobId: string) => api.get(`/study/essay/job/${jobId}`),
 }
 
 export interface AiApiKey {

@@ -18,10 +18,6 @@ export function useJobPolling<T>(options: UseJobPollingOptions<T>) {
   const {
     interval = 2500,
     maxAttempts = 60,
-    poll,
-    onReady,
-    onError,
-    onTimeout,
     errorTitle = 'Generation failed',
     timeoutTitle = 'Generation timed out'
   } = options
@@ -33,6 +29,23 @@ export function useJobPolling<T>(options: UseJobPollingOptions<T>) {
   const pollCount = useRef(0)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const toast = useToast()
+  // Always call the latest closures (avoids stale jobId captured at start() time).
+  // start() is typically called right after setJobId(); without refs it would
+  // keep polling with jobId=null forever.
+  const pollRef = useRef(options.poll)
+  const onReadyRef = useRef(options.onReady)
+  const onErrorRef = useRef(options.onError)
+  const onTimeoutRef = useRef(options.onTimeout)
+  const errorTitleRef = useRef(errorTitle)
+  const timeoutTitleRef = useRef(timeoutTitle)
+  useEffect(() => {
+    pollRef.current = options.poll
+    onReadyRef.current = options.onReady
+    onErrorRef.current = options.onError
+    onTimeoutRef.current = options.onTimeout
+    errorTitleRef.current = errorTitle
+    timeoutTitleRef.current = timeoutTitle
+  })
 
   const cleanup = useCallback(() => {
     if (intervalRef.current) {
@@ -48,6 +61,8 @@ export function useJobPolling<T>(options: UseJobPollingOptions<T>) {
   }, [cleanup])
 
   const start = useCallback(() => {
+    cleanup()
+    setLoading(false)
     setLoading(true)
     setStatus('processing')
     setProgress(10)
@@ -58,32 +73,35 @@ export function useJobPolling<T>(options: UseJobPollingOptions<T>) {
       if (pollCount.current >= maxAttempts) {
         cleanup()
         setStatus('failed')
-        toast({ type: 'error', title: timeoutTitle })
-        onTimeout?.()
+        setLoading(false)
+        toast({ type: 'error', title: timeoutTitleRef.current })
+        onTimeoutRef.current?.()
         return
       }
 
       setProgress((p) => Math.min(90, p + 5))
 
       try {
-        const result = await poll()
+        const result = await pollRef.current()
         if (result.status === 'ready' && result.data !== undefined) {
           cleanup()
           setData(result.data)
           setStatus('ready')
           setProgress(100)
-          onReady(result.data)
+          setLoading(false)
+          onReadyRef.current(result.data)
         } else if (result.status === 'failed') {
           cleanup()
           setStatus('failed')
-          toast({ type: 'error', title: errorTitle, message: result.error })
-          onError?.(result.error)
+          setLoading(false)
+          toast({ type: 'error', title: errorTitleRef.current, message: result.error })
+          onErrorRef.current?.(result.error)
         }
       } catch {
         // network glitch: keep trying
       }
     }, interval)
-  }, [interval, maxAttempts, poll, onReady, onError, onTimeout, cleanup, errorTitle, timeoutTitle, toast])
+  }, [interval, maxAttempts, cleanup, toast])
 
   useEffect(() => {
     return () => cleanup()

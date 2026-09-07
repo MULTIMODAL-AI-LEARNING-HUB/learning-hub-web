@@ -47,9 +47,15 @@ export function ChatPanel() {
     }
   }, [courseId, activeSessionId, sessions, addSession])
 
+  const lastMsg = messages[messages.length - 1]
+  const showTyping =
+    isSending &&
+    (!lastMsg || lastMsg.role === 'user' || (lastMsg.role === 'assistant' && !lastMsg.content.trim()))
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages.length, isSending])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length, isSending, lastMsg?.content?.length])
 
   const handleSend = async () => {
     if (!input.trim() || isSending) return
@@ -173,7 +179,7 @@ export function ChatPanel() {
                 )}
               </div>
             ))}
-            {isSending && (
+            {showTyping && (
               <div className="flex gap-2.5 justify-start items-center">
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent text-primary-foreground">
                   <Sparkles className="h-3.5 w-3.5 animate-pulse" />

@@ -11,6 +11,7 @@ import { EmptyState } from '../../components/ui/EmptyState'
 import { Spinner } from '../../components/ui/Spinner'
 import { useToast } from '../../components/ui/useToast'
 import { studyApi } from '../../services/api'
+import { useJobPolling, type JobStatus } from '../../hooks/useJobPolling'
 
 interface GradingResult {
   score: number
@@ -26,7 +27,37 @@ export function EssayGrading() {
   const [selectedDoc, setSelectedDoc] = useState('')
   const [essay, setEssay] = useState('')
   const [result, setResult] = useState<GradingResult | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [jobId, setJobId] = useState<string | null>(null)
+
+  const { loading, progress, start, stop, setProgress } = useJobPolling<GradingResult>({
+    poll: async (): Promise<{ status: JobStatus; data?: GradingResult; error?: string }> => {
+      if (!jobId) return { status: 'pending' }
+      try {
+        const res = await studyApi.getEssayJob(jobId)
+        const data = res.data as
+          | { status?: string; job_id?: string; score?: number; feedback?: string; comparisons?: GradingResult['comparisons'] }
+          | GradingResult
+        if ('score' in data && typeof data.score === 'number') {
+          return { status: 'ready', data: data as GradingResult }
+        }
+        if ((data as { status?: string }).status === 'failed') {
+          return { status: 'failed', error: 'Mô hình AI không thể chấm bài luận này.' }
+        }
+        return { status: 'processing' }
+      } catch {
+        return { status: 'processing' }
+      }
+    },
+    onReady: (graded) => {
+      setResult(graded)
+      toast({ type: 'success', title: 'Đã hoàn tất chấm điểm', message: `Điểm số: ${graded.score}/10` })
+    },
+    onError: () => {
+      toast({ type: 'error', title: 'Chấm điểm bài luận thất bại' })
+    },
+    errorTitle: 'Chấm điểm bài luận thất bại',
+    timeoutTitle: 'Quá thời gian chấm bài luận',
+  })
 
   const handleGrade = async () => {
     if (!essay.trim()) {
@@ -37,23 +68,24 @@ export function EssayGrading() {
       toast({ type: 'warning', title: 'Vui lòng chọn tài liệu tham chiếu' })
       return
     }
-    setLoading(true)
     try {
       const res = await studyApi.submitEssay({
         document_id: selectedDoc,
         essay_text: essay,
       })
-      setResult(res.data as GradingResult)
-      toast({ type: 'success', title: 'Đã hoàn tất chấm điểm', message: `Điểm số: ${(res.data as GradingResult).score}/10` })
+      setResult(null)
+      setJobId(res.data.job_id)
+      setProgress(0)
+      setTimeout(() => start(), 0)
     } catch {
       toast({ type: 'error', title: 'Chấm điểm bài luận thất bại' })
-    } finally {
-      setLoading(false)
     }
   }
 
   const handleReset = () => {
+    stop()
     setResult(null)
+    setJobId(null)
     setEssay('')
   }
 
@@ -124,7 +156,7 @@ export function EssayGrading() {
               <div className="flex flex-col items-center text-center">
                 <Spinner size="lg" />
                 <p className="mt-4 text-sm font-semibold text-foreground">Đang phân tích bài luận của bạn</p>
-                <p className="mt-1 text-xs text-muted-foreground">Đang đối chiếu nội dung với tài liệu tham chiếu...</p>
+                <p className="mt-1 text-xs text-muted-foreground">Đang đối chiếu nội dung với tài liệu tham chiếu... {progress}%</p>
               </div>
             </Card>
           ) : result ? (

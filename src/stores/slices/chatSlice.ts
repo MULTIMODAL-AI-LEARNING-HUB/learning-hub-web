@@ -65,46 +65,140 @@ export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never
         }
       }), false, 'chat/sendUserMessage')
 
-      try {
-        const res = await chatApi.ask({
-          session_id: sessionId,
-          query: content.trim(),
-          course_id: courseId,
-          lesson_id: lessonId,
-          document_ids: documentIds
-        })
-        const data = res.data
-        const aiMsg: Message = {
-          id: `msg-${Date.now() + 1}`,
-          role: 'assistant',
-          content: data.answer,
-          timestamp: ts,
-          citations: data.citations?.map((c: ApiCitation, i: number) => ({
-            id: `cite-${i}`,
-            label: `[${i + 1}] Page ${c.page_number || '?'}`
-          })) || []
+      // Insert a placeholder assistant message that will be filled token-by-token
+      const streamMsgId = `msg-${Date.now() + 1}`
+      const streamMsg: Message = {
+        id: streamMsgId,
+        role: 'assistant',
+        content: '',
+        timestamp: ts,
+        citations: [],
+      }
+      set((state) => ({
+        chat: {
+          ...state.chat,
+          sessions: state.chat.sessions.map((s) =>
+            s.id === sessionId ? { ...s, messages: [...s.messages, streamMsg] } : s
+          )
         }
-        
+      }), false, 'chat/receiveAIMessagePlaceholder')
+
+      const appendToken = (tokenText: string) => {
         set((state) => ({
           chat: {
             ...state.chat,
             sessions: state.chat.sessions.map((s) =>
-              s.id === sessionId ? { ...s, messages: [...s.messages, aiMsg] } : s
+              s.id === sessionId
+                ? {
+                    ...s,
+                    messages: s.messages.map((m) =>
+                      m.id === streamMsgId ? { ...m, content: m.content + tokenText } : m
+                    ),
+                  }
+                : s
             )
           }
-        }), false, 'chat/receiveAIMessage')
-      } catch {
-        const aiMsg: Message = {
-          id: `msg-${Date.now() + 1}`,
-          role: 'assistant',
-          content: 'Xin lỗi, đã có lỗi xảy ra khi xử lý phản hồi AI. Vui lòng thử lại.',
-          timestamp: ts,
-        }
+        }), false, 'chat/streamToken')
+      }
+
+      const applyCitations = (cites: ApiCitation[]) => {
         set((state) => ({
           chat: {
             ...state.chat,
             sessions: state.chat.sessions.map((s) =>
-              s.id === sessionId ? { ...s, messages: [...s.messages, aiMsg] } : s
+              s.id === sessionId
+                ? {
+                    ...s,
+                    messages: s.messages.map((m) =>
+                      m.id === streamMsgId
+                        ? {
+                            ...m,
+                            citations: cites.map((c: ApiCitation, i: number) => ({
+                              id: `cite-${i}`,
+                              label: `[${i + 1}] Page ${c.page_number || '?'}`
+                            })),
+                          }
+                        : m
+                    ),
+                  }
+                : s
+            )
+          }
+        }), false, 'chat/streamCitations')
+      }
+
+      try {
+        const controller = new AbortController()
+        try {
+          const result = await chatApi.askStream(
+            {
+              session_id: sessionId,
+              query: content.trim(),
+              course_id: courseId,
+              lesson_id: lessonId,
+              document_ids: documentIds,
+            },
+            appendToken,
+            (meta) => {
+              if (meta.citations) applyCitations(meta.citations)
+            },
+            controller.signal,
+          )
+          if (result.citations?.length) applyCitations(result.citations)
+        } catch (streamErr) {
+          // Fallback to non-streaming JSON endpoint (older backend / stream unavailable)
+          const res = await chatApi.ask({
+            session_id: sessionId,
+            query: content.trim(),
+            course_id: courseId,
+            lesson_id: lessonId,
+            document_ids: documentIds
+          })
+          const data = res.data
+          set((state) => ({
+            chat: {
+              ...state.chat,
+              sessions: state.chat.sessions.map((s) =>
+                s.id === sessionId
+                  ? {
+                      ...s,
+                      messages: s.messages.map((m) =>
+                        m.id === streamMsgId
+                          ? {
+                              ...m,
+                              content: data.answer,
+                              citations: data.citations?.map((c: ApiCitation, i: number) => ({
+                                id: `cite-${i}`,
+                                label: `[${i + 1}] Page ${c.page_number || '?'}`
+                              })) || [],
+                            }
+                          : m
+                      ),
+                    }
+                  : s
+              )
+            }
+          }), false, 'chat/receiveAIMessageFallback')
+          void streamErr
+        }
+      } catch {
+        set((state) => ({
+          chat: {
+            ...state.chat,
+            sessions: state.chat.sessions.map((s) =>
+              s.id === sessionId
+                ? {
+                    ...s,
+                    messages: s.messages.map((m) =>
+                      m.id === streamMsgId
+                        ? {
+                            ...m,
+                            content: 'Xin lỗi, đã có lỗi xảy ra khi xử lý phản hồi AI. Vui lòng thử lại.',
+                          }
+                        : m
+                    ),
+                  }
+                : s
             )
           }
         }), false, 'chat/receiveAIMessageError')
