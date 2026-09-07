@@ -74,20 +74,14 @@ function AuthShell({ variant }: { variant: Variant }) {
   // Stores a Facebook access_token read from the URL hash (no setState inside effect)
   const pendingFbTokenRef = useRef<string | null>(null)
   
-  const initialRole = searchParams.get('role') === 'lecturer' ? 'lecturer' : 'student'
-  const [selectedRole, setSelectedRole] = useState<'student' | 'lecturer'>(initialRole)
-
-  // Sync role state whenever search params update
-  useEffect(() => {
-    const roleParam = searchParams.get('role')
-    if (roleParam === 'lecturer' || roleParam === 'student') {
-      setSelectedRole(roleParam)
-    }
-  }, [searchParams])
+  const selectedRole: 'student' | 'lecturer' = searchParams.get('role') === 'lecturer' ? 'lecturer' : 'student'
 
   const handleSelectRole = (role: 'student' | 'lecturer') => {
-    setSelectedRole(role)
-    setSearchParams({ role })
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set('role', role)
+      return next
+    })
   }
 
   const isRegister = variant === 'register'

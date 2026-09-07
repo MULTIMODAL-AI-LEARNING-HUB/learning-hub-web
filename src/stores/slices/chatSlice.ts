@@ -1,7 +1,7 @@
 import type { StateCreator } from 'zustand'
 import type { AppState, ChatSlice } from '../types'
 import type { ChatSession, Message } from '../../types'
-import { chatApi, type Citation as ApiCitation } from '../../services/api'
+import { chatApi, type Citation as ApiCitation, type ChatMessage as ApiChatMessage } from '../../services/api'
 
 export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never]], [], ChatSlice> = (set, get) => ({
   chat: {
@@ -16,12 +16,12 @@ export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never
       if (session && session.messages.length === 0) {
         try {
           const res = await chatApi.listMessages(id)
-          const msgs: Message[] = (res.data.items || []).map((m: any) => ({
+          const msgs: Message[] = (res.data.items || []).map((m: ApiChatMessage) => ({
             id: m.id,
-            role: m.role,
+            role: m.role as 'user' | 'assistant',
             content: m.content,
             timestamp: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            citations: (m.citations || []).map((c: any, i: number) => ({
+            citations: (m.citations || []).map((c: ApiCitation, i: number) => ({
               id: `cite-${i}`,
               label: `[${i + 1}] Page ${c.page_number || '?'}`
             }))
