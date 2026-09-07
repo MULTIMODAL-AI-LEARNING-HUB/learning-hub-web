@@ -5,6 +5,7 @@ import { LoginPage, RegisterPage } from '../pages/AuthPage'
 import { ForgotPasswordPage } from '../pages/ForgotPasswordPage'
 import { ResetPasswordPage } from '../pages/ResetPasswordPage'
 import { PaymentReturn } from '../pages/PaymentReturn'
+import { MockPaymentGateway } from '../pages/MockPaymentGateway'
 import { QuizTaking } from '../pages/QuizTaking'
 import { StudentLayout } from '../layouts/StudentLayout'
 import { LecturerLayout } from '../layouts/LecturerLayout'
@@ -49,6 +50,7 @@ export const router = createBrowserRouter([
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/reset-password/:token', element: <ResetPasswordPage /> },
   { path: '/payment/return', element: <PaymentReturn /> },
+  { path: '/payment/mock-gateway', element: <MockPaymentGateway /> },
   { path: '/quiz/:id', element: <QuizTaking /> },
   { path: '/unauthorized', element: <PlaceholderPage title="Unauthorized" /> },
 

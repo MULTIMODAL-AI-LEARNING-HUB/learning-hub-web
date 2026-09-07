@@ -11,6 +11,7 @@ import { ReviewSection } from './ReviewSection'
 import { Announcements } from './Announcements'
 
 const TRUSTED_PAYMENT_HOSTS = new Set([
+  'sandbox.vnpay.vn',
   'sandbox.vnpayment.vn',
   'pay.vnpay.vn',
   'test-payment.momo.vn',
@@ -18,10 +19,20 @@ const TRUSTED_PAYMENT_HOSTS = new Set([
 ])
 
 function getTrustedPaymentUrl(value: string): string | null {
+  if (!value) return null
+  if (value.startsWith('/')) return value
   try {
     const url = new URL(value)
-    if (url.protocol !== 'https:' || !TRUSTED_PAYMENT_HOSTS.has(url.hostname)) return null
-    return url.toString()
+    if (
+      url.origin === window.location.origin ||
+      url.hostname === 'localhost' ||
+      url.hostname === '127.0.0.1' ||
+      url.hostname === 'learninghubs.tech' ||
+      (url.protocol === 'https:' && TRUSTED_PAYMENT_HOSTS.has(url.hostname))
+    ) {
+      return url.toString()
+    }
+    return null
   } catch {
     return null
   }

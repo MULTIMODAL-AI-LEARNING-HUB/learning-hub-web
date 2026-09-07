@@ -794,6 +794,8 @@ export const enrollmentsApi = {
 
 export const paymentsApi = {
   getStatus: (paymentId: string) => api.get<{ status: string; enrollment_id?: string }>(`/payments/${paymentId}/status`),
+  mockConfirm: (data: { transaction_id: string; action: 'success' | 'cancel' | 'fail'; mock_token: string }) =>
+    api.post<{ success: boolean; status: string; course_id?: string }>('/payments/mock/confirm', data),
   createVNPayUrl: (enrollmentId: string, amount: number) =>
     api.post<{ payment_url: string }>('/payments/vnpay/create', { enrollment_id: enrollmentId, amount }),
   createMoMoUrl: (enrollmentId: string, amount: number) =>
