@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
-import { Sparkles, ArrowRight, Mail, Lock, User, GraduationCap, Briefcase, ShieldCheck } from 'lucide-react'
+import { Sparkles, ArrowRight, Mail, Lock, User, GraduationCap, Briefcase } from 'lucide-react'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useAppStore } from '../stores/appStore'
 import { Button } from '../components/ui/Button'
@@ -62,8 +62,6 @@ function AuthShell({ variant }: { variant: Variant }) {
   const facebookLogin = useAppStore((s) => s.auth.facebookLogin)
 
   const fromPath = (location.state as { from?: { pathname?: string } })?.from?.pathname
-  // Lecturer accounts are provisioned by an administrator; public signup is student-only.
-  const roleFromUrl = 'student'
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -238,7 +236,7 @@ function AuthShell({ variant }: { variant: Variant }) {
         const user = useAppStore.getState().auth.user
         navigate(getRedirectPath(user))
       } else {
-        await register(email, password, name, roleFromUrl)
+        await register(email, password, name, selectedRole)
         const user = useAppStore.getState().auth.user
         navigate(getRedirectPath(user))
       }
@@ -273,14 +271,14 @@ function AuthShell({ variant }: { variant: Variant }) {
                 ? content.title
                 : isStudent
                 ? 'Tạo tài khoản Học viên'
-                : 'Cổng thông tin Giảng viên'}
+                : 'Tạo tài khoản Giảng viên'}
             </h1>
             <p className="text-sm text-muted-foreground">
               {variant === 'login'
                 ? content.subtitle
                 : isStudent
                 ? 'Đăng ký để học tập, thực hành với AI và tham gia các khóa học chất lượng.'
-                : 'Quy trình tiếp nhận & cấp phát tài khoản dành cho cán bộ giảng dạy.'}
+                : 'Đăng ký tài khoản để thiết kế bài giảng, tạo khóa học và đồng hành cùng học viên.'}
             </p>
           </div>
 
@@ -327,206 +325,170 @@ function AuthShell({ variant }: { variant: Variant }) {
 
           {/* Form Card */}
           <Card className="border-border bg-surface-elevated p-6 sm:p-8 shadow-lift relative">
-            {isRegister && !isStudent ? (
-              /* Lecturer Provisioning Notice */
-              <div className="space-y-6">
-                <div className="flex items-start gap-3.5 p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-600 text-white shadow-soft">
-                    <ShieldCheck className="h-5 w-5" />
+            {/* Role Badge when Registering */}
+            {isRegister && (
+              <div className={cn(
+                "flex items-center justify-between mb-5 pb-3 border-b",
+                isStudent ? "border-border/60" : "border-purple-500/20"
+              )}>
+                <div className="flex items-center gap-2.5">
+                  <div className={cn(
+                    "flex h-8 w-8 items-center justify-center rounded-lg",
+                    isStudent ? "bg-primary/10 text-primary" : "bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                  )}>
+                    {roleIcon}
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-foreground">Tài khoản Giảng viên được cấp bởi Ban Quản Trị</h3>
-                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                      Nhằm đảm bảo chất lượng kiểm định nội dung giảng dạy và an toàn hệ thống, tài khoản Giảng viên được phân quyền trực tiếp bởi Ban Quản Trị thay vì đăng ký tự do.
+                    <p className="text-xs font-bold text-foreground">
+                      {isStudent ? 'Đăng ký Học viên' : 'Đăng ký Giảng viên'}
+                    </p>
+                    <p className="text-3xs text-muted-foreground">
+                      {isStudent
+                        ? 'Tự do học tập, làm bài tập & tương tác cùng AI'
+                        : 'Thiết kế giáo trình, chấm bài tập & theo dõi học viên'}
                     </p>
                   </div>
                 </div>
-
-                <div className="space-y-2.5 rounded-xl bg-surface-muted/60 p-4 border border-border text-xs text-muted-foreground">
-                  <p className="font-bold text-foreground flex items-center gap-1.5">
-                    <Briefcase className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                    Quy trình cấp phát tài khoản Giảng viên:
-                  </p>
-                  <ol className="list-decimal list-inside space-y-1.5 text-xs text-muted-foreground/90 pl-1 leading-relaxed">
-                    <li>Gửi email yêu cầu cấp tài khoản kèm thông tin chuyên môn / tổ chức đào tạo.</li>
-                    <li>Ban Quản Trị xem xét và kích hoạt tài khoản trong vòng 24 giờ làm việc.</li>
-                    <li>Nhận thông tin đăng nhập chính thức và tiến hành cấu hình giáo trình.</li>
-                  </ol>
-                </div>
-
-                <div className="space-y-3 pt-2">
-                  <a
-                    href="mailto:admin@learninghubs.tech?subject=Y%C3%AAu%20c%E1%BA%A7u%20c%E1%BA%A5p%20t%C3%A0i%20kho%E1%BA%A3n%20Gi%E1%BA%A3ng%20vi%C3%AAn%20-%20Learning%20Hub"
-                    className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl bg-primary text-primary-foreground font-semibold text-xs hover:bg-primary/90 transition-all shadow-soft active:scale-[0.99]"
-                  >
-                    <Mail className="h-4 w-4" />
-                    <span>Gửi yêu cầu xét duyệt qua Email (admin@learninghubs.tech)</span>
-                  </a>
-
-                  <div className="grid grid-cols-2 gap-2.5 pt-1">
-                    <Link
-                      to="/login"
-                      className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border border-border text-xs font-semibold text-foreground hover:bg-surface-muted transition-colors text-center"
-                    >
-                      Đã có tài khoản? Đăng nhập
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => handleSelectRole('student')}
-                      className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border border-primary/30 text-xs font-semibold text-primary hover:bg-primary/5 transition-colors text-center cursor-pointer"
-                    >
-                      <GraduationCap className="h-3.5 w-3.5" />
-                      Đăng ký Học viên
-                    </button>
-                  </div>
-                </div>
+                <span className={cn(
+                  "inline-flex items-center px-2 py-0.5 rounded text-3xs font-bold uppercase tracking-wider",
+                  isStudent
+                    ? "bg-primary/10 text-primary border border-primary/20"
+                    : "bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20"
+                )}>
+                  {isStudent ? 'Student' : 'Lecturer'}
+                </span>
               </div>
-            ) : (
-              <>
-                {/* Role Badge when Student */}
-                {isRegister && (
-                  <div className="flex items-center justify-between mb-5 pb-3 border-b border-border/60">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                        <GraduationCap className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-foreground">Đăng ký Học viên</p>
-                        <p className="text-3xs text-muted-foreground">Tự do học tập, làm bài tập & tương tác cùng AI</p>
-                      </div>
-                    </div>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-3xs font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
-                      Student
-                    </span>
-                  </div>
-                )}
-
-                {/* Social Login Buttons */}
-                <div className="grid grid-cols-2 gap-3 mb-5">
-                  <SocialLoginButton
-                    provider="google"
-                    onClick={() => triggerGoogleLogin()}
-                    loading={socialLoading === 'google'}
-                    disabled={loading || socialLoading !== null}
-                  />
-                  <SocialLoginButton
-                    provider="facebook"
-                    onClick={handleFacebookClick}
-                    loading={socialLoading === 'facebook'}
-                    disabled={loading || socialLoading !== null}
-                  />
-                </div>
-
-                {/* Divider */}
-                <div className="relative my-4 flex items-center justify-center">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-border/60" />
-                  </div>
-                  <div className="relative bg-surface-elevated px-3 text-3xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Hoặc tiếp tục với email
-                  </div>
-                </div>
-
-                <form onSubmit={handleSubmit} className="grid gap-5">
-                  {errors.form && (
-                    <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-xs text-destructive animate-shake-in" role="alert">
-                      {errors.form}
-                    </div>
-                  )}
-
-                  {variant === 'register' && (
-                    <AuthInput
-                      name="full_name"
-                      label="Họ và tên"
-                      placeholder="Nguyễn Văn A"
-                      value={name}
-                      onChange={setName}
-                      error={errors.name}
-                      prefixIcon={<User className="h-4 w-4 text-muted-foreground" />}
-                    />
-                  )}
-
-                  <AuthInput
-                    name="email"
-                    label="Địa chỉ email"
-                    type="email"
-                    placeholder="ban@example.com"
-                    value={email}
-                    onChange={setEmail}
-                    error={errors.email}
-                    prefixIcon={<Mail className="h-4 w-4 text-muted-foreground" />}
-                  />
-
-                  <AuthInput
-                    name="password"
-                    label="Mật khẩu"
-                    type="password"
-                    placeholder="Tối thiểu 8 ký tự"
-                    value={password}
-                    onChange={setPassword}
-                    error={errors.password}
-                    prefixIcon={<Lock className="h-4 w-4 text-muted-foreground" />}
-                  />
-
-                  {variant === 'register' && (
-                    <AuthInput
-                      name="confirmPassword"
-                      label="Xác nhận mật khẩu"
-                      type="password"
-                      placeholder="Nhập lại mật khẩu"
-                      value={confirmPassword}
-                      onChange={setConfirmPassword}
-                      error={errors.confirmPassword}
-                      prefixIcon={<Lock className="h-4 w-4 text-muted-foreground" />}
-                    />
-                  )}
-
-                  {/* Login extras */}
-                  {variant === 'login' && (
-                    <div className="flex items-center justify-between">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={rememberMe}
-                          onChange={(e) => setRememberMe(e.target.checked)}
-                          className="h-4 w-4 rounded border-border bg-surface-elevated text-blue-500 focus:ring-blue-500/30 cursor-pointer"
-                        />
-                        <span className="text-xs text-muted-foreground select-none">Duy trì đăng nhập</span>
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => navigate('/forgot-password')}
-                        className="text-xs font-bold text-blue-500 hover:text-blue-600 transition-colors"
-                      >
-                        Quên mật khẩu?
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Register extras */}
-                  {variant === 'register' && (
-                    <p className="text-3xs text-muted-foreground leading-relaxed">
-                      Bằng việc tạo tài khoản, bạn đồng ý với{' '}
-                      <button type="button" className="font-bold text-blue-500 hover:underline">Điều khoản dịch vụ</button>
-                      {' '}và{' '}
-                      <button type="button" className="font-bold text-blue-500 hover:underline">Chính sách bảo mật</button>.
-                    </p>
-                  )}
-
-                  <Button
-                    type="submit"
-                    loading={loading}
-                    className={cn(
-                      "w-full font-semibold"
-                    )}
-                    size="lg"
-                    iconRight={!loading ? <ArrowRight className="h-4 w-4" /> : undefined}
-                  >
-                    {loading ? 'Đang xác thực...' : (isRegister ? 'Tạo tài khoản Học viên' : content.cta)}
-                  </Button>
-                </form>
-              </>
             )}
+
+            {/* Social Login Buttons */}
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              <SocialLoginButton
+                provider="google"
+                onClick={() => triggerGoogleLogin()}
+                loading={socialLoading === 'google'}
+                disabled={loading || socialLoading !== null}
+              />
+              <SocialLoginButton
+                provider="facebook"
+                onClick={handleFacebookClick}
+                loading={socialLoading === 'facebook'}
+                disabled={loading || socialLoading !== null}
+              />
+            </div>
+
+            {/* Divider */}
+            <div className="relative my-4 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border/60" />
+              </div>
+              <div className="relative bg-surface-elevated px-3 text-3xs font-bold uppercase tracking-wider text-muted-foreground">
+                Hoặc tiếp tục với email
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="grid gap-5">
+              {errors.form && (
+                <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-xs text-destructive animate-shake-in" role="alert">
+                  {errors.form}
+                </div>
+              )}
+
+              {variant === 'register' && (
+                <AuthInput
+                  name="full_name"
+                  label="Họ và tên"
+                  placeholder="Nguyễn Văn A"
+                  value={name}
+                  onChange={setName}
+                  error={errors.name}
+                  prefixIcon={<User className="h-4 w-4 text-muted-foreground" />}
+                />
+              )}
+
+              <AuthInput
+                name="email"
+                label="Địa chỉ email"
+                type="email"
+                placeholder="ban@example.com"
+                value={email}
+                onChange={setEmail}
+                error={errors.email}
+                prefixIcon={<Mail className="h-4 w-4 text-muted-foreground" />}
+              />
+
+              <AuthInput
+                name="password"
+                label="Mật khẩu"
+                type="password"
+                placeholder="Tối thiểu 8 ký tự"
+                value={password}
+                onChange={setPassword}
+                error={errors.password}
+                prefixIcon={<Lock className="h-4 w-4 text-muted-foreground" />}
+              />
+
+              {variant === 'register' && (
+                <AuthInput
+                  name="confirmPassword"
+                  label="Xác nhận mật khẩu"
+                  type="password"
+                  placeholder="Nhập lại mật khẩu"
+                  value={confirmPassword}
+                  onChange={setConfirmPassword}
+                  error={errors.confirmPassword}
+                  prefixIcon={<Lock className="h-4 w-4 text-muted-foreground" />}
+                />
+              )}
+
+              {/* Login extras */}
+              {variant === 'login' && (
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="h-4 w-4 rounded border-border bg-surface-elevated text-blue-500 focus:ring-blue-500/30 cursor-pointer"
+                    />
+                    <span className="text-xs text-muted-foreground select-none">Duy trì đăng nhập</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/forgot-password')}
+                    className="text-xs font-bold text-blue-500 hover:text-blue-600 transition-colors"
+                  >
+                    Quên mật khẩu?
+                  </button>
+                </div>
+              )}
+
+              {/* Register extras */}
+              {variant === 'register' && (
+                <p className="text-3xs text-muted-foreground leading-relaxed">
+                  Bằng việc tạo tài khoản, bạn đồng ý với{' '}
+                  <button type="button" className="font-bold text-blue-500 hover:underline">Điều khoản dịch vụ</button>
+                  {' '}và{' '}
+                  <button type="button" className="font-bold text-blue-500 hover:underline">Chính sách bảo mật</button>.
+                </p>
+              )}
+
+              <Button
+                type="submit"
+                loading={loading}
+                className={cn(
+                  "w-full font-semibold",
+                  isRegister && !isStudent && "bg-purple-600 hover:bg-purple-700 text-white"
+                )}
+                size="lg"
+                iconRight={!loading ? <ArrowRight className="h-4 w-4" /> : undefined}
+              >
+                {loading
+                  ? 'Đang xác thực...'
+                  : isRegister
+                  ? (isStudent ? 'Tạo tài khoản Học viên' : 'Tạo tài khoản Giảng viên')
+                  : content.cta}
+              </Button>
+            </form>
 
             {/* Toggle Link */}
             <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
