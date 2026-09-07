@@ -136,11 +136,11 @@ export function StudentDashboard() {
           </div>
 
           {/* Quick AI Action Card */}
-          <div className="flex lg:flex-col gap-3 shrink-0">
+          <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 w-full lg:w-auto">
             <Button
               onClick={() => navigate('/app/student/quiz')}
               icon={<BrainCircuit className="h-4 w-4 text-purple-400" />}
-              className="h-11 px-5 rounded-2xl bg-gradient-to-r from-blue-600 to-primary text-white hover:from-blue-700 hover:to-primary/90 shadow-md hover:shadow-lg transition-all duration-200"
+              className="h-11 px-5 rounded-2xl bg-gradient-to-r from-blue-600 to-primary text-white hover:from-blue-700 hover:to-primary/90 shadow-md hover:shadow-lg transition-all duration-200 w-full sm:w-auto"
             >
               Tạo đề ôn thi AI
             </Button>
@@ -148,7 +148,7 @@ export function StudentDashboard() {
               variant="outline"
               onClick={() => navigate('/app/student/browse')}
               icon={<Compass className="h-4 w-4 text-primary" />}
-              className="h-11 px-5 rounded-2xl border-border bg-background/80 hover:bg-muted"
+              className="h-11 px-5 rounded-2xl border-border bg-background/80 hover:bg-muted w-full sm:w-auto"
             >
               Khám phá khóa học
             </Button>
@@ -159,7 +159,7 @@ export function StudentDashboard() {
       {/* 2. Key Learning Metrics (4 Modern Stat Cards) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Enrolled Courses */}
-        <div className="group relative overflow-hidden rounded-2xl border border-border/70 bg-surface-elevated p-4.5 hover:border-blue-500/40 hover:shadow-soft transition-all duration-200">
+        <div className="group relative overflow-hidden rounded-2xl border border-border/70 bg-surface-elevated p-4 hover:border-blue-500/40 hover:shadow-soft transition-all duration-200">
           <div className="flex items-center justify-between">
             <span className="text-2xs font-bold uppercase tracking-wider text-muted-foreground">Khóa học</span>
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-1 ring-blue-500/20 group-hover:scale-110 transition-transform">
@@ -178,7 +178,7 @@ export function StudentDashboard() {
         </div>
 
         {/* Completed Lessons */}
-        <div className="group relative overflow-hidden rounded-2xl border border-border/70 bg-surface-elevated p-4.5 hover:border-emerald-500/40 hover:shadow-soft transition-all duration-200">
+        <div className="group relative overflow-hidden rounded-2xl border border-border/70 bg-surface-elevated p-4 hover:border-emerald-500/40 hover:shadow-soft transition-all duration-200">
           <div className="flex items-center justify-between">
             <span className="text-2xs font-bold uppercase tracking-wider text-muted-foreground">Bài học xong</span>
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20 group-hover:scale-110 transition-transform">
@@ -197,7 +197,7 @@ export function StudentDashboard() {
         </div>
 
         {/* Reference Materials */}
-        <div className="group relative overflow-hidden rounded-2xl border border-border/70 bg-surface-elevated p-4.5 hover:border-cyan-500/40 hover:shadow-soft transition-all duration-200">
+        <div className="group relative overflow-hidden rounded-2xl border border-border/70 bg-surface-elevated p-4 hover:border-cyan-500/40 hover:shadow-soft transition-all duration-200">
           <div className="flex items-center justify-between">
             <span className="text-2xs font-bold uppercase tracking-wider text-muted-foreground">Tài liệu</span>
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 ring-1 ring-cyan-500/20 group-hover:scale-110 transition-transform">
@@ -216,7 +216,7 @@ export function StudentDashboard() {
         </div>
 
         {/* Average Progress */}
-        <div className="group relative overflow-hidden rounded-2xl border border-border/70 bg-surface-elevated p-4.5 hover:border-amber-500/40 hover:shadow-soft transition-all duration-200">
+        <div className="group relative overflow-hidden rounded-2xl border border-border/70 bg-surface-elevated p-4 hover:border-amber-500/40 hover:shadow-soft transition-all duration-200">
           <div className="flex items-center justify-between">
             <span className="text-2xs font-bold uppercase tracking-wider text-muted-foreground">Tiến độ TB</span>
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/20 group-hover:scale-110 transition-transform">

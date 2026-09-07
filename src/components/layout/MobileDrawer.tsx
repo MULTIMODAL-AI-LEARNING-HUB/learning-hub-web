@@ -8,6 +8,7 @@ interface MobileDrawerProps {
   children: ReactNode
   side?: 'left' | 'right'
   title?: string
+  showCloseButton?: boolean
 }
 
 export function MobileDrawer({
@@ -16,6 +17,7 @@ export function MobileDrawer({
   children,
   side = 'left',
   title,
+  showCloseButton = true,
 }: MobileDrawerProps) {
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -51,9 +53,13 @@ export function MobileDrawer({
         )}
       >
         <div className="flex h-full flex-col">
-          {title && (
+          {(title || showCloseButton) && (
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
-              <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+              {title ? (
+                <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+              ) : (
+                <span />
+              )}
               <button
                 onClick={onClose}
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition"

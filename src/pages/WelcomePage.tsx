@@ -23,7 +23,7 @@ export default function WelcomePage() {
               <p className="text-3xs font-semibold uppercase tracking-wider text-muted-foreground">Không gian Học tập Đa phương thức AI</p>
             </div>
           </div>
-          <h2 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight leading-tight">
+          <h2 className="text-[clamp(1.875rem,1.5rem+2vw,3rem)] font-extrabold text-foreground tracking-tight leading-tight">
             Chào mừng bạn đến với<br />
             Không gian Học tập <span className="gradient-text-animated">Đột phá cùng AI</span>
           </h2>
