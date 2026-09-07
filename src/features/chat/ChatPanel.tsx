@@ -28,6 +28,8 @@ export function ChatPanel() {
   const activeSession = sessions.find((s) => s.id === activeSessionId)
   const messages = activeSession?.messages ?? []
 
+  const [isSending, setIsSending] = useState(false)
+
   useEffect(() => {
     if (initialQuery) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -36,19 +38,29 @@ export function ChatPanel() {
   }, [initialQuery])
 
   useEffect(() => {
-    if (courseId && !activeSessionId) {
-      addSession(courseId)
+    if (!activeSessionId) {
+      if (sessions.length > 0) {
+        useAppStore.getState().chat.selectSession(sessions[0].id)
+      } else {
+        addSession(courseId)
+      }
     }
-  }, [courseId, activeSessionId, addSession])
+  }, [courseId, activeSessionId, sessions, addSession])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages.length])
+  }, [messages.length, isSending])
 
-  const handleSend = () => {
-    if (!input.trim()) return
-    sendMessage(input, selectedDoc ? [selectedDoc] : [])
+  const handleSend = async () => {
+    if (!input.trim() || isSending) return
+    const text = input
     setInput('')
+    setIsSending(true)
+    try {
+      await sendMessage(text, selectedDoc ? [selectedDoc] : [], courseId)
+    } finally {
+      setIsSending(false)
+    }
   }
 
   const handleKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -161,6 +173,19 @@ export function ChatPanel() {
                 )}
               </div>
             ))}
+            {isSending && (
+              <div className="flex gap-2.5 justify-start items-center">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent text-primary-foreground">
+                  <Sparkles className="h-3.5 w-3.5 animate-pulse" />
+                </div>
+                <div className="rounded-2xl px-4 py-2.5 text-sm bg-muted text-foreground border border-border flex items-center gap-1.5">
+                  <span className="inline-block h-2 w-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="inline-block h-2 w-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="inline-block h-2 w-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <span className="text-xs text-muted-foreground ml-1.5">AI đang suy nghĩ...</span>
+                </div>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
         )}
@@ -174,16 +199,17 @@ export function ChatPanel() {
             onKeyDown={handleKey}
             placeholder="Hỏi bất cứ điều gì về tài liệu học tập của bạn..."
             rows={1}
-            className="flex-1 resize-none bg-transparent px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/70 outline-none max-h-32"
+            disabled={isSending}
+            className="flex-1 resize-none bg-transparent px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/70 outline-none max-h-32 disabled:opacity-50"
           />
           <Button
             onClick={handleSend}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isSending}
             size="icon"
             aria-label="Gửi tin nhắn"
             className="h-8 w-8 shrink-0"
           >
-            <Send className="h-4 w-4" />
+            <Send className={cn('h-4 w-4', isSending && 'opacity-40')} />
           </Button>
         </div>
         <div className="mt-1.5 flex items-center justify-between px-1 text-2xs text-muted-foreground">

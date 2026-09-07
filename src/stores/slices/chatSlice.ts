@@ -7,11 +7,42 @@ export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never
   chat: {
     sessions: [] as ChatSession[],
     activeSessionId: null,
-    selectSession: (id) => set((state) => ({
-      chat: { ...state.chat, activeSessionId: id }
-    }), false, 'chat/selectSession'),
+    selectSession: async (id) => {
+      set((state) => ({
+        chat: { ...state.chat, activeSessionId: id }
+      }), false, 'chat/selectSession')
+
+      const session = get().chat.sessions.find((s) => s.id === id)
+      if (session && session.messages.length === 0) {
+        try {
+          const res = await chatApi.listMessages(id)
+          const msgs: Message[] = (res.data.items || []).map((m: any) => ({
+            id: m.id,
+            role: m.role,
+            content: m.content,
+            timestamp: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            citations: (m.citations || []).map((c: any, i: number) => ({
+              id: `cite-${i}`,
+              label: `[${i + 1}] Page ${c.page_number || '?'}`
+            }))
+          }))
+          set((state) => ({
+            chat: {
+              ...state.chat,
+              sessions: state.chat.sessions.map((s) => (s.id === id ? { ...s, messages: msgs } : s))
+            }
+          }), false, 'chat/loadSessionMessages')
+        } catch {
+          // Ignore if history cannot be loaded
+        }
+      }
+    },
     sendMessage: async (content, documentIds, courseId, lessonId) => {
-      const sessionId = get().chat.activeSessionId
+      let sessionId = get().chat.activeSessionId
+      if (!sessionId) {
+        await get().chat.addSession(courseId, lessonId)
+        sessionId = get().chat.activeSessionId
+      }
       if (!sessionId || !content.trim()) return
 
       const now = new Date()
@@ -66,7 +97,7 @@ export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never
         const aiMsg: Message = {
           id: `msg-${Date.now() + 1}`,
           role: 'assistant',
-          content: 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.',
+          content: 'Xin lỗi, đã có lỗi xảy ra khi xử lý phản hồi AI. Vui lòng thử lại.',
           timestamp: ts,
         }
         set((state) => ({
@@ -81,11 +112,11 @@ export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never
     },
     addSession: async (courseId?: string, lessonId?: string) => {
       try {
-        const res = await chatApi.createSession({ course_id: courseId, lesson_id: lessonId, title: 'New chat' })
+        const res = await chatApi.createSession({ course_id: courseId, lesson_id: lessonId, title: 'Đoạn chat mới' })
         const session = res.data
         const newSession: ChatSession = {
           id: session.id,
-          title: session.title || 'New chat',
+          title: session.title || 'Đoạn chat mới',
           course_id: session.course_id || undefined,
           lesson_id: session.lesson_id || undefined,
           context_type: session.context_type,
@@ -104,7 +135,7 @@ export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never
         const newId = `c-${Date.now()}`
         const newSession: ChatSession = {
           id: newId,
-          title: 'New chat',
+          title: 'Đoạn chat mới',
           preview: '',
           messages: []
         }
