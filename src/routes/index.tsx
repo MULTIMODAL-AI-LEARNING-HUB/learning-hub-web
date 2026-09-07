@@ -117,5 +117,9 @@ export const router = createBrowserRouter([
     ]
   },
 
+  // Compatibility routes to prevent accidental kicks to /welcome
+  { path: '/app/courses', element: <Navigate to="/app/student/courses" replace /> },
+  { path: '/app/courses/my', element: <Navigate to="/app/student/courses" replace /> },
+
   { path: '*', element: <Navigate to="/welcome" replace /> }
 ])
