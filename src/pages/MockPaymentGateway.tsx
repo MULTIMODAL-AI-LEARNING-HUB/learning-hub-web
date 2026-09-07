@@ -97,8 +97,12 @@ export function MockPaymentGateway() {
         navigate(`/payment/return?${query.toString()}`)
       }
     } catch (err) {
-      const axiosErr = err as { response?: { data?: { detail?: string } } }
-      alert(axiosErr?.response?.data?.detail || 'Thao tác giả lập thất bại')
+      const axiosErr = err as { response?: { data?: { detail?: string; message?: string } } }
+      const msg =
+        axiosErr?.response?.data?.detail ||
+        axiosErr?.response?.data?.message ||
+        'Thao tác giả lập thất bại. Vui lòng kiểm tra lại kết nối mạng hoặc thử lại.'
+      alert(msg)
       setLoadingAction(null)
     }
   }
