@@ -157,7 +157,7 @@ export function StudentDashboard() {
       </div>
 
       {/* 2. Key Learning Metrics (4 Modern Stat Cards) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         {/* Enrolled Courses */}
         <div className="group relative overflow-hidden rounded-2xl border border-border/70 bg-surface-elevated p-4 hover:border-blue-500/40 hover:shadow-soft transition-all duration-200">
           <div className="flex items-center justify-between">
@@ -294,7 +294,7 @@ export function StudentDashboard() {
       )}
 
       {/* 4. Main Section: Courses Grid + Right Panel (Activity & Tools) */}
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
         {/* Left Column (2/3): Enrolled Courses */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">

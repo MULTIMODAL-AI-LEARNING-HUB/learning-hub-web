@@ -56,9 +56,9 @@ export function Modal({
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
       <div
-        className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-foreground/45 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden
       />
@@ -69,28 +69,28 @@ export function Modal({
         className={cn(
           'relative w-full border border-border bg-surface-elevated shadow-lift flex flex-col',
           fullScreenOnMobile
-            ? 'h-full max-h-screen rounded-none sm:rounded-2xl sm:h-auto sm:max-h-[85vh]'
-            : 'rounded-2xl sm:max-h-[85vh]',
+            ? 'h-full sm:h-auto max-h-[100dvh] sm:max-h-[85vh] rounded-none sm:rounded-2xl safe-top safe-bottom'
+            : 'max-h-[90dvh] sm:max-h-[85vh] rounded-t-2xl sm:rounded-2xl safe-bottom',
           'animate-slide-in-from-bottom',
           sizes[size]
         )}
       >
         {(title || !hideClose) && (
-          <div className="flex items-start justify-between gap-4 px-6 pt-5 shrink-0">
+          <div className="flex items-start justify-between gap-3 px-4 sm:px-6 pt-4 sm:pt-5 shrink-0">
             <div className="flex-1 min-w-0">
               {title && (
-                <h2 className="font-display text-lg font-semibold text-foreground">
+                <h2 className="font-display text-base sm:text-lg font-semibold text-foreground">
                   {title}
                 </h2>
               )}
               {description && (
-                <p className="text-sm text-muted-foreground mt-1">{description}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">{description}</p>
               )}
             </div>
             {!hideClose && onClose && (
               <button
                 onClick={onClose}
-                className="shrink-0 -m-1 p-1 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition"
+                className="shrink-0 p-1.5 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition"
                 aria-label="Đóng"
               >
                 <X className="h-5 w-5" />
@@ -98,9 +98,9 @@ export function Modal({
             )}
           </div>
         )}
-        <div className={cn('overflow-y-auto flex-1 min-h-0', title ? 'p-6 pt-4' : 'p-6')}>{children}</div>
+        <div className={cn('overflow-y-auto flex-1 min-h-0', title ? 'p-4 sm:p-6 pt-3 sm:pt-4' : 'p-4 sm:p-6')}>{children}</div>
         {footer && (
-          <div className="px-6 py-4 border-t border-border flex items-center justify-end gap-2 bg-muted/30 rounded-b-2xl shrink-0">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border flex items-center justify-end gap-2 bg-muted/30 rounded-b-none sm:rounded-b-2xl shrink-0 safe-bottom">
             {footer}
           </div>
         )}

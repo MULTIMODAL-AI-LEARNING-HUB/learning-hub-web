@@ -14,6 +14,7 @@ import {
   UserPlus,
   Users,
   X,
+  ArrowLeft,
 } from 'lucide-react'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
@@ -231,10 +232,13 @@ export function StudentSocialChat() {
       )}
 
       <div
-        className="grid min-h-0 flex-1 overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-soft lg:grid-cols-[22rem_1fr]"
+        className="grid min-h-0 flex-1 overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-soft max-lg:grid-rows-[auto_1fr] lg:grid-cols-[22rem_1fr]"
         data-testid="friends-chat-shell"
       >
-        <aside className="flex min-h-0 flex-col border-b border-border lg:border-b-0 lg:border-r">
+        <aside className={cn(
+          'flex min-h-0 flex-col border-b border-border lg:border-b-0 lg:border-r',
+          selectedRoomId && 'hidden lg:flex'
+        )}>
           <div className="space-y-3 border-b border-border p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -278,11 +282,20 @@ export function StudentSocialChat() {
           </div>
         </aside>
 
-        <main className="flex min-h-0 min-w-0 flex-col">
+        <main className={cn('flex min-h-0 min-w-0 flex-col', !selectedRoomId && 'hidden lg:flex')}>
           {selectedRoom ? (
             <>
-              <div className="flex items-center justify-between gap-3 border-b border-border p-4">
-                <div className="flex min-w-0 items-center gap-3">
+              <div className="flex items-center justify-between gap-3 border-b border-border p-3 sm:p-4">
+                <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="lg:hidden shrink-0"
+                    aria-label="Quay lại danh sách trò chuyện"
+                    onClick={() => setSelectedRoomId(null)}
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
                   <Avatar fallback="#" size="md" />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">

@@ -71,7 +71,7 @@ export function AdminProfile() {
 
   if (loading) {
     return (
-      <div className="space-y-6 p-6">
+      <div className="space-y-6">
         <Skeleton className="h-10 w-48 rounded-lg" />
         <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
           <Skeleton className="h-80 rounded-xl" />
@@ -99,8 +99,8 @@ export function AdminProfile() {
     .toUpperCase()
 
   return (
-    <div className="space-y-6 p-6 animate-fade-in font-body">
-      <div className="relative overflow-hidden rounded-xl border border-border bg-surface-elevated p-6 shadow-soft">
+    <div className="space-y-6 animate-fade-in font-body">
+      <div className="relative overflow-hidden rounded-xl border border-border bg-surface-elevated p-4 sm:p-6 shadow-soft">
         <PageHeader
           title="Hồ Sơ Quản Trị Viên"
           description="Quản lý thông tin tài khoản quản trị viên hệ thống."
@@ -110,7 +110,7 @@ export function AdminProfile() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
         {/* Main profile edit card */}
-        <Card className="border-border shadow-soft bg-surface-elevated p-6 space-y-6">
+        <Card className="border-border shadow-soft bg-surface-elevated p-4 sm:p-6 space-y-6">
           <div className="flex items-center gap-4 border-b border-border pb-6">
             <Avatar fallback={initials} size="lg" className="ring-4 ring-indigo-500/10" />
             <div>
@@ -152,7 +152,7 @@ export function AdminProfile() {
 
         {/* Info card */}
         <div className="space-y-6">
-          <Card className="border-border shadow-soft bg-surface-elevated p-6 space-y-4">
+          <Card className="border-border shadow-soft bg-surface-elevated p-4 sm:p-6 space-y-4">
             <div className="flex items-center gap-2 border-b border-border pb-3">
               <ShieldCheck className="h-5 w-5 text-indigo-500" />
               <h3 className="font-semibold text-foreground">Trạng Thái Tài Khoản</h3>

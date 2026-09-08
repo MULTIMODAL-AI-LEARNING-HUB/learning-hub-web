@@ -170,7 +170,7 @@ export function DocumentHub() {
                   ))}
                 </div>
               ) : (
-                <div className="flex-1 overflow-y-auto scrollbar-thin pr-1 grid grid-cols-2 gap-2 auto-rows-max">
+                <div className="flex-1 overflow-y-auto scrollbar-thin pr-1 grid grid-cols-1 min-[420px]:grid-cols-2 gap-2 auto-rows-max">
                   {filteredDocs.map((doc) => (
                     <DocumentCard
                       key={doc.id}

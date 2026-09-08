@@ -131,7 +131,7 @@ export function AdminUsers() {
   }
 
   return (
-    <div className="space-y-6 p-6 font-body">
+    <div className="space-y-6 font-body">
       <div className="flex flex-col gap-1">
         <h1 className="text-fluid-2xl font-bold text-foreground">Quản lý người dùng</h1>
         <p className="text-muted-foreground text-sm">Tạo mới, chỉnh sửa và phân quyền tài khoản người dùng trên toàn hệ thống.</p>

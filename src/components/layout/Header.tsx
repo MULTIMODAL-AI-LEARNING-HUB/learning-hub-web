@@ -99,13 +99,13 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 mb-5 flex flex-col gap-3 rounded-xl border border-border bg-surface-elevated/90 px-3 py-3 shadow-soft backdrop-blur-md lg:flex-row lg:items-center lg:justify-between font-body">
-        <div className="flex items-center gap-3 w-full lg:w-auto">
+      <header className="sticky top-0 z-30 mb-3 sm:mb-5 flex items-center gap-2 sm:gap-3 rounded-xl border border-border bg-surface-elevated/90 px-2.5 sm:px-3 py-2 sm:py-3 shadow-soft backdrop-blur-md font-body min-w-0">
+        <div className="flex items-center gap-2 min-w-0 flex-1 lg:flex-none">
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleSidebar}
-            className="lg:hidden shrink-0"
+            className="lg:hidden shrink-0 h-9 w-9"
             aria-label="Mở đóng thanh bên"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -116,13 +116,13 @@ export function Header() {
           </Button>
 
           {/* Logo & Role Brand */}
-          <div className="hidden sm:flex items-center gap-2 mr-2 shrink-0">
+          <div className="hidden md:flex items-center gap-2 mr-1 shrink-0">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
               <Zap className="h-4.5 w-4.5 fill-current" />
             </div>
-            <span className="text-sm font-bold text-foreground">Learning Hub</span>
+            <span className="text-sm font-bold text-foreground whitespace-nowrap">Learning Hub</span>
             <span className={cn(
-              "text-2xs font-medium px-2 py-0.5 rounded-full border",
+              "text-2xs font-medium px-2 py-0.5 rounded-full border whitespace-nowrap",
               roleThemes.bg,
               roleThemes.text,
               roleThemes.border
@@ -131,24 +131,32 @@ export function Header() {
             </span>
           </div>
 
+          {/* Search: full bar on sm+, icon button on xs */}
           <button
             onClick={() => setPaletteOpen(true)}
             className={cn(
-              'group flex h-9 w-full items-center gap-2.5 rounded-lg border border-input bg-surface px-3 text-sm text-muted-foreground transition',
+              'hidden xs:flex sm:flex group h-9 flex-1 items-center gap-2.5 rounded-lg border border-input bg-surface px-3 text-sm text-muted-foreground transition min-w-0',
               'hover:border-primary/30 hover:bg-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20',
-              'lg:w-64'
+              'lg:w-64 lg:flex-none'
             )}
             aria-label="Mở tìm kiếm nhanh"
           >
             <Search className="h-4 w-4 shrink-0" />
             <span className="flex-1 text-left truncate">Tìm kiếm nhanh...</span>
-            <kbd className="hidden items-center gap-0.5 rounded border border-border bg-muted px-1.5 py-0.5 text-2xs font-mono sm:inline-flex">
+            <kbd className="hidden items-center gap-0.5 rounded border border-border bg-muted px-1.5 py-0.5 text-2xs font-mono lg:inline-flex">
               <span>⌘</span>K
             </kbd>
           </button>
+          <button
+            onClick={() => setPaletteOpen(true)}
+            className="xs:hidden sm:hidden flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-input bg-surface text-muted-foreground transition hover:border-primary/30"
+            aria-label="Mở tìm kiếm nhanh"
+          >
+            <Search className="h-4 w-4" />
+          </button>
         </div>
 
-        <div className="flex items-center gap-2 justify-end lg:justify-start">
+        <div className="flex items-center gap-1.5 sm:gap-2 justify-end shrink-0">
           <div className="hidden lg:flex items-center gap-2">
             <Tooltip
               content={

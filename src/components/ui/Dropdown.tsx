@@ -20,9 +20,9 @@ interface DropdownProps {
 }
 
 const alignClasses = {
-  left: 'left-0',
-  right: 'right-0',
-  center: 'left-1/2 -translate-x-1/2'
+  left: 'left-0 max-w-[calc(100vw-1.5rem)] sm:max-w-xs',
+  right: 'right-0 max-w-[calc(100vw-1.5rem)] sm:max-w-xs',
+  center: 'left-1/2 -translate-x-1/2 max-w-[calc(100vw-1.5rem)] sm:max-w-xs'
 }
 
 export function Dropdown({
@@ -63,7 +63,7 @@ export function Dropdown({
         <div
           role="menu"
           className={cn(
-            'absolute top-full z-50 mt-2 min-w-[180px] rounded-xl border border-border bg-surface-elevated py-1 shadow-lift',
+            'absolute top-full z-50 mt-2 min-w-[180px] max-h-[75vh] overflow-y-auto scrollbar-thin rounded-xl border border-border bg-surface-elevated py-1 shadow-lift',
             'animate-slide-in-from-top',
             alignClasses[align],
             menuClassName

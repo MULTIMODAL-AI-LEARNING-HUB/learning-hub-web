@@ -169,7 +169,7 @@ export function AdminSettings() {
   const activeKeysCount = aiKeys.filter((k) => k.is_active).length
 
   return (
-    <div className="space-y-6 p-6 font-body">
+    <div className="space-y-6 font-body">
       <div className="flex flex-col gap-1">
         <h1 className="text-fluid-2xl font-bold text-foreground">Cài Đặt Quản Trị</h1>
         <p className="text-muted-foreground text-sm">Cấu hình nền tảng, quản lý API Key xoay vòng và giám sát hạ tầng.</p>
@@ -315,7 +315,7 @@ export function AdminSettings() {
             </Button>
           </div>
         </div>
-        <div className="grid gap-3 p-5 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 p-4 sm:p-5 md:grid-cols-3">
           {services.map((svc) => {
             const status = health?.services[svc.key] ?? 'offline'
             const statusLabel =

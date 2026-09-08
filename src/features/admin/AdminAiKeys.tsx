@@ -274,7 +274,7 @@ export function AdminAiKeys() {
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card className="p-4 border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/50">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Tổng số Khóa</span>

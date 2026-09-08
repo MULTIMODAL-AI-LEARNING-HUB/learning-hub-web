@@ -576,7 +576,7 @@ function ResourcesPanel({ item, lesson }: { item: LearningItem; lesson: Lesson |
 
 function AiTutorPanel({ courseId }: { courseId: string | undefined }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <Card padding="responsive" variant="outlined">
         <Sparkles className="h-5 w-5 text-primary" />
         <h3 className="mt-3 font-semibold text-foreground">Hỏi đáp về khóa học</h3>

@@ -180,7 +180,7 @@ export function AssignmentBuilder({ lessonId, isOpen, onClose }: AssignmentBuild
                   </div>
                   <Button variant="danger" size="sm" onClick={handleDelete}>Xóa bài tập</Button>
                 </div>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
                   <div>
                     <span className="text-muted-foreground">Điểm tối đa: </span>
                     <span className="font-medium">{assignment.max_score}</span>

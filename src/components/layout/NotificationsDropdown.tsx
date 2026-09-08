@@ -59,7 +59,7 @@ export function NotificationsDropdown({
       </Button>
       {open && (
         <div
-          className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl border border-border bg-surface-elevated p-1.5 shadow-lift animate-slide-in-from-top"
+          className="absolute right-0 top-full z-50 mt-2 w-[calc(100vw-1.5rem)] max-w-sm sm:w-80 rounded-xl border border-border bg-surface-elevated p-1.5 shadow-lift animate-slide-in-from-top"
         >
           <div className="flex items-center justify-between px-2.5 py-2">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

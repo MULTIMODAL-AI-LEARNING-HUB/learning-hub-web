@@ -108,7 +108,7 @@ export function LecturerCourses() {
           )}
 
           {stats && (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <Card padding="responsive">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tổng khóa học</span>
@@ -240,7 +240,7 @@ export function LecturerCourses() {
             <label className="text-sm font-medium">Mô tả ngắn</label>
             <Textarea value={newCourse.description} onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })} className="mt-1" rows={3} placeholder="Mô tả tóm tắt nội dung học viên sẽ học được" />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label className="text-sm font-medium">Danh mục</label>
               <Select

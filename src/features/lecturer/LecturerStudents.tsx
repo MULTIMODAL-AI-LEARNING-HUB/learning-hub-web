@@ -83,7 +83,7 @@ export function LecturerStudents() {
         </Card>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card className="overflow-hidden">
           <div className="px-4 py-3 border-b border-border">
             <h3 className="font-semibold text-foreground">Khóa Học Nhiều Học Viên Nhất</h3>

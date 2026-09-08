@@ -127,7 +127,7 @@ export function LecturerDashboard() {
             <p className="mt-1 supporting-text text-muted-foreground">Các công việc giúp khóa học của bạn vận hành trơn tru.</p>
           </div>
         </div>
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           {workItems.map((item) => {
             const Icon = item.icon
             return (

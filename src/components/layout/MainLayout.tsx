@@ -2,6 +2,7 @@ import { type ReactNode } from 'react'
 import { useAppStore } from '../../stores/appStore'
 import { Header } from './Header'
 import { MobileDrawer } from './MobileDrawer'
+import { MobileBottomNav } from './MobileBottomNav'
 import { cn } from '../../utils/cn'
 
 interface MainLayoutProps {
@@ -15,10 +16,10 @@ export function MainLayout({ sidebar, children }: MainLayoutProps) {
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
-      <div className="mx-auto flex flex-col flex-1 w-full max-w-[1520px] px-3 py-3 sm:px-4 lg:px-5 overflow-hidden">
+      <div className="mx-auto flex flex-col flex-1 w-full max-w-[1520px] px-2.5 py-2 sm:px-4 sm:py-3 lg:px-5 overflow-hidden min-h-0">
         <Header />
 
-        <div className="flex flex-1 gap-4 overflow-hidden">
+        <div className="flex flex-1 gap-4 overflow-hidden min-h-0">
           {/* Desktop sidebar */}
           {sidebar && (
             <aside
@@ -38,11 +39,14 @@ export function MainLayout({ sidebar, children }: MainLayoutProps) {
             </MobileDrawer>
           )}
 
-          <main className="flex-1 min-w-0 overflow-y-auto scrollbar-thin pr-1 pb-6">
+          <main className="flex-1 min-w-0 overflow-y-auto scrollbar-thin px-0.5 sm:px-1 pb-20 lg:pb-6">
             {children}
           </main>
         </div>
       </div>
+
+      {/* Mobile bottom navigation bar */}
+      <MobileBottomNav />
     </div>
   )
 }

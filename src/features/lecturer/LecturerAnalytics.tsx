@@ -54,7 +54,7 @@ export function LecturerAnalytics() {
         icon={<BarChart3 />}
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card padding="responsive">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tổng Doanh Thu</span>
@@ -121,7 +121,7 @@ export function LecturerAnalytics() {
         </Card>
       )}
 
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
         <Card className="overflow-hidden">
           <div className="px-4 py-3 border-b border-border">
             <h3 className="font-semibold text-foreground">Doanh Thu Cao Nhất</h3>

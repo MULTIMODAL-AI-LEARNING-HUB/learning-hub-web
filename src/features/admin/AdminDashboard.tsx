@@ -211,7 +211,7 @@ export function AdminDashboard() {
           </Button>
         </div>
 
-        <div className="grid gap-4 p-5 sm:grid-cols-2 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 p-4 sm:p-5 sm:grid-cols-2 md:grid-cols-3">
           <ServiceCard
             name="Cơ sở dữ liệu PostgreSQL"
             description="Lưu trữ dữ liệu quan hệ"

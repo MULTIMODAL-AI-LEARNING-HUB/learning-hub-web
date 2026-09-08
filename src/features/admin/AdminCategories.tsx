@@ -149,15 +149,16 @@ export function AdminCategories() {
   }
 
   return (
-    <div className="space-y-6 p-6 font-body">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-fluid-2xl font-bold text-foreground">Quản lý danh mục</h1>
-        <p className="text-muted-foreground text-sm">Tổ chức danh mục khóa học trên nền tảng theo cấu trúc cây phân cấp.</p>
-      </div>
-
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" size="sm" icon={<RefreshCw className="h-3.5 w-3.5" />} onClick={fetchTree} loading={loading}>Làm mới</Button>
-        <Button icon={<Plus className="h-4 w-4" />} onClick={resetCreate}>Thêm danh mục</Button>
+    <div className="space-y-6 font-body">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-fluid-2xl font-bold text-foreground">Quản lý danh mục</h1>
+          <p className="text-muted-foreground text-sm">Tổ chức danh mục khóa học trên nền tảng theo cấu trúc cây phân cấp.</p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button variant="outline" size="sm" icon={<RefreshCw className="h-3.5 w-3.5" />} onClick={fetchTree} loading={loading}>Làm mới</Button>
+          <Button icon={<Plus className="h-4 w-4" />} onClick={resetCreate}>Thêm danh mục</Button>
+        </div>
       </div>
 
       <Card>
@@ -301,7 +302,7 @@ function CategoryRow({ category, level, onEdit, onDelete, onAddChild }: {
           <span className="text-sm font-medium text-foreground truncate">{category.name}</span>
           <Badge variant="default" label={`${category.slug}`} />
         </div>
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+        <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition">
           <button
             onClick={() => onAddChild(category.id)}
             className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition"

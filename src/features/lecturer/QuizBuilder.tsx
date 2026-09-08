@@ -300,7 +300,7 @@ export function QuizBuilder({ lessonId, isOpen, onClose }: QuizBuilderProps) {
                   <label className="text-sm font-medium">Nội dung câu hỏi</label>
                   <Textarea value={newQuestionText} onChange={(e) => setNewQuestionText(e.target.value)} className="mt-1" rows={3} placeholder="Nhập câu hỏi..." />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="text-sm font-medium">Loại câu hỏi</label>
                     <Select

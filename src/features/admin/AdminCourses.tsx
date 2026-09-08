@@ -135,7 +135,7 @@ export function AdminCourses() {
   }
 
   return (
-    <div className="space-y-6 p-6 font-body">
+    <div className="space-y-6 font-body">
       <div className="flex flex-col gap-1">
         <h1 className="text-fluid-2xl font-bold text-foreground">Quản lý khóa học</h1>
         <p className="text-muted-foreground text-sm">Tổng quan tất cả các khóa học trên hệ thống. Kiểm duyệt và quản lý theo nhu cầu.</p>

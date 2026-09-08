@@ -67,7 +67,7 @@ export function CourseCatalog() {
   return (
     <div className="space-y-8 animate-fade-in font-body pb-12">
       {/* 1. Header & Search Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-surface-elevated via-primary/5 to-surface p-6 md:p-8 shadow-soft">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-border/80 bg-gradient-to-br from-surface-elevated via-primary/5 to-surface p-4 sm:p-6 md:p-8 shadow-soft">
         <div className="max-w-2xl space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
             <Compass className="h-3.5 w-3.5" />

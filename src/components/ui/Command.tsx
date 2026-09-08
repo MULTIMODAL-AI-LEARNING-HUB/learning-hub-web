@@ -71,13 +71,13 @@ export function CommandPalette({ items, open, onClose }: CommandPaletteProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-[10vh] p-4 animate-fade-in"
+      className="fixed inset-0 z-[100] flex items-start justify-center pt-3 sm:pt-[10vh] p-2.5 sm:p-4 animate-fade-in safe-top"
       role="dialog"
       aria-modal="true"
     >
-      <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-xl rounded-2xl border border-border bg-surface-elevated shadow-lift overflow-hidden animate-slide-in-from-top">
-        <div className="flex items-center gap-3 px-4 border-b border-border">
+      <div className="absolute inset-0 bg-foreground/45 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-xl rounded-2xl border border-border bg-surface-elevated shadow-lift overflow-hidden animate-slide-in-from-top max-h-[90vh] flex flex-col">
+        <div className="flex items-center gap-3 px-3.5 sm:px-4 border-b border-border shrink-0">
           <Search className="h-4 w-4 text-muted-foreground shrink-0" />
           <input
             ref={inputRef}
@@ -87,20 +87,20 @@ export function CommandPalette({ items, open, onClose }: CommandPaletteProps) {
               setActiveIndex(0)
             }}
             placeholder="Tìm kiếm hoặc chuyển đến..."
-            className="flex-1 h-12 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+            className="flex-1 h-12 bg-transparent text-base sm:text-sm text-foreground placeholder:text-muted-foreground outline-none"
           />
           <kbd className="hidden sm:inline-flex items-center rounded border border-border bg-muted px-1.5 py-0.5 text-2xs font-mono text-muted-foreground">
             ESC
           </kbd>
           <button
             onClick={onClose}
-            className="sm:hidden p-1 rounded text-muted-foreground hover:text-foreground"
+            className="sm:hidden p-1.5 rounded-lg text-muted-foreground hover:text-foreground"
             aria-label="Đóng"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div ref={listRef} className="max-h-[60vh] overflow-y-auto py-2 scrollbar-thin">
+        <div ref={listRef} className="max-h-[75vh] sm:max-h-[60vh] overflow-y-auto py-2 scrollbar-thin flex-1 min-h-0">
           {filtered.length === 0 ? (
             <div className="px-4 py-12 text-center">
               <p className="text-sm text-muted-foreground">Không tìm thấy kết quả cho &quot;{query}&quot;</p>
