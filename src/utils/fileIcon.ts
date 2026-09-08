@@ -21,6 +21,7 @@ export function fileIconEmoji(type: string): string {
   const t = type.toLowerCase()
   if (t === 'pdf') return '📄'
   if (t === 'video' || t === 'mp4' || t === 'webm') return '🎬'
-  if (t === 'audio' || t === 'mp3') return '🎧'
+  if (t === 'audio' || t === 'mp3' || t === 'wav') return '🎧'
+  if (t === 'doc' || t === 'docx' || t === 'txt') return '📝'
   return '🔗'
 }

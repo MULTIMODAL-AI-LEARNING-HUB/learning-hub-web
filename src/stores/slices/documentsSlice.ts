@@ -45,11 +45,12 @@ export const createDocumentsSlice: StateCreator<AppState, [['zustand/devtools', 
         const items: DocumentItem[] = res.data.items.map((d) => ({
           id: d.id,
           name: d.file_name,
-          type: d.file_type as 'pdf' | 'video' | 'audio' | 'url',
+          type: (d.file_type || 'pdf').toLowerCase(),
           status: d.status as 'processing' | 'ready' | 'failed',
           size: d.file_size ? `${(d.file_size / 1024 / 1024).toFixed(1)} MB` : '0 MB',
           pageCount: (d.metadata as Record<string, unknown>)?.page_count as number | undefined,
           progress: d.status === 'processing' ? 50 : undefined,
+          fileUrl: d.file_url || undefined,
         }))
         set((state) => ({
           documents: { ...state.documents, items }

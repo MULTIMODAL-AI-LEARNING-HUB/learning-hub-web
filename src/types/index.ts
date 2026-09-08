@@ -1,4 +1,4 @@
-export type DocumentType = 'pdf' | 'video' | 'audio' | 'url'
+export type DocumentType = 'pdf' | 'video' | 'audio' | 'url' | 'doc' | 'docx' | 'txt' | string
 export type DocumentStatus = 'processing' | 'ready' | 'failed'
 
 export interface DocumentItem {
@@ -9,6 +9,7 @@ export interface DocumentItem {
   size: string
   pageCount?: number
   progress?: number
+  fileUrl?: string
 }
 
 export interface Citation {

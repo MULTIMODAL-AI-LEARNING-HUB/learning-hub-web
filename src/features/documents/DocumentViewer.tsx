@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { ZoomIn, ZoomOut, Maximize2, ChevronLeft, ChevronRight, Sparkles, AlertTriangle } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { ZoomIn, ZoomOut, Maximize2, ChevronLeft, ChevronRight, AlertTriangle, ExternalLink, FileText } from 'lucide-react'
 import type { DocumentItem } from '../../types'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -8,18 +8,18 @@ import { Spinner } from '../../components/ui/Spinner'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { fileIconEmoji } from '../../utils/fileIcon'
 
-const smartNotes = [
-  'Học máy (Machine Learning) là một nhánh quan trọng của trí tuệ nhân tạo.',
-  'Học sâu (Deep Learning) sử dụng các mạng nơ-ron nhân tạo đa tầng.',
-  'Lan truyền ngược (Backpropagation) tối ưu hóa trọng số qua giải thuật hạ độ dốc.',
-  'Học có giám sát (Supervised Learning) đòi hỏi tập dữ liệu huấn luyện đã được dán nhãn.',
-  'Hiện tượng quá khớp (Overfitting) xuất hiện khi mô hình học vẹt dữ liệu nhiễu.'
-]
-
 export function DocumentViewer({ doc }: { doc: DocumentItem }) {
   const [zoom, setZoom] = useState(100)
   const [currentPage, setCurrentPage] = useState(1)
   const totalPages = doc.pageCount ?? 1
+  const docType = doc.type.toLowerCase()
+  const isPdf = docType === 'pdf'
+  const isMedia = ['mp4', 'webm', 'mp3', 'wav', 'video', 'audio'].includes(docType)
+  const mediaKind = useMemo(() => {
+    if (['mp4', 'webm', 'video'].includes(docType)) return 'video' as const
+    if (['mp3', 'wav', 'audio'].includes(docType)) return 'audio' as const
+    return null
+  }, [docType])
 
   return (
     <Card className="flex h-full flex-col overflow-hidden">
@@ -120,48 +120,57 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
 
         {doc.status === 'ready' && (
           <div className="p-3 sm:p-6">
-            <div
-              className="mx-auto max-w-3xl rounded-xl border border-border bg-surface-elevated p-4 shadow-soft transition-transform origin-top sm:p-10"
-              style={{ transform: `scale(${zoom / 100})` }}
-            >
-              <div className="space-y-4">
-                <Badge variant="primary" label={`Chương ${currentPage}`} />
-                <h3 className="font-display text-2xl font-bold text-foreground text-balance">
-                  Giới thiệu tổng quan: {doc.name.replace(/\.\w+$/, '')}
-                </h3>
-                <p className="text-sm leading-relaxed text-foreground/80">
-                  Phần này trình bày tổng quan về các khái niệm cơ bản và nguyên lý cốt lõi.
-                  Chúng ta sẽ cùng tìm hiểu các ý tưởng chính, phương pháp luận và ứng dụng thực tiễn
-                  tạo nên nền tảng của chủ đề này.
-                </p>
-                <p className="text-sm leading-relaxed text-foreground/80">
-                  Học máy là một phân nhánh của trí tuệ nhân tạo, tập trung vào việc xây dựng
-                  các hệ thống có khả năng tự học hỏi và đưa ra quyết định dựa trên dữ liệu. Thay vì
-                  được lập trình chi tiết từng bước, hệ thống sẽ tự tìm kiếm quy luật và cải thiện
-                  độ chính xác theo thời gian.
-                </p>
-                <p className="text-sm leading-relaxed text-foreground/80">
-                  Lĩnh vực này đã phát triển vượt bậc trong những năm gần đây, với nhiều ứng dụng
-                  sâu rộng từ xử lý ngôn ngữ tự nhiên, thị giác máy tính đến hệ thống gợi ý và xe tự hành.
-                </p>
+            {doc.fileUrl && (isPdf || mediaKind) ? (
+              <div
+                className="mx-auto max-w-3xl overflow-hidden rounded-xl border border-border bg-surface-elevated shadow-soft transition-transform origin-top"
+                style={{ transform: `scale(${zoom / 100})` }}
+              >
+                {isPdf && (
+                  <iframe
+                    key={doc.fileUrl}
+                    src={doc.fileUrl}
+                    title={doc.name}
+                    className="h-[70vh] w-full"
+                  />
+                )}
+                {mediaKind === 'video' && (
+                  <video key={doc.fileUrl} src={doc.fileUrl} controls className="w-full" preload="metadata" />
+                )}
+                {mediaKind === 'audio' && (
+                  <div className="p-6">
+                    <audio key={doc.fileUrl} src={doc.fileUrl} controls className="w-full" preload="metadata" />
+                  </div>
+                )}
               </div>
-            </div>
-
-            <div className="mt-6 max-w-3xl mx-auto rounded-xl border border-border bg-muted/30 p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="h-4 w-4 text-accent" />
-                <p className="text-sm font-semibold text-foreground">Ghi chú thông minh AI</p>
-                <Badge variant="primary" label="AI" className="ml-auto" />
+            ) : (
+              <div className="mx-auto max-w-3xl rounded-xl border border-border bg-surface-elevated p-4 shadow-soft sm:p-10">
+                <div className="space-y-4">
+                  <Badge variant="primary" label={isMedia ? 'Tệp media' : `Chương ${currentPage}`} />
+                  <h3 className="font-display text-2xl font-bold text-foreground text-balance">
+                    {doc.name.replace(/\.\w+$/, '')}
+                  </h3>
+                  <div className="flex items-start gap-2.5 rounded-lg bg-muted/40 p-3 text-sm text-foreground/80">
+                    <FileText className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <p className="leading-relaxed">
+                      Tài liệu đã được xử lý và lập chỉ mục
+                      {doc.pageCount ? ` (${doc.pageCount} trang/phân đoạn)` : ''}.
+                      Dùng Trò chuyện AI, Quiz, Flashcards hoặc Chấm essay để học từ nội dung thật của tệp này.
+                    </p>
+                  </div>
+                  {doc.fileUrl && (
+                    <a
+                      href={doc.fileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Mở tệp gốc trong tab mới
+                    </a>
+                  )}
+                </div>
               </div>
-              <ul className="space-y-2">
-                {smartNotes.map((note, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-foreground/80">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                    <p className="leading-relaxed">{note}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            )}
           </div>
         )}
       </div>
