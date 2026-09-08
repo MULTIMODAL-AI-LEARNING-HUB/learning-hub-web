@@ -1,15 +1,29 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
-import { Sparkles, ArrowRight, Mail, Lock, User, GraduationCap, Briefcase } from 'lucide-react'
+import {
+  ArrowRight,
+  ArrowLeft,
+  Mail,
+  Lock,
+  User,
+  GraduationCap,
+  Briefcase,
+  Building2,
+  BookOpen,
+  Link2,
+  ShieldCheck,
+} from 'lucide-react'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useAppStore } from '../stores/appStore'
 import { Button } from '../components/ui/Button'
-import { Card } from '../components/ui/Card'
 import { AuthInput } from '../components/auth/AuthInput'
 import { SocialLoginButton } from '../components/auth/SocialLoginButton'
+import { PasswordStrength } from '../components/auth/PasswordStrength'
+import { AuthLayout } from '../components/auth/AuthLayout'
 import { cn } from '../utils/cn'
 
 type Variant = 'login' | 'register'
+type Role = 'student' | 'lecturer'
 
 // ── Facebook SDK types (module-level) ──────────────────────────────────────
 interface FBAuthResponse {
@@ -31,28 +45,20 @@ interface FacebookWindow extends Window {
 }
 const fbWindow = window as FacebookWindow
 
-const copy = {
-  login: {
-    title: 'Chào mừng trở lại',
-    subtitle: 'Đăng nhập để tiếp tục hành trình học tập của bạn.',
-    cta: 'Đăng nhập',
-    alt: 'Chưa có tài khoản?',
-    linkText: 'Tạo tài khoản',
-    linkTo: '/register',
-  },
-  register: {
-    title: 'Tạo tài khoản mới',
-    subtitle: 'Tham gia nền tảng học tập thông minh cùng AI.',
-    cta: 'Tạo tài khoản',
-    alt: 'Đã có tài khoản?',
-    linkText: 'Đăng nhập',
-    linkTo: '/login',
-  }
-}
+const lecturerBlurb =
+  'Tài khoản Giảng viên dùng để mở lớp, đăng giáo trình và theo dõi học viên. Vui lòng dùng email công việc để được tin tưởng hơn.'
 
-// Kept for visual compatibility with older route snapshots; lecturer signup is disabled server-side.
 function AuthShell({ variant }: { variant: Variant }) {
-  const content = copy[variant]
+  const content = {
+    login: {
+      alt: 'Chưa có tài khoản?',
+      linkText: 'Tạo tài khoản',
+    },
+    register: {
+      alt: 'Đã có tài khoản?',
+      linkText: 'Đăng nhập',
+    },
+  }[variant]
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -71,12 +77,20 @@ function AuthShell({ variant }: { variant: Variant }) {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [socialLoading, setSocialLoading] = useState<'google' | 'facebook' | null>(null)
+  // Lecturer onboarding step (register only): 1 = tài khoản, 2 = hồ sơ giảng dạy
+  const [lecturerStep, setLecturerStep] = useState(1)
+  const [organization, setOrganization] = useState('')
+  const [subject, setSubject] = useState('')
+  const [bio, setBio] = useState('')
+  const [portfolioUrl, setPortfolioUrl] = useState('')
   // Stores a Facebook access_token read from the URL hash (no setState inside effect)
   const pendingFbTokenRef = useRef<string | null>(null)
-  
-  const selectedRole: 'student' | 'lecturer' = searchParams.get('role') === 'lecturer' ? 'lecturer' : 'student'
 
-  const handleSelectRole = (role: 'student' | 'lecturer') => {
+  const selectedRole: Role = searchParams.get('role') === 'lecturer' ? 'lecturer' : 'student'
+
+  const handleSelectRole = (role: Role) => {
+    setLecturerStep(1)
+    setErrors({})
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev)
       next.set('role', role)
@@ -86,19 +100,26 @@ function AuthShell({ variant }: { variant: Variant }) {
 
   const isRegister = variant === 'register'
   const isStudent = selectedRole === 'student'
-  const roleLabel = isStudent ? 'Học viên' : 'Giảng viên'
-  const roleIcon = isStudent ? <GraduationCap className="h-5 w-5" /> : <Briefcase className="h-5 w-5" />
+  const isLecturerRegister = isRegister && !isStudent
 
-  const getRedirectPath = useCallback((user: { role?: string } | null) => {
-    if (fromPath && !fromPath.includes('/login') && !fromPath.includes('/register') && !fromPath.includes('/welcome')) {
-      return fromPath
-    }
-    return user?.role === 'admin'
-      ? '/app/admin'
-      : user?.role === 'lecturer'
-      ? '/app/lecturer/dashboard'
-      : '/app/student/dashboard'
-  }, [fromPath])
+  const getRedirectPath = useCallback(
+    (user: { role?: string } | null) => {
+      if (
+        fromPath &&
+        !fromPath.includes('/login') &&
+        !fromPath.includes('/register') &&
+        !fromPath.includes('/welcome')
+      ) {
+        return fromPath
+      }
+      return user?.role === 'admin'
+        ? '/app/admin'
+        : user?.role === 'lecturer'
+          ? '/app/lecturer/dashboard'
+          : '/app/student/dashboard'
+    },
+    [fromPath]
+  )
 
   const handleFacebookTokenLogin = useCallback(
     async (accessToken: string) => {
@@ -176,7 +197,7 @@ function AuthShell({ variant }: { variant: Variant }) {
     },
     onError: () => {
       setErrors({ form: 'Đăng nhập Google đã bị hủy hoặc thất bại.' })
-    }
+    },
   })
 
   const handleFacebookClick = () => {
@@ -204,22 +225,65 @@ function AuthShell({ variant }: { variant: Variant }) {
     }
   }
 
-  const validate = () => {
+  const validateAccount = () => {
     const errs: Record<string, string> = {}
-    if (variant === 'register' && !name.trim()) errs.name = 'Vui lòng nhập họ và tên'
+    if (isRegister && !name.trim()) errs.name = 'Vui lòng nhập họ và tên'
     if (!email.trim()) errs.email = 'Vui lòng nhập địa chỉ email'
-    else if (!/\S+@\S+\.\S+/.test(email)) errs.email = 'Địa chỉ email không hợp lệ'
+    else if (!/\S+@\S+\.\S+/.test(email)) errs.email = 'Địa chỉ email chưa đúng định dạng'
     if (!password) errs.password = 'Vui lòng nhập mật khẩu'
-    else if (variant === 'register' && password.length < 8) errs.password = 'Mật khẩu tối thiểu 8 ký tự'
-    if (variant === 'register' && password !== confirmPassword) {
-      errs.confirmPassword = 'Mật khẩu xác nhận không khớp'
+    else if (isRegister && password.length < 8) errs.password = 'Mật khẩu tối thiểu 8 ký tự'
+    if (isRegister && password !== confirmPassword) {
+      errs.confirmPassword = 'Mật khẩu xác nhận chưa khớp'
     }
     return errs
   }
 
+  const validateLecturerProfile = () => {
+    const errs: Record<string, string> = {}
+    if (!organization.trim()) errs.organization = 'Vui lòng nhập trường hoặc tổ chức công tác'
+    if (!subject.trim()) errs.subject = 'Vui lòng nhập môn giảng dạy chính'
+    if (bio.trim() && bio.trim().length < 20)
+      errs.bio = 'Giới thiệu nên có ít nhất 20 ký tự để học viên hiểu rõ bạn'
+    if (portfolioUrl.trim() && !/^https?:\/\/.+\..+/.test(portfolioUrl.trim()))
+      errs.portfolioUrl = 'Đường dẫn phải bắt đầu bằng http:// hoặc https://'
+    return errs
+  }
+
+  const persistLecturerProfile = (registeredEmail: string) => {
+    try {
+      const key = `lecturer_profile:${registeredEmail.toLowerCase()}`
+      window.localStorage.setItem(
+        key,
+        JSON.stringify({
+          organization: organization.trim(),
+          subject: subject.trim(),
+          bio: bio.trim(),
+          portfolioUrl: portfolioUrl.trim(),
+          completedAt: new Date().toISOString(),
+        })
+      )
+    } catch {
+      // localStorage có thể bị chặn — hồ sơ vẫn đăng ký thành công, bỏ qua lặng lẽ.
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const errs = validate()
+
+    // Lecturer register bước 1: kiểm tra tài khoản rồi mới sang hồ sơ giảng dạy.
+    if (isLecturerRegister && lecturerStep === 1) {
+      const errs = validateAccount()
+      setErrors(errs)
+      if (Object.keys(errs).length > 0) return
+      setLecturerStep(2)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+
+    const errs =
+      isLecturerRegister && lecturerStep === 2
+        ? { ...validateAccount(), ...validateLecturerProfile() }
+        : validateAccount()
     setErrors(errs)
     if (Object.keys(errs).length > 0) return
 
@@ -231,6 +295,7 @@ function AuthShell({ variant }: { variant: Variant }) {
         navigate(getRedirectPath(user))
       } else {
         await register(email, password, name, selectedRole)
+        if (isLecturerRegister) persistLecturerProfile(email)
         const user = useAppStore.getState().auth.user
         navigate(getRedirectPath(user))
       }
@@ -242,323 +307,409 @@ function AuthShell({ variant }: { variant: Variant }) {
     }
   }
 
+  const header = !isRegister
+    ? isStudent
+      ? {
+          title: 'Chào mừng trở lại',
+          subtitle: 'Đăng nhập để tiếp tục hành trình học tập của bạn.',
+        }
+      : {
+          title: 'Chào mừng trở lại',
+          subtitle: 'Đăng nhập để quản lý lớp học và đồng hành cùng học viên.',
+        }
+    : isStudent
+      ? {
+          title: 'Tạo tài khoản Học viên',
+          subtitle: 'Học cùng AI tutor, luyện đề mỗi ngày và theo dõi tiến độ rõ ràng.',
+        }
+      : lecturerStep === 1
+        ? {
+            title: 'Trở thành Giảng viên',
+            subtitle: 'Tạo tài khoản để thiết kế khóa học và quản lý lớp học của bạn.',
+          }
+        : {
+            title: 'Hồ sơ giảng dạy',
+            subtitle: 'Hồ sơ rõ ràng giúp học viên tin tưởng và mở lớp nhanh hơn.',
+          }
+
+  const ctaLabel = !isRegister
+    ? 'Đăng nhập'
+    : isStudent
+      ? 'Tạo tài khoản Học viên'
+      : lecturerStep === 1
+        ? 'Tiếp tục'
+        : 'Hoàn tất đăng ký'
+
   return (
-    <div className="relative min-h-screen animate-fade-in overflow-hidden bg-background font-body">
-      <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 py-8 lg:flex-row lg:items-center lg:justify-between lg:gap-16 relative z-10">
-        {/* Left: Brand + Form */}
-        <section className="flex w-full flex-col gap-6 lg:w-[480px] animate-zoom-in-95">
-          {/* Brand */}
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-soft">
-              <Sparkles className="h-5.5 w-5.5" />
-            </div>
-            <div>
-              <p className="text-sm font-display font-extrabold text-foreground">Learning Hub</p>
-              <p className="text-3xs uppercase font-bold tracking-wider text-muted-foreground">Không gian học tập AI</p>
-            </div>
-          </div>
+    <AuthLayout role={selectedRole}>
+      {/* Header */}
+      <div className="space-y-2">
+        {isLecturerRegister && (
+          <ol
+            className="flex items-center gap-2 text-[13px] font-medium text-muted-foreground"
+            aria-label="Tiến trình đăng ký giảng viên"
+          >
+            <li aria-current={lecturerStep === 1 ? 'step' : undefined}>
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1',
+                  lecturerStep === 1
+                    ? 'border-purple-500/40 bg-purple-500/10 text-purple-700 dark:text-purple-300'
+                    : 'border-border text-muted-foreground'
+                )}
+              >
+                <span
+                  className={cn(
+                    'flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold',
+                    lecturerStep === 1
+                      ? 'bg-purple-600 text-white'
+                      : lecturerStep > 1
+                        ? 'bg-success text-white'
+                        : 'bg-muted text-muted-foreground'
+                  )}
+                >
+                  {lecturerStep > 1 ? '✓' : '1'}
+                </span>
+                Tài khoản
+              </span>
+            </li>
+            <li aria-hidden="true" className="h-px w-6 bg-border" />
+            <li aria-current={lecturerStep === 2 ? 'step' : undefined}>
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1',
+                  lecturerStep === 2
+                    ? 'border-purple-500/40 bg-purple-500/10 text-purple-700 dark:text-purple-300'
+                    : 'border-border text-muted-foreground'
+                )}
+              >
+                <span
+                  className={cn(
+                    'flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold',
+                    lecturerStep === 2 ? 'bg-purple-600 text-white' : 'bg-muted text-muted-foreground'
+                  )}
+                >
+                  2
+                </span>
+                Hồ sơ giảng dạy
+              </span>
+            </li>
+          </ol>
+        )}
+        <h1 className="font-display text-[clamp(1.625rem,1.35rem+1.25vw,2.125rem)] font-bold leading-tight tracking-tight text-foreground">
+          {header.title}
+        </h1>
+        <p className="text-[15px] leading-relaxed text-muted-foreground">{header.subtitle}</p>
+      </div>
 
-          {/* Header */}
-          <div className="space-y-1">
-            <h1 className="font-display text-3xl font-bold tracking-tight text-foreground text-balance">
-              {variant === 'login'
-                ? content.title
-                : isStudent
-                ? 'Tạo tài khoản Học viên'
-                : 'Tạo tài khoản Giảng viên'}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {variant === 'login'
-                ? content.subtitle
-                : isStudent
-                ? 'Đăng ký để học tập, thực hành với AI và tham gia các khóa học chất lượng.'
-                : 'Đăng ký tài khoản để thiết kế bài giảng, tạo khóa học và đồng hành cùng học viên.'}
+      {/* Role segmented control (register only) */}
+      {isRegister && (
+        <div className="mt-6">
+          <div
+            role="tablist"
+            aria-label="Chọn vai trò tài khoản"
+            className="grid grid-cols-2 gap-1 rounded-2xl border border-border bg-muted/60 p-1"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={isStudent}
+              onClick={() => handleSelectRole('student')}
+              className={cn(
+                'flex min-h-[52px] items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold transition-all duration-200',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
+                isStudent
+                  ? 'bg-surface-elevated text-foreground shadow-soft ring-1 ring-border'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              <GraduationCap
+                className={cn('h-[18px] w-[18px]', isStudent ? 'text-blue-600' : 'text-muted-foreground')}
+                aria-hidden="true"
+              />
+              <span>
+                Học viên
+                <span className="block text-xs font-normal text-muted-foreground">Học & luyện tập</span>
+              </span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={!isStudent}
+              onClick={() => handleSelectRole('lecturer')}
+              className={cn(
+                'flex min-h-[52px] items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold transition-all duration-200',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
+                !isStudent
+                  ? 'bg-surface-elevated text-foreground shadow-soft ring-1 ring-purple-500/30'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              <Briefcase
+                className={cn('h-[18px] w-[18px]', !isStudent ? 'text-purple-600' : 'text-muted-foreground')}
+                aria-hidden="true"
+              />
+              <span>
+                Giảng viên
+                <span className="block text-xs font-normal text-muted-foreground">Dạy & quản lý lớp</span>
+              </span>
+            </button>
+          </div>
+          {!isStudent && lecturerStep === 1 && (
+            <p className="mt-2.5 flex items-start gap-1.5 rounded-xl border border-purple-500/20 bg-purple-500/[0.06] px-3 py-2 text-[13px] leading-relaxed text-muted-foreground">
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-purple-600" aria-hidden="true" />
+              <span>{lecturerBlurb}</span>
             </p>
-          </div>
-
-          {/* Role Selector Tabs (Only on Register) */}
-          {isRegister && (
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between text-xs text-muted-foreground px-0.5">
-                <span className="font-medium">Bạn muốn tham gia với vai trò:</span>
-                <span className="text-3xs text-primary font-bold uppercase tracking-wider">
-                  {isStudent ? 'Học tập cá nhân' : 'Giảng dạy & Quản lý'}
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-1.5 p-1 bg-surface-muted/90 rounded-xl border border-border">
-                <button
-                  type="button"
-                  onClick={() => handleSelectRole('student')}
-                  className={cn(
-                    "flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer",
-                    isStudent
-                      ? "bg-surface-elevated text-foreground shadow-xs border border-border text-primary font-extrabold"
-                      : "text-muted-foreground hover:text-foreground hover:bg-surface-elevated/50"
-                  )}
-                >
-                  <GraduationCap className={cn("h-4 w-4", isStudent ? "text-primary" : "text-muted-foreground")} />
-                  <span>Học viên (Student)</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleSelectRole('lecturer')}
-                  className={cn(
-                    "flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer",
-                    !isStudent
-                      ? "bg-surface-elevated text-foreground shadow-xs border border-border text-purple-600 dark:text-purple-400 font-extrabold"
-                      : "text-muted-foreground hover:text-foreground hover:bg-surface-elevated/50"
-                  )}
-                >
-                  <Briefcase className={cn("h-4 w-4", !isStudent ? "text-purple-600 dark:text-purple-400" : "text-muted-foreground")} />
-                  <span>Giảng viên (Lecturer)</span>
-                </button>
-              </div>
-            </div>
           )}
+        </div>
+      )}
 
-          {/* Form Card */}
-          <Card className="border-border bg-surface-elevated p-6 sm:p-8 shadow-lift relative">
-            {/* Role Badge when Registering */}
+      {/* Social login */}
+      <div className="mt-6 grid grid-cols-1 gap-2.5 xs:grid-cols-2">
+        <SocialLoginButton
+          provider="google"
+          onClick={() => triggerGoogleLogin()}
+          loading={socialLoading === 'google'}
+          disabled={loading || socialLoading !== null}
+        />
+        <SocialLoginButton
+          provider="facebook"
+          onClick={handleFacebookClick}
+          loading={socialLoading === 'facebook'}
+          disabled={loading || socialLoading !== null}
+        />
+      </div>
+
+      <div className="relative my-5 flex items-center justify-center" aria-hidden="true">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-border" />
+        </div>
+        <span className="relative bg-background px-3 text-xs font-medium text-muted-foreground">
+          Hoặc tiếp tục với email
+        </span>
+      </div>
+
+      <form onSubmit={handleSubmit} noValidate className="grid gap-4">
+        {errors.form && (
+          <div
+            className="rounded-xl border border-destructive/25 bg-destructive/[0.07] px-3.5 py-2.5 text-sm font-medium text-destructive"
+            role="alert"
+          >
+            {errors.form}
+          </div>
+        )}
+
+        {/* Bước hồ sơ giảng dạy (register lecturer, bước 2) */}
+        {isLecturerRegister && lecturerStep === 2 ? (
+          <>
+            <AuthInput
+              name="organization"
+              label="Trường / Tổ chức công tác"
+              placeholder="VD: Đại học Bách khoa Hà Nội"
+              value={organization}
+              onChange={setOrganization}
+              error={errors.organization}
+              required
+              autoComplete="organization"
+              prefixIcon={<Building2 className="h-4 w-4" aria-hidden="true" />}
+            />
+            <AuthInput
+              name="subject"
+              label="Môn giảng dạy chính"
+              placeholder="VD: Toán cao cấp, Lập trình Python"
+              value={subject}
+              onChange={setSubject}
+              error={errors.subject}
+              required
+              autoComplete="off"
+              prefixIcon={<BookOpen className="h-4 w-4" aria-hidden="true" />}
+            />
+            <div className="grid w-full gap-1.5">
+              <label htmlFor="lecturer-bio" className="text-sm font-semibold text-foreground">
+                Giới thiệu ngắn
+                <span className="ml-1.5 text-xs font-normal text-muted-foreground">(không bắt buộc)</span>
+              </label>
+              <textarea
+                id="lecturer-bio"
+                rows={3}
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Kinh nghiệm giảng dạy, thành tựu nghiên cứu, phong cách dạy học…"
+                aria-invalid={Boolean(errors.bio)}
+                aria-describedby={errors.bio ? 'lecturer-bio-error' : 'lecturer-bio-hint'}
+                className={cn(
+                  'w-full rounded-xl border border-input bg-surface-elevated px-3.5 py-2.5 text-[15px] text-foreground',
+                  'placeholder:text-muted-foreground/60 transition-all duration-200',
+                  'hover:border-foreground/25',
+                  'focus:border-purple-500 focus:outline-none focus:ring-[3px] focus:ring-purple-500/20',
+                  errors.bio && 'border-destructive/60 focus:border-destructive focus:ring-destructive/15'
+                )}
+              />
+              {errors.bio ? (
+                <p id="lecturer-bio-error" role="alert" className="text-[13px] font-medium text-destructive">
+                  {errors.bio}
+                </p>
+              ) : (
+                <p id="lecturer-bio-hint" className="text-[13px] text-muted-foreground">
+                  {bio.trim().length}/500 ký tự — tối thiểu 20 ký tự nếu có viết.
+                </p>
+              )}
+            </div>
+            <AuthInput
+              name="portfolioUrl"
+              label="Website / Hồ sơ cá nhân"
+              type="url"
+              placeholder="https://…"
+              value={portfolioUrl}
+              onChange={setPortfolioUrl}
+              error={errors.portfolioUrl}
+              hint="Không bắt buộc — link Google Scholar, LinkedIn hoặc trang cá nhân."
+              autoComplete="url"
+              prefixIcon={<Link2 className="h-4 w-4" aria-hidden="true" />}
+            />
+          </>
+        ) : (
+          <>
             {isRegister && (
-              <div className={cn(
-                "flex items-center justify-between mb-5 pb-3 border-b",
-                isStudent ? "border-border/60" : "border-purple-500/20"
-              )}>
-                <div className="flex items-center gap-2.5">
-                  <div className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-lg",
-                    isStudent ? "bg-primary/10 text-primary" : "bg-purple-500/10 text-purple-600 dark:text-purple-400"
-                  )}>
-                    {roleIcon}
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-foreground">
-                      {isStudent ? 'Đăng ký Học viên' : 'Đăng ký Giảng viên'}
-                    </p>
-                    <p className="text-3xs text-muted-foreground">
-                      {isStudent
-                        ? 'Tự do học tập, làm bài tập & tương tác cùng AI'
-                        : 'Thiết kế giáo trình, chấm bài tập & theo dõi học viên'}
-                    </p>
-                  </div>
-                </div>
-                <span className={cn(
-                  "inline-flex items-center px-2 py-0.5 rounded text-3xs font-bold uppercase tracking-wider",
-                  isStudent
-                    ? "bg-primary/10 text-primary border border-primary/20"
-                    : "bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20"
-                )}>
-                  {isStudent ? 'Student' : 'Lecturer'}
-                </span>
-              </div>
+              <AuthInput
+                name="full_name"
+                label="Họ và tên"
+                placeholder="Nguyễn Văn A"
+                value={name}
+                onChange={setName}
+                error={errors.name}
+                required
+                autoComplete="name"
+                prefixIcon={<User className="h-4 w-4" aria-hidden="true" />}
+              />
             )}
 
-            {/* Social Login Buttons */}
-            <div className="grid grid-cols-2 gap-3 mb-5">
-              <SocialLoginButton
-                provider="google"
-                onClick={() => triggerGoogleLogin()}
-                loading={socialLoading === 'google'}
-                disabled={loading || socialLoading !== null}
-              />
-              <SocialLoginButton
-                provider="facebook"
-                onClick={handleFacebookClick}
-                loading={socialLoading === 'facebook'}
-                disabled={loading || socialLoading !== null}
-              />
-            </div>
+            <AuthInput
+              name="email"
+              label="Địa chỉ email"
+              type="email"
+              placeholder="ban@example.com"
+              value={email}
+              onChange={setEmail}
+              error={errors.email}
+              required
+              autoComplete="email"
+              prefixIcon={<Mail className="h-4 w-4" aria-hidden="true" />}
+            />
 
-            {/* Divider */}
-            <div className="relative my-4 flex items-center justify-center">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border/60" />
-              </div>
-              <div className="relative bg-surface-elevated px-3 text-3xs font-bold uppercase tracking-wider text-muted-foreground">
-                Hoặc tiếp tục với email
-              </div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="grid gap-5">
-              {errors.form && (
-                <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-xs text-destructive animate-shake-in" role="alert">
-                  {errors.form}
-                </div>
-              )}
-
-              {variant === 'register' && (
-                <AuthInput
-                  name="full_name"
-                  label="Họ và tên"
-                  placeholder="Nguyễn Văn A"
-                  value={name}
-                  onChange={setName}
-                  error={errors.name}
-                  prefixIcon={<User className="h-4 w-4 text-muted-foreground" />}
-                />
-              )}
-
-              <AuthInput
-                name="email"
-                label="Địa chỉ email"
-                type="email"
-                placeholder="ban@example.com"
-                value={email}
-                onChange={setEmail}
-                error={errors.email}
-                prefixIcon={<Mail className="h-4 w-4 text-muted-foreground" />}
-              />
-
+            <div className="grid gap-2">
               <AuthInput
                 name="password"
                 label="Mật khẩu"
                 type="password"
-                placeholder="Tối thiểu 8 ký tự"
+                placeholder={isRegister ? 'Tối thiểu 8 ký tự' : 'Nhập mật khẩu của bạn'}
                 value={password}
                 onChange={setPassword}
                 error={errors.password}
-                prefixIcon={<Lock className="h-4 w-4 text-muted-foreground" />}
+                required
+                autoComplete={isRegister ? 'new-password' : 'current-password'}
+                prefixIcon={<Lock className="h-4 w-4" aria-hidden="true" />}
               />
-
-              {variant === 'register' && (
-                <AuthInput
-                  name="confirmPassword"
-                  label="Xác nhận mật khẩu"
-                  type="password"
-                  placeholder="Nhập lại mật khẩu"
-                  value={confirmPassword}
-                  onChange={setConfirmPassword}
-                  error={errors.confirmPassword}
-                  prefixIcon={<Lock className="h-4 w-4 text-muted-foreground" />}
-                />
-              )}
-
-              {/* Login extras */}
-              {variant === 'login' && (
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="h-4 w-4 rounded border-border bg-surface-elevated text-blue-500 focus:ring-blue-500/30 cursor-pointer"
-                    />
-                    <span className="text-xs text-muted-foreground select-none">Duy trì đăng nhập</span>
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => navigate('/forgot-password')}
-                    className="text-xs font-bold text-blue-500 hover:text-blue-600 transition-colors"
-                  >
-                    Quên mật khẩu?
-                  </button>
-                </div>
-              )}
-
-              {/* Register extras */}
-              {variant === 'register' && (
-                <p className="text-3xs text-muted-foreground leading-relaxed">
-                  Bằng việc tạo tài khoản, bạn đồng ý với{' '}
-                  <button type="button" className="font-bold text-blue-500 hover:underline">Điều khoản dịch vụ</button>
-                  {' '}và{' '}
-                  <button type="button" className="font-bold text-blue-500 hover:underline">Chính sách bảo mật</button>.
-                </p>
-              )}
-
-              <Button
-                type="submit"
-                loading={loading}
-                className={cn(
-                  "w-full font-semibold",
-                  isRegister && !isStudent && "bg-purple-600 hover:bg-purple-700 text-white"
-                )}
-                size="lg"
-                iconRight={!loading ? <ArrowRight className="h-4 w-4" /> : undefined}
-              >
-                {loading
-                  ? 'Đang xác thực...'
-                  : isRegister
-                  ? (isStudent ? 'Tạo tài khoản Học viên' : 'Tạo tài khoản Giảng viên')
-                  : content.cta}
-              </Button>
-            </form>
-
-            {/* Toggle Link */}
-            <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-              <span>{content.alt}</span>
-              <Link
-                className="font-bold text-blue-500 transition hover:underline"
-                to={content.linkTo + (variant === 'register' ? '' : '?role=student')}
-              >
-                {content.linkText}
-              </Link>
+              {isRegister && <PasswordStrength password={password} />}
             </div>
-          </Card>
-        </section>
 
-        {/* Right: Decorative Panel */}
-        <aside className="hidden w-full lg:block lg:w-[400px] animate-slide-in-from-right">
-          <div className="space-y-6">
-            {/* Role Info Card */}
-            <Card className="p-6 border-border bg-surface-elevated shadow-soft">
-              <div className="flex items-center gap-3 mb-4">
-                <div className={cn(
-                  "flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20"
-                )}>
-                  {roleIcon}
-                </div>
-                <div>
-                  <p className="font-bold text-foreground text-sm">Cổng thông tin {roleLabel}</p>
-                  <p className="text-3xs text-muted-foreground uppercase tracking-wider font-semibold">Đặc quyền học tập</p>
-                </div>
-              </div>
-              <ul className="space-y-3.5 text-xs text-muted-foreground">
-                {isStudent ? (
-                  <>
-                    <li className="flex items-center gap-2.5">
-                      <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                      <span>Truy cập đầy đủ giáo trình & tài liệu học tập</span>
-                    </li>
-                    <li className="flex items-center gap-2.5">
-                      <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                      <span>Trợ lý AI hỗ trợ giải đáp & định hướng học tập</span>
-                    </li>
-                    <li className="flex items-center gap-2.5">
-                      <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                      <span>Thống kê tiến độ & theo dõi kết quả rèn luyện</span>
-                    </li>
-                  </>
-                ) : (
-                  <>
-                    <li className="flex items-center gap-2.5">
-                      <div className="h-1.5 w-1.5 rounded-full bg-purple-500" />
-                      <span>Thiết kế bài giảng & quản lý giáo trình linh hoạt</span>
-                    </li>
-                    <li className="flex items-center gap-2.5">
-                      <div className="h-1.5 w-1.5 rounded-full bg-purple-500" />
-                      <span>Chấm điểm bài tập & đánh giá trắc nghiệm tự động</span>
-                    </li>
-                    <li className="flex items-center gap-2.5">
-                      <div className="h-1.5 w-1.5 rounded-full bg-purple-500" />
-                      <span>Theo dõi dữ liệu học viên & đánh giá khóa học</span>
-                    </li>
-                  </>
-                )}
-              </ul>
-            </Card>
+            {isRegister && (
+              <AuthInput
+                name="confirmPassword"
+                label="Xác nhận mật khẩu"
+                type="password"
+                placeholder="Nhập lại mật khẩu"
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+                error={errors.confirmPassword}
+                required
+                autoComplete="new-password"
+                prefixIcon={<Lock className="h-4 w-4" aria-hidden="true" />}
+              />
+            )}
+          </>
+        )}
 
-            {/* Quote Card */}
-            <Card className="p-6 border-border bg-surface-elevated">
-              <p className="text-xs italic text-foreground/80 leading-relaxed">
-                "Giáo dục là vũ khí mạnh nhất mà bạn có thể dùng để thay đổi thế giới."
-              </p>
-              <p className="mt-3 text-3xs font-bold uppercase tracking-wider text-muted-foreground">— Nelson Mandela</p>
-            </Card>
+        {/* Login extras */}
+        {!isRegister && (
+          <div className="flex items-center justify-between">
+            <label className="flex min-h-[44px] cursor-pointer items-center gap-2">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 cursor-pointer rounded border-border bg-surface-elevated accent-primary"
+              />
+              <span className="select-none text-sm text-muted-foreground">Duy trì đăng nhập</span>
+            </label>
+            <button
+              type="button"
+              onClick={() => navigate('/forgot-password')}
+              className="min-h-[44px] px-1 text-sm font-semibold text-primary transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Quên mật khẩu?
+            </button>
           </div>
-        </aside>
+        )}
+
+        {/* Register extras */}
+        {isRegister && (!isLecturerRegister || lecturerStep === 2) && (
+          <p className="text-[13px] leading-relaxed text-muted-foreground">
+            Bằng việc tạo tài khoản, bạn đồng ý với{' '}
+            <button type="button" className="font-semibold text-primary hover:underline">
+              Điều khoản dịch vụ
+            </button>{' '}
+            và{' '}
+            <button type="button" className="font-semibold text-primary hover:underline">
+              Chính sách bảo mật
+            </button>
+            .
+          </p>
+        )}
+
+        <div className={cn('grid gap-2.5', isLecturerRegister && lecturerStep === 2 && 'grid-cols-[auto_1fr]')}>
+          {isLecturerRegister && lecturerStep === 2 && (
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              onClick={() => {
+                setLecturerStep(1)
+                setErrors({})
+              }}
+              icon={<ArrowLeft className="h-4 w-4" aria-hidden="true" />}
+              aria-label="Quay lại bước tài khoản"
+            >
+              Quay lại
+            </Button>
+          )}
+          <Button
+            type="submit"
+            loading={loading}
+            size="lg"
+            fullWidth
+            className={cn(
+              'font-semibold',
+              !isStudent && 'bg-purple-600 text-white hover:bg-purple-700 focus-visible:ring-purple-500'
+            )}
+            iconRight={!loading ? <ArrowRight className="h-4 w-4" aria-hidden="true" /> : undefined}
+          >
+            {loading ? 'Đang xác thực…' : ctaLabel}
+          </Button>
+        </div>
+      </form>
+
+      {/* Toggle link — giữ ?role= để không rớt vai trò khi chuyển trang */}
+      <div className="mt-6 flex min-h-[44px] items-center justify-center gap-1.5 text-sm text-muted-foreground">
+        <span>{content.alt}</span>
+        <Link
+          className="font-semibold text-primary transition hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          to={isRegister ? `/login?role=${selectedRole}` : `/register?role=${selectedRole}`}
+        >
+          {content.linkText}
+        </Link>
       </div>
-    </div>
+    </AuthLayout>
   )
 }
 
