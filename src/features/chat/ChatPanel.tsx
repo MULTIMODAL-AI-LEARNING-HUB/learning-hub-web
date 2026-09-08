@@ -54,7 +54,6 @@ export function ChatPanel() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages.length, isSending, lastMsg?.content?.length])
 
   const handleSend = async () => {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { BookOpen, CheckCircle2, XCircle, Trophy, ArrowLeft, ArrowRight } from 'lucide-react'
 import { coursesApi, enrollmentsApi, studyApi, type Course, type Enrollment } from '../services/api'
@@ -37,29 +37,38 @@ export function QuizTaking() {
   const [score, setScore] = useState({ correct: 0, total: 0, percentage: 0 })
   const [jobId, setJobId] = useState<string | null>(null)
 
-  const loadData = useCallback(async () => {
+  useEffect(() => {
     if (!id) return
-    setLoading(true)
-    try {
-      const [courseRes, enrollRes] = await Promise.all([
-        coursesApi.get(id).catch(() => ({ data: null })),
-        enrollmentsApi.list({ status: 'active' }).catch(() => ({ data: { items: [] } }))
-      ])
-      if (courseRes.data) {
-        setCourse(courseRes.data)
-        const userEnrollment = enrollRes.data.items.find((e: Enrollment) => e.course_id === id)
-        setEnrollment(userEnrollment || null)
+    let cancelled = false
+
+    const loadData = async () => {
+      try {
+        const [courseRes, enrollRes] = await Promise.all([
+          coursesApi.get(id).catch(() => ({ data: null })),
+          enrollmentsApi.list({ status: 'active' }).catch(() => ({ data: { items: [] } }))
+        ])
+        if (cancelled) return
+        if (courseRes.data) {
+          setCourse(courseRes.data)
+          const userEnrollment = enrollRes.data.items.find((e: Enrollment) => e.course_id === id)
+          setEnrollment(userEnrollment || null)
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error('Failed to load course:', err)
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
       }
-    } catch (err) {
-      console.error('Failed to load course:', err)
-    } finally {
-      setLoading(false)
+    }
+
+    loadData()
+    return () => {
+      cancelled = true
     }
   }, [id])
-
-  useEffect(() => {
-    loadData()
-  }, [loadData])
 
   const handleGenerateQuiz = async (fromMaterialId?: string) => {
     if (!id) return

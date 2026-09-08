@@ -20,7 +20,7 @@ export function DiscussionPanel({ lessonId }: Props) {
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
 
-  useEffect(() => { fetchDiscussions() }, [lessonId])
+  useEffect(() => { fetchDiscussions() }, [fetchDiscussions])
 
   const handlePost = async () => {
     if (!newContent.trim()) return

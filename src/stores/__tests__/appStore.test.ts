@@ -143,9 +143,10 @@ describe('appStore', () => {
       })
       useAppStore.getState().chat.sendMessage('Hello')
       const messages = useAppStore.getState().chat.sessions[0].messages
-      expect(messages).toHaveLength(1)
+      expect(messages).toHaveLength(2)
       expect(messages[0].content).toBe('Hello')
       expect(messages[0].role).toBe('user')
+      expect(messages[1].role).toBe('assistant')
     })
 
     it('adds a new session', async () => {
