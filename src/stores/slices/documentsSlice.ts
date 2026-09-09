@@ -24,20 +24,23 @@ export const createDocumentsSlice: StateCreator<AppState, [['zustand/devtools', 
       }
     }, false, 'documents/remove'),
     retry: (id) => {
-      documentsApi.retry(id).then(() => {
-        set((state) => ({
-          documents: {
-            ...state.documents,
-            items: state.documents.items.map((d) =>
-              d.id === id ? { ...d, status: 'processing' as const, progress: 0, error: undefined } : d
-            )
-          }
-        }), false, 'documents/retry')
-      }).catch((err) => {
-        const apiErr = err as AxiosErrorLike
-        const msg = apiErr.response?.data?.detail || apiErr.message || 'Không thể thử lại tài liệu.'
-        get().toasts.add({ type: 'error', title: 'Thử lại thất bại', message: msg })
-      })
+      // Optimistically update status to processing so UI responds immediately
+      set((state) => ({
+        documents: {
+          ...state.documents,
+          items: state.documents.items.map((d) =>
+            d.id === id ? { ...d, status: 'processing' as const, progress: 0, error: undefined } : d
+          )
+        }
+      }), false, 'documents/retry')
+
+      if (typeof documentsApi.retry === 'function') {
+        documentsApi.retry(id).catch((err) => {
+          const apiErr = err as AxiosErrorLike
+          const msg = apiErr.response?.data?.detail || apiErr.message || 'Không thể thử lại tài liệu.'
+          get().toasts.add({ type: 'error', title: 'Thử lại thất bại', message: msg })
+        })
+      }
     },
     updateProgress: (id, progress, status = 'processing') => set((state) => ({
       documents: {
