@@ -41,8 +41,8 @@ export const createDocumentsSlice: StateCreator<AppState, [['zustand/devtools', 
     }), false, 'documents/updateProgress'),
     loadDocuments: async () => {
       try {
-        const res = await documentsApi.list()
-        const items: DocumentItem[] = res.data.items.map((d) => ({
+        const res = await documentsApi.list(1, 100)
+        const items: DocumentItem[] = (res.data?.items || []).map((d) => ({
           id: d.id,
           name: d.file_name,
           type: (d.file_type || 'pdf').toLowerCase(),
@@ -55,13 +55,13 @@ export const createDocumentsSlice: StateCreator<AppState, [['zustand/devtools', 
         set((state) => ({
           documents: { ...state.documents, items }
         }), false, 'documents/loadDocuments')
-      } catch {
-        // Fallback to initial mock docs if API fails
+      } catch (err) {
+        console.warn('Failed to load documents from API', err)
       }
     },
-    uploadDocument: async (file: File) => {
+    uploadDocument: async (file: File, onProgress?: (percent: number) => void) => {
       try {
-        const res = await documentsApi.upload(file)
+        const res = await documentsApi.upload(file, undefined, onProgress)
         const data = res.data as { id: string; file_name: string; file_type?: string }
         const newDoc: DocumentItem = {
           id: data.id,

@@ -63,6 +63,18 @@ api.interceptors.request.use((config) => {
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`
   }
+  // When payload is FormData, NEVER send an explicit Content-Type header so the browser
+  // can set 'multipart/form-data; boundary=----WebKitFormBoundary...' correctly.
+  if (config.data instanceof FormData) {
+    const headers = config.headers as unknown as { delete?: (k: string) => void }
+    if (typeof headers?.delete === 'function') {
+      headers.delete('Content-Type')
+      headers.delete('content-type')
+    } else if (config.headers) {
+      delete (config.headers as Record<string, unknown>)['Content-Type']
+      delete (config.headers as Record<string, unknown>)['content-type']
+    }
+  }
   return config
 })
 
@@ -577,9 +589,10 @@ export const coursesApi = {
   archive: (id: string) => api.post<Course>(`/courses/${id}/archive`, {}),
   getMaterials: (id: string) => api.get<CourseMaterial[]>(`/courses/${id}/materials`),
   addMaterial: (id: string, data: FormData) =>
-    api.post<CourseMaterial>(`/courses/${id}/materials`, data, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
+    // NOTE: do NOT set Content-Type manually — the browser must append the
+    // multipart boundary itself. The request interceptor strips any stale
+    // Content-Type when data is FormData (fixes "Missing boundary" 400s).
+    api.post<CourseMaterial>(`/courses/${id}/materials`, data),
   updateMaterial: (courseId: string, materialId: string, data: Partial<CourseMaterial>) =>
     api.put<CourseMaterial>(`/courses/${courseId}/materials/${materialId}`, data),
   deleteMaterial: (courseId: string, materialId: string) =>
@@ -664,9 +677,8 @@ export const lessonsApi = {
     api.put<Lesson[]>(`/sections/${sectionId}/lessons/reorder`, { lesson_ids: lessonIds }),
   getAttachments: (sectionId: string, lessonId: string) => api.get<Attachment[]>(`/sections/${sectionId}/lessons/${lessonId}/attachments`),
   addAttachment: (sectionId: string, lessonId: string, data: FormData) =>
-    api.post<Attachment>(`/sections/${sectionId}/lessons/${lessonId}/attachments/upload`, data, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
+    // NOTE: do NOT set Content-Type manually — boundary is set by the browser.
+    api.post<Attachment>(`/sections/${sectionId}/lessons/${lessonId}/attachments/upload`, data),
   deleteAttachment: (sectionId: string, lessonId: string, attachmentId: string) =>
     api.delete(`/sections/${sectionId}/lessons/${lessonId}/attachments/${attachmentId}`),
 }
@@ -747,9 +759,7 @@ export const assignmentsApi = {
       file_type: string
       file_size: number
       storage_key: string
-    }>(`/lessons/${lessonId}/assignment/submissions/upload`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
+    }>(`/lessons/${lessonId}/assignment/submissions/upload`, formData)
   },
   getMySubmissions: (lessonId: string) =>
     api.get<AssignmentSubmission[]>(`/lessons/${lessonId}/assignment/submissions`),
@@ -836,12 +846,19 @@ export const documentsApi = {
       '/documents/', { params: { page, page_size: pageSize } }
     ),
   get: (id: string) => api.get<DocumentItem>(`/documents/${id}`),
-  upload: (file: File, title?: string) => {
+  upload: (file: File, title?: string, onUploadProgress?: (percent: number) => void) => {
     const formData = new FormData()
     formData.append('file', file)
     if (title) formData.append('title', title)
+    // NOTE: do NOT set Content-Type manually — the browser must append the
+    // multipart boundary itself (fixes "Missing boundary in multipart." 400s).
+    // The request interceptor also strips any stale Content-Type for FormData.
     return api.post('/documents/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: onUploadProgress
+        ? (e) => {
+            if (e.total) onUploadProgress(Math.round((e.loaded * 100) / e.total))
+          }
+        : undefined,
     })
   },
   delete: (id: string) => api.delete(`/documents/${id}`),

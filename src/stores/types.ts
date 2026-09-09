@@ -36,7 +36,7 @@ export interface DocumentsSlice {
     retry: (id: string) => void
     updateProgress: (id: string, progress: number, status?: 'processing' | 'ready' | 'failed') => void
     loadDocuments: () => Promise<void>
-    uploadDocument: (file: File) => Promise<void>
+    uploadDocument: (file: File, onProgress?: (percent: number) => void) => Promise<void>
   }
 }
 

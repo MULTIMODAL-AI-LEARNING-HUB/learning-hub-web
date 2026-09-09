@@ -53,15 +53,20 @@ export function Header() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  // Quota comes from the login/me payload via mapApiUser. When quota is missing
+  // (older sessions, failed /me refresh) keep pills hidden instead of showing "0%".
+  const hasQuota = Boolean(user?.quota)
   const storageUsed = user?.quota?.storageUsed ?? 0
-  const storageTotal = user?.quota?.storageTotal ?? 1024
-  const storagePct = Math.min(100, Math.round((storageUsed / storageTotal) * 100))
+  const storageTotal = user?.quota?.storageTotal ?? 0
+  const storageSafeTotal = storageTotal > 0 ? storageTotal : 1
+  const storagePct = Math.min(100, Math.round((storageUsed / storageSafeTotal) * 100))
   const storageUsedLabel = storageUsed >= 1024 ? `${(storageUsed / 1024).toFixed(1)}GB` : `${storageUsed.toFixed(0)}MB`
   const storageTotalLabel = storageTotal >= 1024 ? `${(storageTotal / 1024).toFixed(0)}GB` : `${storageTotal}MB`
 
   const tokensUsed = user?.quota?.tokensUsed ?? 0
-  const tokensTotal = user?.quota?.tokensTotal ?? 50000
-  const tokenPct = Math.min(100, Math.round((tokensUsed / tokensTotal) * 100))
+  const tokensTotal = user?.quota?.tokensTotal ?? 0
+  const tokenSafeTotal = tokensTotal > 0 ? tokensTotal : 1
+  const tokenPct = Math.min(100, Math.round((tokensUsed / tokenSafeTotal) * 100))
   const tokensUsedLabel = tokensUsed >= 1000 ? `${(tokensUsed / 1000).toFixed(1)}k` : `${tokensUsed}`
   const tokensTotalLabel = tokensTotal >= 1000 ? `${(tokensTotal / 1000).toFixed(0)}k` : `${tokensTotal}`
 
@@ -100,7 +105,7 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-30 mb-3 sm:mb-5 flex items-center gap-2 sm:gap-3 rounded-xl border border-border bg-surface-elevated/90 px-2.5 sm:px-3 py-2 sm:py-3 shadow-soft backdrop-blur-md font-body min-w-0">
-        <div className="flex items-center gap-2 min-w-0 flex-1 lg:flex-none">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <Button
             variant="ghost"
             size="icon"
@@ -115,12 +120,12 @@ export function Header() {
             </svg>
           </Button>
 
-          {/* Logo & Role Brand */}
-          <div className="hidden md:flex items-center gap-2 mr-1 shrink-0">
+          {/* Logo & Role Brand — sidebar already shows branding on desktop,
+              so keep this compact: icon + role only, never duplicate full logo */}
+          <div className="hidden md:flex items-center gap-2 shrink-0">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
               <Zap className="h-4.5 w-4.5 fill-current" />
             </div>
-            <span className="text-sm font-bold text-foreground whitespace-nowrap">Learning Hub</span>
             <span className={cn(
               "text-2xs font-medium px-2 py-0.5 rounded-full border whitespace-nowrap",
               roleThemes.bg,
@@ -135,9 +140,8 @@ export function Header() {
           <button
             onClick={() => setPaletteOpen(true)}
             className={cn(
-              'hidden xs:flex sm:flex group h-9 flex-1 items-center gap-2.5 rounded-lg border border-input bg-surface px-3 text-sm text-muted-foreground transition min-w-0',
-              'hover:border-primary/30 hover:bg-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20',
-              'lg:w-64 lg:flex-none'
+              'hidden xs:flex group h-9 w-full min-w-0 max-w-md flex-1 items-center gap-2.5 rounded-lg border border-input bg-surface px-3 text-sm text-muted-foreground transition',
+              'hover:border-primary/30 hover:bg-muted/40 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20'
             )}
             aria-label="Mở tìm kiếm nhanh"
           >
@@ -149,46 +153,58 @@ export function Header() {
           </button>
           <button
             onClick={() => setPaletteOpen(true)}
-            className="xs:hidden sm:hidden flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-input bg-surface text-muted-foreground transition hover:border-primary/30"
+            className="flex xs:hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-input bg-surface text-muted-foreground transition hover:border-primary/30"
             aria-label="Mở tìm kiếm nhanh"
           >
             <Search className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-2 justify-end shrink-0">
-          <div className="hidden lg:flex items-center gap-2">
-            <Tooltip
-              content={
-                <div className="space-y-1 text-left">
-                  <p className="font-semibold">Dung lượng lưu trữ</p>
-                  <p className="text-2xs opacity-80">{storageUsedLabel} / {storageTotalLabel}</p>
+        <div className="flex min-w-0 items-center gap-1.5 sm:gap-2 justify-end shrink-0">
+          {hasQuota && (
+            <div className="hidden lg:flex items-center gap-2">
+              <Tooltip
+                content={
+                  <div className="space-y-1 text-left text-xs p-0.5">
+                    <p className="font-semibold text-foreground">Dung lượng lưu trữ</p>
+                    <p className="text-2xs text-muted-foreground">
+                      Đã dùng: <span className="font-medium text-foreground">{storageUsedLabel}</span> / {storageTotalLabel} ({storagePct}%)
+                    </p>
+                    <p className="text-2xs text-emerald-500 font-medium">
+                      Còn trống: {storageTotal > storageUsed ? (storageTotal - storageUsed >= 1024 ? `${((storageTotal - storageUsed)/1024).toFixed(1)}GB` : `${Math.round(storageTotal - storageUsed)}MB`) : '0MB'}
+                    </p>
+                  </div>
+                }
+              >
+                <div className="flex items-center gap-1.5 rounded-lg border border-input bg-surface/80 px-2.5 py-1.5 hover:bg-muted/40 transition">
+                  <HardDrive className="h-3.5 w-3.5 text-primary" />
+                  <span className="text-2xs font-medium text-foreground tabular-nums">
+                    {storageUsed === 0 ? `${storageTotalLabel} trống` : `${storageUsedLabel} / ${storageTotalLabel}`}
+                  </span>
                 </div>
-              }
-            >
-              <div className="flex items-center gap-1.5 rounded-lg border border-input bg-surface px-2.5 py-1.5">
-                <HardDrive className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-2xs font-medium text-foreground tabular-nums">
-                  {storagePct}%
-                </span>
-              </div>
-            </Tooltip>
-            <Tooltip
-              content={
-                <div className="text-left">
-                  <p className="font-semibold">Token AI</p>
-                  <p className="text-2xs opacity-80">Đã dùng {tokensUsedLabel} / {tokensTotalLabel}</p>
+              </Tooltip>
+              <Tooltip
+                content={
+                  <div className="space-y-1 text-left text-xs p-0.5">
+                    <p className="font-semibold text-foreground">Hạn mức Token AI</p>
+                    <p className="text-2xs text-muted-foreground">
+                      Đã dùng: <span className="font-medium text-foreground">{tokensUsedLabel}</span> / {tokensTotalLabel} ({tokenPct}%)
+                    </p>
+                    <p className="text-2xs text-purple-500 font-medium">
+                      Khả dụng: {tokensTotal > tokensUsed ? (tokensTotal - tokensUsed >= 1000 ? `${Math.round((tokensTotal - tokensUsed)/1000)}k` : `${tokensTotal - tokensUsed}`) : '0'} tokens
+                    </p>
+                  </div>
+                }
+              >
+                <div className="flex items-center gap-1.5 rounded-lg border border-input bg-surface/80 px-2.5 py-1.5 hover:bg-muted/40 transition">
+                  <Zap className="h-3.5 w-3.5 text-purple-500 fill-purple-500/20" />
+                  <span className="text-2xs font-medium text-foreground tabular-nums">
+                    {tokensUsed === 0 ? `${tokensTotalLabel} AI` : `${tokensUsedLabel} / ${tokensTotalLabel}`}
+                  </span>
                 </div>
-              }
-            >
-              <div className="flex items-center gap-1.5 rounded-lg border border-input bg-surface px-2.5 py-1.5">
-                <Zap className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-2xs font-medium text-foreground tabular-nums">
-                  {tokenPct}%
-                </span>
-              </div>
-            </Tooltip>
-          </div>
+              </Tooltip>
+            </div>
+          )}
 
           <ThemeToggle />
           <NotificationsDropdown

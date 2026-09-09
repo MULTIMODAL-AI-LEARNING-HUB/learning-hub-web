@@ -13,6 +13,31 @@ interface UploadItem {
   size: string
   progress: number
   status: 'uploading' | 'done' | 'error'
+  error?: string
+}
+
+const ALLOWED_EXTS = ['pdf', 'mp4', 'mp3', 'webm', 'wav', 'txt', 'doc', 'docx']
+const MAX_SIZE_BYTES = 100 * 1024 * 1024 // 100MB — khớp giới hạn backend
+
+function describeUploadError(err: unknown, fileName: string): string {
+  const e = err as {
+    response?: { status?: number; data?: { detail?: unknown } }
+    message?: string
+    code?: string
+  }
+  const detail = e?.response?.data?.detail
+  const raw = typeof detail === 'string' ? detail : Array.isArray(detail) ? detail.join('; ') : ''
+  if (raw) return raw
+  if (e?.code === 'ERR_NETWORK' || e?.message === 'Network Error') {
+    return 'Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.'
+  }
+  if (e?.response?.status === 429) {
+    return 'Bạn tải lên quá nhanh (tối đa 5 tệp/phút). Chờ một chút rồi thử lại.'
+  }
+  if (e?.response?.status === 413) {
+    return 'Tệp quá lớn. Dung lượng tối đa là 100MB.'
+  }
+  return e?.message || `Không tải lên được ${fileName}.`
 }
 
 export function UploadModal({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -22,27 +47,65 @@ export function UploadModal({ open, onClose }: { open: boolean; onClose: () => v
   const [dragging, setDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const refreshList = useAppStore((s) => s.documents.loadDocuments)
+
   const doUpload = useCallback(
     async (file: UploadItem, rawFile: File) => {
       try {
-        await uploadDoc(rawFile)
+        await uploadDoc(rawFile, (pct) =>
+          setFiles((prev) =>
+            prev.map((f) => (f.id === file.id ? { ...f, progress: pct } : f))
+          )
+        )
         setFiles((prev) =>
           prev.map((f) => (f.id === file.id ? { ...f, progress: 100, status: 'done' } : f))
         )
-      } catch {
+        await refreshList()
+      } catch (err) {
+        const message = describeUploadError(err, file.name)
         setFiles((prev) =>
-          prev.map((f) => (f.id === file.id ? { ...f, status: 'error' } : f))
+          prev.map((f) => (f.id === file.id ? { ...f, status: 'error', error: message } : f))
         )
-        toast({ type: 'error', title: 'Tải lên thất bại', message: file.name })
+        toast({ type: 'error', title: 'Tải lên thất bại', message: `${file.name}: ${message}` })
       }
     },
-    [uploadDoc, toast]
+    [uploadDoc, refreshList, toast]
   )
 
   const addFiles = (fileList: FileList | null) => {
     if (!fileList) return
     const rawFiles = Array.from(fileList)
-    const newFiles: UploadItem[] = rawFiles.map((f) => ({
+    const accepted: File[] = []
+    rawFiles.forEach((f) => {
+      const ext = f.name.includes('.') ? f.name.split('.').pop()!.toLowerCase() : ''
+      if (!ALLOWED_EXTS.includes(ext)) {
+        const bad: UploadItem = {
+          id: `${Date.now()}-rejected-${f.name}`,
+          name: f.name,
+          size: `${(f.size / 1024 / 1024).toFixed(1)}MB`,
+          progress: 0,
+          status: 'error',
+          error: `Định dạng .${ext || '?'} chưa hỗ trợ. Chỉ nhận: ${ALLOWED_EXTS.map((e) => `.${e}`).join(', ')}.`,
+        }
+        setFiles((prev) => [...prev, bad])
+        return
+      }
+      if (f.size > MAX_SIZE_BYTES) {
+        const big: UploadItem = {
+          id: `${Date.now()}-oversize-${f.name}`,
+          name: f.name,
+          size: `${(f.size / 1024 / 1024).toFixed(1)}MB`,
+          progress: 0,
+          status: 'error',
+          error: 'Tệp quá lớn. Dung lượng tối đa là 100MB.',
+        }
+        setFiles((prev) => [...prev, big])
+        return
+      }
+      accepted.push(f)
+    })
+    if (accepted.length === 0) return
+    const newFiles: UploadItem[] = accepted.map((f) => ({
       id: `${Date.now()}-${f.name}`,
       name: f.name,
       size: `${(f.size / 1024 / 1024).toFixed(1)}MB`,
@@ -50,7 +113,7 @@ export function UploadModal({ open, onClose }: { open: boolean; onClose: () => v
       status: 'uploading' as const
     }))
     setFiles((prev) => [...prev, ...newFiles])
-    newFiles.forEach((f, i) => doUpload(f, rawFiles[i]))
+    newFiles.forEach((f, i) => doUpload(f, accepted[i]))
   }
 
   const handleDrop = (e: React.DragEvent) => {
@@ -106,7 +169,7 @@ export function UploadModal({ open, onClose }: { open: boolean; onClose: () => v
             {dragging ? 'Thả tệp vào đây' : 'Nhấn để chọn tệp hoặc kéo & thả vào đây'}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            PDF, MP4, MP3, WAV, DOC, DOCX · tối đa 100MB
+            PDF, MP4, MP3, WebM, WAV, TXT, DOC, DOCX · tối đa 100MB
           </p>
         </div>
       </div>
@@ -115,8 +178,11 @@ export function UploadModal({ open, onClose }: { open: boolean; onClose: () => v
         ref={inputRef}
         type="file"
         multiple
-        accept=".pdf,.mp4,.mp3,.wav,.doc,.docx"
-        onChange={(e) => addFiles(e.target.files)}
+        accept=".pdf,.mp4,.mp3,.webm,.wav,.txt,.doc,.docx"
+        onChange={(e) => {
+          addFiles(e.target.files)
+          e.target.value = ''
+        }}
         className="hidden"
       />
 
@@ -138,16 +204,19 @@ export function UploadModal({ open, onClose }: { open: boolean; onClose: () => v
               </div>
               <div className="flex-1 min-w-0">
                 <p className="truncate text-sm font-medium text-foreground">{f.name}</p>
-                <div className="mt-1.5 flex items-center gap-2">
-                  <Progress
-                    value={f.progress}
-                    variant={f.status === 'done' ? 'success' : f.status === 'error' ? 'destructive' : 'default'}
-                    size="sm"
-                  />
-                  <span className="shrink-0 text-2xs text-muted-foreground tabular-nums w-12 text-right">
-                    {f.size}
-                  </span>
-                </div>
+                {f.status === 'uploading' ? (
+                  <div className="mt-1.5 flex items-center gap-2">
+                    <Progress value={f.progress} variant="default" size="sm" />
+                    <span className="shrink-0 text-2xs text-muted-foreground tabular-nums w-12 text-right">
+                      {f.progress}%
+                    </span>
+                  </div>
+                ) : f.status === 'done' ? (
+                  <p className="mt-1 text-2xs text-success">Đã tải lên — đang xử lý AI…</p>
+                ) : (
+                  <p className="mt-1 text-2xs text-destructive">{f.error || 'Tải lên thất bại.'}</p>
+                )}
+                <p className="mt-0.5 text-2xs text-muted-foreground">{f.size}</p>
               </div>
             </div>
           ))}
