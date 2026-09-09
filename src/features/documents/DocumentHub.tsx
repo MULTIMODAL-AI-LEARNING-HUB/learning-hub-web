@@ -3,6 +3,7 @@ import { Upload, FileText, LayoutGrid, List, ArrowUpDown, Search, ArrowLeft } fr
 import { useAppStore } from '../../stores/appStore'
 import { DocumentViewer } from './DocumentViewer'
 import { DocumentCard } from './DocumentCard'
+import { UploadModal } from './UploadModal'
 import { Button } from '../../components/ui/Button'
 import { PageHeader } from '../../components/ui/PageHeader'
 import { EmptyState } from '../../components/ui/EmptyState'
@@ -13,6 +14,8 @@ export function DocumentHub() {
   const docs = useAppStore((s) => s.documents.items)
   const selectedId = useAppStore((s) => s.documents.selectedId)
   const openUpload = useAppStore((s) => s.ui.openUploadModal)
+  const uploadModalOpen = useAppStore((s) => s.ui.uploadModalOpen)
+  const closeUploadModal = useAppStore((s) => s.ui.closeUploadModal)
   const loadDocuments = useAppStore((s) => s.documents.loadDocuments)
   const removeDoc = useAppStore((s) => s.documents.remove)
   const retryDoc = useAppStore((s) => s.documents.retry)
@@ -227,6 +230,8 @@ export function DocumentHub() {
           </div>
         </div>
       )}
+
+      <UploadModal open={uploadModalOpen} onClose={closeUploadModal} />
     </div>
   )
 }
