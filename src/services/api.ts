@@ -861,6 +861,7 @@ export const documentsApi = {
         : undefined,
     })
   },
+  retry: (id: string) => api.post<DocumentItem>(`/documents/${id}/retry`),
   delete: (id: string) => api.delete(`/documents/${id}`),
 }
 

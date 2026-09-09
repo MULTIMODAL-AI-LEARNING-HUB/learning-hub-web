@@ -23,14 +23,22 @@ export const createDocumentsSlice: StateCreator<AppState, [['zustand/devtools', 
         }
       }
     }, false, 'documents/remove'),
-    retry: (id) => set((state) => ({
-      documents: {
-        ...state.documents,
-        items: state.documents.items.map((d) =>
-          d.id === id ? { ...d, status: 'processing' as const, progress: 0 } : d
-        )
-      }
-    }), false, 'documents/retry'),
+    retry: (id) => {
+      documentsApi.retry(id).then(() => {
+        set((state) => ({
+          documents: {
+            ...state.documents,
+            items: state.documents.items.map((d) =>
+              d.id === id ? { ...d, status: 'processing' as const, progress: 0, error: undefined } : d
+            )
+          }
+        }), false, 'documents/retry')
+      }).catch((err) => {
+        const apiErr = err as AxiosErrorLike
+        const msg = apiErr.response?.data?.detail || apiErr.message || 'Không thể thử lại tài liệu.'
+        get().toasts.add({ type: 'error', title: 'Thử lại thất bại', message: msg })
+      })
+    },
     updateProgress: (id, progress, status = 'processing') => set((state) => ({
       documents: {
         ...state.documents,
@@ -51,6 +59,7 @@ export const createDocumentsSlice: StateCreator<AppState, [['zustand/devtools', 
           pageCount: (d.metadata as Record<string, unknown>)?.page_count as number | undefined,
           progress: d.status === 'processing' ? 50 : undefined,
           fileUrl: d.file_url || undefined,
+          error: (d.metadata as Record<string, unknown> | null)?.error as string | undefined,
         }))
         set((state) => ({
           documents: { ...state.documents, items }

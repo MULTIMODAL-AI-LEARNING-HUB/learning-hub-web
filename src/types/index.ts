@@ -10,6 +10,7 @@ export interface DocumentItem {
   pageCount?: number
   progress?: number
   fileUrl?: string
+  error?: string
 }
 
 export interface Citation {

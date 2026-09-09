@@ -113,8 +113,11 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
         {doc.status === 'failed' && (
           <EmptyState
             icon={<AlertTriangle />}
-            title="Không thể tải tài liệu"
-            description="Hệ thống chưa thể xử lý tệp này. Vui lòng thử tải lên lại hoặc liên hệ hỗ trợ."
+            title="Không thể xử lý tài liệu"
+            description={
+              doc.error ||
+              'Hệ thống chưa thể xử lý tệp này (có thể là PDF scan không có lớp chữ). Hãy bấm "Thử lại" hoặc tải lên bản TXT/DOCX.'
+            }
           />
         )}
 

@@ -42,12 +42,17 @@ export function QuizGenerator() {
         const res = await studyApi.getQuizJob(jobId)
         const data = res.data as { status: string; questions?: Array<{ id: string; question: string; options: string[]; correct_answer: string }> }
         if (data.status === 'ready' && data.questions) {
-          const mapped: QuizQ[] = data.questions.map((q) => ({
-            id: q.id,
-            question: q.question,
-            options: q.options,
-            correctIndex: 'ABCD'.indexOf(q.correct_answer)
-          }))
+          const mapped: QuizQ[] = data.questions.map((q) => {
+            // Backend trả correct_answer là NỘI DUNG đáp án (vd "probe-ok"),
+            // không phải ký tự A/B/C/D — so khớp text để tìm index đúng.
+            let correctIndex = q.options.findIndex((o) => o === q.correct_answer)
+            if (correctIndex < 0) {
+              const norm = (s: string) => s.trim().toLowerCase()
+              correctIndex = q.options.findIndex((o) => norm(o) === norm(q.correct_answer))
+            }
+            if (correctIndex < 0) correctIndex = 0
+            return { id: q.id, question: q.question, options: q.options, correctIndex }
+          })
           return { status: 'ready', data: mapped }
         }
         if (data.status === 'failed') {
@@ -143,7 +148,6 @@ export function QuizGenerator() {
                   value={String(numQuestions)}
                   onChange={(v) => setNumQuestions(Number(v))}
                   options={[
-                    { value: '3', label: '3 câu hỏi' },
                     { value: '5', label: '5 câu hỏi' },
                     { value: '10', label: '10 câu hỏi' },
                     { value: '15', label: '15 câu hỏi' }
