@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'
+import { type ReactNode, useEffect } from 'react'
 import { useAppStore } from '../../stores/appStore'
 import { Header } from './Header'
 import { MobileDrawer } from './MobileDrawer'
@@ -13,6 +13,18 @@ interface MainLayoutProps {
 export function MainLayout({ sidebar, children }: MainLayoutProps) {
   const sidebarOpen = useAppStore((s) => s.ui.sidebarOpen)
   const toggleSidebar = useAppStore((s) => s.ui.toggleSidebar)
+  const isAuthenticated = useAppStore((s) => s.auth.isAuthenticated)
+  const loadDocuments = useAppStore((s) => s.documents.loadDocuments)
+
+  // Preload documents once per authenticated session so the chat "Tài liệu
+  // tham chiếu" picker and study tools never render with an empty store when
+  // the user navigates directly to /chat, /quiz, /flashcards or /essay
+  // without visiting the Documents page first.
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadDocuments()
+    }
+  }, [isAuthenticated, loadDocuments])
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
