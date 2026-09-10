@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { BookOpen, Sparkles, ChevronLeft, ChevronRight, CheckCircle2, XCircle, RotateCcw, Trophy, FileQuestion, History, Trash2 } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { Button } from '../../components/ui/Button'
@@ -59,7 +59,7 @@ export function QuizGenerator() {
       return { id: q.id, question: q.question, options: q.options, correctIndex, explanation: q.explanation }
     })
 
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     setHistoryLoading(true)
     try {
       const res = await studyApi.listQuizHistory({ page: 1, page_size: 20 })
@@ -70,11 +70,12 @@ export function QuizGenerator() {
     } finally {
       setHistoryLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadHistory()
-  }, [])
+  }, [loadHistory])
 
   const openQuizSet = async (id: string) => {
     try {

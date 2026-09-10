@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Layers, Sparkles, Shuffle, Check, X, RotateCcw, Plus, FileQuestion, History, Trash2 } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { Button } from '../../components/ui/Button'
@@ -38,7 +38,7 @@ export function Flashcards() {
   const [quizStarted, setQuizStarted] = useState(false)
   const [sets, setSets] = useState<Array<{ id: string; set_name?: string | null; item_count: number; created_at: string }>>([])
 
-  const loadSets = async () => {
+  const loadSets = useCallback(async () => {
     try {
       const res = await studyApi.listFlashcards({ page: 1, page_size: 20 })
       const data = res.data as { items?: typeof sets }
@@ -46,11 +46,12 @@ export function Flashcards() {
     } catch {
       /* history is best-effort */
     }
-  }
+  }, [])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadSets()
-  }, [])
+  }, [loadSets])
 
   const openSet = async (id: string) => {
     try {
