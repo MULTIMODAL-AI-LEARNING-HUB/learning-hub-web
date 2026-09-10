@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { BookOpen, Sparkles, ChevronLeft, ChevronRight, CheckCircle2, XCircle, RotateCcw, Trophy, FileQuestion } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { BookOpen, Sparkles, ChevronLeft, ChevronRight, CheckCircle2, XCircle, RotateCcw, Trophy, FileQuestion, History, Trash2 } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
@@ -35,34 +35,73 @@ export function QuizGenerator() {
   const [answers, setAnswers] = useState<Record<string, number>>({})
   const [submitted, setSubmitted] = useState(false)
   const [jobId, setJobId] = useState<string | null>(null)
+  const [quizSetId, setQuizSetId] = useState<string | null>(null)
+  const [history, setHistory] = useState<Array<{ id: string; document_id?: string | null; quiz_type: string; question_count: number; created_at: string }>>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+
+  const mapQuestions = (raw: Array<{ id: string; question: string; options: string[]; correct_answer: string; explanation?: string }>): QuizQ[] =>
+    raw.map((q) => {
+      const rawAns = String(q.correct_answer ?? '').trim()
+      let correctIndex = -1
+      const letter = rawAns.match(/^([A-Da-d])$/)
+      const letterPrefix = rawAns.match(/^([A-Da-d])[.)\-:]/)
+      if (letter) correctIndex = letter[1].toUpperCase().charCodeAt(0) - 65
+      else if (letterPrefix) correctIndex = letterPrefix[1].toUpperCase().charCodeAt(0) - 65
+      else if (/^[0-3]$/.test(rawAns)) correctIndex = Number(rawAns)
+      if (correctIndex < 0 || correctIndex > 3) {
+        correctIndex = q.options.findIndex((o) => o === q.correct_answer)
+      }
+      if (correctIndex < 0) {
+        const norm = (s: string) => s.trim().toLowerCase().replace(/^[a-d0-9][.)\-:]\s*/, '')
+        correctIndex = q.options.findIndex((o) => norm(o) === norm(rawAns))
+      }
+      if (correctIndex < 0) correctIndex = 0
+      return { id: q.id, question: q.question, options: q.options, correctIndex, explanation: q.explanation }
+    })
+
+  const loadHistory = async () => {
+    setHistoryLoading(true)
+    try {
+      const res = await studyApi.listQuizHistory({ page: 1, page_size: 20 })
+      const data = res.data as { items?: typeof history }
+      setHistory(data.items || [])
+    } catch {
+      /* history is best-effort */
+    } finally {
+      setHistoryLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    void loadHistory()
+  }, [])
+
+  const openQuizSet = async (id: string) => {
+    try {
+      const res = await studyApi.getQuizSet(id)
+      const data = res.data as { id: string; questions: Array<{ id: string; question: string; options: string[]; correct_answer: string }> }
+      setQuestions(mapQuestions(data.questions || []))
+      setQuizSetId(data.id)
+      setJobId(null)
+      setQuizStarted(true)
+      setCurrentQ(0)
+      setAnswers({})
+      setSubmitted(false)
+    } catch {
+      toast({ type: 'error', title: 'Không thể mở đề đã lưu' })
+    }
+  }
 
   const { loading, progress, start, setProgress } = useJobPolling<QuizQ[]>({
     poll: async () => {
       if (!jobId) return { status: 'pending' }
       try {
         const res = await studyApi.getQuizJob(jobId)
-        const data = res.data as { status: string; questions?: Array<{ id: string; question: string; options: string[]; correct_answer: string; explanation?: string }> }
+        const data = res.data as { status: string; quiz_set_id?: string; questions?: Array<{ id: string; question: string; options: string[]; correct_answer: string; explanation?: string }> }
         if (data.status === 'ready' && data.questions) {
-          const mapped: QuizQ[] = data.questions.map((q) => {
-            // Backend chuẩn enterprise trả correct_answer là "A"/"B"/"C"/"D".
-            // Giữ tương thích ngược: text đầy đủ (vd "probe-ok") hoặc index "0"-"3".
-            const raw = String(q.correct_answer ?? '').trim()
-            let correctIndex = -1
-            const letter = raw.match(/^([A-Da-d])$/)
-            const letterPrefix = raw.match(/^([A-Da-d])[.)\-:]/)
-            if (letter) correctIndex = letter[1].toUpperCase().charCodeAt(0) - 65
-            else if (letterPrefix) correctIndex = letterPrefix[1].toUpperCase().charCodeAt(0) - 65
-            else if (/^[0-3]$/.test(raw)) correctIndex = Number(raw)
-            if (correctIndex < 0 || correctIndex > 3) {
-              correctIndex = q.options.findIndex((o) => o === q.correct_answer)
-            }
-            if (correctIndex < 0) {
-              const norm = (s: string) => s.trim().toLowerCase().replace(/^[a-d0-9][.)\-:]\s*/, '')
-              correctIndex = q.options.findIndex((o) => norm(o) === norm(raw))
-            }
-            if (correctIndex < 0) correctIndex = 0
-            return { id: q.id, question: q.question, options: q.options, correctIndex, explanation: q.explanation }
-          })
+          if (data.quiz_set_id) setQuizSetId(data.quiz_set_id)
+          // Backend chuẩn enterprise trả correct_answer là "A"/"B"/"C"/"D".
+          const mapped = mapQuestions(data.questions)
           return { status: 'ready', data: mapped }
         }
         if (data.status === 'failed') {
@@ -80,6 +119,7 @@ export function QuizGenerator() {
       setAnswers({})
       setSubmitted(false)
       toast({ type: 'success', title: 'Đã tạo đề trắc nghiệm', message: `Sẵn sàng với ${qs.length} câu hỏi` })
+      void loadHistory()
     },
     onError: () => {
       toast({ type: 'error', title: 'Không thể tạo đề trắc nghiệm' })
@@ -107,13 +147,26 @@ export function QuizGenerator() {
     }
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setSubmitted(true)
     const correct = questions.filter((q) => answers[q.id] === q.correctIndex).length
+    // Persist grading server-side when we have a saved set id (DB grading
+    // survives TTL expiry); fall back to local scoring otherwise.
+    if (quizSetId) {
+      try {
+        const payload = questions.map((q) => ({
+          question_id: q.id,
+          answer: String.fromCharCode(65 + (answers[q.id] ?? 0)),
+        }))
+        await studyApi.submitQuiz(quizSetId, payload)
+      } catch {
+        /* local score already shown */
+      }
+    }
     toast({
       type: 'info',
       title: `Kết quả: ${correct}/${questions.length}`,
-      message: `Độ chính xác: ${Math.round((correct / questions.length) * 100)}%`
+      message: `Độ chính xác: ${questions.length ? Math.round((correct / questions.length) * 100) : 0}%`
     })
   }
 
@@ -123,6 +176,18 @@ export function QuizGenerator() {
     setAnswers({})
     setSubmitted(false)
     setJobId(null)
+    setQuizSetId(null)
+    void loadHistory()
+  }
+
+  const handleDeleteSet = async (id: string) => {
+    try {
+      await studyApi.deleteQuizSet(id)
+      setHistory((prev) => prev.filter((h) => h.id !== id))
+      toast({ type: 'success', title: 'Đã xóa đề đã lưu' })
+    } catch {
+      toast({ type: 'error', title: 'Không thể xóa đề đã lưu' })
+    }
   }
 
   if (!quizStarted && !loading) {
@@ -175,6 +240,33 @@ export function QuizGenerator() {
             >
               Bắt đầu tạo đề trắc nghiệm
             </Button>
+          </Card>
+        )}
+
+        {history.length > 0 && (
+          <Card className="mt-6 p-4 sm:p-6">
+            <div className="mb-3 flex items-center gap-2">
+              <History className="h-4 w-4 text-muted-foreground" />
+              <h3 className="text-sm font-semibold text-foreground">Đề đã lưu ({history.length})</h3>
+            </div>
+            <div className="grid gap-2">
+              {history.map((h) => (
+                <div key={h.id} className="flex items-center justify-between gap-2 rounded-xl border border-border p-3">
+                  <button onClick={() => void openQuizSet(h.id)} className="min-w-0 flex-1 text-left">
+                    <p className="truncate text-sm font-semibold text-foreground">
+                      {h.question_count} câu hỏi • {h.quiz_type}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {h.created_at ? new Date(h.created_at).toLocaleString('vi-VN') : ''}
+                    </p>
+                  </button>
+                  <Button variant="ghost" size="icon" onClick={() => void handleDeleteSet(h.id)} aria-label="Xóa đề" title="Xóa đề">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            {historyLoading && <p className="mt-2 text-xs text-muted-foreground">Đang tải lịch sử...</p>}
           </Card>
         )}
       </div>

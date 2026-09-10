@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Layers, Sparkles, Shuffle, Check, X, RotateCcw, Plus, FileQuestion } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Layers, Sparkles, Shuffle, Check, X, RotateCcw, Plus, FileQuestion, History, Trash2 } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
@@ -36,6 +36,53 @@ export function Flashcards() {
   const [known, setKnown] = useState<string[]>([])
   const [unknown, setUnknown] = useState<string[]>([])
   const [quizStarted, setQuizStarted] = useState(false)
+  const [sets, setSets] = useState<Array<{ id: string; set_name?: string | null; item_count: number; created_at: string }>>([])
+
+  const loadSets = async () => {
+    try {
+      const res = await studyApi.listFlashcards({ page: 1, page_size: 20 })
+      const data = res.data as { items?: typeof sets }
+      setSets(data.items || [])
+    } catch {
+      /* history is best-effort */
+    }
+  }
+
+  useEffect(() => {
+    void loadSets()
+  }, [])
+
+  const openSet = async (id: string) => {
+    try {
+      const res = await studyApi.getFlashcard(id)
+      const data = res.data as { items?: CardItem[]; set_name?: string }
+      if (data.items && data.items.length > 0) {
+        setSetId(id)
+        setCards(data.items)
+        if (data.set_name) setSetName(data.set_name)
+        setQuizStarted(true)
+        setCurrentIndex(0)
+        setFlipped(false)
+        setKnown([])
+        setUnknown([])
+      } else {
+        toast({ type: 'warning', title: 'Bộ thẻ này chưa có nội dung' })
+      }
+    } catch {
+      toast({ type: 'error', title: 'Không thể mở bộ thẻ đã lưu' })
+    }
+  }
+
+  const handleDeleteSet = async (id: string) => {
+    try {
+      await studyApi.deleteFlashcard(id)
+      setSets((prev) => prev.filter((s) => s.id !== id))
+      if (setId === id) setSetId(null)
+      toast({ type: 'success', title: 'Đã xóa bộ thẻ đã lưu' })
+    } catch {
+      toast({ type: 'error', title: 'Không thể xóa bộ thẻ đã lưu' })
+    }
+  }
 
   const { loading, progress, start, setProgress } = useJobPolling<CardItem[]>({
     poll: async () => {
@@ -59,6 +106,7 @@ export function Flashcards() {
       setKnown([])
       setUnknown([])
       toast({ type: 'success', title: 'Bộ thẻ học đã sẵn sàng!', message: `Đã nạp ${items.length} thẻ ghi nhớ` })
+      void loadSets()
     },
     errorTitle: 'Không thể khởi tạo bộ thẻ ghi nhớ',
     timeoutTitle: 'Quá thời gian tạo bộ thẻ ghi nhớ'
@@ -128,6 +176,7 @@ export function Flashcards() {
     setKnown([])
     setUnknown([])
     setSetId(null)
+    void loadSets()
   }
 
   if (!quizStarted && !loading) {
@@ -189,6 +238,32 @@ export function Flashcards() {
             >
               Tạo thẻ ghi nhớ Flashcards
             </Button>
+          </Card>
+        )}
+
+        {sets.length > 0 && (
+          <Card className="mt-6 p-6">
+            <div className="mb-3 flex items-center gap-2">
+              <History className="h-4 w-4 text-muted-foreground" />
+              <h3 className="text-sm font-semibold text-foreground">Bộ thẻ đã lưu ({sets.length})</h3>
+            </div>
+            <div className="grid gap-2">
+              {sets.map((s) => (
+                <div key={s.id} className="flex items-center justify-between gap-2 rounded-xl border border-border p-3">
+                  <button onClick={() => void openSet(s.id)} className="min-w-0 flex-1 text-left">
+                    <p className="truncate text-sm font-semibold text-foreground">
+                      {s.set_name || 'Bộ thẻ học'} • {s.item_count} thẻ
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {s.created_at ? new Date(s.created_at).toLocaleString('vi-VN') : ''}
+                    </p>
+                  </button>
+                  <Button variant="ghost" size="icon" onClick={() => void handleDeleteSet(s.id)} aria-label="Xóa bộ thẻ" title="Xóa bộ thẻ">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
           </Card>
         )}
       </div>

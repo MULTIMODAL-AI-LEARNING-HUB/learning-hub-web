@@ -967,10 +967,36 @@ export const socialChatApi = {
     api.post<SocialChatMessage>(`/social-chat/rooms/${roomId}/messages`, { content }),
 }
 
+/** Resolve a backend file_url into a same-origin absolute viewer URL. */
+export const resolveViewerUrl = (fileUrl?: string) => {
+  if (!fileUrl) return undefined
+  if (/^https?:\/\//i.test(fileUrl) || fileUrl.startsWith('blob:') || fileUrl.startsWith('data:')) return fileUrl
+  const base = (api.defaults.baseURL || '').replace(/\/+$/, '').replace(/\/api\/v1$/, '')
+  const path = fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`
+  return `${base}${path}`
+}
+
+/** Append the in-memory access token so <iframe>/<video>/<audio> can stream auth-gated content. */
+export const withAuthToken = (url?: string) => {
+  if (!url) return undefined
+  if (!accessToken || !url.startsWith('http')) return url
+  try {
+    const u = new URL(url)
+    if (!u.searchParams.get('token')) u.searchParams.set('token', accessToken)
+    return u.toString()
+  } catch {
+    return url
+  }
+}
+
 export const studyApi = {
   generateQuiz: (data: { document_id: string; quiz_type?: string; question_count?: number }) =>
     api.post('/study/quiz/generate', data),
   getQuizJob: (jobId: string) => api.get(`/study/quiz/job/${jobId}`),
+  listQuizHistory: (params?: { document_id?: string; page?: number; page_size?: number }) =>
+    api.get('/study/quiz/history', { params }),
+  getQuizSet: (id: string) => api.get(`/study/quiz/sets/${id}`),
+  deleteQuizSet: (id: string) => api.delete(`/study/quiz/sets/${id}`),
   submitQuiz: (quizId: string, answers: Array<{ question_id: string; answer: string }>) =>
     api.post(`/study/quiz/${quizId}/submit`, { answers }),
   generateCourseQuiz: (data: { course_id: string; question_count: number; lesson_ids?: string[] }) =>
@@ -978,6 +1004,9 @@ export const studyApi = {
   generateFlashcards: (data: { document_id: string; set_name: string; count?: number }) =>
     api.post('/study/flashcards/generate', data),
   getFlashcard: (id: string) => api.get(`/study/flashcards/${id}`),
+  listFlashcards: (params?: { document_id?: string; page?: number; page_size?: number }) =>
+    api.get('/study/flashcards', { params }),
+  deleteFlashcard: (id: string) => api.delete(`/study/flashcards/${id}`),
   submitEssay: (data: { document_id: string; essay_text: string }) =>
     api.post<{ job_id: string; status: string }>('/study/essay/submit', data),
   getEssayJob: (jobId: string) => api.get(`/study/essay/job/${jobId}`),

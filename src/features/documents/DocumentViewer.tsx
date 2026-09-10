@@ -7,6 +7,7 @@ import { Badge } from '../../components/ui/Badge'
 import { Spinner } from '../../components/ui/Spinner'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { fileIconEmoji } from '../../utils/fileIcon'
+import { resolveViewerUrl, withAuthToken } from '../../services/api'
 
 export function DocumentViewer({ doc }: { doc: DocumentItem }) {
   const [zoom, setZoom] = useState(100)
@@ -20,6 +21,13 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
     if (['mp3', 'wav', 'audio'].includes(docType)) return 'audio' as const
     return null
   }, [docType])
+  // Backend now serves same-origin viewer bytes at /api/v1/documents/{id}/content
+  // with ?token= flexible auth so <iframe>/<video>/<audio> can stream inline
+  // (fixes the grey broken preview on cross-origin/expired presigned URLs).
+  const viewerUrl = useMemo(
+    () => withAuthToken(resolveViewerUrl(doc.fileUrl)),
+    [doc.fileUrl],
+  )
 
   return (
     <Card className="flex h-full flex-col overflow-hidden">
@@ -123,25 +131,25 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
 
         {doc.status === 'ready' && (
           <div className="p-3 sm:p-6">
-            {doc.fileUrl && (isPdf || mediaKind) ? (
+            {viewerUrl && (isPdf || mediaKind) ? (
               <div
                 className="mx-auto max-w-3xl overflow-hidden rounded-xl border border-border bg-surface-elevated shadow-soft transition-transform origin-top"
                 style={{ transform: `scale(${zoom / 100})` }}
               >
                 {isPdf && (
                   <iframe
-                    key={doc.fileUrl}
-                    src={doc.fileUrl}
+                    key={viewerUrl}
+                    src={viewerUrl}
                     title={doc.name}
                     className="h-[70vh] w-full"
                   />
                 )}
                 {mediaKind === 'video' && (
-                  <video key={doc.fileUrl} src={doc.fileUrl} controls className="w-full" preload="metadata" />
+                  <video key={viewerUrl} src={viewerUrl} controls className="w-full" preload="metadata" />
                 )}
                 {mediaKind === 'audio' && (
                   <div className="p-6">
-                    <audio key={doc.fileUrl} src={doc.fileUrl} controls className="w-full" preload="metadata" />
+                    <audio key={viewerUrl} src={viewerUrl} controls className="w-full" preload="metadata" />
                   </div>
                 )}
               </div>
@@ -160,9 +168,9 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
                       Dùng Trò chuyện AI, Quiz, Flashcards hoặc Chấm essay để học từ nội dung thật của tệp này.
                     </p>
                   </div>
-                  {doc.fileUrl && (
+                  {viewerUrl && (
                     <a
-                      href={doc.fileUrl}
+                      href={viewerUrl}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
