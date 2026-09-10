@@ -863,6 +863,13 @@ export const documentsApi = {
   },
   retry: (id: string) => api.post<DocumentItem>(`/documents/${id}/retry`),
   delete: (id: string) => api.delete(`/documents/${id}`),
+  getContentBlob: async (id: string, signal?: AbortSignal): Promise<Blob> => {
+    const res = await api.get<Blob>(`/documents/${id}/content`, {
+      responseType: 'blob',
+      signal,
+    })
+    return res.data
+  },
 }
 
 export const chatApi = {

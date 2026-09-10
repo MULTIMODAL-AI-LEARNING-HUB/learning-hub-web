@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { ZoomIn, ZoomOut, Maximize2, ChevronLeft, ChevronRight, AlertTriangle, ExternalLink, FileText } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ZoomIn, ZoomOut, Maximize2, Minimize2, ChevronLeft, ChevronRight, AlertTriangle, ExternalLink, FileText, RefreshCw } from 'lucide-react'
 import type { DocumentItem } from '../../types'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -7,7 +7,7 @@ import { Badge } from '../../components/ui/Badge'
 import { Spinner } from '../../components/ui/Spinner'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { fileIconEmoji } from '../../utils/fileIcon'
-import { resolveViewerUrl, withAuthToken } from '../../services/api'
+import { documentsApi, resolveViewerUrl, withAuthToken } from '../../services/api'
 
 export function DocumentViewer({ doc }: { doc: DocumentItem }) {
   const [zoom, setZoom] = useState(100)
@@ -21,13 +21,85 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
     if (['mp3', 'wav', 'audio'].includes(docType)) return 'audio' as const
     return null
   }, [docType])
-  // Backend now serves same-origin viewer bytes at /api/v1/documents/{id}/content
-  // with ?token= flexible auth so <iframe>/<video>/<audio> can stream inline
-  // (fixes the grey broken preview on cross-origin/expired presigned URLs).
-  const viewerUrl = useMemo(
+  // Same-origin iframe URL (query-token auth) for direct streaming.
+  const directUrl = useMemo(
     () => withAuthToken(resolveViewerUrl(doc.fileUrl)),
     [doc.fileUrl],
   )
+  // Authenticated blob fallback: fetch bytes with the axios Bearer header and
+  // render from an object URL. This is what actually fixes the grey viewer —
+  // <iframe> cannot send Authorization headers, and the in-memory ?token= is
+  // never set after a reload (accessToken lives in module memory only).
+  const [blobUrl, setBlobUrl] = useState<string | null>(null)
+  const [blobLoading, setBlobLoading] = useState(false)
+  const [blobError, setBlobError] = useState<string | null>(null)
+  const blobObjectUrl = useRef<string | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  const loadBlob = useCallback(async () => {
+    if (!doc.id || (!isPdf && !mediaKind)) return
+    setBlobLoading(true)
+    setBlobError(null)
+    try {
+      const blob = await documentsApi.getContentBlob(doc.id)
+      if (blobObjectUrl.current) URL.revokeObjectURL(blobObjectUrl.current)
+      const objectUrl = URL.createObjectURL(
+        isPdf && blob.type !== 'application/pdf'
+          ? new Blob([blob], { type: 'application/pdf' })
+          : blob,
+      )
+      blobObjectUrl.current = objectUrl
+      setBlobUrl(objectUrl)
+    } catch {
+      setBlobError('Không tải được nội dung tệp. Hãy kiểm tra đăng nhập rồi bấm thử lại.')
+    } finally {
+      setBlobLoading(false)
+    }
+  }, [doc.id, isPdf, mediaKind])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setBlobUrl(null)
+    setBlobError(null)
+    setCurrentPage(1)
+    if (doc.status === 'ready' && (isPdf || mediaKind)) {
+      void loadBlob()
+    }
+    return () => {
+      if (blobObjectUrl.current) {
+        URL.revokeObjectURL(blobObjectUrl.current)
+        blobObjectUrl.current = null
+      }
+    }
+  }, [doc.id, doc.status, isPdf, mediaKind, loadBlob])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrentPage(1)
+  }, [doc.id])
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement))
+    }
+    document.addEventListener('fullscreenchange', onFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
+  }, [])
+
+  const toggleFullscreen = useCallback(async () => {
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen()
+      } else if (containerRef.current) {
+        await containerRef.current.requestFullscreen()
+      }
+    } catch {
+      // Fullscreen API may be unavailable (older browsers, nested iframes).
+    }
+  }, [])
+
+  const viewerUrl = blobUrl ?? directUrl
 
   return (
     <Card className="flex h-full flex-col overflow-hidden">
@@ -101,8 +173,19 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
             </Button>
           </div>
 
-          <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" aria-label="Toàn màn hình" title="Toàn màn hình">
-            <Maximize2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 sm:h-9 sm:w-9"
+            aria-label={isFullscreen ? 'Thoát toàn màn hình' : 'Toàn màn hình'}
+            title={isFullscreen ? 'Thoát toàn màn hình' : 'Toàn màn hình'}
+            onClick={toggleFullscreen}
+          >
+            {isFullscreen ? (
+              <Minimize2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            ) : (
+              <Maximize2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            )}
           </Button>
         </div>
       </div>
@@ -130,18 +213,32 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
         )}
 
         {doc.status === 'ready' && (
-          <div className="p-3 sm:p-6">
-            {viewerUrl && (isPdf || mediaKind) ? (
-              <div
-                className="mx-auto max-w-3xl overflow-hidden rounded-xl border border-border bg-surface-elevated shadow-soft transition-transform origin-top"
-                style={{ transform: `scale(${zoom / 100})` }}
-              >
+          <div ref={containerRef} className="bg-background p-3 sm:p-6">
+            {blobLoading && (isPdf || mediaKind) ? (
+              <div className="mx-auto flex max-w-3xl flex-col items-center justify-center rounded-xl border border-border bg-surface-elevated py-16 shadow-soft">
+                <Spinner size="lg" />
+                <p className="mt-3 text-sm font-medium text-foreground">Đang tải nội dung tài liệu…</p>
+              </div>
+            ) : blobError && (isPdf || mediaKind) && !viewerUrl ? (
+              <EmptyState
+                icon={<AlertTriangle />}
+                title="Không tải được nội dung tệp"
+                description={blobError}
+                action={
+                  <Button variant="outline" size="sm" icon={<RefreshCw className="h-3.5 w-3.5" />} onClick={() => void loadBlob()}>
+                    Thử lại
+                  </Button>
+                }
+              />
+            ) : viewerUrl && (isPdf || mediaKind) ? (
+              <div className="mx-auto max-w-5xl overflow-auto rounded-xl border border-border bg-surface-elevated shadow-soft">
+                <div className="mx-auto" style={{ width: `${zoom}%`, minWidth: '100%' }}>
                 {isPdf && (
                   <iframe
-                    key={viewerUrl}
-                    src={viewerUrl}
+                    key={`${viewerUrl}#page=${currentPage}`}
+                    src={`${viewerUrl}#page=${currentPage}&zoom=${zoom}`}
                     title={doc.name}
-                    className="h-[70vh] w-full"
+                    className={isFullscreen ? 'h-screen w-full' : 'h-[70vh] w-full'}
                   />
                 )}
                 {mediaKind === 'video' && (
@@ -152,6 +249,7 @@ export function DocumentViewer({ doc }: { doc: DocumentItem }) {
                     <audio key={viewerUrl} src={viewerUrl} controls className="w-full" preload="metadata" />
                   </div>
                 )}
+                </div>
               </div>
             ) : (
               <div className="mx-auto max-w-3xl rounded-xl border border-border bg-surface-elevated p-4 shadow-soft sm:p-10">

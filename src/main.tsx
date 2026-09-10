@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import './index.css'
+import './components/ui/markdown.css'
 import App from './App.tsx'
 import { ThemeProvider } from './components/ui/ThemeProvider'
 

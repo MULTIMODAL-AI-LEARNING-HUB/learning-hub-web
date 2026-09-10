@@ -129,6 +129,23 @@ export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never
 
       try {
         const controller = new AbortController()
+        let streamTimeout: ReturnType<typeof setTimeout> | null = setTimeout(() => {
+          // If 15 seconds pass without any tokens arriving, abort SSE and fall back to /ask
+          controller.abort()
+        }, 15000)
+
+        const clearStreamTimeout = () => {
+          if (streamTimeout) {
+            clearTimeout(streamTimeout)
+            streamTimeout = null
+          }
+        }
+
+        const safeAppendToken = (tokenText: string) => {
+          clearStreamTimeout()
+          appendToken(tokenText)
+        }
+
         try {
           const result = await chatApi.askStream(
             {
@@ -138,14 +155,17 @@ export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never
               lesson_id: lessonId,
               document_ids: documentIds,
             },
-            appendToken,
+            safeAppendToken,
             (meta) => {
+              clearStreamTimeout()
               if (meta.citations) applyCitations(meta.citations)
             },
             controller.signal,
           )
+          clearStreamTimeout()
           if (result.citations?.length) applyCitations(result.citations)
         } catch (streamErr) {
+          clearStreamTimeout()
           // Fallback to non-streaming JSON endpoint (older backend / stream unavailable)
           const res = await chatApi.ask({
             session_id: sessionId,
@@ -193,7 +213,7 @@ export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never
                       m.id === streamMsgId
                         ? {
                             ...m,
-                            content: 'Xin lỗi, đã có lỗi xảy ra khi xử lý phản hồi AI. Vui lòng thử lại.',
+                            content: 'Xin lỗi, không thể kết nối đến máy chủ AI. Vui lòng thử lại sau giây lát.',
                           }
                         : m
                     ),

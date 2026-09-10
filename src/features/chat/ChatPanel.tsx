@@ -7,6 +7,7 @@ import { Button } from '../../components/ui/Button'
 import { Avatar } from '../../components/ui/Avatar'
 import { Dropdown } from '../../components/ui/Dropdown'
 import { EmptyState } from '../../components/ui/EmptyState'
+import { Markdown } from '../../components/ui/Markdown'
 import { fileIconEmoji } from '../../utils/fileIcon'
 import { cn } from '../../utils/cn'
 
@@ -135,7 +136,14 @@ export function ChatPanel() {
           />
         ) : (
           <div className="space-y-4 p-4">
-            {messages.map((msg) => (
+            {messages.map((msg) => {
+              // Skip the empty streaming placeholder while sending — the typing
+              // indicator below already covers it. Rendering both produced the
+              // duplicate "empty bubble 20:44" + "AI đang suy nghĩ..." glitch.
+              const isEmptyStreamingPlaceholder =
+                msg.role === 'assistant' && !msg.content.trim() && isSending
+              if (isEmptyStreamingPlaceholder) return null
+              return (
               <div
                 key={msg.id}
                 className={cn(
@@ -156,7 +164,11 @@ export function ChatPanel() {
                       : 'bg-muted text-foreground border border-border'
                   )}
                 >
-                  <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                  {msg.role === 'user' ? (
+                    <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                  ) : msg.content.trim() ? (
+                    <Markdown text={msg.content} className="md-body leading-relaxed" />
+                  ) : null}
                   {msg.citations && msg.citations.length > 0 && (
                     <div className="mt-2 space-y-1 border-t border-current/20 pt-2 text-xs opacity-80">
                       {msg.citations.map((c) => (
@@ -177,7 +189,8 @@ export function ChatPanel() {
                   />
                 )}
               </div>
-            ))}
+              )
+            })}
             {showTyping && (
               <div className="flex gap-2.5 justify-start items-center">
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent text-primary-foreground">
