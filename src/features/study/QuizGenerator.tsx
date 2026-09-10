@@ -49,7 +49,7 @@ export function QuizGenerator() {
             const raw = String(q.correct_answer ?? '').trim()
             let correctIndex = -1
             const letter = raw.match(/^([A-Da-d])$/)
-            const letterPrefix = raw.match(/^([A-Da-d])[\.\)\-:]/)
+            const letterPrefix = raw.match(/^([A-Da-d])[.)\-:]/)
             if (letter) correctIndex = letter[1].toUpperCase().charCodeAt(0) - 65
             else if (letterPrefix) correctIndex = letterPrefix[1].toUpperCase().charCodeAt(0) - 65
             else if (/^[0-3]$/.test(raw)) correctIndex = Number(raw)
@@ -57,7 +57,7 @@ export function QuizGenerator() {
               correctIndex = q.options.findIndex((o) => o === q.correct_answer)
             }
             if (correctIndex < 0) {
-              const norm = (s: string) => s.trim().toLowerCase().replace(/^[a-d0-9][\.\)\-:]\s*/, '')
+              const norm = (s: string) => s.trim().toLowerCase().replace(/^[a-d0-9][.)\-:]\s*/, '')
               correctIndex = q.options.findIndex((o) => norm(o) === norm(raw))
             }
             if (correctIndex < 0) correctIndex = 0
