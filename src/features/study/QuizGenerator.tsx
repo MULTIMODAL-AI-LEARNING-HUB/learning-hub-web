@@ -19,6 +19,7 @@ interface QuizQ {
   question: string
   options: string[]
   correctIndex: number
+  explanation?: string
 }
 
 export function QuizGenerator() {
@@ -40,18 +41,27 @@ export function QuizGenerator() {
       if (!jobId) return { status: 'pending' }
       try {
         const res = await studyApi.getQuizJob(jobId)
-        const data = res.data as { status: string; questions?: Array<{ id: string; question: string; options: string[]; correct_answer: string }> }
+        const data = res.data as { status: string; questions?: Array<{ id: string; question: string; options: string[]; correct_answer: string; explanation?: string }> }
         if (data.status === 'ready' && data.questions) {
           const mapped: QuizQ[] = data.questions.map((q) => {
-            // Backend trả correct_answer là NỘI DUNG đáp án (vd "probe-ok"),
-            // không phải ký tự A/B/C/D — so khớp text để tìm index đúng.
-            let correctIndex = q.options.findIndex((o) => o === q.correct_answer)
+            // Backend chuẩn enterprise trả correct_answer là "A"/"B"/"C"/"D".
+            // Giữ tương thích ngược: text đầy đủ (vd "probe-ok") hoặc index "0"-"3".
+            const raw = String(q.correct_answer ?? '').trim()
+            let correctIndex = -1
+            const letter = raw.match(/^([A-Da-d])$/)
+            const letterPrefix = raw.match(/^([A-Da-d])[\.\)\-:]/)
+            if (letter) correctIndex = letter[1].toUpperCase().charCodeAt(0) - 65
+            else if (letterPrefix) correctIndex = letterPrefix[1].toUpperCase().charCodeAt(0) - 65
+            else if (/^[0-3]$/.test(raw)) correctIndex = Number(raw)
+            if (correctIndex < 0 || correctIndex > 3) {
+              correctIndex = q.options.findIndex((o) => o === q.correct_answer)
+            }
             if (correctIndex < 0) {
-              const norm = (s: string) => s.trim().toLowerCase()
-              correctIndex = q.options.findIndex((o) => norm(o) === norm(q.correct_answer))
+              const norm = (s: string) => s.trim().toLowerCase().replace(/^[a-d0-9][\.\)\-:]\s*/, '')
+              correctIndex = q.options.findIndex((o) => norm(o) === norm(raw))
             }
             if (correctIndex < 0) correctIndex = 0
-            return { id: q.id, question: q.question, options: q.options, correctIndex }
+            return { id: q.id, question: q.question, options: q.options, correctIndex, explanation: q.explanation }
           })
           return { status: 'ready', data: mapped }
         }
@@ -258,6 +268,13 @@ export function QuizGenerator() {
             })}
           </div>
         </div>
+
+        {submitted && q.explanation && (
+          <div className="mt-4 rounded-xl border border-info/30 bg-info/5 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-info">Giải thích</p>
+            <p className="mt-1 text-sm leading-relaxed text-foreground">{q.explanation}</p>
+          </div>
+        )}
 
         {submitted && (
           <div className="mt-6 flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4 animate-zoom-in-95">
