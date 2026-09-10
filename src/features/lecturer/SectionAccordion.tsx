@@ -62,6 +62,10 @@ export function SectionAccordion({
   const [uploadingDoc, setUploadingDoc] = useState(false)
   const [uploadingVideo, setUploadingVideo] = useState(false)
 
+  // Khi có menu dropdown đang mở, nâng stacking context của cả chương
+  // để menu tràn ra ngoài không bị chương tiếp theo (sibling phía sau) đè lên.
+  const hasOpenMenu = showTypeMenu || Object.values(showMaterialMenu).some(Boolean)
+
   const handleDocumentUploadClick = (lessonId: string) => {
     setActiveUploadLessonId(lessonId)
     setTimeout(() => {
@@ -265,8 +269,8 @@ export function SectionAccordion({
   }
 
   return (
-    <div className="border border-border rounded-lg bg-card overflow-hidden">
-      <div className="flex items-center justify-between p-4 bg-muted/30">
+    <div className={`border border-border rounded-lg bg-card relative ${hasOpenMenu ? 'overflow-visible z-30' : 'overflow-hidden'}`}>
+      <div className="flex items-center justify-between p-4 bg-muted/30 rounded-t-lg">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-2 hover:opacity-80"
@@ -303,12 +307,15 @@ export function SectionAccordion({
               </Button>
             </>
           ) : (
-            <div className="relative">
+            <div className={`relative ${showTypeMenu ? 'z-50' : ''}`}>
               <Button
                 size="sm"
                 variant="ghost"
                 icon={<Plus className="h-4 w-4" />}
-                onClick={() => setShowTypeMenu(!showTypeMenu)}
+                onClick={() => {
+                  setShowTypeMenu(!showTypeMenu)
+                  setShowMaterialMenu({})
+                }}
                 className="hidden sm:inline-flex"
               >
                 Thêm bài học
@@ -317,7 +324,10 @@ export function SectionAccordion({
                 size="icon"
                 variant="ghost"
                 icon={<Plus className="h-4 w-4" />}
-                onClick={() => setShowTypeMenu(!showTypeMenu)}
+                onClick={() => {
+                  setShowTypeMenu(!showTypeMenu)
+                  setShowMaterialMenu({})
+                }}
                 className="sm:hidden"
               />
               
@@ -445,12 +455,13 @@ export function SectionAccordion({
                   {lesson.is_preview && <Badge variant="info" label="Học thử" />}
                   
                   {/* Add Material Dropdown */}
-                  <div className="relative">
+                  <div className={`relative ${showMaterialMenu[lesson.id] ? 'z-50' : ''}`}>
                     <button
                       disabled={uploadingDoc || uploadingVideo}
                       onClick={(e) => {
                         e.stopPropagation()
-                        setShowMaterialMenu(prev => ({ ...prev, [lesson.id]: !prev[lesson.id] }))
+                        setShowTypeMenu(false)
+                        setShowMaterialMenu(prev => ({ [lesson.id]: !prev[lesson.id] }))
                       }}
                       className="inline-flex items-center justify-center h-7 px-2.5 rounded-lg border border-primary/20 bg-card hover:bg-muted text-[11px] font-semibold text-primary gap-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       title="Thêm học liệu hoặc bài tập vào bài học này"
@@ -467,25 +478,25 @@ export function SectionAccordion({
                         </>
                       )}
                     </button>
-                    
+
                     {showMaterialMenu[lesson.id] && (
                       <>
-                        <div className="fixed inset-0 z-40" onClick={() => setShowMaterialMenu(prev => ({ ...prev, [lesson.id]: false }))} />
+                        <div className="fixed inset-0 z-40" onClick={() => setShowMaterialMenu({})} />
                         <div className="absolute right-0 mt-1 w-48 bg-surface-elevated border border-border rounded-xl shadow-lift py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-150 text-left">
                           <button
                             onClick={() => {
-                              setShowMaterialMenu(prev => ({ ...prev, [lesson.id]: false }))
+                              setShowMaterialMenu({})
                               handleDocumentUploadClick(lesson.id)
                             }}
                             className="w-full text-left px-3.5 py-1.5 text-xs hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors font-medium"
                           >
                             <FileText className="h-3.5 w-3.5 text-rose-500" /> Tải lên tài liệu
                           </button>
-                          
+
                           {!lesson.video_url && (
                             <button
                               onClick={() => {
-                                setShowMaterialMenu(prev => ({ ...prev, [lesson.id]: false }))
+                                setShowMaterialMenu({})
                                 handleAddVideoPrompt(lesson.id)
                               }}
                               className="w-full text-left px-3.5 py-1.5 text-xs hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors font-medium"
@@ -493,11 +504,11 @@ export function SectionAccordion({
                               <Video className="h-3.5 w-3.5 text-primary" /> Thêm Video
                             </button>
                           )}
-                          
+
                           {!lesson.has_quiz && (
                             <button
                               onClick={() => {
-                                setShowMaterialMenu(prev => ({ ...prev, [lesson.id]: false }))
+                                setShowMaterialMenu({})
                                 onOpenQuiz(lesson.id)
                               }}
                               className="w-full text-left px-3.5 py-1.5 text-xs hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors font-medium"
@@ -505,11 +516,11 @@ export function SectionAccordion({
                               <HelpCircle className="h-3.5 w-3.5 text-accent" /> Thêm bài trắc nghiệm
                             </button>
                           )}
-                          
+
                           {!lesson.has_assignment && (
                             <button
                               onClick={() => {
-                                setShowMaterialMenu(prev => ({ ...prev, [lesson.id]: false }))
+                                setShowMaterialMenu({})
                                 onOpenAssignment(lesson.id)
                               }}
                               className="w-full text-left px-3.5 py-1.5 text-xs hover:bg-muted/80 text-foreground flex items-center gap-2 transition-colors font-medium"
