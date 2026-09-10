@@ -8,6 +8,9 @@ export interface NotificationItem {
   detail: string
   time: string
   isRead: boolean
+  type?: string
+  related_id?: string | null
+  related_type?: string | null
 }
 
 export interface NotificationsDropdownProps {
@@ -17,6 +20,7 @@ export interface NotificationsDropdownProps {
   onClear: () => void
   onMarkRead: (id: string) => Promise<void>
   onMarkAllRead: () => Promise<void>
+  onNavigate?: (n: NotificationItem) => void
 }
 
 export function NotificationsDropdown({
@@ -26,8 +30,11 @@ export function NotificationsDropdown({
   onClear,
   onMarkRead,
   onMarkAllRead,
+  onNavigate,
 }: NotificationsDropdownProps) {
   const [open, setOpen] = useState(false)
+  const [markingAll, setMarkingAll] = useState(false)
+  const [markingIds, setMarkingIds] = useState<Record<string, boolean>>({})
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -40,6 +47,32 @@ export function NotificationsDropdown({
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
+
+  const handleItemClick = async (n: NotificationItem) => {
+    if (!n.isRead && !markingIds[n.id]) {
+      setMarkingIds((prev) => ({ ...prev, [n.id]: true }))
+      try {
+        await onMarkRead(n.id)
+      } finally {
+        setMarkingIds((prev) => {
+          const next = { ...prev }
+          delete next[n.id]
+          return next
+        })
+      }
+    }
+    if (onNavigate) onNavigate(n)
+  }
+
+  const handleMarkAllRead = async () => {
+    if (markingAll) return
+    setMarkingAll(true)
+    try {
+      await onMarkAllRead()
+    } finally {
+      setMarkingAll(false)
+    }
+  }
 
   return (
     <div className="relative" ref={ref}>
@@ -67,8 +100,8 @@ export function NotificationsDropdown({
             </p>
             <div className="flex items-center gap-2">
               {unreadCount > 0 && (
-                <button onClick={onMarkAllRead} className="text-xs font-medium text-primary hover:underline">
-                  Đánh dấu đã đọc
+                <button onClick={handleMarkAllRead} disabled={markingAll} className="text-xs font-medium text-primary hover:underline disabled:opacity-50">
+                  {markingAll ? 'Đang xử lý...' : 'Đánh dấu tất cả đã đọc'}
                 </button>
               )}
               {notifications.length > 0 && (
@@ -89,15 +122,15 @@ export function NotificationsDropdown({
                 {notifications.map((n) => (
                   <div
                     key={n.id}
-                    onClick={() => { if (!n.isRead) onMarkRead(n.id) }}
+                    onClick={() => handleItemClick(n)}
                     className={`group flex items-start gap-2.5 rounded-lg px-2.5 py-2 hover:bg-muted transition cursor-pointer ${n.isRead ? '' : 'bg-muted/50'}`}
                   >
                     {!n.isRead && <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />}
                     {n.isRead && <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-transparent" />}
                     <div className="flex-1 min-w-0">
                       <p className={`text-sm ${n.isRead ? 'text-muted-foreground' : 'font-medium text-foreground'}`}>{n.title}</p>
-                      <p className="text-xs text-muted-foreground">{n.detail}</p>
-                      <p className="mt-0.5 text-2xs text-muted-foreground/70">{n.time}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{n.detail}</p>
+                      <p className="mt-0.5 text-2xs text-muted-foreground/70">{markingIds[n.id] ? 'Đang đánh dấu đã đọc...' : n.time}</p>
                     </div>
                     <button
                       onClick={(e) => { e.stopPropagation(); onDismiss(n.id) }}

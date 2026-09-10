@@ -41,6 +41,9 @@ export interface Notification {
   title: string
   detail: string
   time: string
+  type?: string
+  related_id?: string | null
+  related_type?: string | null
 }
 
 export interface QuotaInfo {

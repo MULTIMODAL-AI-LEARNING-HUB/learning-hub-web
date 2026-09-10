@@ -214,6 +214,11 @@ export function Header() {
             onClear={clearNotifs}
             onMarkRead={markRead}
             onMarkAllRead={markAllRead}
+            onNavigate={(n) => {
+              if (n.related_type === 'course' && n.related_id) {
+                navigate(`/app/${role}/courses/${n.related_id}`)
+              }
+            }}
           />
 
           <Dropdown
