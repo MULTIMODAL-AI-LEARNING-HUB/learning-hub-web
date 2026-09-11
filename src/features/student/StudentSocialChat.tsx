@@ -114,21 +114,26 @@ export function StudentSocialChat() {
     return () => window.clearInterval(interval)
   }, [loadMessages, selectedRoomId])
 
-  useEffect(() => {
-    let cancelled = false
-    const trimmed = userQuery.trim()
-    if (!trimmed) {
-      setUserResults([])
-      return
-    }
+  // Search users both for the group-creation modal (userQuery)
+  // and for the main sidebar search box (query), which should also
+  // surface individual people with a 1-click "Nhắn tin" action.
+  const [peopleResults, setPeopleResults] = useState<SocialChatUser[]>([])
+  const [peopleSearching, setPeopleSearching] = useState(false)
 
+  const runUserSearch = useCallback(async (value: string, onDone: (items: SocialChatUser[]) => void) => {
+    const trimmed = value.trim()
+    if (!trimmed) {
+      onDone([])
+      return () => undefined
+    }
+    let cancelled = false
     const timer = window.setTimeout(() => {
       socialChatApi.searchUsers(trimmed)
         .then((res) => {
-          if (!cancelled) setUserResults(res.data)
+          if (!cancelled) onDone(res.data ?? [])
         })
         .catch(() => {
-          if (!cancelled) setUserResults([])
+          if (!cancelled) onDone([])
         })
     }, 250)
 
@@ -136,7 +141,40 @@ export function StudentSocialChat() {
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [userQuery])
+  }, [])
+
+  useEffect(() => {
+    let cleanup: (() => void) | undefined
+    void (async () => {
+      cleanup = (await runUserSearch(userQuery, setUserResults)) as unknown as () => void
+    })()
+    return () => cleanup?.()
+  }, [userQuery, runUserSearch])
+
+  useEffect(() => {
+    let cleanup: (() => void) | undefined
+    setPeopleSearching(true)
+    void (async () => {
+      cleanup = (await runUserSearch(query, (items) => {
+        setPeopleResults(items)
+        setPeopleSearching(false)
+      })) as unknown as () => void
+      if (!query.trim()) setPeopleSearching(false)
+    })()
+    return () => cleanup?.()
+  }, [query, runUserSearch])
+
+  const startDirectMessage = useCallback(async (otherUser: SocialChatUser) => {
+    try {
+      const res = await socialChatApi.directMessage(otherUser.id)
+      setRooms((current) => [res.data, ...current.filter((room) => room.id !== res.data.id)])
+      setSelectedRoomId(res.data.id)
+      setMessages([])
+      setError(null)
+    } catch {
+      setError('Không thể bắt đầu trò chuyện với người này.')
+    }
+  }, [])
 
   const filteredRooms = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -264,19 +302,66 @@ export function StudentSocialChat() {
                 <Skeleton className="h-16 rounded-xl" />
                 <Skeleton className="h-16 rounded-xl" />
               </div>
-            ) : filteredRooms.length === 0 ? (
-              <EmptyState
-                compact
-                icon={<Users />}
-                title={rooms.length === 0 ? 'Chưa có cuộc trò chuyện nào' : 'Không tìm thấy nhóm phù hợp'}
-                description={rooms.length === 0 ? 'Tạo nhóm học tập để bắt đầu trao đổi bài cùng bạn bè.' : 'Thử tìm với từ khóa khác xem sao.'}
-                action={rooms.length === 0 ? <Button size="sm" onClick={() => setCreateOpen(true)}>Tạo nhóm mới</Button> : null}
-              />
             ) : (
-              <div className="space-y-1">
-                {filteredRooms.map((room) => (
-                  <ThreadButton key={room.id} room={room} active={room.id === selectedRoomId} onClick={() => setSelectedRoomId(room.id)} />
-                ))}
+              <div className="space-y-3">
+                {/* People search results: direct 1-on-1 chat with any user */}
+                {query.trim() && (
+                  <div>
+                    <p className="mb-2 px-1 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      {peopleSearching ? 'Đang tìm người dùng...' : `Người dùng (${peopleResults.length})`}
+                    </p>
+                    {peopleSearching ? (
+                      <div className="space-y-2">
+                        <Skeleton className="h-14 rounded-xl" />
+                        <Skeleton className="h-14 rounded-xl" />
+                      </div>
+                    ) : peopleResults.length > 0 ? (
+                      <div className="space-y-1">
+                        {peopleResults.map((person) => (
+                          <div
+                            key={person.id}
+                            className="flex w-full items-center gap-3 rounded-xl p-2.5 text-left transition hover:bg-muted/60"
+                          >
+                            <Avatar src={person.avatar_url || undefined} fallback={getInitials(displayUserName(person))} size="md" />
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-semibold text-foreground">{displayUserName(person)}</p>
+                              <p className="truncate text-xs text-muted-foreground">{person.role === 'student' ? 'Học viên' : person.role === 'lecturer' ? 'Giảng viên' : person.role}</p>
+                            </div>
+                            <Button size="sm" variant="outline" onClick={() => startDirectMessage(person)}>
+                              Nhắn tin
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="rounded-xl border border-dashed border-border p-3 text-center text-xs text-muted-foreground">
+                        Không tìm thấy người dùng nào khớp từ khóa.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Chat threads */}
+                <div>
+                  <p className="mb-2 px-1 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Đoạn chat ({filteredRooms.length})
+                  </p>
+                  {filteredRooms.length === 0 ? (
+                    <EmptyState
+                      compact
+                      icon={<Users />}
+                      title={rooms.length === 0 ? 'Chưa có cuộc trò chuyện nào' : 'Không tìm thấy nhóm phù hợp'}
+                      description={rooms.length === 0 ? 'Tìm bạn bè ở trên để nhắn tin, hoặc tạo nhóm học tập để bắt đầu trao đổi.' : 'Thử tìm với từ khóa khác xem sao.'}
+                      action={rooms.length === 0 ? <Button size="sm" onClick={() => setCreateOpen(true)}>Tạo nhóm mới</Button> : null}
+                    />
+                  ) : (
+                    <div className="space-y-1">
+                      {filteredRooms.map((room) => (
+                        <ThreadButton key={room.id} room={room} active={room.id === selectedRoomId} onClick={() => setSelectedRoomId(room.id)} />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -296,14 +381,16 @@ export function StudentSocialChat() {
                   >
                     <ArrowLeft className="h-4 w-4" />
                   </Button>
-                  <Avatar fallback="#" size="md" />
+                  <Avatar fallback={getInitials(selectedRoom.name)} size="md" />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <h2 className="truncate font-semibold text-foreground">{selectedRoom.name}</h2>
-                      <Badge variant="primary" label="Nhóm" />
+                      <Badge variant={selectedRoom.kind === 'direct' ? 'success' : 'primary'} label={selectedRoom.kind === 'direct' ? 'Trực tiếp' : 'Nhóm'} />
                     </div>
                     <p className="truncate text-xs text-muted-foreground">
-                      {selectedRoom.member_count} thành viên · {selectedRoom.description || 'Không có mô tả'}
+                      {selectedRoom.kind === 'direct'
+                        ? selectedRoom.description || 'Trò chuyện 1-1'
+                        : `${selectedRoom.member_count} thành viên · ${selectedRoom.description || 'Không có mô tả'}`}
                     </p>
                   </div>
                 </div>
@@ -452,15 +539,19 @@ export function StudentSocialChat() {
 }
 
 function ThreadButton({ room, active, onClick }: { room: SocialChatRoom; active: boolean; onClick: () => void }) {
+  const isDirect = room.kind === 'direct'
   return (
     <button onClick={onClick} className={cn('flex w-full items-center gap-3 rounded-xl p-3 text-left transition', active ? 'bg-primary/10 ring-1 ring-primary/20' : 'hover:bg-muted/60')}>
-      <Avatar fallback="#" size="md" />
+      <Avatar fallback={getInitials(room.name)} size="md" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
           <p className="truncate text-sm font-semibold text-foreground">{room.name}</p>
           <span className="shrink-0 text-[11px] text-muted-foreground">{formatTime(room.updated_at)}</span>
         </div>
-        <p className="mt-1 truncate text-xs text-muted-foreground">{room.last_message || room.description || `${room.member_count} thành viên`}</p>
+        <p className="mt-1 truncate text-xs text-muted-foreground">
+          {isDirect ? 'Trực tiếp · ' : ''}
+          {room.last_message || room.description || `${room.member_count} thành viên`}
+        </p>
       </div>
     </button>
   )

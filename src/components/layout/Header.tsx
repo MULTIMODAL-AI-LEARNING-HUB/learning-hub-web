@@ -67,8 +67,16 @@ export function Header() {
   const tokensTotal = user?.quota?.tokensTotal ?? 0
   const tokenSafeTotal = tokensTotal > 0 ? tokensTotal : 1
   const tokenPct = Math.min(100, Math.round((tokensUsed / tokenSafeTotal) * 100))
-  const tokensUsedLabel = tokensUsed >= 1000 ? `${(tokensUsed / 1000).toFixed(1)}k` : `${tokensUsed}`
-  const tokensTotalLabel = tokensTotal >= 1000 ? `${(tokensTotal / 1000).toFixed(0)}k` : `${tokensTotal}`
+  const tokensUsedLabel = tokensUsed >= 1_000_000
+    ? `${(tokensUsed / 1_000_000).toFixed(1)}M`
+    : tokensUsed >= 1000
+    ? `${(tokensUsed / 1000).toFixed(1)}k`
+    : `${tokensUsed}`
+  const tokensTotalLabel = tokensTotal >= 1_000_000
+    ? `${(tokensTotal / 1_000_000).toFixed(tokensTotal % 1_000_000 === 0 ? 0 : 1)}M`
+    : tokensTotal >= 1000
+    ? `${(tokensTotal / 1000).toFixed(0)}k`
+    : `${tokensTotal}`
 
   const handleLogout = useCallback(() => {
     logout()

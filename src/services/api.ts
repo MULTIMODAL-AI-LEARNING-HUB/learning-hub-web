@@ -836,6 +836,8 @@ export const authApi = {
     api.post<{ message: string }>('/auth/forgot-password', { email }),
   resetPassword: (token: string, password: string) =>
     api.post<{ message: string }>('/auth/reset-password', { token, password }),
+  changePassword: (current_password: string, new_password: string) =>
+    api.post<{ message: string }>('/auth/change-password', { current_password, new_password }),
   logout: () =>
     api.post<{ message: string }>('/auth/logout', {}),
 }
@@ -966,6 +968,8 @@ export const socialChatApi = {
     api.get<{ items: SocialChatRoom[]; total: number }>('/social-chat/rooms'),
   createRoom: (data: { name: string; description?: string; member_ids?: string[] }) =>
     api.post<SocialChatRoom>('/social-chat/rooms', data),
+  directMessage: (otherUserId: string) =>
+    api.post<SocialChatRoom>(`/social-chat/direct/${otherUserId}`),
   listMessages: (roomId: string, limit = 50, before?: string) =>
     api.get<{ items: SocialChatMessage[]; total: number }>(`/social-chat/rooms/${roomId}/messages`, {
       params: { limit, before },
