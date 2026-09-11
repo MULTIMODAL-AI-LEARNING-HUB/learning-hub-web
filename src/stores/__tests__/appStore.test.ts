@@ -62,7 +62,7 @@ describe('appStore', () => {
       auth: {
         isAuthenticated: true,
         isLoadingUser: false,
-        user: { id: '1', name: 'Test', role: 'Student', initials: 'T' },
+        user: { id: '1', name: 'Test', email: 'test@example.com', role: 'Student', initials: 'T' },
         token: 'mock',
         login: useAppStore.getState().auth.login,
         register: useAppStore.getState().auth.register,

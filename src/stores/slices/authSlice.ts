@@ -6,6 +6,7 @@ import { authApi, clearAccessToken, setAccessToken, type AuthUser } from '../../
 export const mapApiUser = (user: AuthUser) => ({
   id: user.id,
   name: user.full_name || user.email,
+  email: user.email,
   role: user.role,
   initials: (user.full_name || user.email)
     .split(' ')
