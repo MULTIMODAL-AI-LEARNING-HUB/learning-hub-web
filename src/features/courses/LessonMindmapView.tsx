@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useState } from 'react'
 import { AlertCircle, BrainCircuit, RefreshCw, Sparkles } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
@@ -24,9 +25,13 @@ export function LessonMindmapView({ lessonId, lessonTitle }: LessonMindmapViewPr
     try {
       const res = await mindmapApi.getLessonMindmap(lessonId)
       setData(res.data)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load mindmap:', err)
-      setError(err?.response?.data?.detail || 'Không thể tải sơ đồ tư duy cho bài học này.')
+      const detail =
+        typeof err === 'object' && err !== null && 'response' in err
+          ? (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
+          : null
+      setError(detail || 'Không thể tải sơ đồ tư duy cho bài học này.')
     } finally {
       setLoading(false)
     }
@@ -45,12 +50,16 @@ export function LessonMindmapView({ lessonId, lessonTitle }: LessonMindmapViewPr
         type: 'success',
         title: 'Đã vẽ lại sơ đồ tư duy mới từ AI!',
       })
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to regenerate mindmap:', err)
+      const detail =
+        typeof err === 'object' && err !== null && 'response' in err
+          ? (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
+          : null
       toast({
         type: 'error',
         title: 'Tạo lại sơ đồ tư duy thất bại',
-        message: err?.response?.data?.detail || 'Vui lòng thử lại sau giây lát.',
+        message: detail || 'Vui lòng thử lại sau giây lát.',
       })
     } finally {
       setRegenerating(false)

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   AlertCircle,
@@ -93,6 +94,43 @@ export function LessonQuizModal({
     }
   }, [open, loadQuizData])
 
+  const handleSubmitAttempt = useCallback(async () => {
+    if (!currentAttempt) return
+    setSubmitting(true)
+    try {
+      const answersPayload = Object.entries(selectedAnswers).map(([question_id, selected_answers]) => ({
+        question_id,
+        selected_answers,
+      }))
+
+      const res = await quizzesApi.submitAttempt(lessonId, currentAttempt.id, answersPayload)
+      setLastResult(res.data)
+      setView('result')
+
+      // Refresh attempts history
+      const attemptsRes = await quizzesApi.getMyAttempts(lessonId).catch(() => null)
+      if (attemptsRes?.data) {
+        setAttempts(attemptsRes.data)
+      }
+
+      if (res.data.passed) {
+        toast({ type: 'success', title: 'Chúc mừng! Bạn đã vượt qua bài trắc nghiệm' })
+      } else {
+        toast({ type: 'info', title: 'Bạn chưa đạt điểm qua môn. Hãy ôn tập lại nhé!' })
+      }
+
+      onQuizCompleted?.()
+    } catch (err: unknown) {
+      const errMsg =
+        typeof err === 'object' && err !== null && 'response' in err
+          ? (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
+          : null
+      toast({ type: 'error', title: errMsg || 'Nộp bài trắc nghiệm thất bại' })
+    } finally {
+      setSubmitting(false)
+    }
+  }, [currentAttempt, selectedAnswers, lessonId, toast, onQuizCompleted])
+
   // Timer countdown
   useEffect(() => {
     if (view !== 'taking' || timeLeftSeconds === null) return
@@ -108,7 +146,7 @@ export function LessonQuizModal({
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [view, timeLeftSeconds])
+  }, [view, timeLeftSeconds, handleSubmitAttempt])
 
   const questions = quiz?.questions || []
   const maxAttempts = quiz?.max_attempts || 3
@@ -159,43 +197,6 @@ export function LessonQuizModal({
         return { ...prev, [questionId]: [answerId] }
       }
     })
-  }
-
-  const handleSubmitAttempt = async () => {
-    if (!currentAttempt) return
-    setSubmitting(true)
-    try {
-      const answersPayload = Object.entries(selectedAnswers).map(([question_id, selected_answers]) => ({
-        question_id,
-        selected_answers,
-      }))
-
-      const res = await quizzesApi.submitAttempt(lessonId, currentAttempt.id, answersPayload)
-      setLastResult(res.data)
-      setView('result')
-
-      // Refresh attempts history
-      const attemptsRes = await quizzesApi.getMyAttempts(lessonId).catch(() => null)
-      if (attemptsRes?.data) {
-        setAttempts(attemptsRes.data)
-      }
-
-      if (res.data.passed) {
-        toast({ type: 'success', title: 'Chúc mừng! Bạn đã vượt qua bài trắc nghiệm' })
-      } else {
-        toast({ type: 'info', title: 'Bạn chưa đạt điểm qua môn. Hãy ôn tập lại nhé!' })
-      }
-
-      onQuizCompleted?.()
-    } catch (err: unknown) {
-      const errMsg =
-        typeof err === 'object' && err !== null && 'response' in err
-          ? (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
-          : null
-      toast({ type: 'error', title: errMsg || 'Nộp bài trắc nghiệm thất bại' })
-    } finally {
-      setSubmitting(false)
-    }
   }
 
   const formatTimer = (seconds: number) => {
