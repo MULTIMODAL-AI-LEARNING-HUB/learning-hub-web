@@ -385,8 +385,105 @@ export interface QuizAttempt {
   score: number | null
   max_score: number | null
   passed: boolean | null
+  answers_detail?: Array<{
+    question_id: string
+    question_text?: string
+    question_type?: string
+    points?: number
+    earned_points?: number
+    is_correct: boolean
+    selected_answers?: string[]
+    correct_answers?: string[]
+    explanation?: string | null
+  }> | null
   started_at: string
   completed_at: string | null
+}
+
+export interface AnswerStudent {
+  id: string
+  question_id: string
+  answer_text: string
+  order_index: number
+  created_at: string
+}
+
+export interface QuestionStudent {
+  id: string
+  quiz_id: string
+  question_text: string
+  type: 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_BLANK'
+  points: number
+  order_index: number
+  created_at: string
+  answers?: AnswerStudent[]
+}
+
+export interface QuizStudent {
+  id: string
+  lesson_id: string
+  title: string
+  description: string | null
+  passing_score: number
+  duration_mins: number | null
+  max_attempts: number
+  is_active: boolean
+  question_count?: number
+  created_at: string
+  updated_at: string
+  questions?: QuestionStudent[]
+}
+
+export interface QuizAttemptResult extends QuizAttempt {
+  correct_answers?: Array<Record<string, unknown>>
+}
+
+export interface MissedQuestionItem {
+  question_id: string
+  question_text: string
+  selected_answers: string[]
+  correct_answers: string[]
+  explanation?: string | null
+  is_correct?: boolean
+}
+
+export interface WeaknessAreaItem {
+  lesson_id: string
+  lesson_title: string
+  course_id: string
+  course_title: string
+  total_questions: number
+  missed_count: number
+  accuracy_percent: number
+  last_attempt_at?: string | null
+  missed_questions: MissedQuestionItem[]
+}
+
+export interface WeaknessSummaryResponse {
+  weaknesses: WeaknessAreaItem[]
+  total_weak_areas: number
+}
+
+export interface RemedialQuestion {
+  id: string
+  question: string
+  options: string[]
+  correct_answer: string
+  explanation?: string | null
+}
+
+export interface RemedialQuizResponse {
+  lesson_id: string
+  lesson_title: string
+  target_weaknesses_count: number
+  questions: RemedialQuestion[]
+}
+
+export interface LessonMindmapResponse {
+  lesson_id: string
+  lesson_title: string
+  markdown_tree: string
+  is_cached: boolean
 }
 
 export interface Assignment {
@@ -724,6 +821,45 @@ export const quizzesApi = {
   getAttempts: (lessonId: string) => api.get<QuizAttempt[]>(`/lessons/${lessonId}/quiz/attempts`),
   generateQuizAI: (lessonId: string, questionCount: number = 5) =>
     api.post<Quiz>(`/lessons/${lessonId}/quiz/generate-ai`, null, { params: { question_count: questionCount } }),
+  // --- Student quiz flow (lecture-attached quiz) ---
+  getStudentQuiz: (lessonId: string) => api.get<QuizStudent>(`/lessons/${lessonId}/quiz`),
+  startAttempt: (lessonId: string) => api.post<QuizAttempt>(`/lessons/${lessonId}/quiz/attempt`),
+  submitAttempt: (lessonId: string, attemptId: string, answers: Array<{ question_id: string; selected_answers: string[] }>) =>
+    api.put<QuizAttemptResult>(`/lessons/${lessonId}/quiz/attempt/${attemptId}/submit`, { answers }),
+  getMyAttempts: (lessonId: string) => api.get<QuizAttempt[]>(`/lessons/${lessonId}/quiz/my-attempts`),
+}
+
+export const adaptiveApi = {
+  getMyWeaknesses: (limit: number = 5) =>
+    api.get<WeaknessSummaryResponse>('/adaptive/my-weaknesses', { params: { limit } }),
+  generateRemedialQuiz: (lessonId: string, questionCount: number = 3) =>
+    api.post<RemedialQuizResponse>(`/adaptive/lessons/${lessonId}/remedial-quiz`, {
+      question_count: questionCount,
+    }),
+}
+
+export const mindmapApi = {
+  getLessonMindmap: (lessonId: string) =>
+    api.get<LessonMindmapResponse>(`/lessons/${lessonId}/mindmap`),
+  regenerateLessonMindmap: (lessonId: string) =>
+    api.post<LessonMindmapResponse>(`/lessons/${lessonId}/mindmap/regenerate`, {}),
+  generateTextMindmap: (content: string, title?: string) =>
+    api.post<{ markdown_tree: string }>('/study/mindmap/generate', { content, title: title || '' }),
+}
+
+export interface AudioSummaryResponse {
+  lesson_id: string
+  lesson_title: string
+  audio_url: string
+  voice: string
+  is_cached: boolean
+}
+
+export const audioApi = {
+  getLessonAudioSummary: (lessonId: string, voice: 'female' | 'male' = 'female', regenerate: boolean = false) =>
+    api.get<AudioSummaryResponse>(`/lessons/${lessonId}/audio-summary`, {
+      params: { voice, regenerate },
+    }),
 }
 
 export const assignmentsApi = {
@@ -882,10 +1018,10 @@ export const chatApi = {
       params: { page, page_size: pageSize },
     }),
   deleteSession: (id: string) => api.delete(`/chat/sessions/${id}`),
-  ask: (data: { session_id: string; query: string; course_id?: string; lesson_id?: string; document_ids?: string[] }) =>
+  ask: (data: { session_id: string; query: string; course_id?: string; lesson_id?: string; document_ids?: string[]; tutor_mode?: string }) =>
     api.post<ChatAskResponse>('/chat/ask', data),
   askStream: async (
-    data: { session_id: string; query: string; course_id?: string; lesson_id?: string; document_ids?: string[] },
+    data: { session_id: string; query: string; course_id?: string; lesson_id?: string; document_ids?: string[]; tutor_mode?: string },
     onToken: (text: string) => void,
     onMeta?: (meta: { intent?: string; citations?: Citation[] }) => void,
     signal?: AbortSignal,

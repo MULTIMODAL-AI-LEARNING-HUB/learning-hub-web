@@ -37,7 +37,7 @@ export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never
         }
       }
     },
-    sendMessage: async (content, documentIds, courseId, lessonId) => {
+    sendMessage: async (content, documentIds, courseId, lessonId, tutorMode = 'standard') => {
       let sessionId = get().chat.activeSessionId
       if (!sessionId) {
         await get().chat.addSession(courseId, lessonId)
@@ -154,6 +154,7 @@ export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never
               course_id: courseId,
               lesson_id: lessonId,
               document_ids: documentIds,
+              tutor_mode: tutorMode,
             },
             safeAppendToken,
             (meta) => {
@@ -172,7 +173,8 @@ export const createChatSlice: StateCreator<AppState, [['zustand/devtools', never
             query: content.trim(),
             course_id: courseId,
             lesson_id: lessonId,
-            document_ids: documentIds
+            document_ids: documentIds,
+            tutor_mode: tutorMode,
           })
           const data = res.data
           set((state) => ({

@@ -20,6 +20,8 @@
     "axios": "^1.16.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.17.0",
+    "markmap-lib": "^0.18.12",
+    "markmap-view": "^0.18.12",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-router-dom": "^7.18.3",

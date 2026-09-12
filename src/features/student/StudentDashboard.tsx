@@ -24,6 +24,7 @@ import { Card } from '../../components/ui/Card'
 import { Badge } from '../../components/ui/Badge'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { cn } from '../../utils/cn'
+import { WeaknessRemediationWidget } from './WeaknessRemediationWidget'
 
 export function StudentDashboard() {
   const navigate = useNavigate()
@@ -292,6 +293,9 @@ export function StudentDashboard() {
           </div>
         </div>
       )}
+
+      {/* NEW: Adaptive weak-point remediation personalized by AI */}
+      <WeaknessRemediationWidget />
 
       {/* 4. Main Section: Courses Grid + Right Panel (Activity & Tools) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">

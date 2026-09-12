@@ -45,7 +45,7 @@ export interface ChatSlice {
     sessions: ChatSession[]
     activeSessionId: string | null
     selectSession: (id: string) => void
-    sendMessage: (content: string, documentIds?: string[], courseId?: string, lessonId?: string) => Promise<void>
+    sendMessage: (content: string, documentIds?: string[], courseId?: string, lessonId?: string, tutorMode?: string) => Promise<void>
     addSession: (courseId?: string, lessonId?: string) => Promise<void>
     deleteSession: (id: string) => void
   }

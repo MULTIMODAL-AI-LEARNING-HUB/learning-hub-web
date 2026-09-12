@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Send, Sparkles, MessageSquare, FileText, X, Paperclip } from 'lucide-react'
+import { Send, Sparkles, MessageSquare, FileText, X, Paperclip, Lightbulb, Baby, Sparkle, Code, Compass } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -23,6 +23,7 @@ export function ChatPanel() {
   const initialQuery = searchParams.get('initialQuery')
   const [input, setInput] = useState(initialQuery || '')
   const [selectedDoc, setSelectedDoc] = useState<string>('')
+  const [tutorMode, setTutorMode] = useState<string>('standard')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const courseId = searchParams.get('course_id') || undefined
@@ -63,7 +64,28 @@ export function ChatPanel() {
     setInput('')
     setIsSending(true)
     try {
-      await sendMessage(text, selectedDoc ? [selectedDoc] : [], courseId)
+      await sendMessage(text, selectedDoc ? [selectedDoc] : [], courseId, undefined, tutorMode)
+    } finally {
+      setIsSending(false)
+    }
+  }
+
+  const handleReExplain = async (mode: string, contextContent?: string) => {
+    if (isSending) return
+    const modeLabel =
+      mode === 'eli5'
+        ? 'dễ hiểu như giải thích cho người mới (ELI5)'
+        : mode === 'analogy'
+        ? 'hình ảnh ẩn dụ đời thực sinh động'
+        : mode === 'code_deepdive'
+        ? 'chuyên sâu kỹ thuật kèm code minh họa cụ thể'
+        : 'phương pháp gợi mở Socratic'
+
+    const snippet = contextContent ? ` "${contextContent.slice(0, 140)}..."` : ''
+    const text = `Hãy giải thích lại phần trên theo phong cách ${modeLabel}${snippet}`
+    setIsSending(true)
+    try {
+      await sendMessage(text, selectedDoc ? [selectedDoc] : [], courseId, undefined, mode)
     } finally {
       setIsSending(false)
     }
@@ -97,34 +119,59 @@ export function ChatPanel() {
           </div>
         </div>
 
-        <Dropdown
-          align="right"
-          menuClassName="w-72 p-1.5"
-          trigger={
-            <Button variant="outline" size="sm" icon={<Paperclip className="h-3.5 w-3.5" />}>
-              {selectedDocName ? (
-                <span className="max-w-32 truncate">{selectedDocName}</span>
-              ) : (
-                'Tài liệu tham chiếu'
-              )}
-            </Button>
-          }
-          items={[
-            { id: '__none', label: 'Không kèm tài liệu', icon: <X className="h-4 w-4" /> },
-            ...docs
-              .filter((d) => d.status === 'ready')
-              .map((d) => ({
-                id: d.id,
-                label: d.name,
-                icon: <span className="text-base">{fileIconEmoji(d.type)}</span>
-              }))
-          ]}
-          onSelect={(id) => {
-            if (id === '__none') setSelectedDoc('')
-            else setSelectedDoc(id)
-          }}
-        />
+        <div className="flex items-center gap-2 shrink-0">
+          <Dropdown
+            align="right"
+            menuClassName="w-64 p-1.5"
+            trigger={
+              <Button variant="outline" size="sm" icon={<Lightbulb className="h-3.5 w-3.5" />}>
+                {tutorMode === 'socratic' ? 'Socratic' : tutorMode === 'eli5' ? 'ELI5' : tutorMode === 'analogy' ? 'Ẩn dụ' : tutorMode === 'code_deepdive' ? 'Deep-dive' : 'Chuẩn'}
+              </Button>
+            }
+            items={[
+              { id: 'standard', label: 'Chuẩn — trả lời trực tiếp', icon: <Sparkle className="h-4 w-4" /> },
+              { id: 'socratic', label: 'Socratic — hỏi gợi mở', icon: <Compass className="h-4 w-4" /> },
+              { id: 'eli5', label: 'ELI5 — siêu dễ hiểu', icon: <Baby className="h-4 w-4" /> },
+              { id: 'analogy', label: 'Ẩn dụ đời thực', icon: <Lightbulb className="h-4 w-4" /> },
+              { id: 'code_deepdive', label: 'Deep-dive code', icon: <Code className="h-4 w-4" /> },
+            ]}
+            onSelect={(id) => setTutorMode(id)}
+          />
+          <Dropdown
+            align="right"
+            menuClassName="w-72 p-1.5"
+            trigger={
+              <Button variant="outline" size="sm" icon={<Paperclip className="h-3.5 w-3.5" />}>
+                {selectedDocName ? (
+                  <span className="max-w-32 truncate">{selectedDocName}</span>
+                ) : (
+                  'Tài liệu tham chiếu'
+                )}
+              </Button>
+            }
+            items={[
+              { id: '__none', label: 'Không kèm tài liệu', icon: <X className="h-4 w-4" /> },
+              ...docs
+                .filter((d) => d.status === 'ready')
+                .map((d) => ({
+                  id: d.id,
+                  label: d.name,
+                  icon: <span className="text-base">{fileIconEmoji(d.type)}</span>
+                }))
+            ]}
+            onSelect={(id) => {
+              if (id === '__none') setSelectedDoc('')
+              else setSelectedDoc(id)
+            }}
+          />
+        </div>
       </div>
+
+      {tutorMode === 'socratic' && (
+        <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800">
+          Chế độ <strong>Socratic</strong> đang bật — AI sẽ hỏi gợi mở từng bước thay vì đưa đáp án ngay.
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         {messages.length === 0 ? (
@@ -177,6 +224,53 @@ export function ChatPanel() {
                           <span className="truncate">{c.label}</span>
                         </p>
                       ))}
+                    </div>
+                  )}
+                  {msg.role === 'assistant' && msg.content.trim() && (
+                    <div className="mt-2.5 flex flex-wrap items-center gap-1.5 pt-2 border-t border-border/40 text-2xs">
+                      <span className="text-muted-foreground/75 font-medium mr-0.5 flex items-center gap-1">
+                        <Sparkle className="h-3 w-3 text-primary" /> Giải thích lại:
+                      </span>
+                      <button
+                        type="button"
+                        disabled={isSending}
+                        onClick={() => handleReExplain('eli5', msg.content)}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-background/80 hover:bg-background border border-border/60 text-foreground/80 hover:text-foreground transition disabled:opacity-40 cursor-pointer"
+                        title="Giải thích siêu dễ hiểu cho người mới (ELI5)"
+                      >
+                        <Baby className="h-3 w-3 text-emerald-500" />
+                        ELI5
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isSending}
+                        onClick={() => handleReExplain('analogy', msg.content)}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-background/80 hover:bg-background border border-border/60 text-foreground/80 hover:text-foreground transition disabled:opacity-40 cursor-pointer"
+                        title="Giải thích bằng ẩn dụ đời thực sinh động"
+                      >
+                        <Compass className="h-3 w-3 text-sky-500" />
+                        Ẩn dụ
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isSending}
+                        onClick={() => handleReExplain('code_deepdive', msg.content)}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-background/80 hover:bg-background border border-border/60 text-foreground/80 hover:text-foreground transition disabled:opacity-40 cursor-pointer"
+                        title="Kỹ thuật chuyên sâu & code mẫu"
+                      >
+                        <Code className="h-3 w-3 text-purple-500" />
+                        Code sâu
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isSending}
+                        onClick={() => handleReExplain('socratic', msg.content)}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-background/80 hover:bg-background border border-border/60 text-foreground/80 hover:text-foreground transition disabled:opacity-40 cursor-pointer"
+                        title="Gợi mở từng bước (Socratic)"
+                      >
+                        <Lightbulb className="h-3 w-3 text-amber-500" />
+                        Gợi mở
+                      </button>
                     </div>
                   )}
                   <p className="mt-1 text-2xs opacity-60">{msg.timestamp}</p>
