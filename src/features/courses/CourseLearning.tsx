@@ -50,6 +50,7 @@ import { Skeleton } from '../../components/ui/Skeleton'
 import { cn } from '../../utils/cn'
 import { CourseChatPanel } from './CourseChatPanel'
 import { DiscussionPanel } from './DiscussionPanel'
+import { LessonAudioPlayer } from './LessonAudioPlayer'
 import { LessonMindmapView } from './LessonMindmapView'
 import { LessonQuizModal } from './LessonQuizModal'
 import { LessonAssignmentModal } from './LessonAssignmentModal'
@@ -1043,6 +1044,9 @@ function LessonMultiModalWorkspace({
             )}
           </div>
         </div>
+
+        {/* 1b. Audio Podcast TTS Summary */}
+        <LessonAudioPlayer lessonId={lesson.id} lessonTitle={lesson.title} />
       </Card>
 
       {/* 3. SUB-SECTION: VIDEO PLAYER */}
