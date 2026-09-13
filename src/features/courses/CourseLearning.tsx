@@ -895,9 +895,21 @@ function LessonMultiModalWorkspace({
   const [streamFailed, setStreamFailed] = useState(false)
   useEffect(() => {
     setStreamFailed(false)
-  }, [lesson.id])
+  }, [lesson.id, authToken])
 
-  const activeVideoUrl = (!streamFailed && streamUrl) ? streamUrl : (videoSourceUrl || streamUrl)
+  const resolvedFallbackUrl = useMemo(() => {
+    if (!videoSourceUrl) return null
+    if (
+      videoSourceUrl.includes('youtube.com') ||
+      videoSourceUrl.includes('youtu.be') ||
+      videoSourceUrl.includes('vimeo.com')
+    ) {
+      return videoSourceUrl
+    }
+    return withAuthToken(videoSourceUrl, authToken) || videoSourceUrl
+  }, [videoSourceUrl, authToken])
+
+  const activeVideoUrl = (!streamFailed && streamUrl) ? streamUrl : (resolvedFallbackUrl || streamUrl)
 
   // Identify content: text markdown / article
   const hasContent = Boolean(lesson.content && lesson.content.trim().length > 0)

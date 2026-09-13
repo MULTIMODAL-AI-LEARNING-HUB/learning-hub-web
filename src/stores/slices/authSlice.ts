@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand'
 import type { AppState, AuthSlice, AxiosErrorLike } from '../types'
-import { authApi, clearAccessToken, setAccessToken, type AuthUser } from '../../services/api'
+import { authApi, clearAccessToken, getAccessToken, setAccessToken, type AuthUser } from '../../services/api'
 
 // Helper to map API User structure to frontend UserProfile structure
 export const mapApiUser = (user: AuthUser) => ({
@@ -136,6 +136,12 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
         try {
           const res = await authApi.refresh()
           setAccessToken(res.data.access_token)
+          set((state) => ({
+            auth: {
+              ...state.auth,
+              token: res.data.access_token,
+            }
+          }), false, 'auth/restoreSession/token')
           await get().auth.loadUser()
         } catch {
           clearAccessToken()
@@ -162,6 +168,7 @@ export const createAuthSlice: StateCreator<AppState, [['zustand/devtools', never
               ...state.auth,
               isAuthenticated: true,
               user: mapApiUser(user),
+              token: state.auth.token || getAccessToken() || null,
               isLoadingUser: false
             }
           }), false, 'auth/loadUser/success')
