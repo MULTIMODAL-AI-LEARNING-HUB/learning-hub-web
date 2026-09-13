@@ -27,12 +27,14 @@ import {
   X,
 } from 'lucide-react'
 import {
+  api,
   coursesApi,
   enrollmentsApi,
   lessonsApi,
   quizzesApi,
   assignmentsApi,
   sectionsApi,
+  withAuthToken,
   type Course,
   type CourseMaterial,
   type Enrollment,
@@ -859,6 +861,34 @@ function LessonMultiModalWorkspace({
   const videoSourceUrl = lesson.video_url || videoAttachment?.file_url || null
   const hasVideo = Boolean(videoSourceUrl)
 
+  // Build authenticated stream URL via backend proxy (supports Range requests & avoids CORS/presigned expiry)
+  // NOTE: accessToken in api.ts is refreshed by axios interceptors asynchronously,
+  // and this component never re-renders when it changes. Recompute the tokenized
+  // URL lazily so the <video> element uses the URL at first render and we also
+  // re-tokenize when the lesson changes.
+  const streamUrl = useMemo(() => {
+    if (!hasVideo) return null
+    // External embeds (YouTube, Vimeo) go directly
+    const url = lesson.video_url || ''
+    if (
+      url.includes('youtube.com') ||
+      url.includes('youtu.be') ||
+      url.includes('vimeo.com')
+    ) {
+      return url
+    }
+    const sectionId = lesson.section_id
+    const lessonId = lesson.id
+    try {
+      const raw = api.getUri({
+        url: `/sections/${sectionId}/lessons/${lessonId}/stream`,
+      })
+      return withAuthToken(raw) ?? null
+    } catch {
+      return null
+    }
+  }, [hasVideo, lesson.video_url, lesson.section_id, lesson.id])
+
   // Identify content: text markdown / article
   const hasContent = Boolean(lesson.content && lesson.content.trim().length > 0)
 
@@ -1073,19 +1103,9 @@ function LessonMultiModalWorkspace({
           </div>
 
           <div className="aspect-video w-full bg-black flex items-center justify-center overflow-hidden">
-            {videoAttachment ? (
-              <video
-                src={videoAttachment.file_url}
-                controls
-                className="h-full w-full object-contain"
-                controlsList="nodownload"
-                poster={undefined}
-              >
-                Trình duyệt của bạn không hỗ trợ phát video HTML5.
-              </video>
-            ) : lesson.video_url?.includes('youtube.com') ||
-              lesson.video_url?.includes('youtu.be') ||
-              lesson.video_url?.includes('vimeo.com') ? (
+            {lesson.video_url?.includes('youtube.com') ||
+            lesson.video_url?.includes('youtu.be') ||
+            lesson.video_url?.includes('vimeo.com') ? (
               <iframe
                 src={lesson.video_url}
                 title={lesson.title}
@@ -1093,13 +1113,18 @@ function LessonMultiModalWorkspace({
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
-            ) : videoSourceUrl ? (
+            ) : streamUrl ? (
               <video
-                src={videoSourceUrl}
+                key={streamUrl}
+                src={streamUrl}
                 controls
+                playsInline
+                preload="metadata"
+                crossOrigin="use-credentials"
                 className="h-full w-full object-contain"
               >
-                Trình duyệt của bạn không hỗ trợ phát video.
+                <source src={streamUrl} type="video/mp4" />
+                Trình duyệt của bạn không hỗ trợ phát video HTML5.
               </video>
             ) : (
               <EmptyState

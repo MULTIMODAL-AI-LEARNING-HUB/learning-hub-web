@@ -147,10 +147,15 @@ export function LessonEditor({
       
       // Auto-detect video duration locally
       const videoElement = document.createElement('video')
-      videoElement.src = URL.createObjectURL(file)
+      const blobUrl = URL.createObjectURL(file)
+      videoElement.src = blobUrl
       videoElement.onloadedmetadata = () => {
-        setVideoDuration(Math.round(videoElement.duration))
-        URL.revokeObjectURL(videoElement.src)
+        const d = Math.round(videoElement.duration)
+        if (Number.isFinite(d)) setVideoDuration(d)
+        URL.revokeObjectURL(blobUrl)
+      }
+      videoElement.onerror = () => {
+        URL.revokeObjectURL(blobUrl)
       }
       
       toast({ type: 'success', title: 'Tải video lên thành công' })

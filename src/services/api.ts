@@ -15,7 +15,7 @@ if (API_BASE.startsWith('http') && !API_BASE.includes('/api/v1')) {
   API_BASE = API_BASE.replace(/\/+$/, '') + '/api/v1'
 }
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: API_BASE,
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
@@ -1126,13 +1126,20 @@ export const resolveViewerUrl = (fileUrl?: string) => {
 /** Append the in-memory access token so <iframe>/<video>/<audio> can stream auth-gated content. */
 export const withAuthToken = (url?: string) => {
   if (!url) return undefined
-  if (!accessToken || !url.startsWith('http')) return url
+  if (!accessToken) return url
   try {
-    const u = new URL(url)
-    if (!u.searchParams.get('token')) u.searchParams.set('token', accessToken)
+    const base = typeof window !== 'undefined' ? window.location.origin : 'http://localhost'
+    const u = new URL(url, base)
+    if (!u.searchParams.get('token')) {
+      u.searchParams.set('token', accessToken)
+    }
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return `${u.pathname}${u.search}${u.hash}`
+    }
     return u.toString()
   } catch {
-    return url
+    const separator = url.includes('?') ? '&' : '?'
+    return `${url}${separator}token=${encodeURIComponent(accessToken)}`
   }
 }
 

@@ -115,6 +115,7 @@ export function SectionAccordion({
     const file = e.target.files?.[0]
     if (!file || !activeUploadLessonId) return
 
+    const targetLessonId = activeUploadLessonId
     setUploadingVideo(true)
     const formData = new FormData()
     formData.append('file', file)
@@ -122,27 +123,35 @@ export function SectionAccordion({
     formData.append('file_type', file.type)
 
     try {
-      const uploadRes = await lessonsApi.addAttachment(section.id, activeUploadLessonId, formData)
-      
-      const videoElement = document.createElement('video')
-      videoElement.src = URL.createObjectURL(file)
-      
-      videoElement.onloadedmetadata = async () => {
-        const duration = Math.round(videoElement.duration)
-        URL.revokeObjectURL(videoElement.src)
-        
+      const uploadRes = await lessonsApi.addAttachment(section.id, targetLessonId, formData)
+
+      const saveLessonVideo = async (duration?: number) => {
         try {
-          await lessonsApi.update(section.id, activeUploadLessonId, {
+          await lessonsApi.update(section.id, targetLessonId, {
             video_url: uploadRes.data.file_url,
-            video_duration: duration
+            ...(duration !== undefined ? { video_duration: duration } : {}),
           })
-          
           toast({ type: 'success', title: 'Tải video lên và đính kèm bài học thành công' })
           fetchLessons()
         } catch (err) {
           console.error('Failed to update lesson video url:', err)
           toast({ type: 'error', title: 'Không thể cập nhật liên kết video bài học' })
         }
+      }
+
+      const videoElement = document.createElement('video')
+      const blobUrl = URL.createObjectURL(file)
+      videoElement.src = blobUrl
+
+      videoElement.onloadedmetadata = () => {
+        const duration = Math.round(videoElement.duration)
+        URL.revokeObjectURL(blobUrl)
+        saveLessonVideo(Number.isFinite(duration) ? duration : undefined)
+      }
+
+      videoElement.onerror = () => {
+        URL.revokeObjectURL(blobUrl)
+        saveLessonVideo(undefined)
       }
     } catch (err) {
       console.error('Failed to upload video:', err)
