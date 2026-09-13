@@ -1124,14 +1124,15 @@ export const resolveViewerUrl = (fileUrl?: string) => {
 }
 
 /** Append the in-memory access token so <iframe>/<video>/<audio> can stream auth-gated content. */
-export const withAuthToken = (url?: string) => {
+export const withAuthToken = (url?: string, tokenOverride?: string | null) => {
   if (!url) return undefined
-  if (!accessToken) return url
+  const token = tokenOverride || accessToken
+  if (!token) return url
   try {
     const base = typeof window !== 'undefined' ? window.location.origin : 'http://localhost'
     const u = new URL(url, base)
     if (!u.searchParams.get('token')) {
-      u.searchParams.set('token', accessToken)
+      u.searchParams.set('token', token)
     }
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       return `${u.pathname}${u.search}${u.hash}`
@@ -1139,7 +1140,7 @@ export const withAuthToken = (url?: string) => {
     return u.toString()
   } catch {
     const separator = url.includes('?') ? '&' : '?'
-    return `${url}${separator}token=${encodeURIComponent(accessToken)}`
+    return `${url}${separator}token=${encodeURIComponent(token)}`
   }
 }
 

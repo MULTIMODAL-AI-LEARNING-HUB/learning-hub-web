@@ -50,6 +50,7 @@ import { EmptyState } from '../../components/ui/EmptyState'
 import { Progress } from '../../components/ui/Progress'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { cn } from '../../utils/cn'
+import { useAppStore } from '../../stores/appStore'
 import { CourseChatPanel } from './CourseChatPanel'
 import { DiscussionPanel } from './DiscussionPanel'
 import { LessonAudioPlayer } from './LessonAudioPlayer'
@@ -861,11 +862,13 @@ function LessonMultiModalWorkspace({
   const videoSourceUrl = lesson.video_url || videoAttachment?.file_url || null
   const hasVideo = Boolean(videoSourceUrl)
 
+  // Auth token from the store (also refreshable via silent refresh) so we can
+  // re-tokenize the stream URL on login/token refresh without a page reload.
+  const authToken = useAppStore((s) => s.auth.token)
+
   // Build authenticated stream URL via backend proxy (supports Range requests & avoids CORS/presigned expiry)
-  // NOTE: accessToken in api.ts is refreshed by axios interceptors asynchronously,
-  // and this component never re-renders when it changes. Recompute the tokenized
-  // URL lazily so the <video> element uses the URL at first render and we also
-  // re-tokenize when the lesson changes.
+  // NOTE: <video> elements cannot send Authorization headers, so auth rides on
+  // the ``?token=`` query param via withAuthToken.
   const streamUrl = useMemo(() => {
     if (!hasVideo) return null
     // External embeds (YouTube, Vimeo) go directly
@@ -883,11 +886,18 @@ function LessonMultiModalWorkspace({
       const raw = api.getUri({
         url: `/sections/${sectionId}/lessons/${lessonId}/stream`,
       })
-      return withAuthToken(raw) ?? null
+      return withAuthToken(raw, authToken) ?? null
     } catch {
       return null
     }
-  }, [hasVideo, lesson.video_url, lesson.section_id, lesson.id])
+  }, [hasVideo, lesson.video_url, lesson.section_id, lesson.id, authToken])
+
+  const [streamFailed, setStreamFailed] = useState(false)
+  useEffect(() => {
+    setStreamFailed(false)
+  }, [lesson.id])
+
+  const activeVideoUrl = (!streamFailed && streamUrl) ? streamUrl : (videoSourceUrl || streamUrl)
 
   // Identify content: text markdown / article
   const hasContent = Boolean(lesson.content && lesson.content.trim().length > 0)
@@ -1113,17 +1123,22 @@ function LessonMultiModalWorkspace({
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
-            ) : streamUrl ? (
+            ) : activeVideoUrl ? (
               <video
-                key={streamUrl}
-                src={streamUrl}
+                key={activeVideoUrl}
+                src={activeVideoUrl}
                 controls
                 playsInline
                 preload="metadata"
-                crossOrigin="use-credentials"
                 className="h-full w-full object-contain"
+                onError={() => {
+                  // If the authenticated stream proxy fails (e.g. legacy lesson
+                  // without resolvable storage), fall back to the direct file URL.
+                  if (!streamFailed && streamUrl && activeVideoUrl === streamUrl) {
+                    setStreamFailed(true)
+                  }
+                }}
               >
-                <source src={streamUrl} type="video/mp4" />
                 Trình duyệt của bạn không hỗ trợ phát video HTML5.
               </video>
             ) : (
