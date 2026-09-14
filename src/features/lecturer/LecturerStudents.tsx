@@ -6,6 +6,7 @@ import { PageHeader } from '../../components/ui/PageHeader'
 import { Modal } from '../../components/ui/Modal'
 import { useLecturerCourses } from '../../hooks/useLecturerCourses'
 import { coursesApi, type Enrollment } from '../../services/api'
+import { formatCurrency } from '../../utils/formatCurrency'
 
 export function LecturerStudents() {
   const { stats, fetchStats } = useLecturerCourses()
@@ -78,7 +79,7 @@ export function LecturerStudents() {
             <TrendingUp className="h-4 w-4 text-success" />
           </div>
           <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">
-            ${stats?.total_revenue?.toLocaleString() ?? 0}
+            {formatCurrency(stats?.total_revenue ?? 0)}
           </p>
         </Card>
       </div>
@@ -129,7 +130,7 @@ export function LecturerStudents() {
               >
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm font-medium text-foreground truncate">{c.title}</p>
-                  <span className="text-xs text-muted-foreground shrink-0 ml-2">${c.revenue.toLocaleString()}</span>
+                  <span className="text-xs text-muted-foreground shrink-0 ml-2">{formatCurrency(c.revenue)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-1.5 rounded-full bg-muted">
@@ -179,7 +180,7 @@ export function LecturerStudents() {
                     <p className="text-sm font-medium text-foreground">{c.title}</p>
                   </td>
                   <td className="px-4 py-3 text-sm text-muted-foreground tabular-nums">{c.enrollment_count}</td>
-                  <td className="px-4 py-3 text-sm tabular-nums">${c.revenue.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-sm tabular-nums">{formatCurrency(c.revenue)}</td>
                   <td className="px-4 py-3">
                     {c.rating_avg > 0 ? (
                       <span className="text-sm text-foreground tabular-nums">★ {c.rating_avg.toFixed(1)}</span>
@@ -262,7 +263,7 @@ export function LecturerStudents() {
                         </td>
                         <td className="px-3 py-3">
                           <div className="text-xs">
-                            <p className="font-semibold text-foreground">${enrollment.payment_amount_vnd?.toLocaleString() || 0}</p>
+                            <p className="font-semibold text-foreground">{formatCurrency(enrollment.payment_amount_vnd, { emptyText: 'Miễn phí' })}</p>
                             <span className="text-[10px] text-muted-foreground capitalize">{enrollment.payment_method || 'Miễn phí'}</span>
                           </div>
                         </td>

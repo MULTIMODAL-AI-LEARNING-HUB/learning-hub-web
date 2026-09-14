@@ -95,19 +95,24 @@ export function LecturerSettings() {
       setPasswordError('Mật khẩu xác nhận không khớp')
       return
     }
-    if (newPassword.length < 6) {
-      setPasswordError('Mật khẩu phải có ít nhất 6 ký tự')
+    if (newPassword.length < 8) {
+      setPasswordError('Mật khẩu mới phải có ít nhất 8 ký tự')
+      return
+    }
+    if (newPassword === currentPassword) {
+      setPasswordError('Mật khẩu mới phải khác mật khẩu hiện tại')
       return
     }
     setPasswordSaving(true)
     try {
-      await authApi.resetPassword(currentPassword, newPassword)
+      await authApi.changePassword(currentPassword, newPassword)
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
       toast({ type: 'success', title: 'Đổi mật khẩu thành công' })
-    } catch {
-      setPasswordError('Đổi mật khẩu thất bại. Vui lòng kiểm tra lại mật khẩu hiện tại.')
+    } catch (err: unknown) {
+      const errorMsg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+      setPasswordError(errorMsg || 'Đổi mật khẩu thất bại. Vui lòng kiểm tra lại mật khẩu hiện tại.')
     } finally {
       setPasswordSaving(false)
     }

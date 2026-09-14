@@ -3,6 +3,7 @@ import { BarChart3, BookOpen, Users, Star, TrendingUp, DollarSign } from 'lucide
 import { Card } from '../../components/ui/Card'
 import { PageHeader } from '../../components/ui/PageHeader'
 import { coursesApi } from '../../services/api'
+import { formatCurrency } from '../../utils/formatCurrency'
 
 interface StatsData {
   total_courses: number
@@ -60,7 +61,7 @@ export function LecturerAnalytics() {
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tổng Doanh Thu</span>
             <DollarSign className="h-4 w-4 text-success" />
           </div>
-          <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">${totalRevenue.toLocaleString()}</p>
+          <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">{formatCurrency(totalRevenue)}</p>
         </Card>
         <Card padding="responsive">
           <div className="flex items-center justify-between">
@@ -134,7 +135,7 @@ export function LecturerAnalytics() {
                   <p className="text-sm font-medium text-foreground truncate">{c.title}</p>
                 </div>
                 <span className="text-sm font-semibold text-success tabular-nums shrink-0">
-                  ${c.revenue.toLocaleString()}
+                  {formatCurrency(c.revenue)}
                 </span>
               </div>
             ))}

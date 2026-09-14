@@ -933,11 +933,27 @@ export const enrollmentsApi = {
       payment_method: paymentMethod,
     }),
   cancel: (id: string) => api.delete(`/enrollments/${id}`),
-  getProgress: (id: string) => api.get<{ enrollment_id: string; course_id: string; total_materials: number; completed_materials: number; completion_percent: number; materials: MaterialProgressResponse[] }>(`/enrollments/${id}/progress`),
+  getProgress: (id: string) =>
+    api.get<{
+      enrollment_id: string
+      course_id: string
+      total_materials: number
+      completed_materials: number
+      total_lessons: number
+      completed_lessons: number
+      completed_lesson_ids: string[]
+      completion_percent: number
+      materials: MaterialProgressResponse[]
+    }>(`/enrollments/${id}/progress`),
   updateProgress: (enrollmentId: string, materialId: string, data: {
     completion_percent?: number
     last_position?: Record<string, unknown>
   }) => api.post<MaterialProgress>(`/enrollments/${enrollmentId}/materials/${materialId}/progress`, data),
+  updateLessonProgress: (enrollmentId: string, lessonId: string, completed: boolean) =>
+    api.post<{ id: string; enrollment_id: string; lesson_id: string; completed: boolean }>(
+      `/enrollments/${enrollmentId}/lessons/${lessonId}/progress`,
+      { completed }
+    ),
 }
 
 export const paymentsApi = {
@@ -1238,6 +1254,26 @@ export const announcementsApi = {
     api.post<Announcement>(`/courses/${courseId}/announcements`, data),
   delete: (courseId: string, id: string) =>
     api.delete(`/courses/${courseId}/announcements/${id}`),
+}
+
+export interface Note {
+  id: string
+  user_id: string
+  course_id: string
+  lesson_id: string | null
+  content: string
+  created_at: string
+  updated_at: string
+}
+
+export const notesApi = {
+  list: (params: { course_id: string; lesson_id?: string }) =>
+    api.get<Note[]>('/notes', { params }),
+  create: (data: { course_id: string; lesson_id?: string; content: string }) =>
+    api.post<Note>('/notes', data),
+  update: (id: string, data: { content: string }) =>
+    api.put<Note>(`/notes/${id}`, data),
+  delete: (id: string) => api.delete(`/notes/${id}`),
 }
 
 export default api
