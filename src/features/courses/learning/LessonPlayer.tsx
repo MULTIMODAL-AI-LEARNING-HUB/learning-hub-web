@@ -1,15 +1,15 @@
 import { useMemo, useState } from 'react'
-import { Clock, Download, PlayCircle, Video } from 'lucide-react'
+import { Clock, PlayCircle, ShieldCheck, Video } from 'lucide-react'
 import { api, withAuthToken, type CourseMaterial, type Lesson } from '../../../services/api'
 import { Card } from '../../../components/ui/Card'
 import { EmptyState } from '../../../components/ui/EmptyState'
 import { useAppStore } from '../../../stores/appStore'
 import {
   formatDuration,
-  formatFileSize,
   isVideoFile,
   type LearningItem,
 } from './types'
+import { VideoWatermark } from './VideoWatermark'
 
 interface LessonPlayerProps {
   item: LearningItem
@@ -78,22 +78,30 @@ function VideoPlayer({ lesson, onVideoEnded }: { lesson: Lesson; onVideoEnded?: 
             allowFullScreen
           />
         ) : activeVideoUrl ? (
-          <video
-            key={activeVideoUrl}
-            src={activeVideoUrl}
-            controls
-            playsInline
-            preload="metadata"
-            className="h-full w-full object-contain"
-            onEnded={onVideoEnded}
-            onError={() => {
-              if (!streamFailed && streamUrl && activeVideoUrl === streamUrl) {
-                setStreamFailed(true)
-              }
-            }}
-          >
-            Trình duyệt của bạn không hỗ trợ phát video HTML5.
-          </video>
+          <>
+            <video
+              key={activeVideoUrl}
+              src={activeVideoUrl}
+              controls
+              // Anti-download: hide native download button, block right-click save
+              controlsList="nodownload noremoteplayback noplaybackrate"
+              disablePictureInPicture
+              playsInline
+              preload="metadata"
+              className="h-full w-full object-contain"
+              onEnded={onVideoEnded}
+              onContextMenu={(e) => e.preventDefault()}
+              onError={() => {
+                if (!streamFailed && streamUrl && activeVideoUrl === streamUrl) {
+                  setStreamFailed(true)
+                }
+              }}
+            >
+              Trình duyệt của bạn không hỗ trợ phát video HTML5.
+            </video>
+            {/* Learner-specific watermark — deters screen-record redistribution */}
+            <VideoWatermark />
+          </>
         ) : (
           <EmptyState
             compact
@@ -104,7 +112,7 @@ function VideoPlayer({ lesson, onVideoEnded }: { lesson: Lesson; onVideoEnded?: 
         )}
       </div>
 
-      {/* Video metadata bar */}
+      {/* Video metadata bar (download link removed — stream-only viewing) */}
       <div className="flex items-center justify-between bg-card/90 px-4 py-2 text-xs text-muted-foreground border-t border-border">
         <div className="flex items-center gap-2 min-w-0">
           <Video className="h-3.5 w-3.5 text-primary shrink-0" />
@@ -117,17 +125,10 @@ function VideoPlayer({ lesson, onVideoEnded }: { lesson: Lesson; onVideoEnded?: 
           )}
         </div>
 
-        {videoAttachment && (
-          <a
-            href={videoAttachment.file_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 font-semibold text-primary hover:underline shrink-0 text-[11px]"
-          >
-            <Download className="h-3 w-3" />
-            Tải video {videoAttachment.file_size ? `(${formatFileSize(videoAttachment.file_size)})` : ''}
-          </a>
-        )}
+        <span className="flex items-center gap-1 text-[11px] text-muted-foreground shrink-0">
+          <ShieldCheck className="h-3 w-3 text-success" />
+          Chỉ xem trực tiếp
+        </span>
       </div>
     </Card>
   )
@@ -136,19 +137,27 @@ function VideoPlayer({ lesson, onVideoEnded }: { lesson: Lesson; onVideoEnded?: 
 function MaterialPlayer({ material, onVideoEnded }: { material: CourseMaterial; onVideoEnded?: () => void }) {
   return (
     <Card padding="none" className="overflow-hidden border border-border/80 shadow-sm">
-      <div className="flex aspect-video items-center justify-center bg-muted/40">
+      <div className="flex aspect-video items-center justify-center bg-muted/40 relative overflow-hidden">
         {material.material_type === 'video' && material.file_url ? (
-          <video
-            src={material.file_url}
-            controls
-            className="h-full w-full object-contain bg-black"
-            onEnded={onVideoEnded}
-          />
+          <>
+            <video
+              src={material.file_url}
+              controls
+              controlsList="nodownload noremoteplayback noplaybackrate"
+              disablePictureInPicture
+              playsInline
+              onContextMenu={(e) => e.preventDefault()}
+              className="h-full w-full object-contain bg-black"
+              onEnded={onVideoEnded}
+            />
+            <VideoWatermark />
+          </>
         ) : material.material_type === 'image' && material.file_url ? (
           <img
             src={material.file_url}
             alt={material.title ?? undefined}
-            className="max-h-full max-w-full object-contain"
+            className="max-h-full max-w-full object-contain select-none pointer-events-none"
+            onContextMenu={(e) => e.preventDefault()}
           />
         ) : material.material_type === 'url' && material.external_url ? (
           <iframe
@@ -156,6 +165,7 @@ function MaterialPlayer({ material, onVideoEnded }: { material: CourseMaterial; 
             className="h-full w-full"
             title={material.title ?? undefined}
             sandbox="allow-forms allow-modals allow-popups allow-presentation allow-scripts"
+            onContextMenu={(e) => e.preventDefault()}
           />
         ) : material.file_url ? (
           <iframe
@@ -163,12 +173,13 @@ function MaterialPlayer({ material, onVideoEnded }: { material: CourseMaterial; 
             className="h-full w-full"
             title={material.title ?? undefined}
             sandbox="allow-forms allow-modals allow-popups allow-presentation allow-scripts"
+            onContextMenu={(e) => e.preventDefault()}
           />
         ) : (
           <EmptyState
             compact
             title="Không thể xem trước"
-            description="Vui lòng tải hoặc mở học liệu bằng liên kết bên dưới."
+            description="Học liệu chưa sẵn sàng để hiển thị trực tiếp."
           />
         )}
       </div>
@@ -176,14 +187,9 @@ function MaterialPlayer({ material, onVideoEnded }: { material: CourseMaterial; 
       {(material.external_url || material.file_url) && (
         <div className="border-t border-border px-4 py-2.5 flex justify-between items-center bg-card text-xs text-muted-foreground">
           <span className="truncate">{material.file_name || material.title}</span>
-          <a
-            href={material.external_url || material.file_url || '#'}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="shrink-0 flex items-center gap-1 text-primary font-medium hover:underline"
-          >
-            <Download className="h-3 w-3" /> Mở trong tab mới
-          </a>
+          <span className="shrink-0 flex items-center gap-1 text-[11px] text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5 text-success" /> Chỉ xem trực tiếp
+          </span>
         </div>
       )}
     </Card>

@@ -4,7 +4,7 @@ import {
   BrainCircuit,
   ChevronDown,
   ChevronUp,
-  Download,
+  Eye,
   FileCheck,
   FileText,
   Headphones,
@@ -25,6 +25,7 @@ import { DiscussionPanel } from '../DiscussionPanel'
 import { LessonAudioPlayer } from '../LessonAudioPlayer'
 import { LessonMindmapView } from '../LessonMindmapView'
 import { NotesPanel } from './NotesPanel'
+import { SecureDocumentViewer } from './SecureDocumentViewer'
 import {
   formatFileSize,
   isVideoFile,
@@ -174,6 +175,7 @@ function OverviewTabContent({
   highestSubmissionScore: number | null
 }) {
   const [audioExpanded, setAudioExpanded] = useState(false)
+  const [viewingDoc, setViewingDoc] = useState<{ url: string; name: string } | null>(null)
 
   if (!lesson && currentItem.kind === 'material') {
     return (
@@ -275,20 +277,29 @@ function OverviewTabContent({
                     {att.file_size ? formatFileSize(att.file_size) : 'Tài liệu học tập'}
                   </p>
                 </div>
-                <a
-                  href={att.file_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="shrink-0"
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs shrink-0"
+                  icon={<Eye className="h-3 w-3" />}
+                  onClick={() => setViewingDoc({ url: att.file_url, name: att.file_name })}
                 >
-                  <Button size="sm" variant="outline" className="h-7 text-xs" icon={<Download className="h-3 w-3" />}>
-                    Tải về
-                  </Button>
-                </a>
+                  Xem trực tiếp
+                </Button>
               </div>
             ))}
           </div>
         </Card>
+      )}
+
+      {/* In-app secure document viewer modal */}
+      {viewingDoc && (
+        <SecureDocumentViewer
+          open={Boolean(viewingDoc)}
+          fileUrl={viewingDoc.url}
+          fileName={viewingDoc.name}
+          onClose={() => setViewingDoc(null)}
+        />
       )}
 
       {/* Quiz Card */}
