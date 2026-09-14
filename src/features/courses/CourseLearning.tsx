@@ -413,7 +413,7 @@ export function CourseLearning() {
     : false
 
   const hasCurrentVideo = currentItem?.kind === 'lesson'
-    ? Boolean(currentItem.lesson.video_url) || (currentItem.lesson.attachments || []).some((a) => isVideoFile(a.file_name, a.file_type))
+    ? Boolean((currentLesson || currentItem.lesson).video_url) || ((currentLesson || currentItem.lesson).attachments || []).some((a) => isVideoFile(a.file_name, a.file_type))
     : currentItem?.material.material_type === 'video'
 
   const completedMaterialsSet = new Set(
@@ -511,7 +511,7 @@ export function CourseLearning() {
 
                 {/* Primary Player (Kept mounted above tabs so tab switching never pauses video) */}
                 <LessonPlayer
-                  item={currentItem}
+                  item={currentItem.kind === 'lesson' && currentLesson ? { ...currentItem, lesson: currentLesson } : currentItem}
                   onVideoEnded={() => {
                     if (!isCurrentCompleted) markCurrentComplete()
                   }}
