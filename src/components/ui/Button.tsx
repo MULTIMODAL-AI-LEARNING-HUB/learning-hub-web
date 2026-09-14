@@ -85,7 +85,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ) : icon ? (
           <span className="shrink-0 [&>svg]:h-4 [&>svg]:w-4">{icon}</span>
         ) : null}
-        {children && <span className="truncate">{children}</span>}
+        {children && <span className="inline-flex items-center truncate">{children}</span>}
         {iconRight && !loading && (
           <span className="shrink-0 [&>svg]:h-4 [&>svg]:w-4">{iconRight}</span>
         )}

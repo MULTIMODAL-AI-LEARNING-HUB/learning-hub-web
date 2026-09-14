@@ -84,12 +84,11 @@ export function CurriculumSidebar({
           <Button
             variant="ghost"
             size="sm"
+            icon={<X className="h-4 w-4" />}
             className="h-8 w-8 rounded-lg p-0 text-muted-foreground hover:text-foreground hover:bg-muted/80"
             onClick={onClose}
             title="Đóng giáo trình"
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          />
         </div>
 
         {/* Micro progress meter */}

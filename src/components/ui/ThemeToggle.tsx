@@ -2,7 +2,7 @@ import { useTheme } from './useTheme'
 import { Button } from './Button'
 import { Monitor, Moon, Sun } from 'lucide-react'
 
-export function ThemeToggle() {
+export function ThemeToggle({ className = '' }: { className?: string }) {
   const { theme, setTheme } = useTheme()
 
   const cycle = () => {
@@ -22,7 +22,7 @@ export function ThemeToggle() {
       icon={<Icon className="h-4 w-4" />}
       title={`Theme: ${label}`}
       aria-label={`Theme: ${label}`}
-      className="text-muted-foreground hover:text-foreground"
+      className={`text-muted-foreground hover:text-foreground w-auto ${className}`}
     >
       <span className="sr-only">Toggle theme</span>
     </Button>

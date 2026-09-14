@@ -74,8 +74,8 @@ export function LessonContextTabs({
 
   return (
     <div className="space-y-5">
-      {/* Tab Navigation — floating segmented control */}
-      <div className="sticky top-16 z-10 rounded-2xl bg-surface-elevated/80 backdrop-blur-xl ring-1 ring-border/60 shadow-[0_2px_16px_rgba(0,0,0,0.05)] px-2 py-1.5 flex items-center gap-1 overflow-x-auto scrollbar-none">
+      {/* Tab Navigation — inline segmented control (not sticky, so it never overlaps content below) */}
+      <div className="relative z-0 rounded-2xl bg-surface-elevated/90 backdrop-blur-xl ring-1 ring-border/60 shadow-[0_2px_16px_rgba(0,0,0,0.05)] px-2 py-1.5 flex items-center gap-1 overflow-x-auto scrollbar-none">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id
           return (

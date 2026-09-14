@@ -57,11 +57,10 @@ export function FocusTopBar({
           <Button
             variant="ghost"
             size="sm"
+            icon={<ArrowLeft className="h-4 w-4" />}
             className="h-9 w-9 rounded-xl p-0 text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-all"
             title="Quay lại thông tin khóa học"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
+          />
         </Link>
 
         <div className="min-w-0 flex-1 flex items-center gap-1.5">
@@ -111,59 +110,56 @@ export function FocusTopBar({
       </div>
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-1.5 shrink-0">
+      <div className="flex items-center gap-1.5 shrink-0 flex-nowrap">
         <Button
           variant={chatOpen ? 'primary' : 'outline'}
           size="sm"
           onClick={onToggleChat}
+          icon={<MessageCircle className="h-3.5 w-3.5" />}
           className={cn(
-            'h-9 px-3 rounded-xl text-xs font-semibold transition-all',
+            'h-9 px-3 rounded-xl text-xs font-semibold transition-all whitespace-nowrap shrink-0',
             chatOpen
               ? 'shadow-[0_4px_14px_rgba(79,70,229,0.35)]'
               : 'hover:border-primary/40 hover:text-primary'
           )}
           title="Mở phòng chat khóa học"
         >
-          <MessageCircle className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline ml-1.5">Phòng chat</span>
+          <span className="hidden sm:inline">Phòng chat</span>
         </Button>
 
         {/* AI Tutor — Copilot gradient highlight */}
         <Button
           size="sm"
           onClick={onToggleAi}
+          icon={aiOpen ? <Bot className="h-3.5 w-3.5" /> : <Sparkles className="h-3.5 w-3.5" />}
           className={cn(
-            'h-9 px-3 rounded-xl text-xs font-bold transition-all border-0',
+            'h-9 px-3 rounded-xl text-xs font-bold transition-all border-0 whitespace-nowrap shrink-0',
             aiOpen
               ? 'bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] text-white shadow-[0_4px_18px_rgba(124,58,237,0.45)]'
               : 'bg-gradient-to-r from-primary/10 to-accent/10 text-primary ring-1 ring-primary/25 hover:ring-primary/50 hover:shadow-[0_2px_12px_rgba(124,58,237,0.25)]'
           )}
           title="Trợ lý AI ôn tập & giải đáp"
         >
-          {aiOpen ? <Bot className="h-3.5 w-3.5" /> : <Sparkles className="h-3.5 w-3.5" />}
-          <span className="hidden sm:inline ml-1.5">Hỏi AI</span>
+          <span className="hidden sm:inline">Hỏi AI</span>
         </Button>
 
-        <ThemeToggle />
+        <ThemeToggle className="h-9 w-9 rounded-xl shrink-0" />
 
         <Button
           variant={curriculumOpen ? 'secondary' : 'outline'}
           size="sm"
           onClick={onToggleCurriculum}
-          className="h-9 px-3 rounded-xl text-xs font-semibold transition-all hover:border-primary/40"
+          icon={
+            curriculumOpen ? (
+              <PanelRightClose className="h-3.5 w-3.5" />
+            ) : (
+              <PanelRightOpen className="h-3.5 w-3.5" />
+            )
+          }
+          className="h-9 px-3 rounded-xl text-xs font-semibold transition-all hover:border-primary/40 whitespace-nowrap shrink-0"
           title={curriculumOpen ? 'Thu gọn danh sách bài học' : 'Mở danh sách bài học'}
         >
-          {curriculumOpen ? (
-            <>
-              <PanelRightClose className="h-3.5 w-3.5" />
-              <span className="hidden xl:inline ml-1.5">Thu gọn</span>
-            </>
-          ) : (
-            <>
-              <PanelRightOpen className="h-3.5 w-3.5" />
-              <span className="hidden xl:inline ml-1.5">Giáo trình</span>
-            </>
-          )}
+          <span className="hidden xl:inline">{curriculumOpen ? 'Thu gọn' : 'Giáo trình'}</span>
         </Button>
       </div>
     </header>
