@@ -657,13 +657,13 @@ export function CourseLearning() {
               {/* TAB 2: DISCUSSION (Lesson-specific + Course Chat) */}
               {activeWorkspaceTab === 'discussion' && (
                 <div className="space-y-5">
-                  {currentItem.kind === 'lesson' ? (
+                  {currentItem && currentItem.kind === 'lesson' && currentItem.id ? (
                     <Card padding="responsive">
                       <div className="mb-4 border-b border-border pb-3">
                         <h3 className="font-semibold text-foreground">Thảo luận về bài học này</h3>
                         <p className="text-xs text-muted-foreground">{currentItem.title}</p>
                       </div>
-                      <DiscussionPanel lessonId={currentItem.id} />
+                      <DiscussionPanel key={currentItem.id} lessonId={currentItem.id} />
                     </Card>
                   ) : null}
 
@@ -672,7 +672,7 @@ export function CourseLearning() {
                       <h3 className="text-sm font-semibold text-foreground">Phòng chat toàn khóa học</h3>
                       <p className="text-xs text-muted-foreground">Trò chuyện cùng tất cả học viên và giảng viên</p>
                     </div>
-                    <CourseChatPanel courseId={course.id} />
+                    {course?.id ? <CourseChatPanel courseId={course.id} /> : null}
                   </div>
                 </div>
               )}

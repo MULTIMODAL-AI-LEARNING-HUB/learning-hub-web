@@ -907,17 +907,31 @@ export const assignmentsApi = {
 
 export const discussionsApi = {
   list: (lessonId: string, page = 1, pageSize = 20) =>
-    api.get<{ items: Discussion[]; total: number }>(`/lessons/${lessonId}/discussions`, {
+    api.get<Discussion[] | { items: Discussion[]; total: number }>(`/lessons/${lessonId}/discussions`, {
       params: { page, page_size: pageSize },
     }),
   create: (lessonId: string, data: { content: string; parent_id?: string }) =>
     api.post<Discussion>(`/lessons/${lessonId}/discussions`, data),
-  update: (discussionId: string, data: { content: string }) =>
-    api.put<Discussion>(`/discussions/${discussionId}`, data),
-  delete: (discussionId: string) => api.delete(`/discussions/${discussionId}`),
-  upvote: (discussionId: string) => api.post<{ upvotes: number }>(`/discussions/${discussionId}/upvote`),
-  pin: (discussionId: string) => api.post<Discussion>(`/discussions/${discussionId}/pin`, {}),
-  markAsAnswer: (discussionId: string) => api.post<Discussion>(`/discussions/${discussionId}/mark-answer`, {}),
+  update: (discussionId: string, data: { content: string }, lessonId?: string) =>
+    lessonId
+      ? api.put<Discussion>(`/lessons/${lessonId}/discussions/posts/${discussionId}`, data)
+      : api.put<Discussion>(`/discussions/${discussionId}`, data),
+  delete: (discussionId: string, lessonId?: string) =>
+    lessonId
+      ? api.delete(`/lessons/${lessonId}/discussions/posts/${discussionId}`)
+      : api.delete(`/discussions/${discussionId}`),
+  upvote: (discussionId: string, lessonId?: string) =>
+    lessonId
+      ? api.post<Discussion | { upvotes: number }>(`/lessons/${lessonId}/discussions/posts/${discussionId}/upvote`)
+      : api.post<{ upvotes: number }>(`/discussions/${discussionId}/upvote`),
+  pin: (discussionId: string, lessonId?: string) =>
+    lessonId
+      ? api.post<Discussion>(`/lessons/${lessonId}/discussions/posts/${discussionId}/pin`, {})
+      : api.post<Discussion>(`/discussions/${discussionId}/pin`, {}),
+  markAsAnswer: (discussionId: string, lessonId?: string) =>
+    lessonId
+      ? api.post<Discussion>(`/lessons/${lessonId}/discussions/posts/${discussionId}/mark-answer`, {})
+      : api.post<Discussion>(`/discussions/${discussionId}/mark-answer`, {}),
   listByCourse: (courseId: string) =>
     api.get<CourseDiscussionItem[]>(`/courses/${courseId}/discussions`),
   markAnswer: (lessonId: string, postId: string) =>

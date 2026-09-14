@@ -11,7 +11,7 @@ interface Props {
 
 export function DiscussionPanel({ lessonId }: Props) {
   const {
-    discussions, loading, fetchDiscussions,
+    discussions = [], loading, fetchDiscussions,
     createDiscussion, upvote,
   } = useDiscussions(lessonId)
   const [newContent, setNewContent] = useState('')
@@ -19,6 +19,8 @@ export function DiscussionPanel({ lessonId }: Props) {
   const [replyContent, setReplyContent] = useState('')
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
+
+  const safeDiscussions = Array.isArray(discussions) ? discussions : []
 
   useEffect(() => { fetchDiscussions() }, [fetchDiscussions])
 
@@ -55,7 +57,7 @@ export function DiscussionPanel({ lessonId }: Props) {
     })
   }
 
-  if (loading && discussions.length === 0) {
+  if (loading && safeDiscussions.length === 0) {
     return (
       <div className="space-y-3">
         <Skeleton className="h-6 w-32" />
@@ -86,13 +88,14 @@ export function DiscussionPanel({ lessonId }: Props) {
         </div>
       </div>
 
-      {discussions.length === 0 ? (
+      {safeDiscussions.length === 0 ? (
         <p className="text-sm text-muted-foreground">Chưa có thảo luận nào. Hãy là người đầu tiên đặt câu hỏi!</p>
       ) : (
         <div className="space-y-3">
-          {discussions.map((discussion) => {
-            const hasReplies = discussion.replies && discussion.replies.length > 0
+          {safeDiscussions.map((discussion) => {
+            const hasReplies = Array.isArray(discussion?.replies) && discussion.replies.length > 0
             const repliesExpanded = expandedReplies.has(discussion.id)
+            const repliesCount = Array.isArray(discussion?.replies) ? discussion.replies.length : (discussion?.reply_count ?? 0)
 
             return (
               <Card key={discussion.id} className="p-4">
@@ -104,7 +107,7 @@ export function DiscussionPanel({ lessonId }: Props) {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-medium text-foreground">{discussion.user_name || 'Học viên ẩn danh'}</span>
                       {discussion.is_pinned && <span className="text-xs text-warning font-medium">Đã ghim</span>}
-                      <span className="text-xs text-muted-foreground">{new Date(discussion.created_at).toLocaleDateString('vi-VN')}</span>
+                      <span className="text-xs text-muted-foreground">{discussion.created_at ? new Date(discussion.created_at).toLocaleDateString('vi-VN') : ''}</span>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">{discussion.content}</p>
                     <div className="flex items-center gap-3 mt-2">
@@ -113,7 +116,7 @@ export function DiscussionPanel({ lessonId }: Props) {
                         className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition"
                       >
                         <ThumbsUp className="h-3 w-3" />
-                        {discussion.upvotes}
+                        {discussion.upvotes ?? 0}
                       </button>
                       <button
                         onClick={() => setReplyTo(replyTo === discussion.id ? null : discussion.id)}
@@ -127,7 +130,7 @@ export function DiscussionPanel({ lessonId }: Props) {
                           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition"
                         >
                           {repliesExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                          {discussion.replies.length} phản hồi
+                          {repliesCount} phản hồi
                         </button>
                       )}
                     </div>
@@ -151,7 +154,7 @@ export function DiscussionPanel({ lessonId }: Props) {
 
                     {hasReplies && repliesExpanded && (
                       <div className="mt-3 space-y-2 pl-4 border-l-2 border-border">
-                        {discussion.replies.map((reply) => (
+                        {(discussion.replies ?? []).map((reply) => (
                           <div key={reply.id} className="flex items-start gap-2">
                             <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs">
                               {reply.user_name?.[0] || '?'}
@@ -159,7 +162,7 @@ export function DiscussionPanel({ lessonId }: Props) {
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
                                 <span className="text-xs font-medium text-foreground">{reply.user_name || 'Học viên ẩn danh'}</span>
-                                <span className="text-2xs text-muted-foreground">{new Date(reply.created_at).toLocaleDateString('vi-VN')}</span>
+                                <span className="text-2xs text-muted-foreground">{reply.created_at ? new Date(reply.created_at).toLocaleDateString('vi-VN') : ''}</span>
                               </div>
                               <p className="text-xs text-muted-foreground">{reply.content}</p>
                             </div>

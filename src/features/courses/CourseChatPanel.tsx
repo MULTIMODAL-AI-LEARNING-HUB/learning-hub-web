@@ -41,7 +41,13 @@ export function CourseChatPanel({ courseId, compact = false }: CourseChatPanelPr
     if (!silent) setLoading(true)
     try {
       const res = await courseChatApi.listMessages(courseId)
-      setMessages(res.data.items)
+      const data = res.data as { items?: CourseChatMessage[] } | CourseChatMessage[]
+      const items: CourseChatMessage[] = Array.isArray((data as { items?: CourseChatMessage[] })?.items)
+        ? (data as { items: CourseChatMessage[] }).items
+        : Array.isArray(data)
+        ? (data as CourseChatMessage[])
+        : []
+      setMessages(items)
       setError(null)
     } catch {
       setError('Không thể tải tin nhắn trò chuyện.')
