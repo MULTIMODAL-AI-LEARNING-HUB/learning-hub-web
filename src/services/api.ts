@@ -184,19 +184,22 @@ export interface ChatSession {
   updated_at: string
 }
 
-export interface ChatMessage {
-  id: string
-  role: string
-  content: string
-  citations: Array<{ document_id: string; chunk_id: string; page_number: number | null; text: string }> | null
-  created_at: string
-}
-
 export interface Citation {
   document_id: string
   chunk_id: string
   page_number: number | null
   text: string
+  course_id?: string
+  lesson_id?: string
+  material_id?: string
+}
+
+export interface ChatMessage {
+  id: string
+  role: string
+  content: string
+  citations: Citation[] | null
+  created_at: string
 }
 
 export interface ChatAskResponse {
@@ -1048,10 +1051,10 @@ export const chatApi = {
       params: { page, page_size: pageSize },
     }),
   deleteSession: (id: string) => api.delete(`/chat/sessions/${id}`),
-  ask: (data: { session_id: string; query: string; course_id?: string; lesson_id?: string; document_ids?: string[]; tutor_mode?: string }) =>
+  ask: (data: { session_id: string; query: string; course_id?: string; lesson_id?: string; document_ids?: string[]; tutor_mode?: string; course_title?: string; strict_course?: boolean }) =>
     api.post<ChatAskResponse>('/chat/ask', data),
   askStream: async (
-    data: { session_id: string; query: string; course_id?: string; lesson_id?: string; document_ids?: string[]; tutor_mode?: string },
+    data: { session_id: string; query: string; course_id?: string; lesson_id?: string; document_ids?: string[]; tutor_mode?: string; course_title?: string; strict_course?: boolean },
     onToken: (text: string) => void,
     onMeta?: (meta: { intent?: string; citations?: Citation[] }) => void,
     signal?: AbortSignal,

@@ -8,6 +8,7 @@ import { PaymentReturn } from '../pages/PaymentReturn'
 import { MockPaymentGateway } from '../pages/MockPaymentGateway'
 import { QuizTaking } from '../pages/QuizTaking'
 import { StudentLayout } from '../layouts/StudentLayout'
+import { CourseFocusLayout } from '../layouts/CourseFocusLayout'
 import { LecturerLayout } from '../layouts/LecturerLayout'
 import { AdminLayout } from '../layouts/AdminLayout'
 import { StudentDashboard } from '../features/student/StudentDashboard'
@@ -54,6 +55,19 @@ export const router = createBrowserRouter([
   { path: '/quiz/:id', element: <QuizTaking /> },
   { path: '/unauthorized', element: <PlaceholderPage title="Unauthorized" /> },
 
+  // Dedicated distraction-free learning view (no sidebars/chrome)
+  {
+    path: '/app/student/courses/:id/learn',
+    element: (
+      <RoleRoute allowedRoles={['student']}>
+        <CourseFocusLayout />
+      </RoleRoute>
+    ),
+    children: [
+      { index: true, element: <CourseLearning /> }
+    ]
+  },
+
   {
     path: '/app/student',
     element: (
@@ -66,7 +80,6 @@ export const router = createBrowserRouter([
       { path: 'dashboard', element: <StudentDashboard /> },
       { path: 'courses', element: <StudentCourses /> },
       { path: 'courses/:id', element: <StudentCourseDetail /> },
-      { path: 'courses/:id/learn', element: <CourseLearning /> },
       { path: 'browse', element: <CourseCatalog /> },
       { path: 'wishlist', element: <StudentWishlist /> },
       { path: 'friends-chat', element: <StudentSocialChat /> },
