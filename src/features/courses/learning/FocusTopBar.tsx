@@ -3,11 +3,13 @@ import {
   ArrowLeft,
   BookOpen,
   Bot,
+  ChevronRight,
+  FileText,
   MessageCircle,
   PanelRightClose,
   PanelRightOpen,
+  Sparkles,
   Video,
-  FileText,
 } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { Progress } from '../../../components/ui/Progress'
@@ -48,33 +50,33 @@ export function FocusTopBar({
   onToggleAi,
 }: FocusTopBarProps) {
   return (
-    <header className="h-14 shrink-0 border-b border-border bg-surface-elevated/90 backdrop-blur-md px-3 sm:px-4 flex items-center justify-between gap-3 z-20">
-      {/* Left section: Back + Course & Lesson Titles */}
-      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+    <header className="sticky top-0 h-16 shrink-0 border-b border-border/60 bg-surface-elevated/80 backdrop-blur-xl px-3 sm:px-5 flex items-center justify-between gap-3 z-30 shadow-[0_1px_12px_rgba(0,0,0,0.04)]">
+      {/* Left: Back + Breadcrumb */}
+      <div className="flex items-center gap-2 min-w-0 flex-1">
         <Link to={`/app/student/courses/${courseId}`}>
           <Button
             variant="ghost"
             size="sm"
-            className="h-8.5 px-2 text-muted-foreground hover:text-foreground"
+            className="h-9 w-9 rounded-xl p-0 text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-all"
             title="Quay lại thông tin khóa học"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span className="hidden sm:inline ml-1 text-xs font-medium">Khóa học</span>
           </Button>
         </Link>
 
-        <div className="h-4 w-[1px] bg-border shrink-0 hidden sm:block" />
-
-        <div className="min-w-0 flex-1 flex items-center gap-2">
-          <span className="text-xs font-bold text-foreground truncate max-w-[200px] md:max-w-[320px] hidden md:inline" title={courseTitle}>
+        <div className="min-w-0 flex-1 flex items-center gap-1.5">
+          <span
+            className="text-[13px] font-semibold text-muted-foreground truncate max-w-[180px] md:max-w-[260px] hidden md:inline hover:text-foreground transition-colors cursor-default"
+            title={courseTitle}
+          >
             {courseTitle}
           </span>
 
           {currentLessonTitle && (
             <>
-              <span className="text-muted-foreground text-xs hidden md:inline">/</span>
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-md shrink-0">
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0 hidden md:inline" />
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary bg-gradient-to-r from-primary/15 to-accent/15 ring-1 ring-primary/20 px-2.5 py-1 rounded-full shrink-0">
                   {currentLessonKind === 'material' ? (
                     <BookOpen className="h-3 w-3" />
                   ) : hasVideo ? (
@@ -82,11 +84,9 @@ export function FocusTopBar({
                   ) : (
                     <FileText className="h-3 w-3" />
                   )}
-                  <span className="hidden sm:inline">
-                    {currentLessonKind === 'material' ? 'Học liệu' : hasVideo ? 'Video' : 'Bài đọc'}
-                  </span>
+                  {currentLessonKind === 'material' ? 'Học liệu' : hasVideo ? 'Video' : 'Bài đọc'}
                 </span>
-                <span className="text-xs font-medium text-foreground truncate" title={currentLessonTitle}>
+                <span className="text-[13px] font-bold text-foreground truncate" title={currentLessonTitle}>
                   {currentLessonTitle}
                 </span>
               </div>
@@ -95,54 +95,62 @@ export function FocusTopBar({
         </div>
       </div>
 
-      {/* Center/Right section: Progress Indicator */}
-      <div className="hidden lg:flex items-center gap-3 w-48 shrink-0 px-2">
-        <div className="flex-1">
-          <div className="flex items-center justify-between text-[11px] mb-1">
-            <span className="text-muted-foreground">Tiến độ</span>
-            <span className="font-bold text-primary tabular-nums">{overallProgress}%</span>
+      {/* Center: Progress pill */}
+      <div className="hidden lg:flex items-center gap-3 shrink-0 rounded-2xl bg-muted/40 ring-1 ring-border/60 px-4 py-1.5">
+        <div className="flex items-center gap-2.5">
+          <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Tiến độ</span>
+          <div className="w-28">
+            <Progress value={overallProgress} size="sm" className="h-1.5" />
           </div>
-          <Progress value={overallProgress} size="sm" />
+          <span className="text-xs font-extrabold text-primary tabular-nums">{overallProgress}%</span>
         </div>
-        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-          {completedCount}/{totalCount}
+        <span className="h-4 w-px bg-border" />
+        <span className="text-[11px] font-medium text-muted-foreground tabular-nums whitespace-nowrap">
+          {completedCount}/{totalCount} bài
         </span>
       </div>
 
-      {/* Right action controls */}
+      {/* Right: Actions */}
       <div className="flex items-center gap-1.5 shrink-0">
-        {/* Toggle Course Chat */}
         <Button
           variant={chatOpen ? 'primary' : 'outline'}
           size="sm"
           onClick={onToggleChat}
-          className={cn('h-8 px-2.5 text-xs', chatOpen ? 'shadow-xs' : '')}
+          className={cn(
+            'h-9 px-3 rounded-xl text-xs font-semibold transition-all',
+            chatOpen
+              ? 'shadow-[0_4px_14px_rgba(79,70,229,0.35)]'
+              : 'hover:border-primary/40 hover:text-primary'
+          )}
           title="Mở phòng chat khóa học"
         >
           <MessageCircle className="h-3.5 w-3.5" />
           <span className="hidden sm:inline ml-1.5">Phòng chat</span>
         </Button>
 
-        {/* Toggle AI Tutor */}
+        {/* AI Tutor — Copilot gradient highlight */}
         <Button
-          variant={aiOpen ? 'primary' : 'outline'}
           size="sm"
           onClick={onToggleAi}
-          className={cn('h-8 px-2.5 text-xs', aiOpen ? 'shadow-xs' : '')}
+          className={cn(
+            'h-9 px-3 rounded-xl text-xs font-bold transition-all border-0',
+            aiOpen
+              ? 'bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] text-white shadow-[0_4px_18px_rgba(124,58,237,0.45)]'
+              : 'bg-gradient-to-r from-primary/10 to-accent/10 text-primary ring-1 ring-primary/25 hover:ring-primary/50 hover:shadow-[0_2px_12px_rgba(124,58,237,0.25)]'
+          )}
           title="Trợ lý AI ôn tập & giải đáp"
         >
-          <Bot className="h-3.5 w-3.5" />
+          {aiOpen ? <Bot className="h-3.5 w-3.5" /> : <Sparkles className="h-3.5 w-3.5" />}
           <span className="hidden sm:inline ml-1.5">Hỏi AI</span>
         </Button>
 
         <ThemeToggle />
 
-        {/* Toggle Curriculum Sidebar */}
         <Button
           variant={curriculumOpen ? 'secondary' : 'outline'}
           size="sm"
           onClick={onToggleCurriculum}
-          className="h-8 px-2.5 text-xs"
+          className="h-9 px-3 rounded-xl text-xs font-semibold transition-all hover:border-primary/40"
           title={curriculumOpen ? 'Thu gọn danh sách bài học' : 'Mở danh sách bài học'}
         >
           {curriculumOpen ? (

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {
+  BookOpen,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
@@ -12,6 +13,7 @@ import {
 } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { EmptyState } from '../../../components/ui/EmptyState'
+import { Progress } from '../../../components/ui/Progress'
 import { cn } from '../../../utils/cn'
 import {
   isVideoFile,
@@ -52,29 +54,56 @@ export function CurriculumSidebar({
     })
   }
 
+  const totalItemsCount = sections.reduce((acc, s) => acc + s.items.length, 0)
+  const totalCompletedCount = sections.reduce(
+    (acc, s) =>
+      acc +
+      s.items.filter((item) =>
+        item.kind === 'lesson' ? completedLessons.has(item.id) : completedMaterials.has(item.id)
+      ).length,
+    0
+  )
+  const percentComplete = totalItemsCount > 0 ? Math.round((totalCompletedCount / totalItemsCount) * 100) : 0
+
   const content = (
     <div className="flex flex-col h-full bg-card">
       {/* Sidebar Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/20 shrink-0">
-        <div>
-          <h2 className="text-sm font-bold text-foreground">Nội dung khóa học</h2>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            {sections.reduce((acc, s) => acc + s.items.length, 0)} bài học & tài liệu
-          </p>
+      <div className="p-4 border-b border-border/60 bg-surface-elevated/80 backdrop-blur-md shrink-0 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <BookOpen className="h-4 w-4" />
+            </span>
+            <div>
+              <h2 className="text-sm font-bold text-foreground">Giáo trình khóa học</h2>
+              <p className="text-[11px] text-muted-foreground">
+                {totalCompletedCount}/{totalItemsCount} hoàn thành
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 rounded-lg p-0 text-muted-foreground hover:text-foreground hover:bg-muted/80"
+            onClick={onClose}
+            title="Đóng giáo trình"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-          onClick={onClose}
-          title="Đóng giáo trình"
-        >
-          <X className="h-4 w-4" />
-        </Button>
+
+        {/* Micro progress meter */}
+        <div className="space-y-1">
+          <div className="flex justify-between text-[11px] font-semibold">
+            <span className="text-muted-foreground">Tiến độ tổng quan</span>
+            <span className="text-primary tabular-nums font-bold">{percentComplete}%</span>
+          </div>
+          <Progress value={percentComplete} size="sm" className="h-1.5" />
+        </div>
       </div>
 
       {/* Sections List */}
-      <div className="flex-1 overflow-y-auto divide-y divide-border/60 scrollbar-thin">
+      <div className="flex-1 overflow-y-auto divide-y divide-border/40 scrollbar-thin">
         {sections.length === 0 ? (
           <div className="p-6">
             <EmptyState
@@ -91,26 +120,37 @@ export function CurriculumSidebar({
                 ? completedLessons.has(item.id)
                 : completedMaterials.has(item.id)
             ).length
+            const isSectionDone = completedCount === section.items.length && section.items.length > 0
 
             return (
-              <div key={section.id} className="bg-card">
+              <div key={section.id} className="bg-card transition-colors">
                 {/* Section Header Accordion */}
                 <button
                   onClick={() => toggleSection(section.id)}
-                  className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-muted/40 transition-colors"
+                  className="w-full flex items-center justify-between p-3.5 sm:px-4 text-left hover:bg-muted/40 transition-colors"
                 >
-                  <div className="min-w-0 pr-2">
-                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                      Chương {sIndex + 1}
-                    </p>
-                    <p className="text-xs font-bold text-foreground line-clamp-1 mt-0.5">
+                  <div className="min-w-0 pr-2 space-y-0.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground">
+                        Chương {sIndex + 1}
+                      </span>
+                      {isSectionDone && (
+                        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-success bg-success/15 px-1.5 py-0.2 rounded-full">
+                          <CheckCircle2 className="h-2.5 w-2.5" /> Xong
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[13px] font-bold text-foreground line-clamp-1">
                       {section.title}
                     </p>
-                    <span className="text-[10px] text-muted-foreground tabular-nums">
-                      {completedCount}/{section.items.length} hoàn thành
-                    </span>
+                    <p className="text-[11px] text-muted-foreground tabular-nums">
+                      {completedCount}/{section.items.length} bài đã hoàn thành
+                    </p>
                   </div>
-                  <div className="shrink-0 text-muted-foreground">
+                  <div className={cn(
+                    'shrink-0 flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-all',
+                    isCollapsed ? 'bg-transparent' : 'bg-muted/60'
+                  )}>
                     {isCollapsed ? (
                       <ChevronDown className="h-4 w-4" />
                     ) : (
@@ -121,7 +161,7 @@ export function CurriculumSidebar({
 
                 {/* Lesson Items */}
                 {!isCollapsed && (
-                  <div className="py-1 px-2 space-y-0.5 bg-muted/10">
+                  <div className="py-1 px-2 pb-2 space-y-1 bg-muted/[0.15]">
                     {section.items.map((item, index) => {
                       const active = currentItem ? itemKey(item) === itemKey(currentItem) : false
                       const isCompleted =
@@ -160,7 +200,7 @@ export function CurriculumSidebar({
     <>
       {/* Desktop Column */}
       {open && (
-        <aside className="hidden lg:flex flex-col w-80 xl:w-96 shrink-0 border-l border-border h-full overflow-hidden z-10">
+        <aside className="hidden lg:flex flex-col w-80 xl:w-96 shrink-0 border-l border-border/60 h-full overflow-hidden z-10 shadow-[0_0_24px_rgba(0,0,0,0.03)]">
           {content}
         </aside>
       )}
@@ -202,26 +242,29 @@ function CurriculumLessonItem({
       <button
         onClick={onClick}
         className={cn(
-          'w-full rounded-lg px-2.5 py-2 text-left transition-all text-xs flex items-center gap-2.5',
+          'w-full rounded-xl px-3 py-2.5 text-left transition-all text-xs flex items-center gap-3 relative overflow-hidden group',
           active
-            ? 'bg-primary/10 text-primary font-semibold border-l-2 border-primary'
-            : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+            ? 'bg-gradient-to-r from-primary/[0.12] to-accent/[0.08] text-primary font-semibold ring-1 ring-primary/30 shadow-xs'
+            : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'
         )}
       >
+        {active && (
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-primary" />
+        )}
         <div
           className={cn(
-            'flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold',
+            'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold transition-all',
             completed
-              ? 'bg-success/15 text-success'
+              ? 'bg-success/15 text-success ring-1 ring-success/30'
               : active
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted text-muted-foreground'
+              ? 'bg-primary text-primary-foreground shadow-xs'
+              : 'bg-muted text-muted-foreground group-hover:bg-muted-foreground/20'
           )}
         >
-          {completed ? <CheckCircle2 className="h-3 w-3" /> : index + 1}
+          {completed ? <CheckCircle2 className="h-3.5 w-3.5" /> : index + 1}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="line-clamp-1 text-foreground">{item.title}</p>
+          <p className="line-clamp-1 text-[13px] text-foreground font-medium">{item.title}</p>
           <span className="text-[10px] text-muted-foreground font-normal">
             {materialTypeLabel(item.material.material_type)}
           </span>
@@ -242,54 +285,58 @@ function CurriculumLessonItem({
     <button
       onClick={onClick}
       className={cn(
-        'w-full rounded-lg px-2.5 py-2 text-left transition-all text-xs flex items-start gap-2.5',
+        'w-full rounded-xl px-3 py-2.5 text-left transition-all text-xs flex items-start gap-3 relative overflow-hidden group',
         active
-          ? 'bg-primary/10 text-primary font-semibold border-l-2 border-primary'
-          : 'text-foreground/80 hover:bg-muted/60 hover:text-foreground'
+          ? 'bg-gradient-to-r from-primary/[0.12] via-primary/[0.06] to-accent/[0.08] text-foreground ring-1 ring-primary/30 shadow-[0_2px_12px_rgba(79,70,229,0.1)]'
+          : 'text-foreground/80 hover:bg-muted/70 hover:text-foreground'
       )}
     >
+      {active && (
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-7 w-1 rounded-r-full bg-gradient-to-b from-primary to-accent" />
+      )}
+
       <div
         className={cn(
-          'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition-colors',
+          'mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold transition-all',
           completed
-            ? 'bg-success/15 text-success'
+            ? 'bg-success/15 text-success ring-1 ring-success/30'
             : active
-            ? 'bg-primary text-primary-foreground'
-            : 'bg-muted text-muted-foreground'
+            ? 'bg-gradient-to-br from-primary to-accent text-white shadow-xs'
+            : 'bg-muted text-muted-foreground group-hover:bg-muted-foreground/20'
         )}
       >
-        {completed ? <CheckCircle2 className="h-3 w-3" /> : index + 1}
+        {completed ? <CheckCircle2 className="h-3.5 w-3.5" /> : index + 1}
       </div>
 
-      <div className="min-w-0 flex-1">
-        <p className={cn('line-clamp-2 leading-snug', active ? 'text-foreground font-semibold' : 'text-foreground/90')}>
+      <div className="min-w-0 flex-1 space-y-1">
+        <p className={cn('line-clamp-2 text-[13px] leading-snug', active ? 'text-foreground font-bold' : 'text-foreground/90 font-medium')}>
           {item.title}
         </p>
 
-        {/* Feature badges */}
-        <div className="mt-1 flex flex-wrap items-center gap-1">
+        {/* Feature micro-badges */}
+        <div className="flex flex-wrap items-center gap-1">
           {hasVideo && (
-            <span className="inline-flex items-center gap-0.5 text-[9px] font-medium text-primary bg-primary/10 px-1 py-0.2 rounded">
+            <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-primary bg-primary/10 px-1.5 py-0.2 rounded-md">
               <Video className="h-2.5 w-2.5" /> Video
             </span>
           )}
           {hasContent && (
-            <span className="inline-flex items-center gap-0.5 text-[9px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1 py-0.2 rounded">
+            <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded-md">
               <FileText className="h-2.5 w-2.5" /> Bài đọc
             </span>
           )}
           {docAttachmentsCount > 0 && (
-            <span className="inline-flex items-center gap-0.5 text-[9px] font-medium text-blue-600 dark:text-blue-400 bg-blue-500/10 px-1 py-0.2 rounded">
+            <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-1.5 py-0.2 rounded-md">
               <Paperclip className="h-2.5 w-2.5" /> {docAttachmentsCount}
             </span>
           )}
           {hasQuiz && (
-            <span className="inline-flex items-center gap-0.5 text-[9px] font-medium text-violet-600 dark:text-violet-400 bg-violet-500/10 px-1 py-0.2 rounded">
+            <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-violet-600 dark:text-violet-400 bg-violet-500/10 px-1.5 py-0.2 rounded-md">
               <HelpCircle className="h-2.5 w-2.5" /> Quiz
             </span>
           )}
           {hasAssignment && (
-            <span className="inline-flex items-center gap-0.5 text-[9px] font-medium text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1 py-0.2 rounded">
+            <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.2 rounded-md">
               <FileCheck className="h-2.5 w-2.5" /> Bài tập
             </span>
           )}

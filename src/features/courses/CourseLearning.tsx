@@ -6,6 +6,8 @@ import {
   ArrowRight,
   BookOpen,
   CheckCircle2,
+  Sparkles,
+  Trophy,
 } from 'lucide-react'
 import {
   coursesApi,
@@ -447,9 +449,16 @@ export function CourseLearning() {
           <div className="max-w-5xl mx-auto space-y-5">
             {currentItem ? (
               <>
-                {/* Lesson Header & Action Toolbar */}
-                <Card padding="responsive" className="border border-border/80 shadow-xs">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                {/* Lesson Hero Header — ambient gradient, editorial title */}
+                <Card padding="responsive" className="relative overflow-hidden border-border/60 shadow-[0_8px_30px_rgba(0,0,0,0.04)] ring-1 ring-border/40">
+                  {/* Ambient wash */}
+                  <div aria-hidden className="pointer-events-none absolute inset-0">
+                    <div className="absolute -top-24 -left-16 h-56 w-72 rounded-full bg-primary/[0.09] blur-3xl" />
+                    <div className="absolute -top-20 right-0 h-52 w-64 rounded-full bg-accent/[0.10] blur-3xl" />
+                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+                  </div>
+
+                  <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <Badge
@@ -459,18 +468,27 @@ export function CourseLearning() {
                         {currentItem.kind === 'lesson' && currentItem.lesson.is_preview && (
                           <Badge variant="info" label="Học thử miễn phí" />
                         )}
-                        {isCurrentCompleted && (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-success bg-success/15 px-2 py-0.5 rounded-md">
+                        {isCurrentCompleted ? (
+                          <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-success bg-success/15 ring-1 ring-success/25 px-2.5 py-1 rounded-full">
                             <CheckCircle2 className="h-3.5 w-3.5" /> Đã hoàn thành
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground bg-muted/70 ring-1 ring-border/60 px-2.5 py-1 rounded-full tabular-nums">
+                            Bài {currentIndex + 1} / {flatItems.length}
                           </span>
                         )}
                       </div>
-                      <h1 className="mt-2 text-lg sm:text-xl font-bold tracking-tight text-foreground line-clamp-2">
+                      <h1 className="mt-2.5 text-xl sm:text-2xl font-extrabold tracking-tight text-foreground leading-snug line-clamp-2 text-balance">
                         {currentItem.title}
                       </h1>
+                      {currentItem.description && (
+                        <p className="mt-1.5 text-[13px] text-muted-foreground leading-relaxed line-clamp-2 max-w-2xl">
+                          {currentItem.description}
+                        </p>
+                      )}
                     </div>
 
-                    {/* Quick action buttons */}
+                    {/* Completion CTA */}
                     <div className="flex items-center gap-2 shrink-0">
                       <Button
                         onClick={markCurrentComplete}
@@ -478,7 +496,12 @@ export function CourseLearning() {
                         size="sm"
                         loading={updating}
                         icon={<CheckCircle2 className={cn('h-4 w-4', isCurrentCompleted ? 'text-success' : '')} />}
-                        className="shadow-xs"
+                        className={cn(
+                          'rounded-xl px-4 h-9 font-bold transition-all',
+                          isCurrentCompleted
+                            ? 'border-success/40 text-success hover:bg-success/10'
+                            : 'shadow-[0_6px_20px_rgba(79,70,229,0.35)] hover:shadow-[0_8px_26px_rgba(79,70,229,0.45)] hover:-translate-y-px'
+                        )}
                       >
                         {isCurrentCompleted ? 'Đã hoàn thành' : 'Đánh dấu hoàn thành'}
                       </Button>
@@ -509,31 +532,91 @@ export function CourseLearning() {
                   highestSubmissionScore={highestSubmissionScore}
                 />
 
-                {/* Footer Navigation (Previous / Next Lesson) */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 pb-8 border-t border-border/80">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={!previousItem}
-                    onClick={() => goToItem(previousItem)}
-                    icon={<ArrowLeft className="h-4 w-4" />}
-                  >
-                    Bài trước
-                  </Button>
+                {/* Footer Navigation — lesson preview cards */}
+                <div className="pt-5 pb-10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                      <Sparkles className="h-3 w-3 text-primary" />
+                      Bài {currentIndex + 1} / {flatItems.length}
+                    </span>
+                    <span className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+                  </div>
 
-                  <span className="text-xs text-muted-foreground font-medium order-first sm:order-none">
-                    Bài {currentIndex + 1} trên {flatItems.length}
-                  </span>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {/* Previous lesson card */}
+                    <button
+                      disabled={!previousItem}
+                      onClick={() => goToItem(previousItem)}
+                      className={cn(
+                        'group flex items-center gap-3 rounded-2xl border p-3.5 text-left transition-all',
+                        previousItem
+                          ? 'border-border/60 bg-card hover:border-primary/40 hover:shadow-[0_8px_24px_rgba(79,70,229,0.12)] hover:-translate-y-px'
+                          : 'border-border/40 bg-muted/30 opacity-50 cursor-not-allowed'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all',
+                          previousItem
+                            ? 'bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary'
+                            : 'bg-muted text-muted-foreground/50'
+                        )}
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Bài trước
+                        </span>
+                        <span className="block text-[13px] font-bold text-foreground truncate">
+                          {previousItem ? previousItem.title : 'Đã là bài đầu tiên'}
+                        </span>
+                      </span>
+                    </button>
 
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    disabled={!nextItem}
-                    onClick={() => goToItem(nextItem)}
-                  >
-                    Bài tiếp theo
-                    <ArrowRight className="ml-1.5 h-4 w-4 inline" />
-                  </Button>
+                    {/* Next lesson card */}
+                    <button
+                      disabled={!nextItem}
+                      onClick={() => goToItem(nextItem)}
+                      className={cn(
+                        'group relative flex items-center gap-3 overflow-hidden rounded-2xl border p-3.5 text-left transition-all',
+                        nextItem
+                          ? 'border-primary/25 bg-gradient-to-r from-primary/[0.08] to-accent/[0.06] hover:border-primary/50 hover:shadow-[0_8px_24px_rgba(79,70,229,0.18)] hover:-translate-y-px'
+                          : 'border-success/30 bg-gradient-to-r from-success/[0.08] to-emerald-500/[0.06]'
+                      )}
+                    >
+                      {nextItem && (
+                        <span aria-hidden className="pointer-events-none absolute inset-0">
+                          <span className="absolute -right-8 -top-10 h-28 w-32 rounded-full bg-primary/[0.12] blur-2xl" />
+                        </span>
+                      )}
+                      <span className="relative min-w-0 flex-1">
+                        <span
+                          className={cn(
+                            'flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider',
+                            nextItem ? 'text-primary' : 'text-success'
+                          )}
+                        >
+                          {nextItem ? (
+                            <>Bài tiếp theo</>
+                          ) : (
+                            <>
+                              <Trophy className="h-3 w-3" /> Hoàn tất chương trình
+                            </>
+                          )}
+                        </span>
+                        <span className="block text-[13px] font-bold text-foreground truncate">
+                          {nextItem ? nextItem.title : 'Chúc mừng bạn đã học hết!'}
+                        </span>
+                      </span>
+                      {nextItem && (
+                        <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-white shadow-[0_4px_14px_rgba(79,70,229,0.4)] transition-transform group-hover:translate-x-0.5">
+                          <ArrowRight className="h-4 w-4" />
+                        </span>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </>
             ) : (
