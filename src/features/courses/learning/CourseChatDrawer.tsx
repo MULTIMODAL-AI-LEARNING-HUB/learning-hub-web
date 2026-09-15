@@ -1,5 +1,3 @@
-import { X } from 'lucide-react'
-import { Button } from '../../../components/ui/Button'
 import { CourseChatPanel } from '../CourseChatPanel'
 
 interface CourseChatDrawerProps {
@@ -20,28 +18,12 @@ export function CourseChatDrawer({ courseId, open, onClose }: CourseChatDrawerPr
       />
 
       {/* Drawer content - mounted ONLY when open to stop polling when closed */}
-      <div className="relative w-full max-w-sm sm:max-w-md h-full bg-card shadow-2xl animate-slide-in-right flex flex-col overflow-hidden rounded-l-2xl">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
-          <div>
-            <h2 className="text-sm font-bold text-foreground">Phòng chat khóa học</h2>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              Trò chuyện cùng học viên & giảng viên
-            </p>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-            onClick={onClose}
-            title="Đóng phòng chat"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <div className="flex-1 min-h-0 overflow-hidden">
-          <CourseChatPanel courseId={courseId} compact={false} />
-        </div>
+      <div className="relative w-full max-w-sm sm:max-w-md h-full bg-surface-elevated shadow-2xl animate-slide-in-right flex flex-col overflow-hidden rounded-l-2xl border-l border-border z-10">
+        <CourseChatPanel
+          courseId={courseId}
+          onClose={onClose}
+          className="h-full border-0 shadow-none rounded-none bg-surface-elevated"
+        />
       </div>
     </div>
   )

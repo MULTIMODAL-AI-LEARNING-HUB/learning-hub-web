@@ -11,6 +11,9 @@
     --surface-elevated: 0 0% 100%;
     --surface-deep: 240 12% 95%;
 
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 8%;
+
     --muted: 240 10% 94%;
     --muted-foreground: 240 5% 42%;
 
@@ -53,6 +56,9 @@
     --surface: 240 8% 8%;
     --surface-elevated: 240 7% 11%;
     --surface-deep: 240 7% 14%;
+
+    --card: 240 7% 11%;
+    --card-foreground: 0 0% 96%;
 
     --muted: 240 6% 14%;
     --muted-foreground: 240 5% 64%;

@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
-import { MessageCircle, RefreshCcw, Send } from 'lucide-react'
+import { MessageCircle, RefreshCcw, Send, X } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { courseChatApi, type CourseChatMessage } from '../../services/api'
@@ -10,6 +10,8 @@ import { cn } from '../../utils/cn'
 interface CourseChatPanelProps {
   courseId: string
   compact?: boolean
+  className?: string
+  onClose?: () => void
 }
 
 const POLL_INTERVAL_MS = 3000
@@ -28,7 +30,7 @@ function senderInitial(message: CourseChatMessage) {
   return senderName(message).trim().charAt(0).toUpperCase() || '?'
 }
 
-export function CourseChatPanel({ courseId, compact = false }: CourseChatPanelProps) {
+export function CourseChatPanel({ courseId, compact = false, className, onClose }: CourseChatPanelProps) {
   const [messages, setMessages] = useState<CourseChatMessage[]>([])
   const [draft, setDraft] = useState('')
   const [loading, setLoading] = useState(true)
@@ -88,25 +90,42 @@ export function CourseChatPanel({ courseId, compact = false }: CourseChatPanelPr
   }
 
   return (
-    <Card padding="none" className={cn('overflow-hidden', compact ? 'h-[520px]' : 'h-[640px]')}>
+    <Card padding="none" className={cn('overflow-hidden', compact ? 'h-[520px]' : 'h-[640px]', className)}>
       <div className="flex h-full flex-col">
-        <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <div className="flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-primary" />
-            <div>
-              <h2 className="text-base font-semibold text-foreground">Trò Chuyện Khóa Học</h2>
-              <p className="text-xs text-muted-foreground">Tin nhắn hiển thị cho tất cả thành viên trong khóa học.</p>
+        <div className="flex items-center justify-between border-b border-border px-4 py-3 shrink-0 bg-surface-elevated">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+              <MessageCircle className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-sm font-bold text-foreground truncate">Trò Chuyện Khóa Học</h2>
+              <p className="text-[11px] text-muted-foreground truncate">Tin nhắn hiển thị cho tất cả thành viên trong khóa học.</p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => loadMessages()}
-            aria-label="Làm mới tin nhắn"
-            title="Làm mới tin nhắn"
-          >
-            <RefreshCcw className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-1 shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+              onClick={() => loadMessages()}
+              aria-label="Làm mới tin nhắn"
+              title="Làm mới tin nhắn"
+            >
+              <RefreshCcw className="h-4 w-4" />
+            </Button>
+            {onClose && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                onClick={onClose}
+                aria-label="Đóng phòng chat"
+                title="Đóng phòng chat"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-4">

@@ -35,9 +35,9 @@ export function AiTutorDrawer({
       />
 
       {/* Drawer content */}
-      <div className="relative w-full max-w-md sm:max-w-xl md:max-w-2xl h-full bg-card shadow-2xl animate-slide-in-right flex flex-col overflow-hidden rounded-l-2xl border-l border-border">
+      <div className="relative w-full max-w-md sm:max-w-xl md:max-w-2xl h-full bg-surface-elevated shadow-2xl animate-slide-in-right flex flex-col overflow-hidden rounded-l-2xl border-l border-border z-10">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0 bg-surface-elevated/80 backdrop-blur-md">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0 bg-surface-elevated">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
               <Bot className="h-4 w-4" />

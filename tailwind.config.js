@@ -15,6 +15,10 @@ export default {
     extend: {
       colors: {
         border: 'hsl(var(--border) / <alpha-value>)',
+        card: {
+          DEFAULT: 'hsl(var(--surface-elevated) / <alpha-value>)',
+          foreground: 'hsl(var(--foreground) / <alpha-value>)'
+        },
         input: 'hsl(var(--input) / <alpha-value>)',
         ring: 'hsl(var(--ring) / <alpha-value>)',
         background: 'hsl(var(--background) / <alpha-value>)',
